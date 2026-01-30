@@ -1,0 +1,123 @@
+[
+  {
+    "model": "google/gemini-3-flash-preview",
+    "created_at": "2026-01-24T00:16:17.277700",
+    "usage": {
+      "prompt_tokens": 2591,
+      "completion_tokens": 146,
+      "total_tokens": 2737
+    },
+    "cost": 0.0017335,
+    "timestamp": "2026-01-24T00:16:17.278023"
+  },
+  {
+    "model": "google/gemini-3-flash-preview",
+    "created_at": "2026-01-24T00:15:42.275876",
+    "usage": {
+      "prompt_tokens": 2592,
+      "completion_tokens": 129,
+      "total_tokens": 2721
+    },
+    "cost": 0.001683,
+    "timestamp": "2026-01-24T00:15:42.276498"
+  },
+  {
+    "model": "google/gemini-3-flash-preview",
+    "created_at": "2026-01-23T19:18:44.724333",
+    "usage": {
+      "prompt_tokens": 2594,
+      "completion_tokens": 116,
+      "total_tokens": 2710
+    },
+    "cost": 0.001645,
+    "timestamp": "2026-01-23T19:18:44.724656"
+  },
+  {
+    "model": "google/gemini-3-flash-preview",
+    "created_at": "2026-01-15T16:53:59.327333",
+    "usage": {
+      "prompt_tokens": 15378,
+      "completion_tokens": 366,
+      "total_tokens": 15744
+    },
+    "cost": 0.008787,
+    "timestamp": "2026-01-15T16:53:59.330734"
+  },
+  {
+    "model": "google/gemini-3-flash-preview",
+    "created_at": "2026-01-15T16:48:18.018682",
+    "usage": {
+      "prompt_tokens": 2562,
+      "completion_tokens": 131,
+      "total_tokens": 2693
+    },
+    "cost": 0.001674,
+    "timestamp": "2026-01-15T16:48:18.019241"
+  },
+  {
+    "model": "google/gemini-3-flash-preview",
+    "created_at": "2026-01-06T12:07:23.201267",
+    "usage": {
+      "prompt_tokens": 926,
+      "completion_tokens": 465,
+      "total_tokens": 1391
+    },
+    "cost": 0.001858,
+    "timestamp": "2026-01-06T12:07:23.201970"
+  },
+  {
+    "model": "google/gemini-3-flash-preview",
+    "created_at": "2026-01-06T12:07:05.305939",
+    "usage": {
+      "prompt_tokens": 820,
+      "completion_tokens": 491,
+      "total_tokens": 1311
+    },
+    "cost": 0.001883,
+    "timestamp": "2026-01-06T12:07:05.306261"
+  },
+  {
+    "model": "google/gemini-3-flash-preview",
+    "created_at": "2026-01-06T12:06:13.640882",
+    "usage": {
+      "prompt_tokens": 695,
+      "completion_tokens": 394,
+      "total_tokens": 1089
+    },
+    "cost": 0.0015295,
+    "timestamp": "2026-01-06T12:06:13.641345"
+  },
+  {
+    "model": "google/gemini-3-flash-preview",
+    "created_at": "2026-01-06T12:00:43.025540",
+    "usage": {
+      "prompt_tokens": 431,
+      "completion_tokens": 345,
+      "total_tokens": 776
+    },
+    "cost": 0.0012505,
+    "timestamp": "2026-01-06T12:00:43.025808"
+  },
+  {
+    "model": "google/gemini-3-flash-preview",
+    "created_at": "2026-01-05T21:30:00",
+    "usage": {
+      "prompt_tokens": 1500,
+      "completion_tokens": 500,
+      "total_tokens": 2000
+    },
+    "cost": 0.0015,
+    "timestamp": "2026-01-05T21:30:00"
+  },
+  {
+    "model": "google/gemini-3-flash-preview",
+    "created_at": "2026-01-05T20:15:00",
+    "usage": {
+      "prompt_tokens": 2000,
+      "completion_tokens": 800,
+      "total_tokens": 2800
+    },
+    "cost": 0.0021,
+    "timestamp": "2026-01-05T20:15:00"
+  }
+]

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator, field_validator
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 from decimal import Decimal
@@ -55,6 +55,14 @@ class TransaccionBase(BaseModel):
     Notas: Optional[str] = Field(None, description="Notas adicionales")
     ArchivoAdjunto: Optional[str] = Field(None, description="URL del archivo adjunto")
     Comprobante: Optional[str] = Field(None, description="URL del comprobante (minio)")
+    
+    @validator('Tipo')
+    def validate_tipo(cls, v):
+        """Validar que el tipo sea válido"""
+        tipos_validos = ['ingreso', 'gasto', 'transferencia']
+        if v.lower() not in tipos_validos:
+            raise ValueError(f'Tipo debe ser uno de: {", ".join(tipos_validos)}')
+        return v.lower()
 
 # Schema for creating Transacciones (full API schema)
 class TransaccionCreate(TransaccionBase):
@@ -65,9 +73,9 @@ class TransaccionCreate(TransaccionBase):
 # Schema for creating Transacciones (simplified for frontend)
 class TransaccionCreateRequest(BaseModel):
     """Schema simplificado para crear transacciones desde el frontend"""
-    monto: float = Field(..., description="Monto de la transacción")
+    monto: float = Field(..., description="Monto de la transacción", gt=0)
     moneda: str = Field(default="ARS", description="Moneda de la transacción")
-    descripcion: str = Field(..., description="Descripción de la transacción")
+    descripcion: str = Field(..., description="Descripción de la transacción", min_length=1)
     fecha_transaccion: Optional[str] = Field(None, description="Fecha de la transacción (YYYY-MM-DD)")
     tipo: str = Field(..., description="Tipo (ingreso, gasto, transferencia)")
     categoria_id: Optional[str] = Field(None, description="ID de la categoría")
@@ -78,6 +86,23 @@ class TransaccionCreateRequest(BaseModel):
     etiquetas: Optional[List[str]] = Field(None, description="Lista de etiquetas")
     usuario_id: Optional[str] = Field(None, description="ID del usuario propietario de la transacción (temporal: opcional)")
     comprobante: Optional[str] = Field(None, description="URL del comprobante")
+    
+    @validator('monto')
+    def validate_monto_positivo(cls, v):
+        """Validar que el monto sea positivo (mayor que cero)"""
+        if v is None:
+            raise ValueError('El monto es requerido')
+        if v <= 0:
+            raise ValueError('El monto debe ser mayor que cero. No se permiten valores negativos o cero.')
+        return v
+    
+    @validator('tipo')
+    def validate_tipo(cls, v):
+        """Validar que el tipo sea válido"""
+        tipos_validos = ['ingreso', 'gasto', 'transferencia']
+        if v.lower() not in tipos_validos:
+            raise ValueError(f'Tipo debe ser uno de: {", ".join(tipos_validos)}')
+        return v.lower()
 
 # Schema for updating Transacciones
 class TransaccionUpdate(BaseModel):
@@ -96,6 +121,23 @@ class TransaccionUpdate(BaseModel):
     ArchivoAdjunto: Optional[str] = Field(None, description="Archivo adjunto")
     Comprobante: Optional[str] = Field(None, description="URL del comprobante")
     FechaActualizacion: Optional[str] = Field(None, description="Fecha de actualización")
+    
+    @validator('Monto')
+    def validate_monto_positivo(cls, v):
+        """Validar que el monto sea positivo si se proporciona"""
+        if v is not None and v <= 0:
+            raise ValueError('El monto debe ser mayor que cero. No se permiten valores negativos o cero.')
+        return v
+    
+    @validator('Tipo')
+    def validate_tipo(cls, v):
+        """Validar que el tipo sea válido si se proporciona"""
+        if v is not None:
+            tipos_validos = ['ingreso', 'gasto', 'transferencia']
+            if v.lower() not in tipos_validos:
+                raise ValueError(f'Tipo debe ser uno de: {", ".join(tipos_validos)}')
+            return v.lower()
+        return v
 
 # Schema for Transaccion response (complete)
 class TransaccionResponse(TransaccionBase):

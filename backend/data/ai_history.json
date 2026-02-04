@@ -1,6 +1,28 @@
 [
   {
     "model": "google/gemini-3-flash-preview",
+    "created_at": "2026-02-02T23:35:13.107405",
+    "usage": {
+      "prompt_tokens": 2231,
+      "completion_tokens": 261,
+      "total_tokens": 2492
+    },
+    "cost": 0.0018985,
+    "timestamp": "2026-02-02T23:35:13.107762"
+  },
+  {
+    "model": "google/gemini-3-flash-preview",
+    "created_at": "2026-01-30T00:32:22.997021",
+    "usage": {
+      "prompt_tokens": 2327,
+      "completion_tokens": 265,
+      "total_tokens": 2592
+    },
+    "cost": 0.0019585,
+    "timestamp": "2026-01-30T00:32:22.997818"
+  },
+  {
+    "model": "google/gemini-3-flash-preview",
     "created_at": "2026-01-24T00:16:17.277700",
     "usage": {
       "prompt_tokens": 2591,

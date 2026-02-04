@@ -53,6 +53,17 @@ coverage/
 *.lcov
 .jest/
 
+# TestSprite - Archivos temporales
+testsprite_tests/tmp/
+testsprite_tests/**/*.lock
+testsprite_tests/**/execution.lock
+testsprite_tests/**/config.json
+
+# TestSprite - Incluir planes de prueba y reportes
+!testsprite_tests/*_test_plan.json
+!testsprite_tests/TC*-*.md
+!testsprite_tests/standard_prd.json
+
 # 📝 LOGS
 # ===================================
 logs/
@@ -135,6 +146,12 @@ static/generated/
 # ===================================
 .vercel/
 .netlify/
+
+# Scripts y configuraciones de deployment (contienen información sensible)
+deploy-production.sh
+update-production.sh
+docker-compose.yml
+docker-compose.yml.bak
 
 # ===================================
 # INSTRUCCIONES IMPORTANTES:

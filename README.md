@@ -447,8 +447,8 @@ resumenes_bancarios (1) ► (N) transacciones [credito]
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone https://github.com/tuusuario/sistema-de-gastos.git
-cd sistema-de-gastos
+git clone https://github.com/fer336/finanzas.git
+cd finanzas
 ```
 
 ### 2. Configurar Backend
@@ -536,23 +536,6 @@ La aplicación estará disponible en `http://localhost:5173` 🎉
 
 ## 🐳 Deployment con Docker Swarm
 
-### Arquitectura de Producción
-
-```bash
-# 1. Inicializar Docker Swarm
-docker swarm init
-
-# 2. Crear networks
-docker network create --driver overlay traefik-public
-docker network create --driver overlay backend-network
-
-# 3. Deploy del stack completo
-docker stack deploy -c docker-compose.yml financiero
-
-# 4. Verificar servicios
-docker service ls
-docker service logs financiero_backend -f
-```
 
 ### Actualización de Servicios
 

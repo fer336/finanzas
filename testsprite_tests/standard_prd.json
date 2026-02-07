@@ -4,297 +4,225 @@
     "date": "2026-02-04",
     "prepared_by": "Sistema de Gastos Team"
   },
-  "product_overview": "Sistema de Gastos Inteligente es una plataforma full-stack de gestión financiera personal multi-moneda, con agentes IA para análisis y gestión conversacional, dashboard personalizable, objetivos de ahorro, control de tarjetas de crédito, y pagos pendientes, con alta usabilidad y seguridad.",
+  "product_overview": "Sistema de Gastos Inteligente es una plataforma full-stack de gestión financiera personal que permite a los usuarios administrar sus ingresos, gastos y objetivos de ahorro en múltiples monedas, con soporte para seguimiento de tarjetas de crédito, pagos pendientes y un agente de inteligencia artificial conversacional para análisis y gestión financiera. Incluye un dashboard personalizable con widgets interactivos y funciones modernas de seguridad y usabilidad.",
   "core_goals": [
-    "Simplificar la gestión financiera personal para usuarios no expertos.",
-    "Ofrecer insights automáticos mediante IA conversacional.",
-    "Reducir el tiempo de entrada de datos con importación masiva y OCR futuro.",
-    "Aumentar la retención con gamificación de objetivos de ahorro.",
-    "Garantizar alta performance y respuesta rápida en todas las operaciones.",
-    "Mantener seguridad robusta con autenticación OAuth2 y protección contra inyección SQL."
+    "Simplificar la gestión financiera personal para usuarios no expertos",
+    "Ofrecer insights automáticos mediante IA conversacional",
+    "Reducir el tiempo de entrada de datos con funcionalidades avanzadas como exportaciones y subida masiva",
+    "Aumentar la retención mediante gamificación de objetivos de ahorro y una experiencia intuitiva",
+    "Garantizar la seguridad y privacidad mediante autenticación robusta y manejo adecuado de sesiones",
+    "Proveer una experiencia fluida en dispositivos móviles con diseño responsive"
   ],
   "key_features": [
-    "Dashboard personalizable con widgets interactivos y glass-morphism.",
-    "CRUD completo de transacciones multi-moneda con conversión automática.",
-    "Gestión de categorías y métodos de pago personalizables por usuario.",
-    "Sistema de objetivos de ahorro con tracking visual y aportes automáticos.",
-    "Control integral de tarjetas de crédito con resúmenes bancarios y pagos automatizados.",
-    "Gestión de pagos pendientes con filtros de vencidos y próximos a vencer.",
-    "Agente IA conversacional con function calling para consultas y acciones financieras.",
-    "Cotizaciones en tiempo real de dólar y CEDEARs con gráficos avanzados.",
-    "Importación masiva de transacciones desde CSV con validación y preview.",
-    "Autenticación segura con OAuth2, JWT, y multi-tenancy.",
-    "Visualizaciones con gráficos interactivos usando Recharts.",
-    "Responsive design con navegación especialmente optimizada para móviles."
+    "Dashboard principal con widgets personalizables mostrando balance multi-moneda, transacciones recientes, categorías, métodos de pago y objetivos de ahorro",
+    "Gestión completa de transacciones con validación, multi-moneda, adjuntar comprobantes y exportación avanzada",
+    "Sistema de monedas personalizables por usuario con CRUD y orden personalizable",
+    "Gestión de categorías personalizadas con iconos, colores y filtros por tipo (ingreso/gasto)",
+    "Gestión de métodos de pago con soporte para efectivo, tarjetas y transferencias",
+    "Objetivos de ahorro con creación, seguimiento visual y aportes automáticos",
+    "Seguimiento de tarjetas de crédito con límites, pagos programados y resúmenes bancarios",
+    "Gestión de pagos pendientes con filtros y creación automática de transacciones al marcar pagos",
+    "Agente IA financiero con tools para consultar y ejecutar acciones sobre transacciones y balances",
+    "Consulta y visualización de cotizaciones de dólar y CEDEARs desde APIs externas",
+    "Autenticación segura con JWT, timeout de sesión y manejo de tokens expirados",
+    "Navegación optimizada para dispositivos móviles con accesos rápidos y formularios adaptados"
   ],
   "user_flow_summary": [
-    "Registro y onboarding mediante OAuth2 con Google (planeado) con almacenamiento seguro de token y JWT.",
-    "Creación de transacciones: usuario completa formulario con validaciones, carga los datos y el balance se actualiza automáticamente.",
-    "Gestión de categorías: el usuario crea, edita, desactiva o elimina categorías que afectan transacciones.",
-    "Uso del agente IA: el usuario envía consultas financieras; backend consulta OpenRouter API y ejecuta funciones para brindar respuesta dinámica.",
-    "Pago de resumen de tarjeta: el usuario confirma pago, se crea transacción correspondiente, y se actualizan todas las transacciones y resúmenes relacionados.",
-    "Carga masiva de transacciones: usuario carga archivo CSV, revisa vista previa, y confirma importación con validación por fila."
+    "Registro y onboarding mediante Google OAuth y JWT para autenticación segura",
+    "Creación, edición y eliminación de transacciones con validación y cálculo automático de montos en ARS",
+    "Visualización del dashboard con balance multi-moneda y actualización en tiempo real",
+    "Gestión de categorías y métodos de pago, incluyendo creación, edición y activación/desactivación",
+    "Creación y seguimiento de objetivos de ahorro con progreso visual y aportes vinculados",
+    "Interacción con agente IA para consultas financieras y creación de transacciones mediante conversación",
+    "Exportación de transacciones con filtros, indicadores visuales y soporte para formatos CSV y Excel",
+    "Gestión y pago de resúmenes de tarjetas de crédito con confirmaciones y actualizaciones automáticas",
+    "Manejo de sesión con timeout y modal de advertencia para inactividad",
+    "Navegación mobile-first con diseño responsive para formularios y widgets"
   ],
   "validation_criteria": [
-    "Dashboard debe cargar en menos de 3 segundos con datos actualizados.",
-    "Creación de transacciones valida montos positivos, tipos correctos y conversión automática de moneda.",
-    "Categorías y métodos de pago deben ser únicas por usuario y disponibles para formularios asociados.",
-    "Objetivos de ahorro reflejan progreso correctamente y cambian de estado cuando se completan.",
-    "Pago de resumen de tarjeta genera transacción y actualiza estado y fechas de pago correctamente.",
-    "Agente IA debe responder con lenguaje natural y ejecutar herramientas según parámetros.",
-    "Filtros y exportaciones de transacciones funcionan correctamente en formatos CSV, Excel y PDF.",
-    "Las operaciones críticas deben estar cubiertas con pruebas unitarias, integración y E2E según matriz definida.",
-    "Multi-tenancy se respeta en todas las consultas y operaciones, garantizando seguridad de datos."
+    "El dashboard carga en menos de 3 segundos mostrando balances separados por cada moneda activa del usuario",
+    "El usuario puede crear una transacción con monto positivo, tipo válido y moneda seleccionada, y el sistema calcula monto en ARS automáticamente",
+    "Las exportaciones de transacciones incluyen todas las del mes seleccionado respetando filtros aplicados y muestran el total exportado",
+    "El sistema muestra modal de advertencia 2 minutos antes de cerrar sesión por inactividad y cierra sesión luego de 10 minutos sin respuesta",
+    "El agente IA responde consultas financieras utilizando las tools adecuadas y devuelve respuestas en lenguaje natural",
+    "El usuario puede gestionar monedas personalizadas con creación, edición, activación/desactivación y reordenación",
+    "La gestión de categorías y métodos de pago permite crear, editar, eliminar y activar/desactivar solo para el usuario autenticado",
+    "Las transacciones con es_credito=true no afectan el balance hasta que se pague el resumen de tarjeta correspondiente",
+    "Al pagar un resumen de tarjeta se crea una transacción tipo gasto y se marcan las transacciones asociadas con fecha de pago real",
+    "Los formularios y widgets son completamente responsivos y usables en dispositivos móviles según los estándares de diseño definidos"
   ],
   "code_summary": {
     "tech_stack": [
       "React 19",
       "Vite 5.x",
-      "FastAPI 0.104+",
-      "Python 3.11+",
-      "PostgreSQL 16",
-      "Tailwind CSS 3.4",
-      "SQLAlchemy 2.x",
-      "Pydantic v2",
+      "Tailwind CSS 3.x",
+      "FastAPI (Python 3.10+)",
+      "PostgreSQL 14+",
+      "SQLAlchemy ORM",
+      "Pydantic",
       "shadcn/ui",
-      "Recharts 2.x",
+      "Recharts",
       "Lucide React",
-      "Context API",
-      "Uvicorn",
-      "Docker",
-      "Traefik"
+      "Alembic (migrations)",
+      "JWT/OAuth2 Authentication"
     ],
     "features": [
       {
-        "name": "Dashboard (Mission Control)",
-        "description": "Vista principal del sistema con widgets personalizables que muestran balance, transacciones recientes, categorías, objetivos de ahorro y deuda de tarjetas",
+        "name": "Authentication System",
+        "description": "Sistema de autenticación con JWT, login, registro, session timeout (10 minutos de inactividad), y manejo de tokens",
         "files": [
-          "frontend/src/components/MissionControlDashboard.jsx",
-          "frontend/src/components/mission-control/new-design/StatsCardsNew.jsx",
-          "frontend/src/components/mission-control/new-design/RecentTransactionsSection.jsx"
+          "frontend/src/components/auth/LoginForm.jsx",
+          "frontend/src/components/auth/RegisterForm.jsx",
+          "frontend/src/components/auth/auth-provider.jsx",
+          "frontend/src/components/auth/SessionTimeoutModal.jsx",
+          "frontend/src/hooks/useSessionTimeout.js",
+          "backend/app/routers/auth.py",
+          "backend/app/services/auth_service.py"
         ]
       },
       {
-        "name": "Gestión de Transacciones",
-        "description": "CRUD completo de transacciones financieras multi-moneda (ARS, USD, EUR, BRL) con soporte para gastos con tarjeta de crédito y asociación a objetivos de ahorro",
+        "name": "Transaction Management",
+        "description": "CRUD completo de transacciones (ingresos/gastos), validación de montos positivos, soporte multi-moneda, exportación a Excel de mes completo, adjuntar comprobantes",
         "files": [
           "frontend/src/components/ModernTransactionForm.jsx",
           "frontend/src/components/mission-control/new-design/TransactionsFullView.jsx",
+          "frontend/src/components/mission-control/new-design/RecentTransactionsSection.jsx",
           "backend/app/routers/transacciones.py",
-          "backend/app/repositories/transaccion_repository.py"
+          "backend/app/services/transacciones_service.py",
+          "backend/app/repositories/transacciones_repository.py",
+          "backend/app/schemas/transacciones.py"
         ]
       },
       {
-        "name": "Sistema de Categorías",
-        "description": "Gestión de categorías de ingresos y gastos con personalización de colores e iconos, multi-tenancy por usuario",
+        "name": "Multi-Currency System",
+        "description": "Sistema de monedas personalizables por usuario: agregar, editar, activar/desactivar, eliminar, reordenar. Monedas predeterminadas: ARS, USD, EUR, BRL, GBP. Balance separado por moneda en dashboard",
         "files": [
-          "frontend/src/components/mission-control/modals/CategoryModal.jsx",
+          "frontend/src/components/mission-control/CurrencyManagementView.jsx",
+          "frontend/src/components/mission-control/new-design/MultiCurrencyBalanceWidget.jsx",
+          "frontend/src/components/mission-control/modals/CurrencyModal.jsx",
+          "backend/app/routers/monedas_usuario.py",
+          "backend/app/repositories/moneda_usuario_repository.py",
+          "backend/app/schemas/monedas.py",
+          "backend/app/models/moneda_usuario.py"
+        ]
+      },
+      {
+        "name": "Categories Management",
+        "description": "Gestión de categorías personalizadas por usuario, con iconos, colores, presupuestos asociados, y filtros por tipo (ingreso/gasto)",
+        "files": [
           "frontend/src/components/mission-control/new-design/CategoriesWidget.jsx",
           "frontend/src/components/mission-control/new-design/CategoriesFullView.jsx",
-          "backend/app/routers/categories.py",
+          "frontend/src/components/mission-control/modals/CategoryModal.jsx",
+          "backend/app/routers/categorias.py",
+          "backend/app/services/categoria_service.py",
           "backend/app/repositories/categoria_repository.py"
         ]
       },
       {
-        "name": "Métodos de Pago",
-        "description": "Gestión de métodos de pago (efectivo, débito, crédito, transferencia) con stats de uso",
+        "name": "Payment Methods Management",
+        "description": "Gestión de métodos de pago (efectivo, tarjetas, transferencias), con soporte para tarjetas de crédito y límites",
         "files": [
-          "frontend/src/components/mission-control/modals/PaymentMethodModal.jsx",
-          "frontend/src/components/mission-control/new-design/PaymentMethodsWidget.jsx",
           "frontend/src/components/mission-control/new-design/PaymentMethodsFullView.jsx",
-          "backend/app/routers/payment_methods.py",
-          "backend/app/repositories/metodo_pago_repository.py"
+          "frontend/src/components/mission-control/modals/PaymentMethodModal.jsx",
+          "backend/app/routers/metodos_pago.py",
+          "backend/app/repositories/metodos_pago_repository.py"
         ]
       },
       {
-        "name": "Objetivos de Ahorro",
-        "description": "Sistema de metas de ahorro con tracking visual, progress bars, gráficos de evolución y asociación automática de transacciones",
+        "name": "Savings Goals (Objetivos)",
+        "description": "Creación y seguimiento de objetivos de ahorro con progreso visual, aportes automáticos desde transacciones, multi-moneda",
         "files": [
           "frontend/src/components/mission-control/ObjetivosWidget.jsx",
           "frontend/src/components/mission-control/new-design/ObjetivosFullView.jsx",
           "frontend/src/components/mission-control/ObjetivoFormModal.jsx",
-          "frontend/src/components/mission-control/ObjetivoDetailModal.jsx",
           "backend/app/routers/objetivos.py",
-          "backend/app/repositories/objetivo_ahorro_repository.py"
+          "backend/app/repositories/objetivos_repository.py"
         ]
       },
       {
-        "name": "Gestión de Tarjetas de Crédito",
-        "description": "Control de resúmenes bancarios, asociación de gastos con tarjeta, pago de resúmenes con creación automática de transacciones",
+        "name": "Dashboard & Analytics",
+        "description": "Dashboard principal con widgets: balance total, ingresos, gastos, deudas pendientes, gráficos de transacciones, categorías, cotizaciones dólar",
+        "files": [
+          "frontend/src/components/MissionControlDashboard.jsx",
+          "frontend/src/components/mission-control/new-design/StatsCardsNew.jsx",
+          "frontend/src/components/mission-control/new-design/TransactionsChart.jsx",
+          "frontend/src/components/mission-control/new-design/DollarQuotesChart.jsx",
+          "backend/app/routers/dashboard.py",
+          "backend/app/services/dashboard_service.py"
+        ]
+      },
+      {
+        "name": "Credit Cards & Debt Tracking",
+        "description": "Seguimiento de tarjetas de crédito, límites, deudas pendientes, pagos programados",
         "files": [
           "frontend/src/components/mission-control/DeudaTarjetasWidget.jsx",
-          "frontend/src/components/mission-control/new-design/TarjetasFullView.jsx",
-          "frontend/src/components/mission-control/PagarResumenModal.jsx",
-          "backend/app/routers/resumenes_bancarios.py",
-          "backend/app/repositories/resumen_bancario_repository.py"
+          "frontend/src/components/mission-control/new-design/PendingPaymentsChart.jsx",
+          "backend/app/routers/tarjetas.py"
         ]
       },
       {
-        "name": "Pagos Pendientes",
-        "description": "Gestión de pagos pendientes con fechas de vencimiento, prioridades, filtros de vencidos y próximos a vencer",
+        "name": "AI Agent Integration",
+        "description": "Agente IA con herramientas para consultar transacciones, crear gastos/ingresos, obtener resúmenes, análisis de patrones de gasto",
         "files": [
-          "frontend/src/components/mission-control/new-design/PendingPaymentsSection.jsx",
-          "frontend/src/components/mission-control/new-design/PendingPaymentsFullView.jsx",
-          "frontend/src/components/mission-control/PendingPaymentFormView.jsx",
-          "backend/app/routers/pagos_pendientes.py",
-          "backend/app/repositories/pago_pendiente_repository_pg.py"
-        ]
-      },
-      {
-        "name": "Agente IA Financiero",
-        "description": "Chatbot conversacional con function calling que puede consultar balances, crear transacciones, buscar gastos y generar análisis financieros usando OpenRouter API",
-        "files": [
-          "frontend/src/components/FinancialAgentChat.jsx",
-          "backend/app/routers/agent.py",
+          "frontend/src/components/AgentView.jsx",
+          "frontend/src/components/mission-control/AIUsageWidget.jsx",
+          "backend/app/services/agent.py",
           "backend/app/services/agent_tools.py"
         ]
       },
       {
-        "name": "Presupuestos",
-        "description": "Sistema de presupuestos por categoría con tracking de límites mensuales y anuales",
+        "name": "Dollar Quotes (Cotizaciones)",
+        "description": "Consulta de cotizaciones del dólar (oficial, blue, MEP, CCL, cripto) desde APIs externas, gráficos históricos",
         "files": [
-          "frontend/src/components/mission-control/BudgetWidget.jsx",
-          "frontend/src/components/mission-control/new-design/BudgetsFullView.jsx",
-          "backend/app/routers/presupuestos.py",
-          "backend/app/repositories/presupuesto_repository.py"
-        ]
-      },
-      {
-        "name": "Cotizaciones de Dólar",
-        "description": "Widget con cotizaciones en tiempo real de dólar oficial, blue, MEP, CCL y conversión automática de monedas",
-        "files": [
-          "frontend/src/components/mission-control/DollarQuoteWidget.jsx",
           "frontend/src/components/dollar-view.jsx",
+          "frontend/src/services/dolarService.js",
           "frontend/src/services/yfinanceService.js"
         ]
       },
       {
-        "name": "CEDEARs y Mercado",
-        "description": "Tracking de CEDEARs (acciones argentinas) con integración a Yahoo Finance API",
+        "name": "Mobile Navigation",
+        "description": "Navegación mobile optimizada con menú bottom nav, acceso rápido a todas las funcionalidades",
         "files": [
-          "frontend/src/components/CedearsView.jsx",
-          "frontend/src/components/CedearDetailModal.jsx",
-          "frontend/src/components/market-view.jsx",
-          "backend/app/routers/yfinance_router.py"
+          "frontend/src/components/MobileBottomNav.jsx",
+          "frontend/src/components/mission-control/TransactionFormView.jsx"
         ]
       },
       {
-        "name": "Bulk Upload de Transacciones",
-        "description": "Importación masiva de transacciones desde archivo CSV con validación y preview",
-        "files": [
-          "frontend/src/components/BulkTransactionUpload.jsx",
-          "backend/app/routers/transacciones.py"
-        ]
-      },
-      {
-        "name": "Sistema de Autenticación",
-        "description": "Autenticación con OAuth2 (Google planeado), gestión de usuarios multi-tenancy",
-        "files": [
-          "frontend/src/components/auth/auth-provider.jsx",
-          "frontend/src/components/auth/protected-route.jsx",
-          "frontend/src/components/auth/user-menu.jsx",
-          "backend/app/routers/auth.py",
-          "backend/app/auth/auth_service.py",
-          "backend/app/repositories/user_repository_pg.py"
-        ]
-      },
-      {
-        "name": "Gestión de Archivos",
-        "description": "Upload y gestión de comprobantes con integración a MinIO (S3-compatible)",
-        "files": [
-          "frontend/src/components/comprobante-uploader.jsx",
-          "frontend/src/components/FileUpload/FileUpload.jsx",
-          "backend/app/routers/files.py",
-          "backend/app/services/minio_service.py"
-        ]
-      },
-      {
-        "name": "Charts y Visualizaciones",
-        "description": "Gráficos interactivos con Recharts para análisis de gastos por categoría, método de pago, evolución temporal",
-        "files": [
-          "frontend/src/components/mission-control/charts/CategoriesChart.jsx",
-          "frontend/src/components/mission-control/charts/PaymentMethodsChart.jsx",
-          "frontend/src/components/mission-control/new-design/TransactionsChart.jsx",
-          "frontend/src/components/mission-control/new-design/IncomeExpensesChart.jsx",
-          "frontend/src/components/mission-control/new-design/ExpensesBreakdownChart.jsx"
-        ]
-      },
-      {
-        "name": "Navegación Mobile",
-        "description": "Bottom navigation para dispositivos móviles con menú responsivo",
-        "files": [
-          "frontend/src/components/MobileBottomNav.jsx"
-        ]
-      },
-      {
-        "name": "API Services (Frontend)",
-        "description": "Capa de servicios para comunicación con el backend, cliente HTTP centralizado",
+        "name": "API Service Layer",
+        "description": "Capa de servicios para comunicación con backend: transacciones, categorías, métodos de pago, objetivos, monedas, auth, dashboard. Manejo de errores 401/403, interceptors, logging",
         "files": [
           "frontend/src/services/api.js",
-          "frontend/src/services/config-service.js",
-          "frontend/src/services/yfinanceService.js"
+          "frontend/src/services/config-service.js"
         ]
       },
       {
-        "name": "Context API - Estado Global",
-        "description": "Gestión de estado global con Context API para visibilidad de montos y configuración",
+        "name": "User Management",
+        "description": "Gestión de usuarios: registro, login, perfil, inicialización de monedas predeterminadas para nuevos usuarios",
         "files": [
-          "frontend/src/contexts/AmountVisibilityContext.jsx"
+          "backend/app/routers/users.py",
+          "backend/app/services/user_service.py",
+          "backend/app/repositories/user_repository.py"
         ]
       },
       {
-        "name": "Custom Hooks",
-        "description": "Hooks personalizados para lógica reutilizable (mobile detection, etc)",
+        "name": "Database Models",
+        "description": "Modelos SQLAlchemy: Usuario, Transaccion, Categoria, MetodoPago, Objetivo, MonedaUsuario, Tarjeta. Relaciones many-to-one, cascade delete, multi-tenancy",
         "files": [
-          "frontend/src/hooks/use-mobile.js"
+          "backend/app/models/db_models.py",
+          "backend/app/models/moneda_usuario.py",
+          "backend/alembic/versions/*.py"
         ]
       },
       {
-        "name": "Backend - Repository Pattern",
-        "description": "Implementación del patrón Repository para acceso a datos abstracto y testeable",
+        "name": "Repository Pattern",
+        "description": "Patrón Repository para abstracción de acceso a datos: transacciones, categorías, objetivos, monedas, usuarios",
         "files": [
-          "backend/app/repositories/base_repository.py",
-          "backend/app/repositories/transaccion_repository.py",
+          "backend/app/repositories/transacciones_repository.py",
           "backend/app/repositories/categoria_repository.py",
-          "backend/app/repositories/metodo_pago_repository.py",
-          "backend/app/repositories/objetivo_ahorro_repository.py",
-          "backend/app/repositories/pago_pendiente_repository_pg.py",
-          "backend/app/repositories/resumen_bancario_repository.py",
-          "backend/app/repositories/presupuesto_repository.py",
-          "backend/app/repositories/user_repository_pg.py"
-        ]
-      },
-      {
-        "name": "Backend - Database Models",
-        "description": "Modelos SQLAlchemy con relaciones, índices y constraints para PostgreSQL",
-        "files": [
-          "backend/app/models/db_models.py"
-        ]
-      },
-      {
-        "name": "Backend - Pydantic Schemas",
-        "description": "Schemas de validación de datos con Pydantic v2",
-        "files": [
-          "backend/app/schemas/categories.py",
-          "backend/app/schemas/payment_methods.py",
-          "backend/app/schemas/transacciones.py",
-          "backend/app/schemas/pagos_pendientes.py"
-        ]
-      },
-      {
-        "name": "AI Activity Logging",
-        "description": "Sistema de logging de uso del agente IA (tokens, costos, herramientas usadas)",
-        "files": [
-          "backend/app/routers/ai_usage.py",
-          "frontend/src/components/mission-control/AIUsageWidget.jsx",
-          "frontend/src/components/mission-control/new-design/AIUsageFullView.jsx"
-        ]
-      },
-      {
-        "name": "Settings y Configuración",
-        "description": "Vista de configuración del usuario y preferencias",
-        "files": [
-          "frontend/src/components/settings-view.jsx"
+          "backend/app/repositories/objetivos_repository.py",
+          "backend/app/repositories/moneda_usuario_repository.py",
+          "backend/app/repositories/user_repository.py",
+          "backend/app/repositories/metodos_pago_repository.py"
         ]
       }
     ]

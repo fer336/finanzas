@@ -69,6 +69,7 @@ from app.routers.pagos import router as pagos_router
 from app.routers.ai_usage import router as ai_usage_router
 from app.routers.presupuestos import router as presupuestos_router
 from app.routers.objetivos import router as objetivos_router
+from app.routers.monedas_usuario import router as monedas_usuario_router
 from app.middleware.rate_limiting import RateLimitingMiddleware
 from app.middleware.security import (
     SecurityHeadersMiddleware, 
@@ -294,6 +295,13 @@ app.include_router(
     ai_usage_router,
     prefix="/api/ai",
     tags=["AI Usage"]
+)
+
+# Router for User Currencies (Monedas Personalizadas)
+app.include_router(
+    monedas_usuario_router,
+    prefix="/api/v1/monedas-usuario",
+    tags=["Monedas Usuario"]
 )
 
 

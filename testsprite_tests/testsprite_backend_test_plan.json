@@ -1,52 +1,52 @@
 [
   {
     "id": "TC001",
-    "title": "test_dashboard_loading_performance_and_data_accuracy",
-    "description": "Verify that the dashboard loads within 3 seconds and displays updated data including balance, recent transactions, categories, saving goals, and credit card debt."
+    "title": "test_authentication_login_and_registration",
+    "description": "Verify that the authentication system supports user login and registration using JWT and Google OAuth, ensuring secure token handling and session management with timeout after 10 minutes of inactivity."
   },
   {
     "id": "TC002",
-    "title": "test_create_transaction_with_validations_and_currency_conversion",
-    "description": "Test creating a transaction with positive amounts, correct types, and automatic multi-currency conversion for ARS, USD, EUR, and BRL."
+    "title": "test_transaction_creation_and_export",
+    "description": "Validate the creation, editing, and deletion of transactions with positive amount validation, multi-currency support, and attachment of receipts. Also verify export functionality for transactions filtered by month in CSV and Excel formats."
   },
   {
     "id": "TC003",
-    "title": "test_category_management_uniqueness_and_effect_on_transactions",
-    "description": "Ensure categories are unique per user and that creating, editing, deactivating, or deleting categories correctly affects associated transactions."
+    "title": "test_multi_currency_management",
+    "description": "Test the CRUD operations for user-customizable currencies including adding, editing, activating/deactivating, deleting, and reordering currencies. Verify that the dashboard shows balances separated by each active currency."
   },
   {
     "id": "TC004",
-    "title": "test_payment_methods_management_and_usage_statistics",
-    "description": "Validate CRUD operations on payment methods and verify usage statistics are correctly updated and displayed."
+    "title": "test_category_management",
+    "description": "Ensure that users can create, edit, delete, and activate/deactivate categories with custom icons, colors, and filters by income or expense type."
   },
   {
     "id": "TC005",
-    "title": "test_saving_goals_progress_tracking_and_state_changes",
-    "description": "Check that saving goals track progress visually, update progress bars and charts, and change state when completed."
+    "title": "test_payment_methods_management",
+    "description": "Verify management of payment methods including cash, credit cards, and transfers, with support for credit card limits and activation/deactivation."
   },
   {
     "id": "TC006",
-    "title": "test_credit_card_summary_payment_creates_transaction_and_updates_status",
-    "description": "Verify that paying a credit card summary creates the corresponding transaction and updates payment status and dates correctly."
+    "title": "test_savings_goals_creation_and_tracking",
+    "description": "Validate creation and tracking of savings goals with visual progress indicators, automatic contributions from transactions, and multi-currency support."
   },
   {
     "id": "TC007",
-    "title": "test_pending_payments_filters_and_priority_handling",
-    "description": "Test filtering pending payments by overdue and upcoming due dates and verify priority handling in the list."
+    "title": "test_dashboard_loading_and_widgets",
+    "description": "Test that the dashboard loads within 3 seconds and displays widgets with multi-currency balances, recent transactions, categories, payment methods, and savings goals accurately."
   },
   {
     "id": "TC008",
-    "title": "test_financial_agent_ia_response_and_function_calling",
-    "description": "Validate that the financial AI agent responds in natural language, calls backend functions correctly, and provides dynamic financial insights."
+    "title": "test_credit_card_and_debt_tracking",
+    "description": "Verify tracking of credit cards including limits, pending debts, scheduled payments, and that credit transactions do not affect balance until payment is made."
   },
   {
     "id": "TC009",
-    "title": "test_bulk_transaction_upload_with_validation_and_preview",
-    "description": "Test uploading a CSV file with multiple transactions, validate each row, show a preview, and confirm import with error handling."
+    "title": "test_ai_agent_financial_queries_and_actions",
+    "description": "Test the AI agent's ability to respond to financial queries, create transactions, provide summaries, and analyze spending patterns using the integrated tools."
   },
   {
     "id": "TC010",
-    "title": "test_authentication_oauth2_jwt_and_multi_tenancy_security",
-    "description": "Verify secure user authentication using OAuth2 and JWT, ensuring multi-tenancy data isolation and protection against SQL injection."
+    "title": "test_session_timeout_and_security_modal",
+    "description": "Ensure that the system shows a warning modal 2 minutes before session timeout due to inactivity and logs out the user after 10 minutes without response, handling token expiration securely."
   }
 ]

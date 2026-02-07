@@ -25,7 +25,7 @@
 ## 🎯 Visión General
 
 **Sistema de Gastos Inteligente** es una plataforma full-stack de gestión financiera personal que combina:
-- ✅ Gestión de transacciones multi-moneda (ARS, USD, EUR, BRL)
+- ✅ Gestión de transacciones multi-moneda (ARS, USD, EUR, BRL, GBP)
 - ✅ Objetivos de ahorro con tracking visual
 - ✅ Gestión de deudas de tarjetas de crédito
 - ✅ Agente IA conversacional con function calling
@@ -403,6 +403,18 @@ ai_activity (
 - Lazy loading de widgets
 - Refresh manual y automático
 
+**🆕 Requerimientos Multi-Moneda (v1.1)**:
+- ✅ **Balance en todas las monedas**: El dashboard debe mostrar el balance total en ARS, USD, EUR, BRL y GBP simultáneamente
+- ✅ **Contabilización separada**: Cada moneda debe contabilizarse de forma independiente
+- ✅ **Disponible en web y mobile**: La visualización multi-moneda debe funcionar en ambas versiones
+- ✅ **Widget de Balance Multi-Moneda**: Nuevo componente que muestre:
+  - Balance en ARS (moneda base)
+  - Balance en USD
+  - Balance en EUR
+  - Balance en BRL
+  - Balance en GBP
+  - Totales de ingresos y gastos por moneda
+
 **Criterios de Aceptación**:
 ```gherkin
 Scenario: Usuario visualiza el dashboard
@@ -411,6 +423,17 @@ Scenario: Usuario visualiza el dashboard
   Then debe ver el dashboard con todos los widgets
   And el balance debe mostrarse en la moneda preferida
   And los widgets deben cargarse en menos de 3 segundos
+  And debe ver balances separados para ARS, USD, EUR y BRL
+
+Scenario: Usuario visualiza balances multi-moneda
+  Given el usuario tiene transacciones en diferentes monedas
+  When visualiza el dashboard
+  Then debe ver balance en ARS con total calculado
+  And debe ver balance en USD con total calculado
+  And debe ver balance en EUR con total calculado
+  And debe ver balance en BRL con total calculado
+  And debe ver balance en GBP con total calculado
+  And cada balance debe mostrar ingresos y gastos por separado
 ```
 
 ### 2. Gestión de Transacciones
@@ -484,6 +507,23 @@ Scenario: Usuario crea un gasto en dólares
 - Formatos: CSV, Excel, PDF
 - Incluir filtros aplicados
 - Generación async si > 1000 registros
+
+**🆕 Requerimientos de Exportación (v1.1)**:
+- ✅ **Exportar mes completo**: Al exportar, debe incluir TODAS las transacciones del mes seleccionado, no solo las de la página actual
+- ✅ **Respeto de filtros**: Si hay filtros de moneda, categoría o tipo aplicados, deben respetarse
+- ✅ **Indicador visual**: Mostrar claramente cuántas transacciones se exportarán antes de confirmar
+- ✅ **Formato consistente**: El CSV/Excel debe incluir columnas: Fecha, Descripción, Tipo, Monto, Moneda, Monto ARS, Categoría, Método de Pago
+
+**Criterios de Aceptación**:
+```gherkin
+Scenario: Usuario exporta transacciones del mes
+  Given el usuario está en la vista de transacciones
+  And está viendo la página 2 de 5
+  When selecciona "Exportar mes completo"
+  Then debe exportarse TODAS las transacciones del mes actual
+  And NO solo las 20 transacciones de la página actual
+  And debe mostrarse un mensaje indicando "Se exportaron X transacciones"
+```
 
 ### 3. Gestión de Categorías
 
@@ -944,6 +984,9 @@ GET    /api/quotes/crypto         # Cotizaciones de cripto (planeado)
 ### Seguridad
 - ✅ Autenticación con OAuth2
 - ✅ JWT para sesiones
+- ✅ **Timeout de sesión**: Cierre automático después de 10 minutos de inactividad
+- ✅ **Advertencia de sesión**: Modal de advertencia 2 minutos antes del cierre
+- ✅ **Detección de token expirado**: Manejo automático de errores 401/403
 - ✅ HTTPS obligatorio en producción
 - ✅ Rate limiting (100 req/min por IP)
 - ✅ SQL injection prevention (ORM)
@@ -953,6 +996,21 @@ GET    /api/quotes/crypto         # Cotizaciones de cripto (planeado)
 - ✅ Accesibilidad WCAG 2.1 AA (planeado)
 - ✅ Mensajes de error claros
 - ✅ Loading states en todas las operaciones async
+
+**🆕 Requerimientos Mobile UX (v1.1)**:
+- ✅ **Combobox de monedas responsive**: En mobile, el selector de monedas en el formulario de transacciones debe:
+  - Ocupar el ancho completo en pantallas < 640px
+  - No quedar en una esquina
+  - Tener mínimo 44px de altura (touch target)
+  - Estar alineado con los demás campos del formulario
+- ✅ **Balance multi-moneda mobile**: El widget de balance debe:
+  - Mostrar las 4 monedas de forma compacta en mobile
+  - Usar layout vertical en pantallas pequeñas
+  - Ser scrolleable horizontalmente si es necesario
+- ✅ **Formularios mobile-friendly**: Todos los campos de formulario deben:
+  - Usar `input type` correcto (number para montos)
+  - Tener labels visibles
+  - No tener overflow horizontal
 
 ---
 
@@ -1129,7 +1187,55 @@ GET    /api/quotes/crypto         # Cotizaciones de cripto (planeado)
 
 ---
 
-**Versión**: 1.0  
+## 📝 Changelog de Versiones
+
+### v1.2 (2026-02-05) 🆕
+**Sistema de Monedas Personalizables**:
+- ✅ **Monedas Configurables por Usuario**: Cada usuario puede agregar sus propias monedas
+- ✅ **CRUD Completo de Monedas**: Crear, editar, activar/desactivar y eliminar monedas
+- ✅ **Vista de Gestión de Monedas**: Panel dedicado para administrar todas las monedas
+- ✅ **Widget Multi-Moneda Dinámico**: Se adapta automáticamente a las monedas activas del usuario
+- ✅ **Personalización Visual**: Cada moneda puede tener su propio icono y colores
+- ✅ **Monedas Predeterminadas**: Sistema incluye ARS, USD, EUR, BRL, GBP por defecto
+- ✅ **Soporte para Criptomonedas**: Usuarios pueden agregar BTC, ETH, USDT, etc.
+- ✅ **Orden Personalizable**: Las monedas se pueden reordenar (drag & drop)
+
+**Modelo de Datos**:
+- Nueva tabla: `monedas_usuario`
+- Relación: `1:N` con usuario
+- Campos: código, nombre, símbolo, icono, color, activa, orden, tasa_cambio_a_ars
+
+**Impacto**:
+- Backend: Nuevo modelo, endpoints CRUD, migración de base de datos
+- Frontend: CurrencyModal, CurrencyManagementView, MultiCurrencyBalanceWidget (dinámico)
+- Testing: Agregar tests para gestión de monedas personalizadas
+
+### v1.1 (2026-02-05)
+**Nuevos Requerimientos**:
+- ✅ **Balance Multi-Moneda**: Dashboard ahora muestra balance separado en ARS, USD, EUR, BRL y GBP
+- ✅ **Libra Esterlina (GBP)**: Nueva moneda agregada al sistema
+- ✅ **Exportación de Mes Completo**: La exportación ahora incluye todas las transacciones del mes seleccionado, no solo la página actual
+- ✅ **UI Mobile Mejorada**: Combobox de monedas ahora es responsive y se visualiza correctamente en mobile
+- ✅ **Timeout de Sesión por Inactividad**: Cierre automático de sesión después de 10 minutos sin actividad
+- ✅ **Modal de Advertencia de Sesión**: Notificación 2 minutos antes del cierre con opción de extender
+- ✅ **Manejo Robusto de Tokens Expirados**: Detección automática de errores 401/403 y redirección al login
+
+**Impacto**:
+- Frontend: Dashboard, TransactionForm, ExportButton, AuthProvider, SessionTimeout
+- Backend: Endpoint de balance debe retornar todas las monedas
+- Testing: Agregar tests para balance multi-moneda, exportación completa y timeout de sesión
+- Seguridad: Mejora significativa en manejo de sesiones
+
+### v1.0 (2026-02-04)
+**Versión Inicial**:
+- Sistema completo de gestión de gastos
+- Multi-moneda con conversión automática
+- Agente IA con function calling
+- Dashboard con widgets personalizables
+
+---
+
+**Versión**: 1.1  
 **Autor**: Sistema de Gastos Team  
-**Última Actualización**: 2026-02-04
+**Última Actualización**: 2026-02-05
 

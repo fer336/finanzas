@@ -274,26 +274,37 @@ class TransaccionRepository:
     
     # 💳 Métodos para Tarjetas de Crédito
     
-    def get_deuda_tarjetas(self, usuario_id: Optional[UUID] = None) -> Dict[str, Any]:
-        """Obtener deuda total y detalle de tarjetas de crédito pendientes"""
+    def get_deuda_tarjetas(
+        self,
+        usuario_id: Optional[UUID] = None,
+        fecha_desde: Optional[date] = None,
+        fecha_hasta: Optional[date] = None
+    ) -> Dict[str, Any]:
+        """Obtener deuda total y detalle de tarjetas de crédito (con filtro de periodo opcional)."""
         query = self.db.query(Transaccion).filter(
-            Transaccion.es_credito == True,
-            Transaccion.fecha_pago_real == None  # Solo las que no han sido pagadas
+            Transaccion.es_credito == True
         )
         
         if usuario_id:
             query = query.filter(Transaccion.usuario_id == usuario_id)
         
+        if fecha_desde:
+            query = query.filter(Transaccion.fecha_transaccion >= fecha_desde)
+        if fecha_hasta:
+            query = query.filter(Transaccion.fecha_transaccion <= fecha_hasta)
+        
         transacciones = query.options(
             joinedload(Transaccion.metodo_pago)
         ).order_by(Transaccion.fecha_transaccion.desc()).all()
         
-        # Calcular deuda total
-        deuda_total = sum(abs(t.monto) for t in transacciones)
+        transacciones_pendientes = [t for t in transacciones if t.fecha_pago_real is None]
         
-        # Agrupar por método de pago (tarjeta)
+        # Calcular deuda total (solo pendientes)
+        deuda_total = sum(abs(t.monto) for t in transacciones_pendientes)
+        
+        # Agrupar por método de pago (tarjeta) usando solo pendientes
         deuda_por_tarjeta = {}
-        for t in transacciones:
+        for t in transacciones_pendientes:
             if t.metodo_pago:
                 tarjeta_nombre = t.metodo_pago.nombre
                 if tarjeta_nombre not in deuda_por_tarjeta:
@@ -309,9 +320,49 @@ class TransaccionRepository:
         return {
             'deuda_total': float(deuda_total),
             'cantidad_transacciones': len(transacciones),
+            'cantidad_pendientes': len(transacciones_pendientes),
             'deuda_por_tarjeta': list(deuda_por_tarjeta.values()),
             'transacciones': [self._to_dict(t) for t in transacciones]
         }
+
+    def get_resumen_mensual_tarjetas(
+        self,
+        usuario_id: Optional[UUID] = None,
+        months_back: int = 12
+    ) -> List[Dict[str, Any]]:
+        """Resumen mensual de gastos con tarjeta de crédito."""
+        today = date.today()
+        start_year = today.year
+        start_month = today.month - (months_back - 1)
+        while start_month <= 0:
+            start_year -= 1
+            start_month += 12
+        start_date = date(start_year, start_month, 1)
+
+        query = self.db.query(
+            func.date_trunc('month', Transaccion.fecha_transaccion).label('mes'),
+            func.sum(func.abs(Transaccion.monto)).label('total'),
+            func.count(Transaccion.id).label('cantidad')
+        ).filter(
+            Transaccion.es_credito == True,
+            Transaccion.fecha_transaccion >= start_date
+        )
+
+        if usuario_id:
+            query = query.filter(Transaccion.usuario_id == usuario_id)
+
+        rows = query.group_by('mes').order_by('mes').all()
+
+        resumen = []
+        for row in rows:
+            mes_date = row.mes.date() if hasattr(row.mes, "date") else row.mes
+            resumen.append({
+                "mes": mes_date.strftime("%Y-%m"),
+                "total": float(row.total or 0),
+                "cantidad": int(row.cantidad or 0)
+            })
+
+        return resumen
     
     def marcar_resumen_pagado(
         self, 

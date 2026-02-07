@@ -2,9 +2,15 @@ import { useState, useCallback } from 'react';
 import axios from 'axios';
 
 const AI_CONFIG = {
-  n8nWebhook: import.meta.env.VITE_N8N_WEBHOOK || 'https://n8nw.qeva.xyz/webhook/finance-agency',
+  n8nWebhook: import.meta.env.VITE_N8N_WEBHOOK,
   timeout: 30000 // 30 segundos para análisis de IA
 };
+
+// Validar que la variable de entorno esté configurada
+if (!AI_CONFIG.n8nWebhook) {
+  console.error('❌ VITE_N8N_WEBHOOK no está configurado en .env');
+  console.error('Por favor, copia .env.example a .env y configura tu webhook de n8n');
+}
 
 export const useFinancialAI = () => {
   const [loading, setLoading] = useState(false);

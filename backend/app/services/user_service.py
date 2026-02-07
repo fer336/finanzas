@@ -3,8 +3,15 @@ Servicio de usuarios - PostgreSQL
 """
 from typing import Optional, Dict, Any
 from sqlalchemy.orm import Session
+from uuid import UUID
+import logging
+
 from app.models.user import User, UserCreate, UserUpdate, UserUpdateName, UserUpdatePais
 from app.repositories.user_repository_pg import UserRepositoryPG
+from app.repositories.moneda_usuario_repository import MonedaUsuarioRepository
+from app.schemas.monedas import MONEDAS_PREDETERMINADAS
+
+logger = logging.getLogger(__name__)
 
 class UserService:
     """Servicio para manejo de usuarios"""
@@ -28,12 +35,31 @@ class UserService:
         return None
     
     async def create_user(self, user_create: UserCreate) -> Optional[User]:
-        """Crear nuevo usuario"""
+        """Crear nuevo usuario e inicializar sus monedas predeterminadas"""
         user_data = user_create.model_dump()
         created_user = await self.user_repo.create(user_data)
         if created_user:
+            # Inicializar monedas predeterminadas automáticamente
+            try:
+                await self._initialize_default_currencies(UUID(created_user.id))
+                logger.info(f"✅ Monedas predeterminadas inicializadas para usuario {created_user.id}")
+            except Exception as e:
+                logger.error(f"⚠️ Error inicializando monedas para usuario {created_user.id}: {e}")
+                # No fallar la creación del usuario si las monedas fallan
+            
             return User.model_validate(created_user)
         return None
+    
+    async def _initialize_default_currencies(self, usuario_id: UUID) -> None:
+        """Inicializar monedas predeterminadas para un usuario nuevo"""
+        moneda_repo = MonedaUsuarioRepository(self.user_repo.db)
+        
+        for moneda_default in MONEDAS_PREDETERMINADAS:
+            try:
+                moneda_repo.create(moneda_default.copy(), usuario_id=usuario_id)
+            except Exception as e:
+                logger.error(f"❌ Error creando moneda {moneda_default.get('codigo')}: {e}")
+                # Continuar con las demás monedas aunque una falle
     
     async def update_user(self, user_id: str, user_update: UserUpdate) -> Optional[User]:
         """Actualizar usuario"""

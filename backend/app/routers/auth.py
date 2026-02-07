@@ -196,14 +196,23 @@ async def google_callback(request: Request):
         # Convert to dict for compatibility
         existing_user = None
         if existing_user_obj:
+            # 🔍 DEBUG: Verificar el valor de is_active del objeto SQLAlchemy
+            print(f"🔍 DEBUG SQLAlchemy object:")
+            print(f"   existing_user_obj.is_active = {existing_user_obj.is_active} (tipo: {type(existing_user_obj.is_active)})")
+            print(f"   hasattr(existing_user_obj, 'is_active') = {hasattr(existing_user_obj, 'is_active')}")
+            
             existing_user = {
                 "id": str(existing_user_obj.id),
                 "email": existing_user_obj.email,
                 "full_name": existing_user_obj.full_name,
-                "is_active": existing_user_obj.is_active,
+                "is_active": existing_user_obj.is_active,  # Este viene del modelo SQLAlchemy
                 "picture": existing_user_obj.picture,
                 "google_id": existing_user_obj.google_id if hasattr(existing_user_obj, 'google_id') else None
             }
+            
+            # 🔍 DEBUG: Verificar el diccionario creado
+            print(f"🔍 DEBUG Dict created:")
+            print(f"   existing_user['is_active'] = {existing_user.get('is_active')} (tipo: {type(existing_user.get('is_active'))})")
         
         print(f"")
         print(f"📊 RESULTADO DE BÚSQUEDA:")
@@ -230,17 +239,35 @@ async def google_callback(request: Request):
         # Usuario existe - verificar que esté activo
         # Los campos vienen en snake_case: active, id, email, full_name, picture, etc.
         # 🔒 REGLA: Solo usuarios con active=true pueden ingresar
-        is_active = existing_user.get("is_active", existing_user.get("active", False))
         
-        print(f"🔒 Verificación de acceso:")
+        print(f"🔒 DEBUG Verificación de acceso:")
         print(f"   Email: {email}")
-        print(f"   Campo 'is_active': {is_active} (tipo: {type(is_active).__name__})")
+        print(f"   Claves en existing_user dict: {list(existing_user.keys())}")
+        print(f"   Valor 'is_active' directo: {existing_user.get('is_active')}")
+        print(f"   Valor 'active' directo: {existing_user.get('active')}")
+        
+        # Obtener is_active de manera robusta
+        is_active = existing_user.get("is_active")
+        if is_active is None:
+            is_active = existing_user.get("active", False)
+        
+        # Convertir a bool si es necesario (por si viene como string o int)
+        if isinstance(is_active, str):
+            is_active = is_active.lower() in ('true', '1', 'yes', 't')
+        elif isinstance(is_active, int):
+            is_active = bool(is_active)
+        elif is_active is None:
+            is_active = False
+            
+        print(f"   Campo 'is_active' procesado: {is_active} (tipo: {type(is_active).__name__})")
         
         if not is_active:
             print(f"❌ ACCESO DENEGADO - Usuario {email} está inactivo (is_active={is_active})")
             print(f"   El campo 'is_active' debe ser true para permitir el ingreso")
+            print(f"   Valores originales en DB: is_active={existing_user.get('is_active')}, active={existing_user.get('active')}")
             frontend_url = f"{frontend_url_base}/?auth=inactive&email={urllib.parse.quote(email)}&user={urllib.parse.quote(name or email)}"
             print(f"   Redirecting a: {frontend_url}")
+            db.close()
             return RedirectResponse(url=frontend_url, status_code=302)
         
         user_id = existing_user.get("id") or existing_user.get("Id")

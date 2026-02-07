@@ -1,7 +1,7 @@
 """
 SQLAlchemy database models
 """
-from sqlalchemy import Column, String, Numeric, Date, DateTime, Boolean, Text, JSON, Integer, ForeignKey, CheckConstraint, Index, text
+from sqlalchemy import Column, String, Numeric, Date, DateTime, Boolean, Text, JSON, Integer, ForeignKey, CheckConstraint, Index, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -17,6 +17,7 @@ class Usuario(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     full_name = Column(String(255), nullable=False)
     is_active = Column("active", Boolean, default=True, index=True)
+    google_id = Column(String(255), nullable=True, index=True)  # Google OAuth ID
     moneda_preferida = Column(String(3), default="ARS")
     timezone = Column(String(50), default="America/Argentina/Buenos_Aires")
     avatar_url = Column(Text, nullable=True)
@@ -31,6 +32,8 @@ class Usuario(Base):
     transacciones = relationship("Transaccion", back_populates="usuario", cascade="all, delete-orphan")
     pagos_pendientes = relationship("PagoPendiente", back_populates="usuario", cascade="all, delete-orphan")
     resumenes_bancarios = relationship("ResumenBancario", back_populates="usuario", cascade="all, delete-orphan")
+    monedas = relationship("MonedaUsuario", back_populates="usuario", cascade="all, delete-orphan")
+    balances_iniciales = relationship("BalanceInicial", back_populates="usuario", cascade="all, delete-orphan")
 
 
 class Categoria(Base):
@@ -362,3 +365,111 @@ class AporteObjetivo(Base):
     # Relationships
     objetivo = relationship("ObjetivoAhorro", back_populates="aportes")
 
+
+
+class MonedaUsuario(Base):
+    """
+    Modelo para monedas personalizadas por usuario
+    Permite a cada usuario configurar las monedas que desea usar
+    """
+    __tablename__ = "monedas_usuario"
+
+    # Campos principales
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    codigo = Column(String(10), nullable=False)  # ISO 4217: USD, EUR, BTC, etc.
+    nombre = Column(String(100), nullable=False)  # Dólar Estadounidense, Bitcoin, etc.
+    simbolo = Column(String(10), nullable=False)  # $, €, ₿, £, etc.
+    
+    # Configuración visual
+    icono = Column(String(50), nullable=True)  # Lucide icon name: DollarSign, Bitcoin, etc.
+    color = Column(String(50), default="from-blue-500 to-cyan-500")  # Gradient colors
+    
+    # Metadata
+    es_predeterminada = Column(Boolean, default=False)  # Si es una moneda del sistema
+    activa = Column(Boolean, default=True)  # Si el usuario la tiene activa
+    orden = Column(Integer, default=0)  # Orden de visualización
+    
+    # Conversión (opcional)
+    tasa_cambio_a_ars = Column(Numeric(15, 4), nullable=True)  # Tasa de conversión a ARS
+    ultima_actualizacion_tasa = Column(DateTime(timezone=True), nullable=True)
+    
+    # Relación con usuario
+    usuario_id = Column(UUID(as_uuid=True), ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False, index=True)
+    
+    # Timestamps
+    fecha_creacion = Column(DateTime(timezone=True), default=datetime.utcnow)
+    fecha_actualizacion = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    usuario = relationship("Usuario", back_populates="monedas")
+
+    def __repr__(self):
+        return f"<MonedaUsuario {self.codigo}: {self.nombre}>"
+
+    def to_dict(self):
+        """Convertir a diccionario para JSON"""
+        return {
+            "id": str(self.id),
+            "codigo": self.codigo,
+            "nombre": self.nombre,
+            "simbolo": self.simbolo,
+            "icono": self.icono,
+            "color": self.color,
+            "es_predeterminada": self.es_predeterminada,
+            "activa": self.activa,
+            "orden": self.orden,
+            "tasa_cambio_a_ars": float(self.tasa_cambio_a_ars) if self.tasa_cambio_a_ars else None,
+            "ultima_actualizacion_tasa": self.ultima_actualizacion_tasa.isoformat() if self.ultima_actualizacion_tasa else None,
+            "usuario_id": str(self.usuario_id),
+            "fecha_creacion": self.fecha_creacion.isoformat(),
+            "fecha_actualizacion": self.fecha_actualizacion.isoformat()
+        }
+
+
+class BalanceInicial(Base):
+    """
+    Balance inicial de un mes específico para una moneda específica
+    Permite al usuario configurar el balance inicial de cada mes
+    """
+    __tablename__ = "balance_inicial_mes"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    usuario_id = Column(UUID(as_uuid=True), ForeignKey('usuarios.id', ondelete='CASCADE'), nullable=False, index=True)
+    
+    # Mes en formato YYYY-MM (ej: "2026-02")
+    mes = Column(String(7), nullable=False, index=True)
+    
+    # Código de moneda (ARS, USD, EUR, etc.)
+    moneda = Column(String(10), nullable=False)
+    
+    # Monto del balance inicial
+    monto = Column(Numeric(15, 2), nullable=False, default=0)
+    
+    # Metadatos
+    creado_en = Column(DateTime(timezone=True), default=datetime.utcnow, nullable=False)
+    actualizado_en = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    
+    # Relaciones
+    usuario = relationship("Usuario", back_populates="balances_iniciales")
+    
+    # Constraint: Un usuario solo puede tener un balance inicial por mes y moneda
+    __table_args__ = (
+        Index('idx_balance_inicial_usuario_mes', 'usuario_id', 'mes'),
+        CheckConstraint('monto >= 0', name='check_monto_positive'),
+        UniqueConstraint('usuario_id', 'mes', 'moneda', name='uq_usuario_mes_moneda'),
+    )
+
+    def __repr__(self):
+        return f"<BalanceInicial {self.mes} {self.moneda}: {self.monto}>"
+
+    def to_dict(self):
+        """Convertir a diccionario para JSON"""
+        return {
+            "id": str(self.id),
+            "usuario_id": str(self.usuario_id),
+            "mes": self.mes,
+            "moneda": self.moneda,
+            "monto": float(self.monto),
+            "creado_en": self.creado_en.isoformat(),
+            "actualizado_en": self.actualizado_en.isoformat()
+        }

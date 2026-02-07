@@ -5,9 +5,10 @@ Todos los endpoints requieren autenticación y filtran por usuario
 from fastapi import APIRouter, Query, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import Optional, List, Dict, Any
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from uuid import UUID
 from decimal import Decimal
+import uuid
 
 from app.database import get_db
 from app.repositories.transaccion_repository import TransaccionRepository
@@ -426,9 +427,10 @@ async def delete_transaction(
 @router.post("/bulk-delete")
 async def bulk_delete_transactions(
     request: Dict[str, Any],
+    current_user: CurrentUser,  # 🔒 Agregar autenticación
     db: Session = Depends(get_db)
 ):
-    """Eliminar múltiples transacciones"""
+    """Eliminar múltiples transacciones (solo del usuario autenticado)"""
     try:
         ids = request.get("ids", [])
         
@@ -441,6 +443,12 @@ async def bulk_delete_transactions(
         
         for transaccion_id in ids:
             try:
+                # 🔒 Verificar ownership antes de eliminar
+                transaccion = repo.get_by_id(UUID(transaccion_id))
+                if not transaccion or str(transaccion.get('usuario_id')) != str(current_user.id):
+                    failed_ids.append(transaccion_id)
+                    continue
+                
                 success = repo.delete(UUID(transaccion_id))
                 if success:
                     deleted_count += 1
@@ -466,6 +474,7 @@ async def bulk_delete_transactions(
 @router.post("/bulk-create")
 async def bulk_create_transactions(
     request: Dict[str, Any],
+    current_user: CurrentUser,  # 🔒 Agregar autenticación
     db: Session = Depends(get_db)
 ):
     """Crear múltiples transacciones de una vez"""
@@ -494,6 +503,9 @@ async def bulk_create_transactions(
                 transaccion_data.pop('gasto_compartido', None)
                 transaccion_data.pop('objetivo_aportes', None)
                 
+                # 👤 FORZAR usuario_id del token JWT (NO del request)
+                transaccion_data['usuario_id'] = current_user.id
+                
                 # Convert string IDs to UUID (only if not empty/null)
                 if transaccion_data.get('categoria_id') and str(transaccion_data['categoria_id']).strip():
                     try:
@@ -510,14 +522,6 @@ async def bulk_create_transactions(
                         transaccion_data['metodo_pago_id'] = None
                 else:
                     transaccion_data['metodo_pago_id'] = None
-                    
-                if transaccion_data.get('usuario_id') and str(transaccion_data['usuario_id']).strip():
-                    try:
-                        transaccion_data['usuario_id'] = UUID(transaccion_data['usuario_id'])
-                    except (ValueError, AttributeError):
-                        transaccion_data['usuario_id'] = None
-                else:
-                    transaccion_data['usuario_id'] = None
                 
                 # Ensure monto_ars is set
                 if 'monto_ars' not in transaccion_data or transaccion_data['monto_ars'] is None:
@@ -559,18 +563,67 @@ async def bulk_create_transactions(
 @router.get("/tarjetas/deuda")
 async def get_deuda_tarjetas(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
+    mes: Optional[str] = Query(None, description="Mes en formato YYYY-MM"),
     db: Session = Depends(get_db)
 ):
-    """Obtener deuda total y detalle de tarjetas de crédito del usuario autenticado"""
+    """Obtener deuda total y detalle de tarjetas de crédito del usuario autenticado (por mes)."""
     try:
         repo = TransaccionRepository(db)
-        
-        deuda = repo.get_deuda_tarjetas(usuario_id=current_user.id)
-        
-        return deuda
-        
+
+        if mes:
+            try:
+                year, month = [int(part) for part in mes.split("-")]
+                fecha_desde = date(year, month, 1)
+            except Exception as parse_error:
+                raise HTTPException(status_code=400, detail="Formato de mes inválido. Use YYYY-MM") from parse_error
+        else:
+            today = date.today()
+            year = today.year
+            month = today.month
+            fecha_desde = date(year, month, 1)
+            mes = f"{year}-{str(month).zfill(2)}"
+
+        if month == 12:
+            fecha_hasta = date(year + 1, 1, 1) - timedelta(days=1)
+        else:
+            fecha_hasta = date(year, month + 1, 1) - timedelta(days=1)
+
+        deuda = repo.get_deuda_tarjetas(
+            usuario_id=current_user.id,
+            fecha_desde=fecha_desde,
+            fecha_hasta=fecha_hasta
+        )
+
+        return {
+            **deuda,
+            "periodo": mes
+        }
+
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error obteniendo deuda de tarjetas: {str(e)}")
+
+
+@router.get("/tarjetas/resumen-mensual")
+async def get_resumen_mensual_tarjetas(
+    current_user: CurrentUser,  # 🔒 Requiere autenticación
+    months_back: int = Query(12, ge=1, le=36, description="Cantidad de meses hacia atrás"),
+    db: Session = Depends(get_db)
+):
+    """Obtener resumen mensual de gastos de tarjetas de crédito."""
+    try:
+        repo = TransaccionRepository(db)
+        resumen = repo.get_resumen_mensual_tarjetas(
+            usuario_id=current_user.id,
+            months_back=months_back
+        )
+        return {
+            "months_back": months_back,
+            "resumen": resumen
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error obteniendo resumen mensual: {str(e)}")
 
 
 @router.post("/tarjetas/pagar-resumen")

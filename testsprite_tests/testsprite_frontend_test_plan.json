@@ -1,51 +1,43 @@
 [
   {
     "id": "TC001",
-    "title": "Dashboard Load Performance",
-    "description": "Verify that the dashboard loads in less than 3 seconds with updated and accurate data displayed in all widgets.",
-    "category": "performance",
-    "priority": "High",
-    "steps": [
-      {
-        "type": "action",
-        "description": "Log in as a valid user with multiple transactions and categories."
-      },
-      {
-        "type": "action",
-        "description": "Navigate to the Mission Control Dashboard."
-      },
-      {
-        "type": "assertion",
-        "description": "Check that all dashboard widgets (balance, transactions, categories, savings goals, credit card debt) are displayed."
-      },
-      {
-        "type": "assertion",
-        "description": "Measure load time and confirm it is below 3 seconds."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify that data values correspond to user's latest transactions and balances."
-      }
-    ]
-  },
-  {
-    "id": "TC002",
-    "title": "Create Transaction with Multi-Currency Conversion",
-    "description": "Test creating a financial transaction in one currency and verify automatic correct conversion and balance update in base currency.",
+    "title": "Dashboard load performance and multi-currency balance display",
+    "description": "Validate that the dashboard loads within 3 seconds and displays balances separately for each active user currency.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the create transaction form."
+        "description": "Login with a valid user account having multiple active currencies."
       },
       {
         "type": "action",
-        "description": "Input valid transaction data with amount in USD currency."
+        "description": "Navigate to the dashboard page."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the dashboard loads in under 3 seconds."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that balances for all active currencies are displayed separately and correctly."
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Create transaction with positive amount and multi-currency support",
+    "description": "Ensure a user can create a transaction with a positive amount, valid type, selected currency, and automatic ARS conversion calculation.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to transaction creation form."
       },
       {
         "type": "action",
-        "description": "Select a category and payment method."
+        "description": "Input a valid positive amount, select a valid transaction type (income or expense), and select a non-ARS currency."
       },
       {
         "type": "action",
@@ -53,419 +45,440 @@
       },
       {
         "type": "assertion",
-        "description": "Verify transaction is recorded with correct converted amount in ARS (base currency)."
+        "description": "Verify transaction is saved with the correct amount and currency."
       },
       {
         "type": "assertion",
-        "description": "Verify user balance is updated accordingly with multi-currency conversion applied."
+        "description": "Check that the equivalent amount in ARS is calculated and stored automatically."
       }
     ]
   },
   {
     "id": "TC003",
-    "title": "Transaction Creation Validates Positive Amount",
-    "description": "Ensure transaction cannot be created with zero or negative amount values.",
+    "title": "Transaction creation with invalid amount (negative or zero)",
+    "description": "Check that creation of transactions with zero or negative amounts is prevented and an error is shown.",
     "category": "error handling",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to the new transaction form."
+        "description": "Open the new transaction form."
       },
       {
         "type": "action",
-        "description": "Input transaction with amount = 0."
+        "description": "Enter a zero amount and valid transaction type and currency."
       },
       {
         "type": "action",
-        "description": "Attempt to submit the transaction."
+        "description": "Submit the form."
       },
       {
         "type": "assertion",
-        "description": "Check an error message is displayed preventing submission."
+        "description": "Ensure the form shows an error indicating amount must be positive."
       },
       {
         "type": "action",
-        "description": "Repeat the test with a negative amount."
+        "description": "Repeat the above steps with a negative amount."
       },
       {
         "type": "assertion",
-        "description": "Verify transaction creation is blocked with appropriate error."
+        "description": "Confirm same error is shown for negative amount."
       }
     ]
   },
   {
     "id": "TC004",
-    "title": "Manage Categories: Create, Edit, Disable, Delete",
-    "description": "Verify full CRUD on categories including uniqueness by user, color/icon customization, and impact on associated transactions.",
+    "title": "Export transactions with filters and correct totals",
+    "description": "Validate that exporting transactions for a selected month includes all filtered transactions and shows correct total exported amount.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Create a new category with unique name, color, and icon."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm category appears in list and is selectable in transaction forms."
+        "description": "Navigate to transaction export section."
       },
       {
         "type": "action",
-        "description": "Attempt to create another category with the same name for the same user."
-      },
-      {
-        "type": "assertion",
-        "description": "Verify error is returned for duplicate category name."
+        "description": "Select a specific month and apply some filters (e.g., category, currency)."
       },
       {
         "type": "action",
-        "description": "Edit existing category's name and visual properties."
+        "description": "Export transactions in both CSV and Excel formats."
       },
       {
         "type": "assertion",
-        "description": "Verify edits are persisted and reflected in associated transactions."
-      },
-      {
-        "type": "action",
-        "description": "Disable a category."
+        "description": "Verify exported files contain all transactions matching filters for the month."
       },
       {
         "type": "assertion",
-        "description": "Check category becomes unavailable for new transactions but existing transactions retain category."
-      },
-      {
-        "type": "action",
-        "description": "Delete a category not associated with any transactions."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm category is removed from user category list."
+        "description": "Check that the total amount in the export matches the sum of the filtered transactions."
       }
     ]
   },
   {
     "id": "TC005",
-    "title": "Manage Payment Methods Uniqueness and Usage Stats",
-    "description": "Test CRUD operations on payment methods ensuring uniqueness per user and correctness of usage statistics.",
+    "title": "Session timeout warning and automatic logout after inactivity",
+    "description": "Ensure a modal warning appears 2 minutes before automatic logout and user is logged out after 10 minutes of inactivity.",
     "category": "functional",
-    "priority": "Medium",
+    "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Create a new payment method (e.g., debit card) with unique name."
+        "description": "Login and remain inactive for 8 minutes."
       },
       {
         "type": "assertion",
-        "description": "Verify method appears in list and in transaction forms."
+        "description": "Confirm session timeout warning modal is shown."
       },
       {
         "type": "action",
-        "description": "Attempt creating duplicate payment method name."
+        "description": "Ignore the modal and stay inactive for additional 2 minutes."
       },
       {
         "type": "assertion",
-        "description": "Assert creation fails with appropriate error."
-      },
-      {
-        "type": "action",
-        "description": "Review payment method usage statistics widget."
-      },
-      {
-        "type": "assertion",
-        "description": "Ensure stats reflect accurate counts of transactions associated with each payment method."
+        "description": "Verify automatic logout occurs and user is returned to login screen."
       }
     ]
   },
   {
     "id": "TC006",
-    "title": "Savings Goals: Creation, Tracking Progress, and Completion",
-    "description": "Verify creation of savings goals with visual progress bars, automatic transaction association, state changes on completion.",
+    "title": "Create, edit, activate/deactivate, reorder custom user currencies",
+    "description": "Verify full CRUD and ordering capabilities for user-customizable currencies including activation and deactivation.",
     "category": "functional",
-    "priority": "High",
+    "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Create a new savings goal with a target amount."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm goal appears in the objectives widget with zero progress initially."
+        "description": "Navigate to currency management."
       },
       {
         "type": "action",
-        "description": "Create a transaction associated to this savings goal."
+        "description": "Create a new custom currency with required fields."
       },
       {
         "type": "assertion",
-        "description": "Verify progress bar reflects updated amount towards the goal."
+        "description": "Check the new currency appears in the list."
       },
       {
         "type": "action",
-        "description": "Add transactions until goal target is reached or exceeded."
+        "description": "Edit the currency details."
       },
       {
         "type": "assertion",
-        "description": "Check that goal status updates to complete and visual indicators reflect completion."
+        "description": "Verify changes are saved and reflected."
+      },
+      {
+        "type": "action",
+        "description": "Deactivate the currency."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm currency is marked inactive and no longer counts towards balances."
+      },
+      {
+        "type": "action",
+        "description": "Reorder currencies placing the new currency first."
+      },
+      {
+        "type": "assertion",
+        "description": "Validate the new order is saved and displayed accordingly."
       }
     ]
   },
   {
     "id": "TC007",
-    "title": "Credit Card Summary Payment and Transaction Creation",
-    "description": "Test paying credit card summaries results in creation of corresponding transactions and updates related summaries and payment statuses.",
+    "title": "Categories management with icon, color, filters, and budget",
+    "description": "Check user can create, edit, activate/deactivate categories with icon & color selection and that filters by type work.",
     "category": "functional",
-    "priority": "High",
+    "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to credit card summaries section."
+        "description": "Navigate to category management."
       },
       {
         "type": "action",
-        "description": "Select a summary with outstanding balance."
+        "description": "Create a new expense category with icon and color."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify category appears with correct icon and color."
       },
       {
         "type": "action",
-        "description": "Confirm payment."
+        "description": "Set a budget for the new category."
       },
       {
         "type": "assertion",
-        "description": "Verify a payment transaction is created and linked to credit card."
+        "description": "Ensure budget saves correctly."
+      },
+      {
+        "type": "action",
+        "description": "Filter categories by type income and expense."
       },
       {
         "type": "assertion",
-        "description": "Check the summary status is updated to paid and next payment date is set."
+        "description": "Check that the filtering shows only correct categories."
+      },
+      {
+        "type": "action",
+        "description": "Deactivate and reactivate a category."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify category status changes and it is hidden or visible accordingly."
       }
     ]
   },
   {
     "id": "TC008",
-    "title": "Pending Payments Management with Filters",
-    "description": "Verify creation, editing, filtering, and display of pending payments including filtering by overdue and upcoming statuses.",
+    "title": "Payment methods management CRUD and active status",
+    "description": "Validate creation, edition, activation/deactivation, and deletion of payment methods including cash, cards, and transfers.",
     "category": "functional",
     "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Create multiple pending payments with various due dates and priorities."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm pending payments appear correctly with expected details."
+        "description": "Open payment methods management screen."
       },
       {
         "type": "action",
-        "description": "Apply filter to show only overdue payments."
+        "description": "Create a new payment method specifying type and details."
       },
       {
         "type": "assertion",
-        "description": "Validate only overdue payments are visible."
+        "description": "Check the new method appears in the list."
       },
       {
         "type": "action",
-        "description": "Apply filter to show payments due soon."
+        "description": "Edit the payment method."
       },
       {
         "type": "assertion",
-        "description": "Ensure payments with upcoming due dates are displayed correctly."
+        "description": "Confirm changes are saved."
       },
       {
         "type": "action",
-        "description": "Edit a pending payment's due date and priority."
+        "description": "Deactivate the payment method."
       },
       {
         "type": "assertion",
-        "description": "Verify changes are saved and reflected in UI and filters."
+        "description": "Validate method is marked inactive and excluded where appropriate."
+      },
+      {
+        "type": "action",
+        "description": "Delete the payment method."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify method is removed from the list."
       }
     ]
   },
   {
     "id": "TC009",
-    "title": "Conversational Financial AI Agent Responds and Executes Functions",
-    "description": "Test the AI agent for natural language responses and correct function calls for querying balances, creating transactions, and analyses.",
+    "title": "Create and track savings goals with multi-currency and auto contributions",
+    "description": "Ensure users can create saving goals, monitor progress with accurate visuals across multiple currencies, and that automatic contributions reflect correctly.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Open the AI chatbot interface."
+        "description": "Navigate to savings goals section."
       },
       {
         "type": "action",
-        "description": "Ask for current balance summary."
+        "description": "Create a new savings goal with target amount and currency."
       },
       {
         "type": "assertion",
-        "description": "Validate AI provides clear, accurate natural language response."
+        "description": "Confirm the goal is listed with correct target and initial progress."
       },
       {
         "type": "action",
-        "description": "Request AI to create a new expense transaction."
+        "description": "Make transactions linked to the savings goal."
       },
       {
         "type": "assertion",
-        "description": "Check AI executes function call and confirms creation."
+        "description": "Verify the progress visual updates accordingly."
       },
       {
         "type": "action",
-        "description": "Ask AI for spending analysis by category."
+        "description": "Simulate auto contribution deductions from linked transactions."
       },
       {
         "type": "assertion",
-        "description": "Verify AI returns meaningful analysis text and/or charts."
+        "description": "Confirm auto contributions are reflected on the goal's balance and progress."
       }
     ]
   },
   {
     "id": "TC010",
-    "title": "Bulk Upload Transactions CSV with Validation and Preview",
-    "description": "Validate CSV upload flow: load file, show preview with validations per row, block corrupt rows, and confirm import.",
+    "title": "Transactions flagged as credit card expenses do not affect balance until card payment",
+    "description": "Verify that transactions marked with is_credito=true do not modify user balance until the corresponding credit card statement is paid.",
     "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Navigate to bulk transaction upload page."
-      },
-      {
-        "type": "action",
-        "description": "Upload a valid CSV file with multiple transactions."
+        "description": "Create a transaction flagged as credit card expense."
       },
       {
         "type": "assertion",
-        "description": "Display preview table with transaction data and validation statuses."
+        "description": "Check that overall user balance does not decrease."
       },
       {
         "type": "action",
-        "description": "Upload a CSV with some invalid rows (e.g., missing required fields, invalid amounts)."
+        "description": "Record payment of the credit card statement."
       },
       {
         "type": "assertion",
-        "description": "Highlight invalid rows with error messages, prevent import."
-      },
-      {
-        "type": "action",
-        "description": "Correct invalid rows and confirm import."
+        "description": "Validate a new expense transaction is created reflecting payment."
       },
       {
         "type": "assertion",
-        "description": "Verify only valid rows are imported as transactions and balances update."
+        "description": "Confirm the user balance is updated by the payment amount."
       }
     ]
   },
   {
     "id": "TC011",
-    "title": "Multi-Tenancy Data Security Enforcement",
-    "description": "Verify that users can only access and modify their own data, enforcing tenant isolation in all queries and operations.",
-    "category": "security",
+    "title": "Pay credit card statement updates and links related transactions",
+    "description": "Check that paying a credit card statement creates an expense transaction and marks associated transactions with the actual payment date.",
+    "category": "functional",
     "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Log in as User A and access transactions, categories, payment methods."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm only User A's data is visible."
+        "description": "Navigate to credit card statement payment screen."
       },
       {
         "type": "action",
-        "description": "Try to access User B's data via API direct calls or URL modification."
+        "description": "Mark a pending statement as paid."
       },
       {
         "type": "assertion",
-        "description": "Verify access is denied with appropriate authorization errors."
-      },
-      {
-        "type": "action",
-        "description": "Attempt to create or modify data referencing User B's tenant."
+        "description": "Verify creation of a corresponding expense transaction."
       },
       {
         "type": "assertion",
-        "description": "Ensure backend blocks the operation and logs security violation."
+        "description": "Confirm all transactions linked to the statement have their payment date updated accordingly."
       }
     ]
   },
   {
     "id": "TC012",
-    "title": "Budget Limits Per Category with Monthly and Annual Tracking",
-    "description": "Test creation and tracking of budgets per category with enforcement of limits and proper tracking on all cycle types.",
-    "category": "functional",
-    "priority": "Medium",
+    "title": "Responsive UI for forms and widgets on mobile devices",
+    "description": "Ensure all forms and dashboard widgets are fully responsive and usable on various mobile screen sizes.",
+    "category": "ui",
+    "priority": "High",
     "steps": [
       {
         "type": "action",
-        "description": "Create a monthly budget limit for a spending category."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm budget appears in budget widget with correct limit."
+        "description": "Access the app from multiple device simulators with varying screen sizes (small phones, tablets)."
       },
       {
         "type": "action",
-        "description": "Add transactions in that category and monitor budget progress."
+        "description": "Open transaction forms, category management, currency management, savings goals, and dashboard widgets."
       },
       {
         "type": "assertion",
-        "description": "Verify progress updates accurately and alerts if limit is near or exceeded."
-      },
-      {
-        "type": "action",
-        "description": "Create an annual budget and repeat similar testing."
+        "description": "Verify forms adapt their layout properly, all input elements are accessible and usable."
       },
       {
         "type": "assertion",
-        "description": "Ensure annual cycle tracks correctly distinct from monthly limits."
+        "description": "Confirm dashboard widgets resize and rearrange for optimal readability and interaction."
       }
     ]
   },
   {
     "id": "TC013",
-    "title": "Real-time Dollar and CEDEAR Quotation Accuracy",
-    "description": "Verify that dollar quotations (official, blue, MEP, CCL) and CEDEAR prices update in real-time and graphs refresh accordingly.",
+    "title": "Dashboard real-time updates after transaction changes",
+    "description": "Verify that adding, editing, or deleting transactions updates the dashboard balances and charts in real-time.",
     "category": "functional",
     "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Open the dollar quotation widget."
-      },
-      {
-        "type": "assertion",
-        "description": "Confirm all dollar price types are displayed with latest values."
+        "description": "Open dashboard and note current balances and charts."
       },
       {
         "type": "action",
-        "description": "Open CEDEARs market view."
+        "description": "Add a new income transaction."
       },
       {
         "type": "assertion",
-        "description": "Validate CEDEAR prices update accurately with charts rendering price history."
+        "description": "Check dashboard updates to reflect new transaction."
+      },
+      {
+        "type": "action",
+        "description": "Edit the transaction amount."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dashboard updates to changed amount."
+      },
+      {
+        "type": "action",
+        "description": "Delete the transaction."
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm dashboard removes the corresponding data."
       }
     ]
   },
   {
     "id": "TC014",
-    "title": "Responsive Navigation on Mobile Devices",
-    "description": "Test bottom navigation and responsive menu on various mobile devices and screen sizes for correct accessibility and usability.",
-    "category": "ui",
+    "title": "Error handling for expired JWT tokens and session management",
+    "description": "Make sure system handles expired JWT tokens gracefully with appropriate logout and error messaging.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simulate an expired JWT token during an API request."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify user is logged out and redirected to login page."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that user sees an informative error message regarding session expiration."
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Filter and search on transaction and payment methods lists",
+    "description": "Validate filtering and searching capabilities work correctly on transactions and payment methods listings.",
+    "category": "functional",
     "priority": "Medium",
     "steps": [
       {
         "type": "action",
-        "description": "Access the application from different mobile device emulators (small to large screen sizes)."
+        "description": "Navigate to transactions list and apply filters (date, category, currency)."
       },
       {
         "type": "assertion",
-        "description": "Verify bottom navigation menu is visible, functional, and visually consistent."
+        "description": "Confirm list shows only transactions matching filters."
       },
       {
         "type": "action",
-        "description": "Navigate through all major screens using bottom menu."
+        "description": "Search transactions by description keyword."
       },
       {
         "type": "assertion",
-        "description": "Check that menus collapse/expand appropriately and no UI element is clipped or overlapped."
+        "description": "Validate search results are correct."
+      },
+      {
+        "type": "action",
+        "description": "Go to payment methods list and filter active and inactive methods."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify filtering shows correct subset."
       }
     ]
   }

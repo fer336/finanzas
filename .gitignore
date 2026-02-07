@@ -36,6 +36,15 @@ package-lock.json
 yarn.lock
 .pnpm-debug.log*
 
+# Python
+__pycache__/
+*/__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
 # 🏗️ BUILD Y DISTRIBUCIÓN
 # ===================================
 build/

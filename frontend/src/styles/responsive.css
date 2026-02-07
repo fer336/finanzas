@@ -1,0 +1,379 @@
+/* =================================================================== */
+/* RESPONSIVE UTILITIES FOR RETRO SISTEMA DE GASTOS                   */
+/* =================================================================== */
+
+/* Custom Breakpoints */
+/* xs: 475px */
+/* sm: 640px */
+/* md: 768px */
+/* lg: 1024px */
+/* xl: 1280px */
+/* 2xl: 1536px */
+
+/* =================================================================== */
+/* MOBILE FIRST UTILITIES                                              */
+/* =================================================================== */
+
+/* Card responsive grids */
+.grid-responsive-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .grid-responsive-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  .grid-responsive-cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Stats cards responsive */
+.grid-responsive-stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .grid-responsive-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+}
+
+/* Form layouts */
+.form-responsive-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .form-responsive-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Table responsive wrapper */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive table {
+  min-width: 800px;
+  width: 100%;
+}
+
+/* Mobile sidebar adjustments */
+.sidebar-responsive {
+  width: 16rem; /* 64 */
+}
+
+@media (min-width: 768px) {
+  .sidebar-responsive {
+    width: 18rem; /* 72 */
+  }
+}
+
+@media (min-width: 1024px) {
+  .sidebar-responsive {
+    width: 20rem; /* 80 */
+  }
+}
+
+/* Button responsive sizes */
+.btn-responsive {
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .btn-responsive {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Text responsive sizes */
+.text-responsive-title {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+@media (min-width: 640px) {
+  .text-responsive-title {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+}
+
+.text-responsive-subtitle {
+  font-size: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .text-responsive-subtitle {
+    font-size: 0.875rem;
+  }
+}
+
+/* Container responsive padding */
+.container-responsive {
+  padding: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .container-responsive {
+    padding: 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .container-responsive {
+    padding: 1.5rem;
+  }
+}
+
+/* Card actions responsive */
+.card-actions-responsive {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .card-actions-responsive {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+}
+
+/* Filter bar responsive */
+.filter-bar-responsive {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .filter-bar-responsive {
+    flex-direction: row;
+    gap: 0.75rem;
+  }
+}
+
+/* Modal responsive */
+.modal-responsive {
+  margin: 0.5rem;
+  max-height: 95vh;
+}
+
+@media (min-width: 640px) {
+  .modal-responsive {
+    margin: 1rem;
+    max-height: 90vh;
+  }
+}
+
+/* =================================================================== */
+/* MOBILE SPECIFIC UTILITIES                                           */
+/* =================================================================== */
+
+/* Hide on mobile */
+@media (max-width: 639px) {
+  .hidden-mobile {
+    display: none;
+  }
+}
+
+/* Show only on mobile */
+@media (min-width: 640px) {
+  .mobile-only {
+    display: none;
+  }
+}
+
+/* Mobile text sizes */
+@media (max-width: 639px) {
+  .mobile-text-sm {
+    font-size: 0.75rem;
+  }
+  
+  .mobile-text-xs {
+    font-size: 0.625rem;
+  }
+  
+  .mobile-p-2 {
+    padding: 0.5rem;
+  }
+  
+  .mobile-p-3 {
+    padding: 0.75rem;
+  }
+}
+
+/* Mobile button adjustments */
+@media (max-width: 639px) {
+  .mobile-btn-full {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .mobile-btn-sm {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* =================================================================== */
+/* TOUCH OPTIMIZATIONS                                                */
+/* =================================================================== */
+
+/* Larger touch targets for mobile */
+@media (hover: none) and (pointer: coarse) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .touch-button {
+    padding: 0.75rem 1rem;
+  }
+  
+  .touch-input {
+    padding: 0.75rem;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* =================================================================== */
+/* PRINT OPTIMIZATIONS                                                */
+/* =================================================================== */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break-before {
+    page-break-before: always;
+  }
+  
+  .print-break-after {
+    page-break-after: always;
+  }
+  
+  .print-break-inside-avoid {
+    page-break-inside: avoid;
+  }
+}
+
+/* =================================================================== */
+/* DARK MODE OPTIMIZATIONS                                            */
+/* =================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  .auto-dark {
+    color-scheme: dark;
+  }
+}
+
+/* =================================================================== */
+/* HIGH CONTRAST MODE                                                 */
+/* =================================================================== */
+
+@media (prefers-contrast: high) {
+  .high-contrast {
+    border-width: 3px;
+    font-weight: bold;
+  }
+}
+
+/* =================================================================== */
+/* REDUCED MOTION SUPPORT                                             */
+/* =================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-reduce {
+    animation: none;
+    transition: none;
+  }
+  
+  .motion-reduce * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =================================================================== */
+/* UTILITY CLASSES FOR COMMON PATTERNS                               */
+/* =================================================================== */
+
+/* Responsive flex utilities */
+.flex-responsive {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .flex-responsive {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+/* Responsive grid auto-fit */
+.grid-auto-fit-sm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.grid-auto-fit-md {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.grid-auto-fit-lg {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1rem;
+}
+
+/* Responsive aspect ratios */
+.aspect-responsive {
+  aspect-ratio: 1;
+}
+
+@media (min-width: 640px) {
+  .aspect-responsive {
+    aspect-ratio: 16/9;
+  }
+}
+
+/* Safe area padding for mobile */
+.safe-area-padding {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}

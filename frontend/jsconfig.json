@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*", "src/types/**/*"],
+  "exclude": ["node_modules"],
+  "typeAcquisition": {
+    "enable": false
+  }
+}

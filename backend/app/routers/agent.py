@@ -3,8 +3,10 @@ from fastapi import APIRouter, HTTPException, Request, Depends
 from app.utils.ai_logger import save_ai_activity, calculate_cost
 from app.services.agent_tools import AGENT_TOOLS, execute_tool
 from app.repositories.ai_config_repository import AIConfigRepository
+from app.services.agent_graph import invoke_agent_graph, get_agent_engine_status
 from app.database import get_db
 from app.core.dependencies import CurrentUser
+from app.core.config import settings
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
@@ -538,308 +540,11 @@ async def chat_with_agent(
         f"🤖 Agent chat request received from {current_user.email}: {request.message[:50]}..."
     )
     """
-    Endpoint principal del agente conversacional con Function Calling
+    Endpoint principal del agente conversacional con LangGraph.
     """
     try:
-        # Construir system prompt con contexto
-        fecha_actual = datetime.now().strftime("%d/%m/%Y")
-        system_prompt = DEFAULT_SYSTEM_PROMPT.replace("{fecha_actual}", fecha_actual)
-
-        # Inyectar info del usuario
-        system_prompt += (
-            f"\n\nUsuario actual: {current_user.full_name} ({current_user.email})"
-        )
-
-        if request.context:
-            # Agregar categorías disponibles
-            if "categories" in request.context:
-                categories = request.context["categories"]
-                cat_names = [
-                    f"{c.get('icono', '📁')} {c.get('nombre', 'Sin nombre')}"
-                    for c in categories
-                ]
-                system_prompt += f"\n\nCategorías disponibles: {', '.join(cat_names)}"
-
-            # Agregar métodos de pago disponibles
-            if "payment_methods" in request.context:
-                methods = request.context["payment_methods"]
-                method_names = [
-                    f"{m.get('icono', '💳')} {m.get('nombre', 'Sin nombre')}"
-                    for m in methods
-                ]
-                system_prompt += (
-                    f"\n\nMétodos de pago disponibles: {', '.join(method_names)}"
-                )
-
-            # Agregar fecha actual
-            system_prompt += f"\n\nFecha actual: {datetime.now().strftime('%d/%m/%Y')}"
-
-            # Agregar datos financieros si existen
-            if "financial_data" in request.context:
-                fin_data = request.context["financial_data"]
-                if fin_data:
-                    system_prompt += "\n\n## ESTADO FINANCIERO ACTUAL\n"
-
-                    # Balance Mensual
-                    if "monthlyStats" in fin_data:
-                        stats = fin_data["monthlyStats"]
-                        system_prompt += f"- Ingresos mes: ${stats.get('income', 0)}\n"
-                        system_prompt += f"- Gastos mes: ${stats.get('expenses', 0)}\n"
-                        system_prompt += f"- Balance mes: ${stats.get('balance', 0)}\n"
-
-                    # Deuda
-                    if "totalDeuda" in fin_data:
-                        debt = fin_data["totalDeuda"]
-                        system_prompt += (
-                            f"- Deuda Total Pendiente: ${debt.get('total', 0)}\n"
-                        )
-                        system_prompt += f"  - Pagos Pendientes: ${debt.get('pendingPayments', 0)} ({debt.get('pendingCount', 0)} items)\n"
-                        system_prompt += f"  - Resúmenes Tarjeta: ${debt.get('bankSummariesPendingOnly', 0)} ({debt.get('summariesPendingCount', 0)} items)\n"
-
-                    # Detalle Pagos Pendientes
-                    if "pendingPayments" in fin_data:
-                        pendings = fin_data["pendingPayments"]
-                        # Filtrar solo los no pagados para ahorrar contexto
-                        unpaid = [
-                            p
-                            for p in pendings
-                            if str(p.get("Estado", "")).lower() != "pagado"
-                        ]
-                        if unpaid:
-                            system_prompt += "\n### Pagos Pendientes (Detalle):\n"
-                            for p in unpaid[:10]:  # Limitar a 10
-                                system_prompt += f"- {p.get('Nombre', 'Item')}: ${p.get('Monto', 0)} (Vence: {p.get('Vencimiento', 'N/A')})\n"
-
-                    # Detalle Resúmenes
-                    if "bankSummaries" in fin_data:
-                        summaries = fin_data["bankSummaries"]
-                        # Filtrar recientes/pendientes
-                        valid_summaries = [
-                            s for s in summaries if not s.get("total_pagado")
-                        ]
-                        if valid_summaries:
-                            system_prompt += "\n### Resúmenes Tarjeta (Detalle):\n"
-                            for s in valid_summaries[:5]:
-                                card_name = (
-                                    f"{s.get('banco', '')} {s.get('tipo_tarjeta', '')}"
-                                )
-                                # Intentar parsear totales
-                                try:
-                                    totales = s.get("totales")
-                                    if isinstance(totales, str):
-                                        totales = json.loads(totales)
-                                    amount = totales.get("saldo_actual_pesos", 0)
-                                except:
-                                    amount = "?"
-                                system_prompt += f"- {card_name}: ${amount} (Cierra: {s.get('cierre', '')})\n"
-
-        # Construir historial de mensajes
-        messages = []
-
-        # Agregar historial si existe
-        if request.history:
-            for msg in request.history:
-                messages.append({"role": msg.role, "content": msg.content})
-
-        # Agregar mensaje actual del usuario
-        messages.append({"role": "user", "content": request.message})
-
-        # Preparar todos los mensajes incluyendo system prompt
-        all_messages = []
-        if system_prompt:
-            all_messages.append({"role": "system", "content": system_prompt})
-        all_messages.extend(messages)
-
-        runtime_config = _get_ai_runtime_config(current_user, db)
-        api_key = runtime_config["api_key"]
-        provider = runtime_config["provider"]
-        model = runtime_config["model"]
-        temperature = runtime_config["temperature"]
-        max_tokens = runtime_config["max_tokens"]
-
-        if not api_key:
-            raise HTTPException(
-                status_code=500,
-                detail="No hay API key configurada para Lucy (OpenRouter/OpenAI/Google)",
-            )
-
-        provider_request = _build_provider_request(provider, api_key)
-
-        async with httpx.AsyncClient(timeout=60.0) as client:
-            try:
-                # 🛠️ PRIMERA LLAMADA: Con herramientas disponibles
-                payload = {
-                    "model": model,
-                    "messages": all_messages,
-                    "temperature": temperature,
-                    "max_tokens": max_tokens,
-                    "tools": AGENT_TOOLS,  # Agregar herramientas
-                    "tool_choice": "auto",  # El modelo decide cuándo usar herramientas
-                }
-
-                print(
-                    f"📤 Primera llamada IA ({provider}) con {len(AGENT_TOOLS)} herramientas"
-                )
-
-                client_response = await client.post(
-                    provider_request["url"],
-                    headers=provider_request["headers"],
-                    json=payload,
-                )
-
-                if client_response.status_code != 200:
-                    error_detail = client_response.text
-                    print(
-                        f"❌ Error del proveedor IA ({provider}): {client_response.status_code} - {error_detail}"
-                    )
-                    raise HTTPException(
-                        status_code=client_response.status_code,
-                        detail=f"Error del proveedor IA ({provider}): {error_detail}",
-                    )
-
-                result = client_response.json()
-
-                # 🔍 VERIFICAR SI HAY TOOL CALLS
-                first_choice = result.get("choices", [{}])[0]
-                assistant_message = first_choice.get("message", {})
-                tool_calls = assistant_message.get("tool_calls", [])
-
-                if tool_calls:
-                    print(f"🛠️ El modelo quiere usar {len(tool_calls)} herramientas")
-
-                    # Agregar mensaje del asistente al historial
-                    all_messages.append(assistant_message)
-
-                    # Ejecutar cada herramienta
-                    for tool_call in tool_calls:
-                        tool_name = tool_call.get("function", {}).get("name")
-                        try:
-                            arguments = json.loads(
-                                tool_call.get("function", {}).get("arguments", "{}")
-                            )
-                        except:
-                            arguments = {}
-
-                        tool_id = tool_call.get("id")
-
-                        print(f"  🔧 Ejecutando: {tool_name}")
-
-                        # Ejecutar la herramienta con usuario_id
-                        tool_result = execute_tool(
-                            tool_name, arguments, db, str(current_user.id)
-                        )
-
-                        # Agregar resultado al historial
-                        all_messages.append(
-                            {
-                                "role": "tool",
-                                "tool_call_id": tool_id,
-                                "name": tool_name,
-                                "content": json.dumps(
-                                    tool_result, ensure_ascii=False, default=str
-                                ),
-                            }
-                        )
-
-                    # 🔄 SEGUNDA LLAMADA: Con resultados de herramientas
-                    print(
-                        f"📤 Segunda llamada a OpenRouter con resultados de herramientas"
-                    )
-
-                    second_payload = {
-                        "model": model,
-                        "messages": all_messages,
-                        "temperature": temperature,
-                        "max_tokens": max_tokens,
-                    }
-
-                    second_response = await client.post(
-                        provider_request["url"],
-                        headers=provider_request["headers"],
-                        json=second_payload,
-                    )
-
-                    if second_response.status_code != 200:
-                        print(f"❌ Error en segunda llamada: {second_response.text}")
-                        # Usar respuesta parcial si hay error
-                        agent_response = "Procesé tu solicitud, pero hubo un error al generar la respuesta final."
-                    else:
-                        result = second_response.json()
-                        agent_response = (
-                            result.get("choices", [{}])[0]
-                            .get("message", {})
-                            .get("content", "Sin respuesta")
-                        )
-                else:
-                    # Sin tool calls, respuesta directa
-                    agent_response = assistant_message.get("content", "")
-
-                # 📊 Guardar actividad localmente
-                usage = result.get("usage", {})
-                model_used = result.get("model", MODEL)
-                prompt_tokens = usage.get("prompt_tokens", 0)
-                completion_tokens = usage.get("completion_tokens", 0)
-
-                # Obtener costo
-                real_cost = None
-                response_headers = client_response.headers
-                if "x-ratelimit-cost" in response_headers:
-                    try:
-                        real_cost = float(response_headers["x-ratelimit-cost"])
-                    except:
-                        pass
-
-                if real_cost is None and usage:
-                    real_cost = usage.get("cost") or usage.get("total_cost")
-
-                if real_cost is None or real_cost == 0:
-                    real_cost = calculate_cost(
-                        model_used, prompt_tokens, completion_tokens
-                    )
-                    print(
-                        f"⚠️ OpenRouter no devolvió costo, usando estimación: ${real_cost}"
-                    )
-                else:
-                    print(f"✅ Costo real de OpenRouter: ${real_cost}")
-
-                activity_log = {
-                    "model": model_used,
-                    "created_at": datetime.now().isoformat(),
-                    "usage": {
-                        "prompt_tokens": prompt_tokens,
-                        "completion_tokens": completion_tokens,
-                        "total_tokens": usage.get("total_tokens", 0),
-                    },
-                    "cost": real_cost,
-                }
-                save_ai_activity(activity_log)
-
-                data = {
-                    "usage": usage,
-                    "model": model_used,
-                    "tools_used": len(tool_calls) if tool_calls else 0,
-                }
-
-            except httpx.TimeoutException:
-                raise HTTPException(
-                    status_code=504, detail="Timeout al conectar con OpenRouter"
-                )
-            except httpx.RequestError as e:
-                raise HTTPException(
-                    status_code=500, detail=f"Error de conexión: {str(e)}"
-                )
-
-        # Analizar si hay alguna acción implícita
-        action = None
-
-        if any(
-            word in request.message.lower()
-            for word in ["gasté", "compré", "pagué", "recibí"]
-        ):
-            action = "detect_transaction"
-
-        return ChatResponse(response=agent_response, action=action, data=data)
-
+        result = await invoke_agent_graph(request, current_user, db)
+        return ChatResponse(**result)
     except HTTPException:
         raise
     except Exception as e:
@@ -852,11 +557,14 @@ async def health_check():
     """
     Verifica el estado del agente
     """
+    engine_status = await get_agent_engine_status()
     api_key = os.getenv("OPENROUTER_API_KEY", "").strip().strip('"').strip("'")
 
     return {
         "status": "ok",
         "model": MODEL,
+        "agent_engine": settings.AGENT_ENGINE,
+        "langgraph": engine_status,
         "api_configured": bool(api_key),
         "api_key_length": len(api_key) if api_key else 0,
         "api_key_preview": f"{api_key[:10]}...{api_key[-4:]}"

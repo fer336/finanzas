@@ -1,6 +1,237 @@
 [
   {
     "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T14:35:41.504119",
+    "usage": {
+      "prompt_tokens": 744,
+      "completion_tokens": 41,
+      "total_tokens": 785
+    },
+    "cost": 0.00013619999999999998,
+    "timestamp": "2026-03-09T14:35:41.505322"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T14:35:37.577076",
+    "usage": {
+      "prompt_tokens": 1007,
+      "completion_tokens": 22,
+      "total_tokens": 1029
+    },
+    "cost": 0.00016425,
+    "timestamp": "2026-03-09T14:35:37.588986"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T14:25:55.971733",
+    "usage": {
+      "prompt_tokens": 12263,
+      "completion_tokens": 27,
+      "total_tokens": 12290
+    },
+    "cost": 0.00185565,
+    "timestamp": "2026-03-09T14:25:55.972116"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T14:25:34.854864",
+    "usage": {
+      "prompt_tokens": 11629,
+      "completion_tokens": 79,
+      "total_tokens": 11708
+    },
+    "cost": 0.00179175,
+    "timestamp": "2026-03-09T14:25:34.855758"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T14:25:31.126791",
+    "usage": {
+      "prompt_tokens": 1753,
+      "completion_tokens": 21,
+      "total_tokens": 1774
+    },
+    "cost": 0.00027554999999999995,
+    "timestamp": "2026-03-09T14:25:31.129069"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T13:40:49.219629",
+    "usage": {
+      "prompt_tokens": 1163,
+      "completion_tokens": 29,
+      "total_tokens": 1192
+    },
+    "cost": 0.00019184999999999997,
+    "timestamp": "2026-03-09T13:40:49.220376"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T13:40:45.540468",
+    "usage": {
+      "prompt_tokens": 1650,
+      "completion_tokens": 22,
+      "total_tokens": 1672
+    },
+    "cost": 0.0002607,
+    "timestamp": "2026-03-09T13:40:45.544409"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T13:40:16.450786",
+    "usage": {
+      "prompt_tokens": 1067,
+      "completion_tokens": 31,
+      "total_tokens": 1098
+    },
+    "cost": 0.00017864999999999998,
+    "timestamp": "2026-03-09T13:40:16.451540"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T13:40:13.368415",
+    "usage": {
+      "prompt_tokens": 1554,
+      "completion_tokens": 22,
+      "total_tokens": 1576
+    },
+    "cost": 0.0002463,
+    "timestamp": "2026-03-09T13:40:13.368714"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T13:32:11.274697",
+    "usage": {
+      "prompt_tokens": 982,
+      "completion_tokens": 50,
+      "total_tokens": 1032
+    },
+    "cost": 0.0001773,
+    "timestamp": "2026-03-09T13:32:11.277855"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T13:24:50.816557",
+    "usage": {
+      "prompt_tokens": 1346,
+      "completion_tokens": 51,
+      "total_tokens": 1397
+    },
+    "cost": 0.0002325,
+    "timestamp": "2026-03-09T13:24:50.817223"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T13:24:37.891374",
+    "usage": {
+      "prompt_tokens": 1260,
+      "completion_tokens": 78,
+      "total_tokens": 1338
+    },
+    "cost": 0.0002358,
+    "timestamp": "2026-03-09T13:24:37.892197"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T13:21:17.744315",
+    "usage": {
+      "prompt_tokens": 1157,
+      "completion_tokens": 50,
+      "total_tokens": 1207
+    },
+    "cost": 0.00020355,
+    "timestamp": "2026-03-09T13:21:17.745776"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T13:15:02.915721",
+    "usage": {
+      "prompt_tokens": 1043,
+      "completion_tokens": 50,
+      "total_tokens": 1093
+    },
+    "cost": 0.00018645,
+    "timestamp": "2026-03-09T13:15:02.916186"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T13:14:47.618611",
+    "usage": {
+      "prompt_tokens": 939,
+      "completion_tokens": 93,
+      "total_tokens": 1032
+    },
+    "cost": 0.00019664999999999998,
+    "timestamp": "2026-03-09T13:14:47.619053"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T13:14:13.527832",
+    "usage": {
+      "prompt_tokens": 887,
+      "completion_tokens": 31,
+      "total_tokens": 918
+    },
+    "cost": 0.00015164999999999997,
+    "timestamp": "2026-03-09T13:14:13.528133"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T12:39:34.275653",
+    "usage": {
+      "prompt_tokens": 928,
+      "completion_tokens": 50,
+      "total_tokens": 978
+    },
+    "cost": 0.0001692,
+    "timestamp": "2026-03-09T12:39:34.276166"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T12:39:28.152662",
+    "usage": {
+      "prompt_tokens": 871,
+      "completion_tokens": 49,
+      "total_tokens": 920
+    },
+    "cost": 0.00016005000000000001,
+    "timestamp": "2026-03-09T12:39:28.153705"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T12:38:29.712665",
+    "usage": {
+      "prompt_tokens": 829,
+      "completion_tokens": 35,
+      "total_tokens": 864
+    },
+    "cost": 0.00014534999999999998,
+    "timestamp": "2026-03-09T12:38:29.713464"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T12:38:24.035437",
+    "usage": {
+      "prompt_tokens": 787,
+      "completion_tokens": 34,
+      "total_tokens": 821
+    },
+    "cost": 0.00013845,
+    "timestamp": "2026-03-09T12:38:24.035697"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T12:37:55.020986",
+    "usage": {
+      "prompt_tokens": 777,
+      "completion_tokens": 15,
+      "total_tokens": 792
+    },
+    "cost": 0.00012555,
+    "timestamp": "2026-03-09T12:37:55.021764"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
     "created_at": "2026-03-09T11:58:34.748521",
     "usage": {
       "prompt_tokens": 2532,

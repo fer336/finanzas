@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Cuerpo principal -->
+  <ellipse cx="50" cy="38" rx="22" ry="24" fill="#6b7280"/>
+  <!-- Cabeza / parte superior redondeada -->
+  <ellipse cx="50" cy="22" rx="18" ry="16" fill="#6b7280"/>
+  <!-- Ojos -->
+  <circle cx="43" cy="28" r="4.5" fill="#1f2937"/>
+  <circle cx="57" cy="28" r="4.5" fill="#1f2937"/>
+  <circle cx="44.5" cy="27" r="1.5" fill="#f9fafb"/>
+  <circle cx="58.5" cy="27" r="1.5" fill="#f9fafb"/>
+  <!-- Tentáculos -->
+  <path d="M28,52 C20,58 16,66 20,76 C22,82 18,86 16,90" stroke="#6b7280" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <path d="M34,56 C28,64 26,72 30,80 C32,86 30,90 28,94" stroke="#6b7280" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <path d="M42,60 C40,68 40,76 44,82 C46,88 44,92 44,96" stroke="#6b7280" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <path d="M50,62 C50,70 50,78 50,84 C50,90 48,93 48,97" stroke="#6b7280" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <path d="M58,60 C60,68 60,76 56,82 C54,88 56,92 56,96" stroke="#6b7280" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <path d="M66,56 C72,64 74,72 70,80 C68,86 70,90 72,94" stroke="#6b7280" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <path d="M72,52 C80,58 84,66 80,76 C78,82 82,86 84,90" stroke="#6b7280" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+  <!-- Mejillas -->
+  <ellipse cx="32" cy="38" rx="5" ry="4" fill="#9ca3af" opacity="0.5"/>
+  <ellipse cx="68" cy="38" rx="5" ry="4" fill="#9ca3af" opacity="0.5"/>
+</svg>

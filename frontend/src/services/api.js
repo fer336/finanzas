@@ -613,6 +613,53 @@ const monedasApi = {
 };
 
 // ═══════════════════════════════════════════════════════════════
+// 🤖 AI CONFIG API
+// ═══════════════════════════════════════════════════════════════
+const aiConfigApi = {
+  // Obtener configuración actual de IA del usuario
+  async getConfig() {
+    debugLog('🤖 aiConfigApi.getConfig called');
+    return await apiRequest('/ai-config', { method: 'GET' });
+  },
+
+  // Obtener lista de modelos disponibles (fallback genérico)
+  async getModelos() {
+    debugLog('🤖 aiConfigApi.getModelos called');
+    return await apiRequest('/ai-config/modelos', { method: 'GET' });
+  },
+
+  // Obtener modelos disponibles usando la API key del usuario
+  async getMyModels() {
+    debugLog('🤖 aiConfigApi.getMyModels called');
+    return await apiRequest('/ai-config/my-models', { method: 'GET' });
+  },
+
+  // Crear configuración de IA
+  async create(configData) {
+    debugLog('🤖 aiConfigApi.create called', configData);
+    return await apiRequest('/ai-config', {
+      method: 'POST',
+      data: configData
+    });
+  },
+
+  // Actualizar configuración de IA
+  async update(configData) {
+    debugLog('🤖 aiConfigApi.update called', configData);
+    return await apiRequest('/ai-config', {
+      method: 'PUT',
+      data: configData
+    });
+  },
+
+  // Eliminar configuración de IA
+  async delete() {
+    debugLog('🤖 aiConfigApi.delete called');
+    return await apiRequest('/ai-config', { method: 'DELETE' });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
 // 📤 EXPORTAR TODOS LOS SERVICIOS
 // ═══════════════════════════════════════════════════════════════
 const apiServices = {
@@ -626,7 +673,8 @@ const apiServices = {
   pagosApi,
   objetivosApi,
   tarjetasApi,
-  monedasApi
+  monedasApi,
+  aiConfigApi
 };
 
 debugLog('✅ API Services initialized with FastAPI backend');

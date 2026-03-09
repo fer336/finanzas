@@ -8,6 +8,7 @@ const API_BASE_URL = import.meta.env.MODE === 'production'
   ? '/api/v1'  // En producción usa proxy
   : 'http://localhost:8000/api/v1';  // En desarrollo usa localhost directo
 
+
 // Debug logging
 const IS_PRODUCTION = import.meta.env.MODE === 'production';
 const debugLog = IS_PRODUCTION ? () => {} : console.log;

@@ -339,7 +339,11 @@ const MobileDashboardHome = ({
             data={evolucionData}
             periodo={chartPeriod}
             onChangePeriodo={setChartPeriod}
-            balanceReal={balanceMes}
+            balanceReal={{
+              balance: balanceMes,
+              totalARS: balanceMes,
+              ingresosMes,
+            }}
             allTransactions={transactions}
             compact
           />

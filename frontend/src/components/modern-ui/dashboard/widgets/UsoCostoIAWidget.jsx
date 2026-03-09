@@ -15,7 +15,7 @@ const UsoCostoIAWidget = ({ onClick }) => {
       const token = localStorage.getItem('auth_token');
       if (!token) return;
 
-      const response = await fetch('/api/ai-config/usage', {
+      const response = await fetch('/api/ai/usage', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

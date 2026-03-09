@@ -686,7 +686,7 @@ const ModernDashboard = ({
                 data={evolucionData} 
                 periodo={chartPeriod}
                 onChangePeriodo={setChartPeriod}
-                balanceReal={dashboardData?.balance}
+                balanceReal={dashboardData}
                 allTransactions={transactions}
               />
             </div>

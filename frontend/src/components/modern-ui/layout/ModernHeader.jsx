@@ -180,13 +180,13 @@ const ModernHeader = ({
 
   return (
     <header className="sticky top-0 z-[90] bg-[#0a0a0a] px-6 py-3">
-      <div className="flex items-center justify-between gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 xl:gap-6 items-center">
         
         {/* Left Section - Balance con carousel + Ingresos + Gastos */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 min-w-0 xl:col-span-8 overflow-x-auto xl:overflow-visible pb-1 xl:pb-0">
           
           {/* Balance Total - Carousel automático (DOBLE DE ANCHO) */}
-          <div className="bg-[#18181b] rounded-xl px-4 py-2 border border-white/5 w-80 h-[72px] flex flex-col justify-center">
+          <div className="bg-[#18181b] rounded-xl px-4 py-2 border border-white/5 w-80 min-w-80 h-[72px] flex flex-col justify-center">
             <p className="text-xs text-gray-500 mb-1">BALANCE TOTAL</p>
             
             <div className="flex items-center gap-2">
@@ -274,7 +274,7 @@ const ModernHeader = ({
           {/* Ingresos de la moneda actual */}
           <div 
             key={`ingresos-${currentCurrencyIndex}`}
-            className="bg-[#18181b] rounded-xl px-3.5 py-2 border border-white/5 w-[161px] h-[72px] flex flex-col justify-center"
+            className="bg-[#18181b] rounded-xl px-3.5 py-2 border border-white/5 w-[161px] min-w-[161px] h-[72px] flex flex-col justify-center"
             style={{
               animation: 'slideInSmooth 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
@@ -294,7 +294,7 @@ const ModernHeader = ({
           {/* Gastos de la moneda actual */}
           <div 
             key={`gastos-${currentCurrencyIndex}`}
-            className="bg-[#18181b] rounded-xl px-3.5 py-2 border border-white/5 w-[161px] h-[72px] flex flex-col justify-center"
+            className="bg-[#18181b] rounded-xl px-3.5 py-2 border border-white/5 w-[161px] min-w-[161px] h-[72px] flex flex-col justify-center"
             style={{
               animation: 'slideInSmooth 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
@@ -313,10 +313,10 @@ const ModernHeader = ({
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 min-w-0 xl:col-span-4 xl:justify-end">
           
           {/* Search - Grande */}
-          <div className="relative flex-1 max-w-md">
+          <div className="relative flex-1 min-w-[180px] max-w-md">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
             <input
               type="text"

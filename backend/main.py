@@ -2,6 +2,7 @@
 Sistema de Gastos - Backend Principal
 Aplicación FastAPI con arquitectura mejorada y seguridad robusta
 """
+
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -22,9 +23,9 @@ SECRET_PATH = "/run/secrets/backend.env"
 logging.basicConfig(level=logging.INFO)
 startup_logger = logging.getLogger("startup")
 
-startup_logger.info(f"\n{'='*100}")
+startup_logger.info(f"\n{'=' * 100}")
 startup_logger.info(f"🔧 INICIALIZANDO BACKEND - CARGA DE CONFIGURACIÓN")
-startup_logger.info(f"{'='*100}")
+startup_logger.info(f"{'=' * 100}")
 
 if os.path.exists(SECRET_PATH):
     startup_logger.info(f"🚀 Cargando configuración desde Docker secret: {SECRET_PATH}")
@@ -32,26 +33,36 @@ if os.path.exists(SECRET_PATH):
     startup_logger.info(f"✅ Secret cargado correctamente")
 else:
     startup_logger.info(f"👨‍💻 Cargando configuración desde archivo .env local")
-    load_dotenv(override=True) # FORZAR recarga para sobrescribir variables viejas
+    load_dotenv(override=True)  # FORZAR recarga para sobrescribir variables viejas
     startup_logger.info(f"✅ .env local cargado")
 
 # Verificar variables críticas (de forma segura)
 startup_logger.info(f"")
 startup_logger.info(f"🔍 VERIFICACIÓN DE VARIABLES CRÍTICAS:")
-client_id = os.getenv('GOOGLE_CLIENT_ID', 'NOT SET')
-startup_logger.info(f"   GOOGLE_CLIENT_ID: {client_id[:15]}...{client_id[-5:] if len(client_id) > 20 else ''}")
-startup_logger.info(f"   GOOGLE_CLIENT_SECRET: {'✅ SET' if os.getenv('GOOGLE_CLIENT_SECRET') else '❌ NOT SET'}")
+client_id = os.getenv("GOOGLE_CLIENT_ID", "NOT SET")
+startup_logger.info(
+    f"   GOOGLE_CLIENT_ID: {client_id[:15]}...{client_id[-5:] if len(client_id) > 20 else ''}"
+)
+startup_logger.info(
+    f"   GOOGLE_CLIENT_SECRET: {'✅ SET' if os.getenv('GOOGLE_CLIENT_SECRET') else '❌ NOT SET'}"
+)
 startup_logger.info(f"   POSTGRES_HOST: {os.getenv('POSTGRES_HOST', 'NOT SET')}")
 startup_logger.info(f"   POSTGRES_DB: {os.getenv('POSTGRES_DB', 'NOT SET')}")
 startup_logger.info(f"   MINIO_ENDPOINT: {os.getenv('MINIO_ENDPOINT', 'NOT SET')}")
 startup_logger.info(f"   MINIO_ACCESS_KEY: {os.getenv('MINIO_ACCESS_KEY', 'NOT SET')}")
-startup_logger.info(f"   MINIO_SECRET_KEY: {'✅ SET' if os.getenv('MINIO_SECRET_KEY') else '❌ NOT SET'}")
-startup_logger.info(f"   SECRET_KEY: {'✅ SET' if os.getenv('SECRET_KEY') else '❌ NOT SET'}")
-    # Verificar OpenRouter Key
-openrouter_key = os.getenv('OPENROUTER_API_KEY')
-startup_logger.info(f"   OPENROUTER_API_KEY: {'✅ SET' if openrouter_key else '⚠️  NOT SET (Usando default hardcoded)'}")
+startup_logger.info(
+    f"   MINIO_SECRET_KEY: {'✅ SET' if os.getenv('MINIO_SECRET_KEY') else '❌ NOT SET'}"
+)
+startup_logger.info(
+    f"   SECRET_KEY: {'✅ SET' if os.getenv('SECRET_KEY') else '❌ NOT SET'}"
+)
+# Verificar OpenRouter Key
+openrouter_key = os.getenv("OPENROUTER_API_KEY")
+startup_logger.info(
+    f"   OPENROUTER_API_KEY: {'✅ SET' if openrouter_key else '⚠️  NOT SET (Usando default hardcoded)'}"
+)
 startup_logger.info(f"   ENVIRONMENT: {os.getenv('ENVIRONMENT', 'NOT SET')}")
-startup_logger.info(f"{'='*100}\n")
+startup_logger.info(f"{'=' * 100}\n")
 # ----------------------------------------------------
 
 from app.core.config import settings as get_settings
@@ -67,14 +78,15 @@ from app.routers.payment_methods import router as payment_methods_router
 from app.routers.resumenes_bancarios import router as resumenes_bancarios_router
 from app.routers.pagos import router as pagos_router
 from app.routers.ai_usage import router as ai_usage_router
+from app.routers.ai_config import router as ai_config_router
 from app.routers.presupuestos import router as presupuestos_router
 from app.routers.objetivos import router as objetivos_router
 from app.routers.monedas_usuario import router as monedas_usuario_router
 from app.middleware.rate_limiting import RateLimitingMiddleware
 from app.middleware.security import (
-    SecurityHeadersMiddleware, 
+    SecurityHeadersMiddleware,
     RequestValidationMiddleware,
-    RequestLoggingMiddleware
+    RequestLoggingMiddleware,
 )
 
 
@@ -84,8 +96,10 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler("app.log") if not get_settings.debug else logging.StreamHandler()
-    ]
+        logging.FileHandler("app.log")
+        if not get_settings.debug
+        else logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
 
@@ -98,7 +112,7 @@ async def lifespan(app: FastAPI):
     """Gestión del ciclo de vida de la aplicación"""
     # Startup
     logger.info("🚀 Iniciando Sistema de Gastos API con nueva arquitectura...")
-    
+
     # Asegurar que existan directorios necesarios
     try:
         data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -106,16 +120,16 @@ async def lifespan(app: FastAPI):
         logger.info(f"✅ Directorio de datos verificado: {data_dir}")
     except Exception as e:
         logger.error(f"❌ Error creando directorio de datos: {e}")
-    
+
     # Limpiar estados expirados de autenticación periódicamente
     auth_service = get_auth_service()
     await auth_service.cleanup_expired_states()
-    
+
     yield
-    
+
     # Shutdown
     logger.info("🛑 Cerrando Sistema de Gastos API...")
-    
+
     # Cerrar recursos
     await auth_service.close()
 
@@ -133,8 +147,11 @@ app = FastAPI(
     swagger_ui_parameters={
         "persistAuthorization": True,
         "displayRequestDuration": True,
-    } if settings.debug else None
+    }
+    if settings.debug
+    else None,
 )
+
 
 # Manejador global de excepciones
 @app.exception_handler(HTTPException)
@@ -150,16 +167,17 @@ async def http_exception_handler(request: Request, exc: HTTPException):
             "status_code": exc.status_code,
             "message": exc.detail,
             "path": str(request.url.path),
-            "method": request.method
-        }
+            "method": request.method,
+        },
     )
+
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
     """Manejador de excepciones generales"""
     logger.error(
         f"Error inesperado en {request.method} {request.url.path}: {str(exc)}",
-        exc_info=True
+        exc_info=True,
     )
     return JSONResponse(
         status_code=500,
@@ -168,9 +186,10 @@ async def general_exception_handler(request: Request, exc: Exception):
             "status_code": 500,
             "message": "Error interno del servidor" if not settings.debug else str(exc),
             "path": str(request.url.path),
-            "method": request.method
-        }
+            "method": request.method,
+        },
     )
+
 
 # Agregar middleware de seguridad (en orden de prioridad)
 # 0. Gzip Compression (Para reducir tamaño de respuestas)
@@ -191,17 +210,21 @@ if not settings.debug:
         RateLimitingMiddleware,
         requests_per_minute=settings.rate_limit_per_minute,
         requests_per_hour=settings.rate_limit_per_hour,
-        burst_requests=settings.rate_limit_burst
+        burst_requests=settings.rate_limit_burst,
     )
 
 # 5. CORS (después de rate limiting)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "https://finanzas.qeva.xyz"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://finanzas.qeva.xyz",
+    ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allow_headers=["*"],
-    expose_headers=["X-RateLimit-Limit", "X-RateLimit-Remaining", "X-Process-Time"]
+    expose_headers=["X-RateLimit-Limit", "X-RateLimit-Remaining", "X-Process-Time"],
 )
 
 # 6. Session middleware (último para que funcione con CORS)
@@ -214,94 +237,62 @@ app.add_middleware(
 )
 
 # Incluir router de autenticación
-app.include_router(
-    auth_router,
-    prefix=""
-)
+app.include_router(auth_router, prefix="")
 
 # Incluir router de Yahoo Finance (CEDEARs)
-app.include_router(
-    yfinance_router,
-    prefix="/api"
-)
+app.include_router(yfinance_router, prefix="/api")
 
 # Incluir router del Agente de IA
-app.include_router(
-    agent_router,
-    prefix="/api/agent",
-    tags=["Agent"]
-)
+app.include_router(agent_router, prefix="/api/agent", tags=["Agent"])
 
 # Incluir router de archivos (MinIO/S3)
-app.include_router(
-    files_router,
-    prefix="/api/files",
-    tags=["Files"]
-)
+app.include_router(files_router, prefix="/api/files", tags=["Files"])
 
 # Incluir routers de PostgreSQL (nuevos)
 app.include_router(
     pagos_pendientes_router,
     prefix="/api/v1/pagos-pendientes",
-    tags=["Pagos Pendientes"]
+    tags=["Pagos Pendientes"],
 )
 
 app.include_router(
-    transacciones_router,
-    prefix="/api/v1/transacciones",
-    tags=["Transacciones"]
+    transacciones_router, prefix="/api/v1/transacciones", tags=["Transacciones"]
 )
 
-app.include_router(
-    categories_router,
-    prefix="/api/v1/categories",
-    tags=["Categorias"]
-)
+app.include_router(categories_router, prefix="/api/v1/categories", tags=["Categorias"])
 
 app.include_router(
-    payment_methods_router,
-    prefix="/api/v1/payment-methods",
-    tags=["Métodos de Pago"]
+    payment_methods_router, prefix="/api/v1/payment-methods", tags=["Métodos de Pago"]
 )
 
 app.include_router(
     resumenes_bancarios_router,
     prefix="/api/v1/resumenes-bancarios",
-    tags=["Resúmenes Bancarios"]
+    tags=["Resúmenes Bancarios"],
 )
 
 # Router for payment operations
-app.include_router(
-    pagos_router,
-    tags=["Pagos"]
-)
+app.include_router(pagos_router, tags=["Pagos"])
 
 # Router for budgets
 app.include_router(
-    presupuestos_router,
-    prefix="/api/v1/presupuestos",
-    tags=["Presupuestos"]
+    presupuestos_router, prefix="/api/v1/presupuestos", tags=["Presupuestos"]
 )
 
 # Router for savings goals (objetivos de ahorro)
 app.include_router(
-    objetivos_router,
-    prefix="/api/v1/objetivos",
-    tags=["Objetivos de Ahorro"]
+    objetivos_router, prefix="/api/v1/objetivos", tags=["Objetivos de Ahorro"]
 )
 
 # Router for AI Usage
-app.include_router(
-    ai_usage_router,
-    prefix="/api/ai",
-    tags=["AI Usage"]
-)
+app.include_router(ai_usage_router, prefix="/api/ai", tags=["AI Usage"])
+
+# Router for AI Config (provider + keys por usuario)
+app.include_router(ai_config_router, prefix="/api/v1/ai-config", tags=["AI Config"])
 
 # Router for User Currencies (Monedas Personalizadas)
 app.include_router(
-    monedas_usuario_router,
-    prefix="/api/v1/monedas-usuario",
-    tags=["Monedas Usuario"]
+    monedas_usuario_router, prefix="/api/v1/monedas-usuario", tags=["Monedas Usuario"]
 )
 
 
@@ -313,7 +304,7 @@ async def root():
         "version": settings.app_version,
         "status": "running",
         "docs_url": "/docs" if settings.debug else "disabled",
-        "architecture": "Clean Architecture with Design Patterns"
+        "architecture": "Clean Architecture with Design Patterns",
     }
 
 
@@ -322,7 +313,7 @@ async def health_check():
     """Verificación de salud del servicio con métricas de seguridad"""
     import time
     import psutil
-    
+
     return {
         "status": "healthy",
         "service": "sistema-gastos-api",
@@ -335,12 +326,14 @@ async def health_check():
             "security_headers": True,
             "jwt_authentication": True,
             "cors_enabled": True,
-            "https_only": not settings.debug
+            "https_only": not settings.debug,
         },
         "system_info": {
             "cpu_percent": psutil.cpu_percent(),
-            "memory_percent": psutil.virtual_memory().percent
-        } if settings.debug else None
+            "memory_percent": psutil.virtual_memory().percent,
+        }
+        if settings.debug
+        else None,
     }
 
 
@@ -351,29 +344,28 @@ async def get_config():
     Expone variables de configuración necesarias sin exponer secretos
     """
     backend_url = (
-        settings.PRODUCTION_BACKEND_URL 
-        if settings.environment == "production" 
+        settings.PRODUCTION_BACKEND_URL
+        if settings.environment == "production"
         else settings.DEV_BACKEND_URL
     )
-    
+
     return {
         "oauth": {
             "google_client_id": settings.GOOGLE_CLIENT_ID,
-            "auth_url": f"{backend_url}/auth/google"
+            "auth_url": f"{backend_url}/auth/google",
         },
         "api": {
             "base_url": backend_url,
             "version": settings.app_version,
-            "environment": settings.environment
+            "environment": settings.environment,
         },
-        "app": {
-            "name": settings.app_name,
-            "version": settings.app_version
-        },
+        "app": {"name": settings.app_name, "version": settings.app_version},
         "features": {
-            "minio_enabled": bool(settings.MINIO_ENDPOINT and settings.MINIO_ACCESS_KEY),
-            "ai_agent_enabled": True
-        }
+            "minio_enabled": bool(
+                settings.MINIO_ENDPOINT and settings.MINIO_ACCESS_KEY
+            ),
+            "ai_agent_enabled": True,
+        },
     }
 
 
@@ -386,11 +378,11 @@ async def app_info():
         "debug": settings.debug,
         "patterns_implemented": [
             "Repository Pattern - Abstracción del acceso a datos",
-            "Service Layer Pattern - Separación de lógica de negocio", 
+            "Service Layer Pattern - Separación de lógica de negocio",
             "DTO Pattern - Modelos Pydantic para transferencia de datos",
             "Factory Pattern - Configuración centralizada de settings",
             "Strategy Pattern - Múltiples proveedores OAuth2",
-            "Dependency Injection - Inyección de dependencias para servicios"
+            "Dependency Injection - Inyección de dependencias para servicios",
         ],
         "features": [
             "OAuth2 Authentication (Google)",
@@ -401,20 +393,18 @@ async def app_info():
             "Configuration Management",
             "Centralized Logging",
             "CORS Support",
-            "Session Management"
+            "Session Management",
         ],
-        "database": {
-            "type": "NocoDB",
-            "base_url": settings.database_url
-        },
-        "auth_providers": ["google"]
+        "database": {"type": "NocoDB", "base_url": settings.database_url},
+        "auth_providers": ["google"],
     }
 
 
 if __name__ == "__main__":
     import os
+
     port = int(os.getenv("PORT", 8000))
-    
+
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
@@ -424,5 +414,5 @@ if __name__ == "__main__":
         access_log=True,
         use_colors=True,
         server_header=False,
-        date_header=False
+        date_header=False,
     )

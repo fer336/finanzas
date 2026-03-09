@@ -43,6 +43,9 @@ const loadSelectedMonths = () => {
 const EvolucionMensualWidget = ({ data = [], periodo = 'monthly', balanceReal = null, onChangePeriodo, allTransactions = [] }) => {
   const [showMonthPicker, setShowMonthPicker] = useState(false);
   const [selectedMonths, setSelectedMonths] = useState(loadSelectedMonths);
+  const normalizedBalanceReal = typeof balanceReal === 'number'
+    ? { balance: balanceReal, totalARS: balanceReal, ingresosMes: 0 }
+    : (balanceReal || {});
 
   // Guardar selección en localStorage cuando cambia
   useEffect(() => {
@@ -124,12 +127,12 @@ const EvolucionMensualWidget = ({ data = [], periodo = 'monthly', balanceReal = 
   // Totales acumulados para mostrar en header
   const totalesAcumulados = (() => {
     if (periodo !== 'monthly') {
-      const last = data[data.length - 1];
-      return {
-        balance: last?.balance ?? balanceReal?.balance ?? balanceReal?.totalARS ?? 0,
-        ingresos: last?.ingresos ?? balanceReal?.ingresosMes ?? 0,
-      };
-    }
+        const last = data[data.length - 1];
+        return {
+          balance: last?.balance ?? normalizedBalanceReal.balance ?? normalizedBalanceReal.totalARS ?? 0,
+          ingresos: last?.ingresos ?? normalizedBalanceReal.ingresosMes ?? 0,
+        };
+      }
     const totalIngresos = accumulatedData.reduce((sum, p) => sum + p.ingresos, 0);
     const totalGastos = accumulatedData.reduce((sum, p) => sum + p.gastos, 0);
     return {
@@ -361,7 +364,7 @@ const EvolucionMensualWidget = ({ data = [], periodo = 'monthly', balanceReal = 
 EvolucionMensualWidget.propTypes = {
   data: PropTypes.array,
   periodo: PropTypes.string,
-  balanceReal: PropTypes.object,
+  balanceReal: PropTypes.oneOfType([PropTypes.object, PropTypes.number]),
   onChangePeriodo: PropTypes.func,
   allTransactions: PropTypes.array,
 };

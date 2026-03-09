@@ -1,5 +1,93 @@
 [
   {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T11:58:34.748521",
+    "usage": {
+      "prompt_tokens": 2532,
+      "completion_tokens": 40,
+      "total_tokens": 2572
+    },
+    "cost": 0.00040379999999999995,
+    "timestamp": "2026-03-09T11:58:34.748907"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T11:58:25.628806",
+    "usage": {
+      "prompt_tokens": 2840,
+      "completion_tokens": 56,
+      "total_tokens": 2896
+    },
+    "cost": 0.0004596,
+    "timestamp": "2026-03-09T11:58:25.629354"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T11:58:09.420191",
+    "usage": {
+      "prompt_tokens": 2750,
+      "completion_tokens": 79,
+      "total_tokens": 2829
+    },
+    "cost": 0.00045989999999999996,
+    "timestamp": "2026-03-09T11:58:09.420568"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T11:56:37.925150",
+    "usage": {
+      "prompt_tokens": 2282,
+      "completion_tokens": 101,
+      "total_tokens": 2383
+    },
+    "cost": 0.00040290000000000004,
+    "timestamp": "2026-03-09T11:56:37.926058"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T11:53:19.345352",
+    "usage": {
+      "prompt_tokens": 2036,
+      "completion_tokens": 43,
+      "total_tokens": 2079
+    },
+    "cost": 0.0003312,
+    "timestamp": "2026-03-09T11:53:19.345586"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T11:45:29.734490",
+    "usage": {
+      "prompt_tokens": 2383,
+      "completion_tokens": 24,
+      "total_tokens": 2407
+    },
+    "cost": 0.00037185,
+    "timestamp": "2026-03-09T11:45:29.734742"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T11:37:06.949256",
+    "usage": {
+      "prompt_tokens": 12689,
+      "completion_tokens": 101,
+      "total_tokens": 12790
+    },
+    "cost": 0.00196395,
+    "timestamp": "2026-03-09T11:37:06.949511"
+  },
+  {
+    "model": "gpt-4.1-mini-2025-04-14",
+    "created_at": "2026-03-09T11:36:36.186354",
+    "usage": {
+      "prompt_tokens": 2382,
+      "completion_tokens": 34,
+      "total_tokens": 2416
+    },
+    "cost": 0.0003777,
+    "timestamp": "2026-03-09T11:36:36.189705"
+  },
+  {
     "model": "google/gemini-3-flash-preview",
     "created_at": "2026-02-02T23:35:13.107405",
     "usage": {

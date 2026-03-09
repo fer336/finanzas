@@ -13,20 +13,43 @@ const ModernAIUsageView = () => {
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('summary'); // 'summary' o 'activity'
 
+  const buildMonthlyData = (activities = []) => {
+    const byMonth = {};
+    activities.forEach((activity) => {
+      const rawDate = activity.timestamp || activity.created_at;
+      if (!rawDate) return;
+      const date = new Date(rawDate);
+      if (Number.isNaN(date.getTime())) return;
+
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      if (!byMonth[monthKey]) {
+        byMonth[monthKey] = {
+          month: date.toLocaleDateString('es-AR', { month: 'short' }),
+          cost: 0,
+        };
+      }
+      byMonth[monthKey].cost += Number(activity.cost || 0);
+    });
+
+    return Object.keys(byMonth)
+      .sort()
+      .map((key) => ({
+        ...byMonth[key],
+        cost: Number(byMonth[key].cost.toFixed(5)),
+      }));
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('auth_token');
       if (!token) return;
 
-      const [usageRes, activityRes, monthlyRes] = await Promise.all([
-        fetch('/api/ai-config/usage', {
+      const [usageRes, activityRes] = await Promise.all([
+        fetch('/api/ai/usage', {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        fetch('/api/ai-config/activity?limit=20', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        }),
-        fetch('/api/ai-config/monthly', {
+        fetch('/api/ai/activity?limit=50', {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       ]);
@@ -38,12 +61,9 @@ const ModernAIUsageView = () => {
 
       if (activityRes.ok) {
         const activity = await activityRes.json();
-        setActivityData(activity.data || []);
-      }
-
-      if (monthlyRes.ok) {
-        const monthly = await monthlyRes.json();
-        setMonthlyData(monthly.data || []);
+        const items = activity.data || [];
+        setActivityData(items);
+        setMonthlyData(buildMonthlyData(items));
       }
 
     } catch (error) {

@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { X, Send, Sparkles, Trash2, Copy, Settings } from 'lucide-react';
+import { X, Send, Trash2, Settings } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { AIConfigModal } from '../../AIConfigModal';
+
+const LUCY_GRADIENT = 'from-[#ffb3bc] via-[#ff8fa3] to-[#f05d6c]';
+const LUCY_ACCENT = '#ff8fa3';
 
 /**
  * AgentSidePanel - Panel lateral flotante para el Agente IA (estilo Gemini)
@@ -63,7 +66,11 @@ const AgentSidePanel = ({ isOpen, onClose, balanceData }) => {
       // TODO: Llamar al endpoint del agente
       console.log('🤖 Enviando mensaje a Lucy:', input);
       
-      const response = await fetch('/api/agent/chat-v2', {
+      const history = messages
+        .filter((m) => m.role === 'user' || m.role === 'assistant')
+        .map((m) => ({ role: m.role, content: m.content }));
+
+      const response = await fetch('/api/agent/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -71,8 +78,9 @@ const AgentSidePanel = ({ isOpen, onClose, balanceData }) => {
         },
         body: JSON.stringify({
           message: input,
-          thread_id: threadId,
+          history,
           context: {
+            thread_id: threadId,
             balance_data: balanceData
           }
         })
@@ -140,10 +148,10 @@ const AgentSidePanel = ({ isOpen, onClose, balanceData }) => {
       )}
 
       {/* Panel lateral */}
-      <div 
-        className={`
-          fixed top-0 right-0 h-screen w-[480px] max-w-full
-          bg-[#18181b] border-l border-white/10
+        <div 
+          className={`
+            fixed top-0 right-0 h-screen w-[480px] max-w-full
+          bg-[linear-gradient(180deg,rgba(37,18,23,0.96)_0%,rgba(24,24,27,0.98)_24%,rgba(17,17,19,1)_100%)] border-l border-white/10
           shadow-2xl z-[9999]
           transform transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : 'translate-x-full'}
@@ -151,14 +159,20 @@ const AgentSidePanel = ({ isOpen, onClose, balanceData }) => {
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/10 flex-shrink-0">
+        <div className="flex items-center justify-between p-4 border-b border-white/10 bg-[linear-gradient(180deg,rgba(255,143,163,0.08)_0%,rgba(255,143,163,0)_100%)] flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#10b981] to-[#34d399] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${LUCY_GRADIENT} p-[1px] shadow-lg shadow-[#f05d6c]/20`}>
+              <div className="w-full h-full rounded-full bg-[#170c10] flex items-center justify-center overflow-hidden">
+                <img
+                  src="/octopus-lucy.svg"
+                  alt="Lucy"
+                  className="w-full h-full object-cover scale-[1.08]"
+                />
+              </div>
             </div>
             <div>
               <h2 className="text-lg font-bold text-white">Lucy</h2>
-              <p className="text-xs text-gray-400">Tu asistente financiera personal</p>
+              <p className="text-xs text-white/55">Tu asistente financiera personal</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -167,21 +181,21 @@ const AgentSidePanel = ({ isOpen, onClose, balanceData }) => {
               className="p-2 hover:bg-white/5 rounded-lg transition-colors"
               title="Configurar Lucy (API Key)"
             >
-              <Settings className="w-4 h-4 text-gray-400" />
+              <Settings className="w-4 h-4 text-white/50 hover:text-[#ffb3bc]" />
             </button>
             <button
               onClick={clearChat}
               className="p-2 hover:bg-white/5 rounded-lg transition-colors"
               title="Borrar conversación"
             >
-              <Trash2 className="w-4 h-4 text-gray-400" />
+              <Trash2 className="w-4 h-4 text-white/50 hover:text-[#ffb3bc]" />
             </button>
             <button
               onClick={onClose}
               className="p-2 hover:bg-white/5 rounded-lg transition-colors"
               title="Cerrar"
             >
-              <X className="w-5 h-5 text-gray-400" />
+              <X className="w-5 h-5 text-white/50 hover:text-[#ffb3bc]" />
             </button>
           </div>
         </div>
@@ -196,12 +210,14 @@ const AgentSidePanel = ({ isOpen, onClose, balanceData }) => {
               <div 
                 className={`
                   max-w-[85%] rounded-2xl p-4
-                  ${message.role === 'user' 
-                    ? 'bg-gradient-to-br from-[#10b981] to-[#34d399] text-white' 
-                    : 'bg-[#0a0a0a] border border-white/10 text-white'
-                  }
-                `}
-              >
+                   ${message.role === 'user' 
+                     ? `bg-gradient-to-br ${LUCY_GRADIENT} text-white shadow-lg shadow-[#f05d6c]/20` 
+                     : message.isError
+                       ? 'bg-[linear-gradient(180deg,rgba(70,18,28,0.92)_0%,rgba(18,10,12,1)_100%)] border border-[#ff8fa3]/30 text-white'
+                       : 'bg-[#0a0a0a]/90 border border-white/10 text-white'
+                   }
+                 `}
+               >
                 <div className="text-sm leading-relaxed prose prose-invert prose-sm max-w-none">
                   <ReactMarkdown
                     components={{
@@ -215,14 +231,14 @@ const AgentSidePanel = ({ isOpen, onClose, balanceData }) => {
                         inline 
                           ? <code className="px-1.5 py-0.5 bg-white/10 rounded text-xs font-mono" {...props} />
                           : <code className="block p-2 bg-white/10 rounded-lg text-xs font-mono overflow-x-auto my-2" {...props} />,
-                      a: ({node, ...props}) => <a className="text-[#10b981] hover:underline" target="_blank" rel="noopener noreferrer" {...props} />
+                      a: ({node, ...props}) => <a className="text-[#ffb3bc] hover:text-white hover:underline" target="_blank" rel="noopener noreferrer" {...props} />
                     }}
                   >
                     {message.content}
                   </ReactMarkdown>
                 </div>
                 <p className={`text-xs mt-2 ${
-                  message.role === 'user' ? 'text-white/70' : 'text-gray-500'
+                  message.role === 'user' ? 'text-white/75' : 'text-white/35'
                 }`}>
                   {message.timestamp.toLocaleTimeString('es-AR', { 
                     hour: '2-digit', 
@@ -236,16 +252,16 @@ const AgentSidePanel = ({ isOpen, onClose, balanceData }) => {
           {/* Loading indicator */}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-[#0a0a0a] border border-white/10 rounded-2xl p-4">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 bg-[#10b981] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <div className="w-2 h-2 bg-[#10b981] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <div className="w-2 h-2 bg-[#10b981] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                  <span className="text-xs text-gray-400">Pensando...</span>
-                </div>
-              </div>
+               <div className="bg-[#0a0a0a]/90 border border-[#ff8fa3]/20 rounded-2xl p-4">
+                 <div className="flex items-center gap-2">
+                   <div className="flex gap-1">
+                     <div className="w-2 h-2 bg-[#ffb3bc] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                     <div className="w-2 h-2 bg-[#ff8fa3] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                     <div className="w-2 h-2 bg-[#f05d6c] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                   </div>
+                   <span className="text-xs text-white/50">Pensando...</span>
+                 </div>
+               </div>
             </div>
           )}
 
@@ -262,7 +278,7 @@ const AgentSidePanel = ({ isOpen, onClose, balanceData }) => {
                 onKeyPress={handleKeyPress}
                 placeholder="Pregunta sobre tus finanzas..."
                 rows={1}
-                className="w-full px-4 py-3 bg-[#0a0a0a] border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#10b981]/50 transition-colors resize-none scrollbar-thin"
+                className="w-full px-4 py-3 bg-[#0a0a0a]/90 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-[#ff8fa3]/60 focus:ring-2 focus:ring-[#ff8fa3]/10 transition-colors resize-none scrollbar-thin"
                 style={{ maxHeight: '120px' }}
               />
             </div>
@@ -272,7 +288,7 @@ const AgentSidePanel = ({ isOpen, onClose, balanceData }) => {
               className={`
                 p-3 rounded-xl transition-all flex-shrink-0
                 ${input.trim() && !isLoading
-                  ? 'bg-gradient-to-br from-[#10b981] to-[#34d399] hover:shadow-lg hover:shadow-[#10b981]/30' 
+                  ? `bg-gradient-to-br ${LUCY_GRADIENT} hover:shadow-lg hover:shadow-[#f05d6c]/30` 
                   : 'bg-gray-600 cursor-not-allowed opacity-50'
                 }
               `}
@@ -286,19 +302,19 @@ const AgentSidePanel = ({ isOpen, onClose, balanceData }) => {
           <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-thin pb-2">
             <button
               onClick={() => setInput('¿Cuánto gasté este mes?')}
-              className="px-3 py-1.5 bg-[#0a0a0a] border border-white/10 rounded-lg text-xs text-gray-400 hover:text-white hover:border-[#10b981]/50 transition-colors whitespace-nowrap"
+               className="px-3 py-1.5 bg-[#0a0a0a]/90 border border-white/10 rounded-lg text-xs text-white/50 hover:text-white hover:border-[#ff8fa3]/50 transition-colors whitespace-nowrap"
             >
               💰 Gastos del mes
             </button>
             <button
               onClick={() => setInput('¿Cómo va mi presupuesto?')}
-              className="px-3 py-1.5 bg-[#0a0a0a] border border-white/10 rounded-lg text-xs text-gray-400 hover:text-white hover:border-[#10b981]/50 transition-colors whitespace-nowrap"
+               className="px-3 py-1.5 bg-[#0a0a0a]/90 border border-white/10 rounded-lg text-xs text-white/50 hover:text-white hover:border-[#ff8fa3]/50 transition-colors whitespace-nowrap"
             >
               📊 Estado presupuesto
             </button>
             <button
               onClick={() => setInput('¿Cuánto debo de tarjetas?')}
-              className="px-3 py-1.5 bg-[#0a0a0a] border border-white/10 rounded-lg text-xs text-gray-400 hover:text-white hover:border-[#10b981]/50 transition-colors whitespace-nowrap"
+               className="px-3 py-1.5 bg-[#0a0a0a]/90 border border-white/10 rounded-lg text-xs text-white/50 hover:text-white hover:border-[#ff8fa3]/50 transition-colors whitespace-nowrap"
             >
               💳 Deuda tarjetas
             </button>

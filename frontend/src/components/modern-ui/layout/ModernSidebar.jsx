@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { 
   Sparkles,
-  LayoutDashboard,
   ArrowLeftRight,
   Target,
   CreditCard,
@@ -43,13 +42,6 @@ const ModernSidebar = ({
   };
 
   const menuItems = [
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      view: 'dashboard',
-      alwaysShow: true // Siempre visible
-    },
     {
       id: 'transactions',
       label: 'Transacciones',
@@ -153,11 +145,11 @@ const ModernSidebar = ({
         {/* Logo / Header - Pulpo */}
         <div className="py-4 px-2 border-b border-white/5">
           <div className="flex items-center justify-center">
-            <img 
-              src="/img/pulpo.svg" 
-              alt="Octopus Logo" 
-              className="w-full h-auto object-contain px-2"
-            />
+              <img 
+                src="/octopus.svg" 
+                alt="Octopus Logo" 
+                className="w-full h-auto object-contain px-2"
+              />
           </div>
         </div>
 

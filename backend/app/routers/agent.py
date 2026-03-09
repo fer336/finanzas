@@ -2,6 +2,7 @@ import logging
 from fastapi import APIRouter, HTTPException, Request, Depends
 from app.utils.ai_logger import save_ai_activity, calculate_cost
 from app.services.agent_tools import AGENT_TOOLS, execute_tool
+from app.repositories.ai_config_repository import AIConfigRepository
 from app.database import get_db
 from app.core.dependencies import CurrentUser
 from sqlalchemy.orm import Session
@@ -20,32 +21,43 @@ router = APIRouter()
 # OPENROUTER_API_KEY se lee dinámicamente
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 # Usar un modelo estable y gratuito para pruebas
-MODEL = "google/gemini-3-flash-preview" 
+MODEL = "google/gemini-3-flash-preview"
 # Alternativa: "google/gemini-pro-1.5"
+
+PROVIDER_CHAT_ENDPOINTS = {
+    "openrouter": "https://openrouter.ai/api/v1/chat/completions",
+    "openai": "https://api.openai.com/v1/chat/completions",
+    "google": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+}
 
 # ==========================================
 # 📊 MODELOS DE DATOS
 # ==========================================
 
+
 class Message(BaseModel):
     role: str  # "user" o "assistant"
     content: str
+
 
 class ChatRequest(BaseModel):
     message: str
     history: Optional[List[Message]] = []
     context: Optional[Dict[str, Any]] = {}
 
+
 class ChatResponse(BaseModel):
     response: str
     action: Optional[str] = None
     data: Optional[Dict[str, Any]] = None
+
 
 class LogRequest(BaseModel):
     model: str
     usage: Dict[str, int]
     cost: Optional[float] = 0.0
     timestamp: Optional[str] = None
+
 
 # ==========================================
 # 🧠 SYSTEM PROMPT (actualizar con el tuyo)
@@ -254,13 +266,73 @@ Voy a registrar:
 # 🔧 FUNCIONES AUXILIARES
 # ==========================================
 
-async def call_openrouter(messages: List[Dict[str, str]], system_prompt: str = None) -> str:
+
+def _normalize_model_for_provider(provider: str, model: str) -> str:
+    if provider in ["openai", "google"] and "/" in model:
+        prefix, suffix = model.split("/", 1)
+        if provider == "openai" and prefix == "openai":
+            return suffix
+        if provider == "google" and prefix == "google":
+            return suffix
+    return model
+
+
+def _get_ai_runtime_config(current_user: CurrentUser, db: Session) -> Dict[str, Any]:
+    repo = AIConfigRepository(db)
+    config = repo.get_by_user_id(current_user.id) or {}
+
+    provider = (config.get("provider") or "openrouter").lower()
+    auth_method = (config.get("auth_method") or "api_key").lower()
+    model = config.get("modelo_preferido") or MODEL
+    temperature = float(config.get("temperatura") or 0.7)
+    max_tokens = int(config.get("max_tokens") or 4000)
+
+    if auth_method == "oauth2":
+        api_key = (config.get("access_token") or "").strip()
+    else:
+        api_key = (config.get("api_key") or "").strip()
+
+    if not api_key:
+        api_key = os.getenv("OPENROUTER_API_KEY", "").strip().strip('"').strip("'")
+        provider = "openrouter"
+
+    return {
+        "provider": provider,
+        "api_key": api_key,
+        "model": _normalize_model_for_provider(provider, model),
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+
+
+def _build_provider_request(provider: str, api_key: str) -> Dict[str, Any]:
+    target_url = PROVIDER_CHAT_ENDPOINTS.get(provider)
+    if not target_url:
+        raise HTTPException(
+            status_code=400, detail=f"Provider no soportado: {provider}"
+        )
+
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    if provider == "openrouter":
+        headers["HTTP-Referer"] = "http://localhost:3000"
+        headers["X-Title"] = "Financial Assistant"
+
+    return {"url": target_url, "headers": headers}
+
+
+async def call_openrouter(
+    messages: List[Dict[str, str]], system_prompt: Optional[str] = None
+) -> str:
     """
     Llama a OpenRouter API (compatible con OpenAI)
     """
     # Leer API Key dinámicamente y limpiar posibles caracteres extra
     api_key = os.getenv("OPENROUTER_API_KEY", "").strip().strip('"').strip("'")
-    
+
     # DEBUG: Mostrar primeros y últimos caracteres de la key para verificar
     if api_key:
         masked_key = f"{api_key[:10]}...{api_key[-4:]}"
@@ -271,22 +343,19 @@ async def call_openrouter(messages: List[Dict[str, str]], system_prompt: str = N
     if not api_key:
         raise HTTPException(
             status_code=500,
-            detail="API key de OpenRouter no configurada. Por favor, revisa el archivo .env o los secrets de Docker."
+            detail="API key de OpenRouter no configurada. Por favor, revisa el archivo .env o los secrets de Docker.",
         )
-    
+
     # Preparar mensajes
     all_messages = []
-    
+
     # Agregar system prompt si existe
     if system_prompt:
-        all_messages.append({
-            "role": "system",
-            "content": system_prompt
-        })
-    
+        all_messages.append({"role": "system", "content": system_prompt})
+
     # Agregar mensajes del historial
     all_messages.extend(messages)
-    
+
     # Hacer request a OpenRouter
     async with httpx.AsyncClient(timeout=60.0) as client:
         try:
@@ -294,9 +363,9 @@ async def call_openrouter(messages: List[Dict[str, str]], system_prompt: str = N
                 "model": MODEL,
                 "messages": all_messages,
                 "temperature": 0.7,
-                "max_tokens": 4000
+                "max_tokens": 4000,
             }
-            
+
             # Enable reasoning if supported/requested (Gemini 3 Flash Preview)
             # COMENTADO: Puede causar errores 500 si el modelo no lo soporta
             # if "gemini-3" in MODEL or "flash-preview" in MODEL:
@@ -310,67 +379,71 @@ async def call_openrouter(messages: List[Dict[str, str]], system_prompt: str = N
                     "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json",
                     "HTTP-Referer": "http://localhost:3000",
-                    "X-Title": "Financial Assistant"
+                    "X-Title": "Financial Assistant",
                 },
-                json=payload
+                json=payload,
             )
-            
+
             if response.status_code != 200:
                 error_detail = response.text
-                print(f"❌ Error de OpenRouter ({response.status_code}): {error_detail}")
-                
+                print(
+                    f"❌ Error de OpenRouter ({response.status_code}): {error_detail}"
+                )
+
                 # Fallback a un modelo más simple si es error del modelo
-                if response.status_code >= 400 and response.status_code < 500 and "model" in error_detail.lower():
-                     print("⚠️ Intentando fallback a google/gemini-2.0-flash-exp:free")
-                     payload["model"] = "google/gemini-2.0-flash-exp:free"
-                     response = await client.post(
+                if (
+                    response.status_code >= 400
+                    and response.status_code < 500
+                    and "model" in error_detail.lower()
+                ):
+                    print("⚠️ Intentando fallback a google/gemini-2.0-flash-exp:free")
+                    payload["model"] = "google/gemini-2.0-flash-exp:free"
+                    response = await client.post(
                         f"{OPENROUTER_BASE_URL}/chat/completions",
                         headers={
                             "Authorization": f"Bearer {api_key}",
-                            "Content-Type": "application/json"
+                            "Content-Type": "application/json",
                         },
-                        json=payload
-                     )
-                     if response.status_code == 200:
-                         data = response.json()
-                         if "choices" in data and len(data["choices"]) > 0:
-                             return data["choices"][0]["message"]["content"]
+                        json=payload,
+                    )
+                    if response.status_code == 200:
+                        data = response.json()
+                        if "choices" in data and len(data["choices"]) > 0:
+                            return data["choices"][0]["message"]["content"]
 
                 raise HTTPException(
                     status_code=response.status_code,
-                    detail=f"Error de OpenRouter: {error_detail}"
+                    detail=f"Error de OpenRouter: {error_detail}",
                 )
-            
+
             result = response.json()
-            
+
             # Extraer respuesta
             if "choices" in result and len(result["choices"]) > 0:
                 return result["choices"][0]["message"]["content"]
             else:
                 raise HTTPException(
-                    status_code=500,
-                    detail="Respuesta inválida de OpenRouter"
+                    status_code=500, detail="Respuesta inválida de OpenRouter"
                 )
-                
+
         except httpx.TimeoutException:
             raise HTTPException(
-                status_code=504,
-                detail="Timeout al conectar con OpenRouter"
+                status_code=504, detail="Timeout al conectar con OpenRouter"
             )
         except httpx.RequestError as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error de conexión: {str(e)}"
-            )
+            raise HTTPException(status_code=500, detail=f"Error de conexión: {str(e)}")
+
 
 # ==========================================
 # 🌐 ENDPOINTS
 # ==========================================
 
+
 class AnalysisRequest(BaseModel):
     ticker: str
     price: float
     indicators: Dict[str, Any]
+
 
 @router.post("/log")
 async def log_external_usage(request: LogRequest):
@@ -382,13 +455,14 @@ async def log_external_usage(request: LogRequest):
             "model": request.model,
             "created_at": request.timestamp or datetime.now().isoformat(),
             "usage": request.usage,
-            "cost": request.cost
+            "cost": request.cost,
         }
         save_ai_activity(activity_log)
         return {"status": "ok", "log": activity_log}
     except Exception as e:
         print(f"❌ Error logging external usage: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/analyze-asset", response_model=ChatResponse)
 async def analyze_asset(request: AnalysisRequest):
@@ -437,58 +511,66 @@ async def analyze_asset(request: AnalysisRequest):
         
         _Nota: Esta recomendación es educativa y no constituye asesoramiento financiero._
         """
-        
+
         user_message = f"""Analiza {request.ticker} con estos datos:
         Precio: ${request.price}
-        RSI: {request.indicators.get('rsi')}
-        MACD: {request.indicators.get('macd')} (Signal: {request.indicators.get('macd_signal')})
-        SMA 50: {request.indicators.get('sma_50')}
-        SMA 200: {request.indicators.get('sma_200')}
+        RSI: {request.indicators.get("rsi")}
+        MACD: {request.indicators.get("macd")} (Signal: {request.indicators.get("macd_signal")})
+        SMA 50: {request.indicators.get("sma_50")}
+        SMA 200: {request.indicators.get("sma_200")}
         """
-        
+
         messages = [{"role": "user", "content": user_message}]
-        
+
         agent_response = await call_openrouter(messages, system_prompt)
-        
-        return ChatResponse(
-            response=agent_response,
-            action="display_analysis"
-        )
-        
+
+        return ChatResponse(response=agent_response, action="display_analysis")
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_agent(
-    request: ChatRequest, 
-    current_user: CurrentUser,
-    db: Session = Depends(get_db)
+    request: ChatRequest, current_user: CurrentUser, db: Session = Depends(get_db)
 ):
-    print(f"🤖 Agent chat request received from {current_user.email}: {request.message[:50]}...")
+    print(
+        f"🤖 Agent chat request received from {current_user.email}: {request.message[:50]}..."
+    )
     """
     Endpoint principal del agente conversacional con Function Calling
     """
     try:
         # Construir system prompt con contexto
-        fecha_actual = datetime.now().strftime('%d/%m/%Y')
-        system_prompt = DEFAULT_SYSTEM_PROMPT.replace('{fecha_actual}', fecha_actual)
-        
+        fecha_actual = datetime.now().strftime("%d/%m/%Y")
+        system_prompt = DEFAULT_SYSTEM_PROMPT.replace("{fecha_actual}", fecha_actual)
+
         # Inyectar info del usuario
-        system_prompt += f"\n\nUsuario actual: {current_user.full_name} ({current_user.email})"
-        
+        system_prompt += (
+            f"\n\nUsuario actual: {current_user.full_name} ({current_user.email})"
+        )
+
         if request.context:
             # Agregar categorías disponibles
             if "categories" in request.context:
                 categories = request.context["categories"]
-                cat_names = [f"{c.get('icono', '📁')} {c.get('nombre', 'Sin nombre')}" for c in categories]
+                cat_names = [
+                    f"{c.get('icono', '📁')} {c.get('nombre', 'Sin nombre')}"
+                    for c in categories
+                ]
                 system_prompt += f"\n\nCategorías disponibles: {', '.join(cat_names)}"
-            
+
             # Agregar métodos de pago disponibles
             if "payment_methods" in request.context:
                 methods = request.context["payment_methods"]
-                method_names = [f"{m.get('icono', '💳')} {m.get('nombre', 'Sin nombre')}" for m in methods]
-                system_prompt += f"\n\nMétodos de pago disponibles: {', '.join(method_names)}"
-            
+                method_names = [
+                    f"{m.get('icono', '💳')} {m.get('nombre', 'Sin nombre')}"
+                    for m in methods
+                ]
+                system_prompt += (
+                    f"\n\nMétodos de pago disponibles: {', '.join(method_names)}"
+                )
+
             # Agregar fecha actual
             system_prompt += f"\n\nFecha actual: {datetime.now().strftime('%d/%m/%Y')}"
 
@@ -497,18 +579,20 @@ async def chat_with_agent(
                 fin_data = request.context["financial_data"]
                 if fin_data:
                     system_prompt += "\n\n## ESTADO FINANCIERO ACTUAL\n"
-                    
+
                     # Balance Mensual
                     if "monthlyStats" in fin_data:
                         stats = fin_data["monthlyStats"]
                         system_prompt += f"- Ingresos mes: ${stats.get('income', 0)}\n"
                         system_prompt += f"- Gastos mes: ${stats.get('expenses', 0)}\n"
                         system_prompt += f"- Balance mes: ${stats.get('balance', 0)}\n"
-                    
+
                     # Deuda
                     if "totalDeuda" in fin_data:
                         debt = fin_data["totalDeuda"]
-                        system_prompt += f"- Deuda Total Pendiente: ${debt.get('total', 0)}\n"
+                        system_prompt += (
+                            f"- Deuda Total Pendiente: ${debt.get('total', 0)}\n"
+                        )
                         system_prompt += f"  - Pagos Pendientes: ${debt.get('pendingPayments', 0)} ({debt.get('pendingCount', 0)} items)\n"
                         system_prompt += f"  - Resúmenes Tarjeta: ${debt.get('bankSummariesPendingOnly', 0)} ({debt.get('summariesPendingCount', 0)} items)\n"
 
@@ -516,175 +600,186 @@ async def chat_with_agent(
                     if "pendingPayments" in fin_data:
                         pendings = fin_data["pendingPayments"]
                         # Filtrar solo los no pagados para ahorrar contexto
-                        unpaid = [p for p in pendings if str(p.get('Estado', '')).lower() != 'pagado']
+                        unpaid = [
+                            p
+                            for p in pendings
+                            if str(p.get("Estado", "")).lower() != "pagado"
+                        ]
                         if unpaid:
                             system_prompt += "\n### Pagos Pendientes (Detalle):\n"
-                            for p in unpaid[:10]: # Limitar a 10
+                            for p in unpaid[:10]:  # Limitar a 10
                                 system_prompt += f"- {p.get('Nombre', 'Item')}: ${p.get('Monto', 0)} (Vence: {p.get('Vencimiento', 'N/A')})\n"
 
                     # Detalle Resúmenes
                     if "bankSummaries" in fin_data:
                         summaries = fin_data["bankSummaries"]
                         # Filtrar recientes/pendientes
-                        valid_summaries = [s for s in summaries if not s.get('total_pagado')]
+                        valid_summaries = [
+                            s for s in summaries if not s.get("total_pagado")
+                        ]
                         if valid_summaries:
                             system_prompt += "\n### Resúmenes Tarjeta (Detalle):\n"
                             for s in valid_summaries[:5]:
-                                card_name = f"{s.get('banco','')} {s.get('tipo_tarjeta','')}"
+                                card_name = (
+                                    f"{s.get('banco', '')} {s.get('tipo_tarjeta', '')}"
+                                )
                                 # Intentar parsear totales
                                 try:
-                                    totales = s.get('totales')
+                                    totales = s.get("totales")
                                     if isinstance(totales, str):
                                         totales = json.loads(totales)
-                                    amount = totales.get('saldo_actual_pesos', 0)
+                                    amount = totales.get("saldo_actual_pesos", 0)
                                 except:
-                                    amount = '?'
-                                system_prompt += f"- {card_name}: ${amount} (Cierra: {s.get('cierre','')})\n"
+                                    amount = "?"
+                                system_prompt += f"- {card_name}: ${amount} (Cierra: {s.get('cierre', '')})\n"
 
-        
         # Construir historial de mensajes
         messages = []
-        
+
         # Agregar historial si existe
         if request.history:
             for msg in request.history:
-                messages.append({
-                    "role": msg.role,
-                    "content": msg.content
-                })
-        
+                messages.append({"role": msg.role, "content": msg.content})
+
         # Agregar mensaje actual del usuario
-        messages.append({
-            "role": "user",
-            "content": request.message
-        })
-        
+        messages.append({"role": "user", "content": request.message})
+
         # Preparar todos los mensajes incluyendo system prompt
         all_messages = []
         if system_prompt:
-            all_messages.append({
-                "role": "system",
-                "content": system_prompt
-            })
+            all_messages.append({"role": "system", "content": system_prompt})
         all_messages.extend(messages)
-        
-        # Llamar a OpenRouter
-        # Leer API Key dinámicamente
-        api_key = os.getenv("OPENROUTER_API_KEY")
-        
+
+        runtime_config = _get_ai_runtime_config(current_user, db)
+        api_key = runtime_config["api_key"]
+        provider = runtime_config["provider"]
+        model = runtime_config["model"]
+        temperature = runtime_config["temperature"]
+        max_tokens = runtime_config["max_tokens"]
+
         if not api_key:
             raise HTTPException(
                 status_code=500,
-                detail="API key de OpenRouter no configurada"
+                detail="No hay API key configurada para Lucy (OpenRouter/OpenAI/Google)",
             )
+
+        provider_request = _build_provider_request(provider, api_key)
 
         async with httpx.AsyncClient(timeout=60.0) as client:
             try:
                 # 🛠️ PRIMERA LLAMADA: Con herramientas disponibles
                 payload = {
-                    "model": MODEL,
+                    "model": model,
                     "messages": all_messages,
-                    "temperature": 0.7,
-                    "max_tokens": 4000,
+                    "temperature": temperature,
+                    "max_tokens": max_tokens,
                     "tools": AGENT_TOOLS,  # Agregar herramientas
-                    "tool_choice": "auto"  # El modelo decide cuándo usar herramientas
+                    "tool_choice": "auto",  # El modelo decide cuándo usar herramientas
                 }
-                
-                print(f"📤 Primera llamada a OpenRouter con {len(AGENT_TOOLS)} herramientas")
+
+                print(
+                    f"📤 Primera llamada IA ({provider}) con {len(AGENT_TOOLS)} herramientas"
+                )
 
                 client_response = await client.post(
-                    f"{OPENROUTER_BASE_URL}/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {api_key}",
-                        "Content-Type": "application/json",
-                        "HTTP-Referer": "http://localhost:3000",
-                        "X-Title": "Financial Assistant"
-                    },
-                    json=payload
+                    provider_request["url"],
+                    headers=provider_request["headers"],
+                    json=payload,
                 )
-                
+
                 if client_response.status_code != 200:
                     error_detail = client_response.text
-                    print(f"❌ Error de OpenRouter: {client_response.status_code} - {error_detail}")
+                    print(
+                        f"❌ Error del proveedor IA ({provider}): {client_response.status_code} - {error_detail}"
+                    )
                     raise HTTPException(
                         status_code=client_response.status_code,
-                        detail=f"Error de OpenRouter: {error_detail}"
+                        detail=f"Error del proveedor IA ({provider}): {error_detail}",
                     )
-                
+
                 result = client_response.json()
-                
+
                 # 🔍 VERIFICAR SI HAY TOOL CALLS
                 first_choice = result.get("choices", [{}])[0]
                 assistant_message = first_choice.get("message", {})
                 tool_calls = assistant_message.get("tool_calls", [])
-                
+
                 if tool_calls:
                     print(f"🛠️ El modelo quiere usar {len(tool_calls)} herramientas")
-                    
+
                     # Agregar mensaje del asistente al historial
                     all_messages.append(assistant_message)
-                    
+
                     # Ejecutar cada herramienta
                     for tool_call in tool_calls:
                         tool_name = tool_call.get("function", {}).get("name")
                         try:
-                            arguments = json.loads(tool_call.get("function", {}).get("arguments", "{}"))
+                            arguments = json.loads(
+                                tool_call.get("function", {}).get("arguments", "{}")
+                            )
                         except:
                             arguments = {}
-                        
+
                         tool_id = tool_call.get("id")
-                        
+
                         print(f"  🔧 Ejecutando: {tool_name}")
-                        
+
                         # Ejecutar la herramienta con usuario_id
-                        tool_result = execute_tool(tool_name, arguments, db, str(current_user.id))
-                        
+                        tool_result = execute_tool(
+                            tool_name, arguments, db, str(current_user.id)
+                        )
+
                         # Agregar resultado al historial
-                        all_messages.append({
-                            "role": "tool",
-                            "tool_call_id": tool_id,
-                            "name": tool_name,
-                            "content": json.dumps(tool_result, ensure_ascii=False)
-                        })
-                    
+                        all_messages.append(
+                            {
+                                "role": "tool",
+                                "tool_call_id": tool_id,
+                                "name": tool_name,
+                                "content": json.dumps(
+                                    tool_result, ensure_ascii=False, default=str
+                                ),
+                            }
+                        )
+
                     # 🔄 SEGUNDA LLAMADA: Con resultados de herramientas
-                    print(f"📤 Segunda llamada a OpenRouter con resultados de herramientas")
-                    
-                    second_payload = {
-                        "model": MODEL,
-                        "messages": all_messages,
-                        "temperature": 0.7,
-                        "max_tokens": 4000
-                    }
-                    
-                    second_response = await client.post(
-                        f"{OPENROUTER_BASE_URL}/chat/completions",
-                        headers={
-                            "Authorization": f"Bearer {api_key}",
-                            "Content-Type": "application/json",
-                            "HTTP-Referer": "http://localhost:3000",
-                            "X-Title": "Financial Assistant"
-                        },
-                        json=second_payload
+                    print(
+                        f"📤 Segunda llamada a OpenRouter con resultados de herramientas"
                     )
-                    
+
+                    second_payload = {
+                        "model": model,
+                        "messages": all_messages,
+                        "temperature": temperature,
+                        "max_tokens": max_tokens,
+                    }
+
+                    second_response = await client.post(
+                        provider_request["url"],
+                        headers=provider_request["headers"],
+                        json=second_payload,
+                    )
+
                     if second_response.status_code != 200:
                         print(f"❌ Error en segunda llamada: {second_response.text}")
                         # Usar respuesta parcial si hay error
                         agent_response = "Procesé tu solicitud, pero hubo un error al generar la respuesta final."
                     else:
                         result = second_response.json()
-                        agent_response = result.get("choices", [{}])[0].get("message", {}).get("content", "Sin respuesta")
+                        agent_response = (
+                            result.get("choices", [{}])[0]
+                            .get("message", {})
+                            .get("content", "Sin respuesta")
+                        )
                 else:
                     # Sin tool calls, respuesta directa
                     agent_response = assistant_message.get("content", "")
-                
+
                 # 📊 Guardar actividad localmente
                 usage = result.get("usage", {})
                 model_used = result.get("model", MODEL)
                 prompt_tokens = usage.get("prompt_tokens", 0)
                 completion_tokens = usage.get("completion_tokens", 0)
-                
+
                 # Obtener costo
                 real_cost = None
                 response_headers = client_response.headers
@@ -693,65 +788,64 @@ async def chat_with_agent(
                         real_cost = float(response_headers["x-ratelimit-cost"])
                     except:
                         pass
-                
+
                 if real_cost is None and usage:
                     real_cost = usage.get("cost") or usage.get("total_cost")
-                
+
                 if real_cost is None or real_cost == 0:
-                    real_cost = calculate_cost(model_used, prompt_tokens, completion_tokens)
-                    print(f"⚠️ OpenRouter no devolvió costo, usando estimación: ${real_cost}")
+                    real_cost = calculate_cost(
+                        model_used, prompt_tokens, completion_tokens
+                    )
+                    print(
+                        f"⚠️ OpenRouter no devolvió costo, usando estimación: ${real_cost}"
+                    )
                 else:
                     print(f"✅ Costo real de OpenRouter: ${real_cost}")
-                
+
                 activity_log = {
                     "model": model_used,
                     "created_at": datetime.now().isoformat(),
                     "usage": {
                         "prompt_tokens": prompt_tokens,
                         "completion_tokens": completion_tokens,
-                        "total_tokens": usage.get("total_tokens", 0)
+                        "total_tokens": usage.get("total_tokens", 0),
                     },
-                    "cost": real_cost
+                    "cost": real_cost,
                 }
                 save_ai_activity(activity_log)
-                
+
                 data = {
                     "usage": usage,
                     "model": model_used,
-                    "tools_used": len(tool_calls) if tool_calls else 0
+                    "tools_used": len(tool_calls) if tool_calls else 0,
                 }
-                    
+
             except httpx.TimeoutException:
                 raise HTTPException(
-                    status_code=504,
-                    detail="Timeout al conectar con OpenRouter"
+                    status_code=504, detail="Timeout al conectar con OpenRouter"
                 )
             except httpx.RequestError as e:
                 raise HTTPException(
-                    status_code=500,
-                    detail=f"Error de conexión: {str(e)}"
+                    status_code=500, detail=f"Error de conexión: {str(e)}"
                 )
-        
+
         # Analizar si hay alguna acción implícita
         action = None
-        
-        if any(word in request.message.lower() for word in ["gasté", "compré", "pagué", "recibí"]):
+
+        if any(
+            word in request.message.lower()
+            for word in ["gasté", "compré", "pagué", "recibí"]
+        ):
             action = "detect_transaction"
-        
-        return ChatResponse(
-            response=agent_response,
-            action=action,
-            data=data
-        )
-        
+
+        return ChatResponse(response=agent_response, action=action, data=data)
+
     except HTTPException:
         raise
     except Exception as e:
         print(f"❌ Error en chat_with_agent: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error interno: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+
 
 @router.get("/health")
 async def health_check():
@@ -759,36 +853,43 @@ async def health_check():
     Verifica el estado del agente
     """
     api_key = os.getenv("OPENROUTER_API_KEY", "").strip().strip('"').strip("'")
-    
+
     return {
         "status": "ok",
         "model": MODEL,
         "api_configured": bool(api_key),
         "api_key_length": len(api_key) if api_key else 0,
-        "api_key_preview": f"{api_key[:10]}...{api_key[-4:]}" if api_key and len(api_key) > 14 else "NOT_SET",
-        "env_source": "docker_secret" if os.path.exists("/run/secrets/backend.env") else "local_env"
+        "api_key_preview": f"{api_key[:10]}...{api_key[-4:]}"
+        if api_key and len(api_key) > 14
+        else "NOT_SET",
+        "env_source": "docker_secret"
+        if os.path.exists("/run/secrets/backend.env")
+        else "local_env",
     }
 
+
 @router.post("/update-config")
-async def update_config(api_key: str, model: Optional[str] = None, system_prompt: Optional[str] = None):
+async def update_config(
+    api_key: str, model: Optional[str] = None, system_prompt: Optional[str] = None
+):
     """
     Actualiza la configuración del agente (solo para desarrollo)
-    
+
     NOTA: En producción, esto debería estar protegido con autenticación
     """
     global MODEL, DEFAULT_SYSTEM_PROMPT
-    
+
     if api_key:
         os.environ["OPENROUTER_API_KEY"] = api_key
-    
+
     if model:
         MODEL = model
-    
+
     if system_prompt:
         DEFAULT_SYSTEM_PROMPT = system_prompt
-    
+
     return {
         "status": "updated",
         "model": MODEL,
-        "api_configured": bool(os.getenv("OPENROUTER_API_KEY"))
+        "api_configured": bool(os.getenv("OPENROUTER_API_KEY")),
     }

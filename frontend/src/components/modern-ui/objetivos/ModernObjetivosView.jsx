@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
-import { Plus, Home, Plane, Car, RefreshCw } from 'lucide-react';
+import { Plus, Home, Plane, Car, RefreshCw, Pencil, Trash2 } from 'lucide-react';
 import { useRefresh } from '../../../hooks/useRefresh';
 import { QUERY_KEYS } from '../../../hooks/useFinancialData';
 
-const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onAportar }) => {
+const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onEditObjetivo, onDeleteObjetivo, onAportar }) => {
   const { refresh, isRefreshing } = useRefresh([QUERY_KEYS.objetivos]);
   // Normalizar objetivos del API
   const normalizedObjetivos = objetivos.map(obj => {
@@ -75,9 +75,29 @@ const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onAportar }) => {
           const Icon = icons[obj.icono] || Home;
           return (
             <div key={obj.id} className="bg-[#18181b] rounded-3xl p-6 border border-white/5">
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-start justify-between gap-3 mb-4">
+                <div className="flex items-center gap-3 min-w-0">
                 <div className="w-12 h-12 rounded-xl bg-[#10b981]/10 flex items-center justify-center"><Icon className="w-6 h-6 text-[#10b981]" /></div>
                 <h3 className="text-lg font-bold text-white">{obj.nombre}</h3>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => onEditObjetivo && onEditObjetivo(obj)}
+                    className="p-2 rounded-lg hover:bg-white/5 transition-colors"
+                    title="Editar objetivo"
+                  >
+                    <Pencil className="w-4 h-4 text-zinc-400 hover:text-white" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDeleteObjetivo && onDeleteObjetivo(obj.id)}
+                    className="p-2 rounded-lg hover:bg-red-500/10 transition-colors"
+                    title="Eliminar objetivo"
+                  >
+                    <Trash2 className="w-4 h-4 text-zinc-400 hover:text-red-400" />
+                  </button>
+                </div>
               </div>
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
@@ -116,5 +136,5 @@ const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onAportar }) => {
   );
 };
 
-ModernObjetivosView.propTypes = { objetivos: PropTypes.array, onNewObjetivo: PropTypes.func, onAportar: PropTypes.func };
+ModernObjetivosView.propTypes = { objetivos: PropTypes.array, onNewObjetivo: PropTypes.func, onEditObjetivo: PropTypes.func, onDeleteObjetivo: PropTypes.func, onAportar: PropTypes.func };
 export default ModernObjetivosView;

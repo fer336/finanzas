@@ -6,14 +6,19 @@ import { Building2, AlertCircle } from 'lucide-react';
  * ResumenesBancariosWidget - Widget de resúmenes bancarios pendientes
  */
 const ResumenesBancariosWidget = ({ resumenes = [], onClick }) => {
-  // Normalizar datos
-  const data = resumenes.map(r => ({
-    id: r.id || r.Id,
-    banco: r.banco || r.Banco || 'Banco',
-    monto: parseFloat(r.monto_total || r.MontoTotal || r.monto || r.Monto || 0),
-    vencimiento: r.fecha_vencimiento || r.FechaVencimiento || r.fechavencimiento || r.Fechavencimiento,
-    estado: r.estado || r.Estado || 'pendiente'
-  }));
+  // Normalizar datos — los campos vienen anidados en JSONB (ciclo_facturacion, totales)
+  const data = resumenes.map(r => {
+    const ciclo = r.ciclo_facturacion || {};
+    const totales = r.totales || {};
+    const estadoRaw = r.minimo_pagado || r.total_pagado ? 'pagado' : 'pendiente';
+    return {
+      id: r.id || r.Id,
+      banco: r.banco || r.Banco || 'Banco',
+      monto: parseFloat(totales.saldo_actual_pesos || totales.saldo_pesos || r.saldo_pesos || 0),
+      vencimiento: ciclo.vencimiento_actual || ciclo.fecha_vencimiento || r.fecha_vencimiento || null,
+      estado: (r.estado || r.Estado || estadoRaw).toString().toLowerCase()
+    };
+  });
 
   const totalPendiente = data.reduce((sum, r) => sum + r.monto, 0);
   const cantidad = data.length;

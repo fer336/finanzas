@@ -13,10 +13,10 @@ const FloatingActionButton = ({ actions = [] }) => {
   };
 
   return (
-    <div className="fixed bottom-24 right-8 z-40">
+    <div className="fixed bottom-20 right-4 z-40">
       {/* Acciones desplegadas */}
       {isOpen && (
-        <div className="absolute bottom-20 right-0 flex flex-col gap-3 mb-2 animate-fade-in">
+        <div className="absolute bottom-14 right-0 flex flex-col gap-2 mb-1 animate-fade-in">
           {actions.map((action, index) => {
             const Icon = action.icon;
             return (
@@ -27,20 +27,20 @@ const FloatingActionButton = ({ actions = [] }) => {
                   setIsOpen(false);
                 }}
                 className="
-                  flex items-center gap-3 px-4 py-3 rounded-2xl
-                  bg-[#18181b] border-2 border-white/10
+                  flex items-center gap-2.5 px-3 py-2 rounded-xl
+                  bg-[#18181b] border border-white/10
                   text-white hover:bg-white/5
-                  shadow-xl hover:shadow-2xl
+                  shadow-lg
                   transition-all
                   whitespace-nowrap
                 "
                 title={action.label}
                 style={{
-                  animation: `slideInRight 0.3s ease-out ${index * 0.05}s both`
+                  animation: `slideInRight 0.2s ease-out ${index * 0.04}s both`
                 }}
               >
-                <Icon className="w-5 h-5 text-gray-400" />
-                <span className="text-sm font-medium">{action.label}</span>
+                <Icon className="w-4 h-4 text-gray-400" />
+                <span className="text-xs font-medium">{action.label}</span>
               </button>
             );
           })}
@@ -51,19 +51,19 @@ const FloatingActionButton = ({ actions = [] }) => {
       <button
         onClick={toggleMenu}
         className={`
-          w-14 h-14 rounded-full
+          w-11 h-11 rounded-full
           bg-gradient-to-br from-[#10b981] to-[#34d399]
           flex items-center justify-center
-          shadow-xl shadow-green-500/30
-          hover:shadow-2xl hover:scale-110
+          shadow-lg shadow-green-500/25
+          active:scale-95
           transition-all
           ${isOpen ? 'rotate-45' : 'rotate-0'}
         `}
       >
         {isOpen ? (
-          <X className="w-6 h-6 text-white" />
+          <X className="w-4 h-4 text-white" />
         ) : (
-          <Plus className="w-6 h-6 text-white" />
+          <Plus className="w-4 h-4 text-white" />
         )}
       </button>
 

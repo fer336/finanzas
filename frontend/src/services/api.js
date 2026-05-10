@@ -321,7 +321,37 @@ const metodosPagoApi = {
 // ═══════════════════════════════════════════════════════════════
 // 📁 FILES API (MinIO)
 // ═══════════════════════════════════════════════════════════════
+const _getBaseUrl = () => import.meta.env.MODE === 'production' ? '' : 'http://localhost:8000';
+
 const filesApi = {
+  /**
+   * Subir archivo a MinIO
+   * @param {File} file - Archivo a subir
+   * @param {string} prefix - Prefijo/carpeta (default: 'comprobantes')
+   * @returns {Promise<Object>} Resultado con url, file_url, file_name, etc.
+   */
+  async uploadFile(file, prefix = 'comprobantes') {
+    debugLog('📤 filesApi.uploadFile:', file.name, `(${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+
+    const endpoint = `${_getBaseUrl()}/api/files/upload?prefix=${prefix}`;
+    const body = new FormData();
+    body.append('file', file);
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      body
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || errorData.message || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    debugLog('✅ filesApi.uploadFile success:', data);
+    return data.data || data;
+  },
+
   /**
    * Eliminar archivo de MinIO
    * @param {string} fileUrl - URL completa del archivo (ej: https://s3.qeva.xyz/facturas/comprobantes/file.jpg)
@@ -341,11 +371,7 @@ const filesApi = {
       
       debugLog('🗑️ Extracted object_name:', objectName);
       
-      // Usar URL completa en desarrollo
-      const baseUrl = import.meta.env.MODE === 'production' 
-        ? '' 
-        : 'http://localhost:8000';
-      const endpoint = `${baseUrl}/api/files/delete?object_name=${encodeURIComponent(objectName)}`;
+      const endpoint = `${_getBaseUrl()}/api/files/delete?object_name=${encodeURIComponent(objectName)}`;
       
       const response = await fetch(endpoint, {
         method: 'DELETE',

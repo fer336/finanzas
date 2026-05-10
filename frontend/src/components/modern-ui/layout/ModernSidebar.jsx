@@ -18,7 +18,8 @@ import {
   ChevronRight,
   LogOut,
   Coins,
-  Bug
+  Bug,
+  Building2
 } from 'lucide-react';
 import GlassCard from '../common/GlassCard';
 
@@ -104,6 +105,13 @@ const ModernSidebar = ({
       icon: Calendar,
       view: 'pending-payments-full',
       settingKey: 'showPagosPendientes' // ← Conectado
+    },
+    {
+      id: 'resumenes-bancarios',
+      label: 'Resúmenes Bancarios',
+      icon: Building2,
+      view: 'resumen-bancario',
+      settingKey: 'showResumenes' // ← Conectado a configuración
     },
     {
       id: 'uso-ia',

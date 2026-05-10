@@ -140,6 +140,8 @@ const ModernTransactionsView = ({
   const formatMonto = (n) =>
     new Intl.NumberFormat('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
 
+
+
   // ── Filtrado por fecha ────────────────────────────────────────────────────
   const currentYear = new Date().getFullYear();
 
@@ -391,17 +393,17 @@ const ModernTransactionsView = ({
         <div className="grid grid-cols-3 gap-2 px-4 mb-4">
           <div className="bg-[#18181b] rounded-xl border border-white/5 p-3">
             <p className="text-[10px] text-gray-500 mb-1">{viewMode === 'monthly' ? 'INGRESOS' : 'ING. ACUM.'}</p>
-            <p className="text-base font-bold text-[#10b981]">+${formatMonto(totales.ingresos)}</p>
+            <p className="text-xs font-bold text-[#10b981] truncate">+${formatMonto(totales.ingresos)}</p>
             <p className="text-[10px] text-gray-400 mt-0.5">{filtered.filter(t => t.tipo === 'ingreso').length} tx</p>
           </div>
           <div className="bg-[#18181b] rounded-xl border border-white/5 p-3">
             <p className="text-[10px] text-gray-500 mb-1">{viewMode === 'monthly' ? 'GASTOS' : 'GTO. ACUM.'}</p>
-            <p className="text-base font-bold text-[#ec4899]">-${formatMonto(totales.gastos)}</p>
+            <p className="text-xs font-bold text-[#ec4899] truncate">-${formatMonto(totales.gastos)}</p>
             <p className="text-[10px] text-gray-400 mt-0.5">{filtered.filter(t => t.tipo === 'gasto').length} tx</p>
           </div>
           <div className="bg-[#18181b] rounded-xl border border-white/5 p-3">
             <p className="text-[10px] text-gray-500 mb-1">BALANCE</p>
-            <p className={`text-base font-bold ${totales.ingresos - totales.gastos >= 0 ? 'text-[#10b981]' : 'text-[#ec4899]'}`}>
+            <p className={`text-xs font-bold truncate ${totales.ingresos - totales.gastos >= 0 ? 'text-[#10b981]' : 'text-[#ec4899]'}`}>
               {totales.ingresos - totales.gastos >= 0 ? '+' : '-'}${formatMonto(Math.abs(totales.ingresos - totales.gastos))}
             </p>
             <p className="text-[10px] text-gray-400 mt-0.5">{filtered.length} tx</p>

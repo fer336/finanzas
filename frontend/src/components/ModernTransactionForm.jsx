@@ -15,7 +15,8 @@ import {
   ChevronDown,
   Eye,
   ExternalLink,
-  Target
+  Target,
+  Paperclip
 } from 'lucide-react';
 import apiServices from '../services/api';
 import dolarService, { TIPOS_DOLAR } from '../services/dolarService';
@@ -61,6 +62,9 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
   const [cotizaciones, setCotizaciones] = useState([]);
   const [loadingCotizaciones, setLoadingCotizaciones] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const fieldClassName = 'w-full px-3 py-2.5 bg-[#0b0b0f] border border-white/8 rounded-xl text-sm text-white placeholder:text-zinc-600 focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/10 focus:outline-none transition-all shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]';
+  const selectClassName = 'w-full px-3 py-2.5 pr-9 bg-[#0b0b0f] border border-white/8 rounded-xl text-sm text-white appearance-none cursor-pointer focus:border-cyan-400/60 focus:ring-2 focus:ring-cyan-400/10 focus:outline-none transition-all shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]';
 
   // Load data when form opens
   useEffect(() => {
@@ -302,8 +306,8 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
 
   if (!isOpen) return null;
 
-  // Render original modal for mobile
-  if (isMobile) {
+  // Layout mobile legado desactivado: usamos el mismo diseño que desktop/web
+  if (false && isMobile) {
   return (
       <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
       <div className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -600,380 +604,365 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
 
   // DESKTOP VERSION - Completely Redesigned
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-8">
+    <div className="fixed inset-0 z-[9999] flex items-end md:items-center justify-center p-0 md:p-8">
       <div 
         className="fixed inset-0 bg-black/80 backdrop-blur-sm"
         onClick={handleCancel}
       />
       <div 
-        className="relative w-full max-w-3xl bg-[#09090b] rounded-xl shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[90vh] z-[1001]"
+        className="relative w-full max-w-3xl bg-[radial-gradient(circle_at_top,rgba(24,27,38,0.95)_0%,rgba(9,9,11,0.98)_38%,rgba(7,7,9,1)_100%)] rounded-t-3xl md:rounded-[1.4rem] shadow-2xl border border-white/10 overflow-hidden flex flex-col h-[92dvh] md:h-auto max-h-[92dvh] md:max-h-[90vh] z-[10000]"
       >
-        {/* Desktop Header - Compact */}
-        <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-[#09090b]">
-          <div>
-            <h2 className="text-lg font-bold text-white tracking-tight">
+        <div className="sticky top-0 z-20 flex items-center justify-between px-8 py-6 border-b border-white/10 bg-[#18181b]/80 backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            <div className="bg-cyan-400/15 p-2 rounded-lg">
+              {editingTransaction ? <FileText className="w-5 h-5 text-cyan-300" /> : <Plus className="w-5 h-5 text-cyan-300" />}
+            </div>
+            <h2 className="text-slate-100 text-xl font-bold tracking-tight">
               {editingTransaction ? 'Editar Transacción' : 'Nueva Transacción'}
             </h2>
           </div>
-          <button 
+          <button
             onClick={handleCancel}
-            className="p-1.5 hover:bg-white/5 rounded-full transition-colors group"
+            className="p-2 hover:bg-white/5 rounded-full transition-colors group"
           >
-            <X className="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors" />
+            <X className="w-5 h-5 text-slate-400 group-hover:text-white" />
           </button>
         </div>
 
-        {/* Single Column Layout - Compact */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-5">
-            <div className="space-y-4">
-              
-              {/* Type Selector - Compact Inline */}
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setTransactionType('ingreso')}
-                  className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${
-                    transactionType === 'ingreso'
-                      ? 'bg-green-500/10 border-green-500/50 text-white'
-                      : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700'
-                  }`}
-                >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                    transactionType === 'ingreso' ? 'bg-green-500 text-white' : 'bg-zinc-800'
-                  }`}>
-                    <TrendingUp className="w-4 h-4" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm font-bold">Ingreso</p>
-                    <p className="text-xs opacity-60">Salarios, ventas</p>
-                  </div>
-                </button>
+        <div className="flex-1 overflow-y-auto px-8 py-8 space-y-8 custom-scrollbar">
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <FileText className="w-4 h-4 text-cyan-300" />
+              <h3 className="text-slate-100 font-semibold text-lg">Información Básica</h3>
+            </div>
 
-                <button
-                  onClick={() => setTransactionType('gasto')}
-                  className={`flex items-center gap-2 p-3 rounded-lg border transition-all ${
-                    transactionType === 'gasto'
-                      ? 'bg-red-500/10 border-red-500/50 text-white'
-                      : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700'
-                  }`}
-                >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                    transactionType === 'gasto' ? 'bg-red-500 text-white' : 'bg-zinc-800'
-                  }`}>
-                    <TrendingDown className="w-4 h-4" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-sm font-bold">Gasto</p>
-                    <p className="text-xs opacity-60">Compras, pagos</p>
-                  </div>
-                </button>
+            <div className="flex gap-3 p-1 bg-white/5 rounded-2xl border border-white/10 w-fit">
+              <button
+                onClick={() => setTransactionType('ingreso')}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                  transactionType === 'ingreso'
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/30'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Ingreso
+              </button>
+              <button
+                onClick={() => setTransactionType('gasto')}
+                className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                  transactionType === 'gasto'
+                    ? 'bg-rose-500/20 text-rose-300 border border-rose-400/30'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Gasto
+              </button>
+            </div>
+
+            <div className="grid gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-slate-400 text-sm font-medium ml-1">Descripción</label>
+                <input
+                  type="text"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="¿Qué transacción es esta?"
+                  className={fieldClassName}
+                />
               </div>
 
-              {/* Compact 2-Column Form */}
-              <div className="grid grid-cols-2 gap-3">
-                {/* Monto */}
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-zinc-400">Monto</label>
-                  <div className="relative">
-                    <span className={`absolute left-2.5 top-2.5 text-sm font-bold ${transactionType === 'gasto' ? 'text-red-400' : 'text-green-400'}`}>$</span>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-slate-400 text-sm font-medium ml-1">Notas</label>
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                  placeholder="Detalles adicionales (opcional)..."
+                  rows={3}
+                  className={`${fieldClassName} resize-none`}
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <DollarSign className="w-4 h-4 text-cyan-300" />
+              <h3 className="text-slate-100 font-semibold text-lg">Montos y Fechas</h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-slate-400 text-sm font-medium ml-1">Monto y Moneda</label>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <span className={`absolute left-4 top-3 text-sm font-bold ${transactionType === 'gasto' ? 'text-rose-300' : 'text-emerald-300'}`}>$</span>
                     <input
                       type="number"
                       name="amount"
                       value={formData.amount}
                       onChange={handleInputChange}
                       placeholder="0.00"
-                      className="w-full pl-7 pr-2 py-2 bg-zinc-900/50 border border-white/10 rounded-lg text-lg font-bold text-white placeholder-zinc-600 focus:border-blue-500 focus:outline-none"
+                      className="w-full pl-8 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400 transition-all"
                       step="0.01"
                       min="0.01"
                       autoFocus
-                      required
                     />
                   </div>
-                  {formData.amount && parseFloat(formData.amount) <= 0 && (
-                    <p className="text-xs text-red-400 mt-1">⚠️ El monto debe ser mayor que 0</p>
-                  )}
-                </div>
-
-                {/* Fecha */}
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-zinc-400">Fecha</label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    className="w-full p-2 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
-
-                {/* Descripción */}
-                <div className="col-span-2 space-y-1">
-                  <label className="text-xs font-medium text-zinc-400">Descripción</label>
-                  <input
-                    type="text"
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    placeholder="¿Qué transacción es esta?"
-                    className="w-full p-2 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-600 focus:border-blue-500 focus:outline-none"
-                  />
-                </div>
-
-                {/* Categoría */}
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-zinc-400">Categoría</label>
-                  <div className="relative">
+                  <div className="relative min-w-[120px]">
                     <select
-                      value={formData.category}
-                      onChange={(e) => {
-                        if(e.target.value === 'new') setShowCreateCategory(true);
-                        else setFormData(prev => ({ ...prev, category: e.target.value }));
-                      }}
-                      className="w-full p-2 bg-zinc-900/50 border border-white/10 rounded-lg text-xs text-white appearance-none cursor-pointer focus:border-blue-500 focus:outline-none"
+                      value={formData.currency}
+                      onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
+                      className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 pr-9 text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 appearance-none min-w-[120px]"
                     >
-                      <option value="">Categoría</option>
-                      {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-                      <option value="new">+ Nueva</option>
-                    </select>
-                    <ChevronDown size={14} className="absolute right-2 top-2.5 text-zinc-500 pointer-events-none" />
-                  </div>
-                </div>
-
-                {/* Método de Pago */}
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-zinc-400">Método de Pago</label>
-                  <div className="relative">
-                    <select
-                      value={formData.paymentMethod}
-                      onChange={(e) => setFormData(prev => ({ ...prev, paymentMethod: e.target.value }))}
-                      className="w-full p-2 bg-zinc-900/50 border border-white/10 rounded-lg text-xs text-white appearance-none cursor-pointer focus:border-blue-500 focus:outline-none"
-                    >
-                      <option value="">Método</option>
-                      {metodosPago.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
-                    </select>
-                    <ChevronDown size={14} className="absolute right-2 top-2.5 text-zinc-500 pointer-events-none" />
-                  </div>
-                </div>
-
-                {/* 🎯 Objetivo de Ahorro */}
-                <div className="space-y-1 col-span-2">
-                  <label className="text-xs font-medium text-zinc-400 flex items-center gap-1">
-                    <Target size={12} />
-                    Objetivo de Ahorro (Opcional)
-                  </label>
-                  <div className="relative">
-                    <select
-                      value={formData.objetivo}
-                      onChange={(e) => setFormData(prev => ({ ...prev, objetivo: e.target.value }))}
-                      className="w-full p-2 bg-zinc-900/50 border border-white/10 rounded-lg text-xs text-white appearance-none cursor-pointer focus:border-blue-500 focus:outline-none"
-                    >
-                      <option value="">Sin objetivo asignado</option>
-                      {objetivos.map(obj => (
-                        <option key={obj.id} value={obj.id}>
-                          {obj.icono} {obj.nombre} ({obj.porcentaje_completado.toFixed(0)}%)
+                      {currencies.map(currency => (
+                        <option key={currency.id || currency.codigo} value={currency.codigo}>
+                          {currency.codigo}
                         </option>
                       ))}
                     </select>
-                    <ChevronDown size={14} className="absolute right-2 top-2.5 text-zinc-500 pointer-events-none" />
+                    <ChevronDown size={16} className="absolute right-3 top-3.5 text-slate-500 pointer-events-none" />
                   </div>
-                  {formData.objetivo && (
-                    <div className="mt-2 p-2 bg-blue-500/10 border border-blue-500/30 rounded-lg space-y-2">
-                      <p className="text-[10px] text-zinc-400 font-medium">
-                        ¿Cómo afecta al objetivo?
-                      </p>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={formData.esAporteObjetivo}
-                          onChange={(e) => setFormData(prev => ({ ...prev, esAporteObjetivo: e.target.checked }))}
-                          className="w-3 h-3 rounded border-zinc-600 bg-zinc-800 text-blue-500"
-                        />
-                        <span className="text-[10px] text-white">
-                          {formData.esAporteObjetivo ? '✅ Aporte (suma)' : '❌ Uso (resta)'}
-                        </span>
-                      </label>
-                    </div>
-                  )}
                 </div>
-
-                {/* 💳 Tarjeta de Crédito Checkbox - Solo para GASTOS */}
-                {transactionType === 'gasto' && (
-                  <div className="col-span-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.esCredito}
-                        onChange={(e) => setFormData(prev => ({ ...prev, esCredito: e.target.checked }))}
-                        className="mt-0.5 w-4 h-4 rounded border-blue-500/30 bg-zinc-900 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
-                      />
-                      <div className="flex-1">
-                        <span className="text-xs font-medium text-blue-300">
-                          💳 Es gasto con tarjeta de crédito
-                        </span>
-                        <p className="text-xs text-blue-400/60 mt-1">
-                          No se descontará del balance hasta que pagues el resumen
-                        </p>
-                      </div>
-                    </label>
-                  </div>
+                {formData.amount && parseFloat(formData.amount) <= 0 && (
+                  <p className="text-xs text-rose-400 ml-1">El monto debe ser mayor que 0</p>
                 )}
-
-                {/* Moneda Buttons */}
-                <div className="col-span-2">
-                  <label className="text-xs font-medium text-zinc-400 block mb-1">Moneda</label>
-                  <div className="flex gap-2">
-                    {currencies.map(currency => (
-                      <button
-                        key={currency.id || currency.codigo}
-                        onClick={() => setFormData(prev => ({ ...prev, currency: currency.codigo }))}
-                        className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                          formData.currency === currency.codigo
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-zinc-900/50 text-zinc-400 hover:bg-zinc-800'
-                        }`}
-                        title={currency.nombre}
-                      >
-                        {currency.codigo}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
-                
-              {/* Create Category Inline */}
-              {showCreateCategory && (
-                <div className="col-span-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                  <div className="flex gap-1">
-                    <input
-                      type="text"
-                      value={newCategoryName}
-                      onChange={(e) => setNewCategoryName(e.target.value)}
-                      placeholder="Nueva categoría"
-                      className="flex-1 p-1.5 bg-zinc-900/80 border border-blue-500/30 rounded text-xs text-white focus:outline-none"
-                      autoFocus
-                    />
-                    <button onClick={createQuickCategory} className="px-2 py-1 bg-blue-600 text-white text-xs rounded">
-                      +
-                    </button>
-                    <button onClick={() => setShowCreateCategory(false)} className="px-2 hover:bg-white/10 text-white rounded">
-                      ×
-                    </button>
-                  </div>
-                </div>
-              )}
 
-              {/* Notas */}
-              <div className="col-span-2 space-y-1">
-                <label className="text-xs font-medium text-zinc-400">Notas</label>
-                <textarea
-                  name="notes"
-                  value={formData.notes}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-slate-400 text-sm font-medium ml-1">Fecha</label>
+                <input
+                  type="date"
+                  name="date"
+                  value={formData.date}
                   onChange={handleInputChange}
-                  placeholder="Detalles adicionales (opcional)..."
-                  rows={2}
-                  className="w-full p-2 bg-zinc-900/50 border border-white/10 rounded-lg text-xs text-white placeholder-zinc-600 focus:border-blue-500 focus:outline-none resize-none"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400 transition-all [color-scheme:dark]"
                 />
               </div>
+            </div>
 
-              {/* Comprobante */}
-              <div className="col-span-2 space-y-1">
-                <label className="text-xs font-medium text-zinc-400">Comprobante</label>
-                <FileUpload
-                  onFileUploaded={(fileData) => setFormData(prev => ({ ...prev, archivoAdjunto: fileData.url }))}
-                  onFileRemoved={() => setFormData(prev => ({ ...prev, archivoAdjunto: '' }))}
-                  currentFileUrl={formData.archivoAdjunto}
-                  prefix="transacciones"
-                  maxSizeMB={10}
-                  showPreview={true}
-                />
-                
-                {/* Vista previa del comprobante */}
-                {formData.archivoAdjunto && (
-                  <div className="mt-3 p-3 bg-zinc-900/50 border border-white/10 rounded-lg space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-zinc-400">Comprobante Adjunto</span>
-                      <div className="flex gap-2">
-                        <a
-                          href={formData.archivoAdjunto}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded-lg transition-colors text-blue-400 text-xs"
-                        >
-                          <Eye size={12} />
-                          Ver Completo
-                        </a>
-                      </div>
-                    </div>
-                    
-                    {/* Vista previa de imagen */}
-                    {(formData.archivoAdjunto.match(/\.(jpg|jpeg|png|gif|webp)$/i)) && (
-                      <div className="relative w-full aspect-video bg-zinc-950 rounded-lg overflow-hidden">
-                        <img
-                          src={formData.archivoAdjunto}
-                          alt="Comprobante"
-                          className="w-full h-full object-contain"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
-                        <div className="hidden w-full h-full items-center justify-center text-zinc-500 text-xs">
-                          <FileText size={24} />
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Ícono para archivos PDF */}
-                    {(formData.archivoAdjunto.match(/\.pdf$/i)) && (
-                      <div className="flex items-center justify-center py-8 text-red-400">
-                        <FileText size={48} />
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* USD Conversion */}
-              {formData.currency === 'USD' && (
-                <div className="col-span-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded-lg space-y-1">
-                  <div className="flex items-center gap-1 text-blue-400">
-                    <DollarSign size={12} />
-                    <span className="text-xs font-bold">Conversión USD</span>
-                  </div>
+            {formData.currency === 'USD' && (
+              <div className="p-4 bg-white/5 rounded-2xl border border-cyan-400/15 space-y-3">
+                <div className="flex items-center gap-2 text-cyan-300">
+                  <DollarSign className="w-4 h-4" />
+                  <span className="text-sm font-semibold">Conversión USD</span>
+                </div>
+                <div className="relative">
                   <select
                     value={formData.tipoDolar}
                     onChange={(e) => setFormData(prev => ({ ...prev, tipoDolar: e.target.value }))}
-                    className="w-full p-1 bg-zinc-900/80 border border-blue-500/30 rounded text-xs text-white focus:outline-none"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 pr-9 text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
                   >
                     {Object.values(TIPOS_DOLAR).map(tipo => (
                       <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
                     ))}
                   </select>
-                  <div className="text-xs flex justify-between pt-1 border-t border-white/5">
-                    <span className="text-zinc-400">Cot: ${formData.cotizacionDolar}</span>
-                    <span className="text-white font-bold">ARS: ${parseFloat(formData.montoArs || 0).toLocaleString('es-AR')}</span>
-                  </div>
+                  <ChevronDown size={16} className="absolute right-3 top-3.5 text-slate-500 pointer-events-none" />
                 </div>
-              )}
+                <div className="flex justify-between text-sm border-t border-white/5 pt-3">
+                  <span className="text-slate-400">Cotización: ${formData.cotizacionDolar}</span>
+                  <span className="text-slate-100 font-semibold">ARS: ${parseFloat(formData.montoArs || 0).toLocaleString('es-AR')}</span>
+                </div>
+              </div>
+            )}
+          </section>
+
+          <section className="space-y-6">
+            <div className="flex items-center gap-2 mb-2">
+              <Tag className="w-4 h-4 text-cyan-300" />
+              <h3 className="text-slate-100 font-semibold text-lg">Categorización</h3>
             </div>
-          </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-slate-400 text-sm font-medium ml-1">Categoría</label>
+                <div className="relative">
+                  <select
+                    value={formData.category}
+                    onChange={(e) => {
+                      if (e.target.value === 'new') setShowCreateCategory(true);
+                      else setFormData(prev => ({ ...prev, category: e.target.value }));
+                    }}
+                    className="w-full bg-[#0b0b0f] border border-white/10 rounded-xl px-4 py-3 pr-9 text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
+                  >
+                    <option value="">Categoría</option>
+                    {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                    <option value="new">+ Nueva</option>
+                  </select>
+                  <ChevronDown size={16} className="absolute right-3 top-3.5 text-slate-500 pointer-events-none" />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-slate-400 text-sm font-medium ml-1">Método de Pago</label>
+                <div className="relative">
+                  <select
+                    value={formData.paymentMethod}
+                    onChange={(e) => setFormData(prev => ({ ...prev, paymentMethod: e.target.value }))}
+                    className="w-full bg-[#0b0b0f] border border-white/10 rounded-xl px-4 py-3 pr-9 text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
+                  >
+                    <option value="">Método</option>
+                    {metodosPago.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                  </select>
+                  <ChevronDown size={16} className="absolute right-3 top-3.5 text-slate-500 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+
+            {showCreateCategory && (
+              <div className="p-4 bg-white/5 rounded-2xl border border-cyan-400/15">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)}
+                    placeholder="Nueva categoría"
+                    className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
+                    autoFocus
+                  />
+                  <button onClick={createQuickCategory} className="px-4 py-3 rounded-xl bg-cyan-400 text-black font-semibold">Guardar</button>
+                  <button onClick={() => setShowCreateCategory(false)} className="px-4 py-3 rounded-xl border border-white/10 text-slate-300 hover:bg-white/5">Cancelar</button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-slate-400 text-sm font-medium ml-1">Objetivo de Ahorro (Opcional)</label>
+              <div className="relative">
+                <select
+                  value={formData.objetivo}
+                  onChange={(e) => setFormData(prev => ({ ...prev, objetivo: e.target.value }))}
+                  className="w-full bg-[#0b0b0f] border border-white/10 rounded-xl px-4 py-3 pr-9 text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400/50"
+                >
+                  <option value="">Sin objetivo asignado</option>
+                  {objetivos.map(obj => (
+                    <option key={obj.id} value={obj.id}>
+                      {obj.icono} {obj.nombre} ({obj.porcentaje_completado.toFixed(0)}%)
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown size={16} className="absolute right-3 top-3.5 text-slate-500 pointer-events-none" />
+              </div>
+            </div>
+
+            {formData.objetivo && (
+              <div className="space-y-3">
+                <label className="text-slate-400 text-sm font-medium ml-1">Cómo afecta al objetivo</label>
+                <div className="flex gap-2 p-1 bg-white/5 rounded-xl w-fit border border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, esAporteObjetivo: true }))}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${formData.esAporteObjetivo ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/30' : 'text-slate-400 hover:text-white'}`}
+                  >
+                    Aporte
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, esAporteObjetivo: false }))}
+                    className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${!formData.esAporteObjetivo ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/30' : 'text-slate-400 hover:text-white'}`}
+                  >
+                    Uso
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {transactionType === 'gasto' && (
+              <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+                <div className="flex flex-col">
+                  <span className="text-slate-100 font-medium">Gasto con tarjeta de crédito</span>
+                  <span className="text-slate-500 text-xs">No descuenta balance hasta pagar el resumen</span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.esCredito}
+                    onChange={(e) => setFormData(prev => ({ ...prev, esCredito: e.target.checked }))}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-slate-700 rounded-full peer-checked:bg-cyan-400 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+                </label>
+              </div>
+            )}
+          </section>
+
+          <section className="space-y-4 pb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Paperclip className="w-4 h-4 text-cyan-300" />
+              <h3 className="text-slate-100 font-semibold text-lg">Documentos</h3>
+            </div>
+
+            <FileUpload
+              onFileUploaded={(fileData) => setFormData(prev => ({ ...prev, archivoAdjunto: fileData.url }))}
+              onFileRemoved={() => setFormData(prev => ({ ...prev, archivoAdjunto: '' }))}
+              currentFileUrl={formData.archivoAdjunto}
+              prefix="transacciones"
+              maxSizeMB={10}
+              showPreview={true}
+            />
+
+            {formData.archivoAdjunto && (
+              <div className="p-4 bg-white/5 rounded-2xl border border-white/10 space-y-3">
+                <div className="flex items-center gap-4">
+                  <a
+                    href={formData.archivoAdjunto}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-slate-200 text-sm font-medium hover:bg-white/10 transition-colors"
+                  >
+                    <Eye size={16} />
+                    Ver Comprobante
+                  </a>
+                </div>
+
+                {(formData.archivoAdjunto.match(/\.(jpg|jpeg|png|gif|webp)$/i)) && (
+                  <div className="relative w-full aspect-video bg-black/20 rounded-lg overflow-hidden">
+                    <img
+                      src={formData.archivoAdjunto}
+                      alt="Comprobante"
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                    <div className="hidden w-full h-full items-center justify-center text-zinc-500">
+                      <FileText size={28} />
+                    </div>
+                  </div>
+                )}
+
+                {(formData.archivoAdjunto.match(/\.pdf$/i)) && (
+                  <a
+                    href={formData.archivoAdjunto}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-cyan-300 hover:text-cyan-200 text-sm font-medium flex items-center gap-2 transition-colors"
+                  >
+                    <ExternalLink size={16} />
+                    Ver PDF adjunto
+                  </a>
+                )}
+              </div>
+            )}
+          </section>
         </div>
 
-        {/* Compact Footer */}
-        <div className="px-5 py-3 border-t border-white/5 bg-[#09090b] flex justify-end gap-2">
+        <div className="sticky bottom-0 z-20 px-8 py-6 border-t border-white/10 bg-[#18181b]/80 backdrop-blur-md flex items-center justify-end gap-4">
           <button
             onClick={handleCancel}
-            className="px-4 py-2 text-sm text-zinc-400 hover:text-white font-medium hover:bg-white/5 rounded-lg transition-all"
+            className="px-6 py-3 rounded-xl border border-white/10 text-slate-300 font-semibold hover:bg-white/5 transition-all"
           >
             Cancelar
           </button>
           <button
             onClick={handleSubmit}
             disabled={loading || isSubmitting || !formData.description.trim() || !formData.amount}
-            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-bold rounded-lg shadow-lg disabled:opacity-50 flex items-center gap-1.5"
+            className="px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-400 text-white font-bold shadow-lg shadow-cyan-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex items-center gap-2"
           >
             {loading || isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save size={16} />}
-            {editingTransaction ? 'Guardar' : 'Registrar'}
+            {editingTransaction ? 'Guardar Cambios' : 'Registrar'}
           </button>
         </div>
       </div>

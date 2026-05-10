@@ -56,6 +56,7 @@ const PendingPaymentPayModal = lazy(() => import('./pending-payments/PendingPaym
 const BulkTransactionUpload = lazy(() => import('../BulkTransactionUpload'));
 const BudgetModal = lazy(() => import('../modals/BudgetModal'));
 const AsignarDineroModal = lazy(() => import('../modals/AsignarDineroModal'));
+const ObjetivoFormModal = lazy(() => import('../mission-control/ObjetivoFormModal'));
 const StitchPendingPaymentModal = lazy(() => import('./pending-payments/StitchPendingPaymentModal'));
 const CurrencyModal = lazy(() => import('./common/modals/CurrencyModal').then(m => ({ default: m.CurrencyModal })));
 const PaymentMethodModal = lazy(() => import('./common/modals/PaymentMethodModal').then(m => ({ default: m.PaymentMethodModal })));
@@ -149,6 +150,8 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [showBudgetModal, setShowBudgetModal] = useState(false);
   const [editingBudget, setEditingBudget] = useState(null);
+  const [showObjetivoModal, setShowObjetivoModal] = useState(false);
+  const [editingObjetivo, setEditingObjetivo] = useState(null);
   const [showAsignarDineroModal, setShowAsignarDineroModal] = useState(false);
   const [objetivoToFund, setObjetivoToFund] = useState(null);
   const [showPendingPaymentModal, setShowPendingPaymentModal] = useState(false);
@@ -159,6 +162,8 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   const [transactionToDelete, setTransactionToDelete] = useState(null);
   const [showAgentPanel, setShowAgentPanel] = useState(false);
   const [showAIConfigModal, setShowAIConfigModal] = useState(false);
+  const isApplyingHistoryRef = useRef(false);
+  const hasInitializedHistoryRef = useRef(false);
 
   // ====== EFFECTS ======
   // Reaccionar a cambios de initialView (navegación mobile desde App.jsx)
@@ -202,6 +207,57 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   useEffect(() => {
     setHeaderScope(null);
   }, [currentView]);
+
+  useEffect(() => {
+    const buildNavState = () => ({
+      appNav: true,
+      view: currentView,
+      showAgentPanel,
+      showBulkUpload,
+    });
+
+    if (!hasInitializedHistoryRef.current) {
+      window.history.replaceState(buildNavState(), '');
+      window.history.pushState(buildNavState(), '');
+      hasInitializedHistoryRef.current = true;
+      return;
+    }
+
+    if (isApplyingHistoryRef.current) {
+      isApplyingHistoryRef.current = false;
+      return;
+    }
+
+    window.history.pushState(buildNavState(), '');
+  }, [currentView, showAgentPanel, showBulkUpload]);
+
+  useEffect(() => {
+    const handlePopState = (event) => {
+      const navState = event.state;
+
+      if (!navState?.appNav) {
+        window.history.pushState(
+          {
+            appNav: true,
+            view: currentView,
+            showAgentPanel,
+            showBulkUpload,
+          },
+          ''
+        );
+        return;
+      }
+
+      isApplyingHistoryRef.current = true;
+      setCurrentView(navState.view || 'dashboard');
+      setShowAgentPanel(Boolean(navState.showAgentPanel));
+      setShowBulkUpload(Boolean(navState.showBulkUpload));
+      onNavigate && onNavigate(navState.view || 'dashboard');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [currentView, onNavigate, showAgentPanel, showBulkUpload]);
 
   useEffect(() => {
     const loadCedears = async () => {
@@ -693,6 +749,14 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
       return;
     }
 
+    if (showAgentPanel) {
+      setShowAgentPanel(false);
+    }
+
+    if (showBulkUpload) {
+      setShowBulkUpload(false);
+    }
+
     setCurrentView(view);
     onNavigate && onNavigate(view);
   };
@@ -1021,9 +1085,25 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
         return (
           <ModernObjetivosView
             objetivos={objetivos}
-            onNewObjetivo={() => console.log('Nuevo objetivo')}
-            onEditObjetivo={(obj) => console.log('Editar:', obj)}
-            onDeleteObjetivo={(id) => console.log('Eliminar:', id)}
+            onNewObjetivo={() => {
+              setEditingObjetivo(null);
+              setShowObjetivoModal(true);
+            }}
+            onEditObjetivo={(obj) => {
+              setEditingObjetivo(obj || null);
+              setShowObjetivoModal(true);
+            }}
+            onDeleteObjetivo={async (id) => {
+              if (!id) return;
+              if (!window.confirm('¿Eliminar este objetivo?')) return;
+              try {
+                await objetivosApi.delete(id);
+                await refreshData();
+              } catch (error) {
+                console.error('Error deleting objetivo:', error);
+                alert('Error al eliminar el objetivo');
+              }
+            }}
             onAportar={(obj) => {
               setObjetivoToFund(obj || null);
               setShowAsignarDineroModal(true);
@@ -1201,9 +1281,7 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
         return (
           <ModernResumenesView
             resumenes={resumenesBancarios}
-            onUploadResumen={() => console.log('Upload resumen')}
-            onViewResumen={(r) => console.log('Ver:', r)}
-            onDownloadPDF={(r) => console.log('Download:', r)}
+            onUploadResumen={() => console.log('Upload resumen pendiente implementar')}
           />
         );
 
@@ -1326,6 +1404,25 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
             }}
             onSuccess={handleTransactionSaved}
             editingTransaction={editingTransaction}
+          />
+        </Suspense>
+      )}
+
+      {showObjetivoModal && (
+        <Suspense fallback={null}>
+          <ObjetivoFormModal
+            isOpen={showObjetivoModal}
+            onClose={() => {
+              setShowObjetivoModal(false);
+              setEditingObjetivo(null);
+            }}
+            onSuccess={async () => {
+              await refreshData();
+              setShowObjetivoModal(false);
+              setEditingObjetivo(null);
+            }}
+            objetivo={editingObjetivo}
+            categorias={categories}
           />
         </Suspense>
       )}

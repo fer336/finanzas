@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { 
   X, 
@@ -14,107 +14,289 @@ import {
   Check,
   Link,
   Trash2,
-  ExternalLink
+  ExternalLink,
+  Upload,
+  AlertCircle,
+  File
 } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DocField — campo editable con preview de imagen / PDF / link genérico
+// FileUploadField — upload de archivos a MinIO con preview + URL manual
 // ─────────────────────────────────────────────────────────────────────────────
-const DocField = ({ label, hint, value, onChange, previewTitle, accentColor }) => {
+const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentColor, uploadPrefix = 'comprobantes' }) => {
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [error, setError] = useState(null);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef(null);
+
   const isImage = value && /\.(jpe?g|png|webp|gif|bmp|svg)(\?.*)?$/i.test(value);
   const isPdf   = value && /\.(pdf)(\?.*)?$/i.test(value);
+  const hasFile = !!value;
+
+  // ── Compresión de imágenes (adaptada de ComprobanteUploader) ──
+  const compressImage = useCallback(async (file) => {
+    const MAX_SIZE_BYTES = 2 * 1024 * 1024;
+    if (file.size <= MAX_SIZE_BYTES || !file.type.startsWith('image/') || file.type === 'application/pdf') {
+      return file;
+    }
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          let width = img.width, height = img.height;
+          const maxDim = 1920;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) { height = (height / width) * maxDim; width = maxDim; }
+            else { width = (width / height) * maxDim; height = maxDim; }
+          }
+          canvas.width = width; canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+          const tryCompress = (q) => {
+            canvas.toBlob((blob) => {
+              if (!blob) { resolve(file); return; }
+              if (blob.size <= MAX_SIZE_BYTES || q <= 0.3) {
+                resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() }));
+              } else { tryCompress(q - 0.1); }
+            }, 'image/jpeg', q);
+          };
+          tryCompress(0.9);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }, []);
+
+  // ── Subida a MinIO ──
+  const doUpload = useCallback(async (file) => {
+    const maxSize = 10 * 1024 * 1024;
+    const allowed = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    if (file.size > maxSize) { setError('El archivo es demasiado grande. Máximo 10MB.'); return; }
+    if (!allowed.includes(file.type)) { setError('Tipo de archivo no permitido. Use JPG, PNG o PDF.'); return; }
+
+    setError(null);
+    setUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const processedFile = await compressImage(file);
+
+      const progressInterval = setInterval(() => {
+        setUploadProgress((prev) => {
+          if (prev >= 90) { clearInterval(progressInterval); return 90; }
+          return prev + 10;
+        });
+      }, 200);
+
+      const baseUrl = import.meta.env.MODE === 'production' ? '' : 'http://localhost:8000';
+      const fd = new FormData();
+      fd.append('file', processedFile);
+
+      const res = await fetch(`${baseUrl}/api/files/upload?prefix=${uploadPrefix}`, {
+        method: 'POST', body: fd,
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.detail || errData.message || 'Error al subir archivo');
+      }
+
+      const data = await res.json();
+      const fileUrl = data.data?.file_url || data.data?.url || data.file_url || data.url;
+      if (!fileUrl) throw new Error('El servidor no devolvió la URL');
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      onChange(fileUrl);
+
+      setTimeout(() => { setUploading(false); setUploadProgress(0); }, 500);
+    } catch (err) {
+      setError(err.message || 'Error al subir el archivo');
+      setUploading(false);
+      setUploadProgress(0);
+    }
+  }, [compressImage, onChange, uploadPrefix]);
+
+  // ── Handlers de drag & drop ──
+  const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
+  const handleDragLeave = () => setIsDragging(false);
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) doUpload(files[0]);
+  };
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) doUpload(files[0]);
+    e.target.value = '';
+  };
 
   return (
     <div className="space-y-3">
       {/* Label */}
       <div className="flex flex-col gap-0.5 ml-1">
         <label className="text-white text-sm font-semibold flex items-center gap-1.5">
-          <Link className="w-3.5 h-3.5" style={{ color: accentColor }} />
+          <FileText className="w-3.5 h-3.5" style={{ color: accentColor }} />
           {label}
         </label>
         {hint && <span className="text-gray-500 text-xs">{hint}</span>}
       </div>
 
-      {/* Input + clear */}
-      <div className="flex gap-2">
-        <input
-          type="url"
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 transition-all placeholder:text-gray-600 text-sm"
-          style={{ '--tw-ring-color': `${accentColor}80` }}
-          placeholder="https://..."
-        />
-        {value && (
-          <button
-            type="button"
-            onClick={() => onChange('')}
-            className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 hover:bg-red-500/20 transition-colors"
-            title={`Quitar ${label.toLowerCase()}`}
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        )}
-      </div>
-
-      {/* Preview */}
-      {value && (
-        <div className="rounded-2xl overflow-hidden border border-white/10 bg-black/20">
-          {isImage ? (
-            <div className="relative">
-              <img
-                src={value}
-                alt={previewTitle}
-                className="w-full max-h-56 object-contain bg-black/40"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-              />
-              <a
-                href={value}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1.5 bg-black/60 backdrop-blur-sm border border-white/10 rounded-lg text-white text-xs font-medium hover:bg-black/80 transition-colors"
-              >
-                <ExternalLink className="w-3 h-3" />
-                Ver completo
-              </a>
-            </div>
-          ) : isPdf ? (
-            <div className="relative h-64">
-              <iframe
-                src={value}
-                title={previewTitle}
-                className="w-full h-full border-0"
-              />
-              <a
-                href={value}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1.5 bg-black/60 backdrop-blur-sm border border-white/10 rounded-lg text-white text-xs font-medium hover:bg-black/80 transition-colors"
-              >
-                <ExternalLink className="w-3 h-3" />
-                Abrir PDF
-              </a>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3 p-4">
-              <div className="p-2.5 rounded-xl" style={{ backgroundColor: `${accentColor}1a` }}>
-                <FileText className="w-5 h-5" style={{ color: accentColor }} />
+      {/* ── Ya hay archivo subido → preview ── */}
+      {hasFile && !showUrlInput && (
+        <div className="space-y-2">
+          <div className="rounded-2xl overflow-hidden border border-white/10 bg-black/20">
+            {isImage ? (
+              <div className="relative">
+                <img src={value} alt={previewTitle} className="w-full max-h-56 object-contain bg-black/40" />
+                <a href={value} target="_blank" rel="noopener noreferrer"
+                   className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1.5 bg-black/60 backdrop-blur-sm border border-white/10 rounded-lg text-white text-xs font-medium hover:bg-black/80 transition-colors">
+                  <ExternalLink className="w-3 h-3" /> Ver completo
+                </a>
               </div>
-              <p className="text-gray-400 text-xs truncate flex-1">{value}</p>
-              <a
-                href={value}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors shrink-0"
-                style={{ backgroundColor: `${accentColor}1a`, color: accentColor, border: `1px solid ${accentColor}40` }}
-              >
-                <ExternalLink className="w-3 h-3" />
-                Abrir
-              </a>
+            ) : isPdf ? (
+              <div className="relative h-64">
+                <iframe src={value} title={previewTitle} className="w-full h-full border-0" />
+                <a href={value} target="_blank" rel="noopener noreferrer"
+                   className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1.5 bg-black/60 backdrop-blur-sm border border-white/10 rounded-lg text-white text-xs font-medium hover:bg-black/80 transition-colors">
+                  <ExternalLink className="w-3 h-3" /> Abrir PDF
+                </a>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3 p-4">
+                <div className="p-2.5 rounded-xl" style={{ backgroundColor: `${accentColor}1a` }}>
+                  <FileText className="w-5 h-5" style={{ color: accentColor }} />
+                </div>
+                <p className="text-gray-400 text-xs truncate flex-1">{value}</p>
+                <a href={value} target="_blank" rel="noopener noreferrer"
+                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors shrink-0"
+                   style={{ backgroundColor: `${accentColor}1a`, color: accentColor, border: `1px solid ${accentColor}40` }}>
+                  <ExternalLink className="w-3 h-3" /> Abrir
+                </a>
+              </div>
+            )}
+          </div>
+
+          {/* Acciones: reemplazar + quitar + editar URL */}
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors"
+                    style={{ backgroundColor: `${accentColor}1a`, color: accentColor, border: `1px solid ${accentColor}30` }}>
+              <Upload className="w-3 h-3" /> Reemplazar archivo
+            </button>
+            <button type="button" onClick={() => onChange('')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-red-400 border border-red-500/20 hover:bg-red-500/10 transition-colors">
+              <Trash2 className="w-3 h-3" /> Quitar
+            </button>
+            <button type="button" onClick={() => setShowUrlInput(true)}
+                    className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-gray-400 hover:text-white transition-colors">
+              <Link className="w-3 h-3" /> Editar URL
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Zona de upload (cuando no hay archivo O se activó URL manual) ── */}
+      {(!hasFile || showUrlInput) && !uploading && (
+        <div className="space-y-3">
+          {/* Upload zone (solo si no hay archivo) */}
+          {!hasFile && (
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`
+                flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border-2 border-dashed cursor-pointer transition-all
+                ${isDragging
+                  ? 'border-[#10b981] bg-[#10b981]/5'
+                  : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/[0.07]'
+                }
+              `}
+            >
+              <Upload className="w-8 h-8" style={{ color: `${accentColor}99` }} />
+              <p className="text-white text-sm font-medium">Subir archivo</p>
+              <p className="text-gray-500 text-xs text-center">
+                Arrastrá un archivo o hace clic para seleccionar
+              </p>
+              <p className="text-gray-600 text-xs">
+                JPG, PNG, PDF — máx. 10MB
+              </p>
             </div>
+          )}
+
+          {/* URL input (siempre visible cuando está en modo URL) */}
+          <div className="flex gap-2">
+            <input
+              type="url"
+              value={value || ''}
+              onChange={(e) => onChange(e.target.value)}
+              className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 transition-all placeholder:text-gray-600 text-sm"
+              style={{ '--tw-ring-color': `${accentColor}80` }}
+              placeholder="https://..."
+            />
+            {value && (
+              <button type="button" onClick={() => onChange('')}
+                      className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 hover:bg-red-500/20 transition-colors"
+                      title={`Quitar ${label.toLowerCase()}`}>
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {/* Toggle: URL manual ⇄ upload */}
+          {!hasFile && (
+            <button type="button" onClick={() => setShowUrlInput(!showUrlInput)}
+                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1">
+              <Link className="w-3 h-3" />
+              {showUrlInput ? 'Subir archivo en su lugar' : 'O pegar URL manualmente'}
+            </button>
+          )}
+          {hasFile && showUrlInput && (
+            <button type="button" onClick={() => setShowUrlInput(false)}
+                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1">
+              <FileText className="w-3 h-3" />
+              Volver a vista de archivo
+            </button>
           )}
         </div>
       )}
+
+      {/* ── Progress bar ── */}
+      {uploading && (
+        <div className="space-y-2 p-4 rounded-2xl bg-white/5 border border-white/10">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-300 font-medium">Subiendo archivo...</span>
+            <span className="text-sm text-gray-500">{uploadProgress}%</span>
+          </div>
+          <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+            <div className="h-full rounded-full transition-all duration-300"
+                 style={{ width: `${uploadProgress}%`, backgroundColor: accentColor }} />
+          </div>
+        </div>
+      )}
+
+      {/* ── Error ── */}
+      {error && (
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
+          <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+          <span className="text-sm text-red-300 flex-1">{error}</span>
+          <button type="button" onClick={() => setError(null)}
+                  className="p-1 hover:bg-red-500/10 rounded-lg transition-colors">
+            <X className="w-3.5 h-3.5 text-red-400" />
+          </button>
+        </div>
+      )}
+
+      {/* Hidden file input */}
+      <input ref={fileInputRef} type="file" className="hidden"
+             accept=".jpg,.jpeg,.png,.pdf" onChange={handleFileSelect} />
     </div>
   );
 };
@@ -536,23 +718,25 @@ const StitchPendingPaymentModal = ({
               </div>
 
               {/* ── FACTURA ORIGINAL (url_pdf) ── */}
-              <DocField
+              <FileUploadField
                 label="Factura original"
                 hint="El PDF o imagen de la factura/servicio a pagar"
                 value={formData.url_pdf}
                 onChange={(val) => setFormData({ ...formData, url_pdf: val })}
                 previewTitle="Factura"
                 accentColor="#6366f1"
+                uploadPrefix="facturas"
               />
 
               {/* ── COMPROBANTE DE PAGO (comprobante) ── */}
-              <DocField
+              <FileUploadField
                 label="Comprobante de pago"
                 hint="El ticket o recibo que prueba que ya pagaste"
                 value={formData.comprobante}
                 onChange={(val) => setFormData({ ...formData, comprobante: val })}
                 previewTitle="Comprobante"
                 accentColor="#10b981"
+                uploadPrefix="comprobantes"
               />
             </section>
           </form>

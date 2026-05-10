@@ -227,7 +227,9 @@ export function NuevoGastoHijaModal({ onGastoCreado, trigger }) {
         ...(notas && { Notas: notas }),
         // Relaciones requeridas - buscar categoría "Gastos con Hija"
         categorias_id: await obtenerCategoriaGastosHija(),
-        metodos_pago_id: await obtenerMetodoPagoPorDefecto()
+        metodos_pago_id: await obtenerMetodoPagoPorDefecto(),
+        // Adjuntar comprobante subido a MinIO si existe
+        ...(comprobante?.url && { Comprobante: comprobante.url })
       };
 
       // Crear la transacción

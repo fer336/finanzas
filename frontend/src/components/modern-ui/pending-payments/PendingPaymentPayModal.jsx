@@ -1,17 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Calendar, FileUp, Loader2, Upload, X } from 'lucide-react';
-
-const normalizeProvider = (name = '', description = '') => {
-  const normalized = `${String(name)} ${String(description)}`.toLowerCase();
-  if (normalized.includes('proagas') || normalized.includes('progas')) return 'proagas';
-  if (normalized.includes('calp')) return 'calp';
-  if (normalized.includes('hetzner')) return 'hetzner';
-  if (normalized.includes('galicia') || normalized.includes('resumen')) return 'galicia';
-  return 'otros';
-};
-
-const DEFAULT_OTHERS_FOLDER_ID = '1GL2yl7QmdAQCtmxzOLf-MJOJ3qaNkyAx';
 
 const PendingPaymentPayModal = ({
   isOpen,
@@ -32,11 +21,6 @@ const PendingPaymentPayModal = ({
   const [uploadingProof, setUploadingProof] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-
-  const provider = useMemo(
-    () => normalizeProvider(payment?.nombre, payment?.descripcion),
-    [payment?.nombre, payment?.descripcion]
-  );
 
   useEffect(() => {
     if (!isOpen) return;
@@ -75,48 +59,35 @@ const PendingPaymentPayModal = ({
 
   if (!isOpen || !payment) return null;
 
-  const uploadProofToDrive = async () => {
+  const uploadToMinIO = async () => {
     if (!selectedFile) return formData.comprobante;
 
     const backendBaseUrl = import.meta.env.MODE === 'production' ? '' : 'http://localhost:8000';
-    const targetFolderId = provider === 'otros'
-      ? (import.meta.env.VITE_DRIVE_OTHERS_FOLDER_ID || DEFAULT_OTHERS_FOLDER_ID)
-      : '';
-
-    const proxyParams = new URLSearchParams({
-      provider,
-      payment_name: payment?.nombre || 'Pago'
-    });
-
-    if (targetFolderId) {
-      proxyParams.set('fallback_folder_id', targetFolderId);
-    }
-
-    const proxyEndpoint = `${backendBaseUrl}/api/files/upload-drive-comprobante?${proxyParams.toString()}`;
+    const endpoint = `${backendBaseUrl}/api/files/upload?prefix=comprobantes`;
 
     setUploadingProof(true);
     try {
       const body = new FormData();
       body.append('file', selectedFile);
 
-      const response = await fetch(proxyEndpoint, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         body
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'No se pudo subir el comprobante a Drive');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || errorData.message || 'No se pudo subir el comprobante');
       }
 
       const data = await response.json();
-      const url = data?.data?.url || data.url || data.webViewLink || data.file_url || '';
-      if (!url) {
-        throw new Error('Drive no devolvió URL del comprobante');
+      const fileUrl = data.data?.file_url || data.data?.url || data.file_url || data.url;
+      if (!fileUrl) {
+        throw new Error('El servidor no devolvió la URL del comprobante');
       }
 
-      setFormData((prev) => ({ ...prev, comprobante: url }));
-      return url;
+      setFormData((prev) => ({ ...prev, comprobante: fileUrl }));
+      return fileUrl;
     } finally {
       setUploadingProof(false);
     }
@@ -133,7 +104,7 @@ const PendingPaymentPayModal = ({
 
     setSaving(true);
     try {
-      const comprobanteUrl = await uploadProofToDrive();
+      const comprobanteUrl = await uploadToMinIO();
 
       await onConfirm({
         item_id: payment.id || payment.Id,
@@ -221,7 +192,7 @@ const PendingPaymentPayModal = ({
           </label>
 
           <label className="text-sm text-white/80 block">
-            <span className="block mb-1">Comprobante (se sube a carpeta Drive de {provider.toUpperCase()})</span>
+            <span className="block mb-1">Comprobante (se sube a MinIO)</span>
             <div className="flex items-center gap-3">
               <label className="flex items-center gap-2 px-4 py-2.5 bg-[#0a0a0a] border border-white/10 rounded-xl cursor-pointer hover:border-[#10b981]/40 transition-colors">
                 <Upload className="w-4 h-4 text-[#10b981]" />
@@ -270,7 +241,7 @@ const PendingPaymentPayModal = ({
               className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#10b981] to-[#059669] text-white font-semibold hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50"
             >
               {(saving || uploadingProof) ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
-              {uploadingProof ? 'Subiendo comprobante...' : saving ? 'Guardando...' : 'Confirmar pago'}
+              {uploadingProof ? 'Subiendo comprobante a MinIO...' : saving ? 'Guardando...' : 'Confirmar pago'}
             </button>
           </div>
         </form>

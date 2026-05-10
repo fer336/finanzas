@@ -146,26 +146,42 @@ export function ComprobanteUploader({ onFileUpload, existingFile, transaccionId,
         });
       }, 200);
 
-      // Convertir archivo a base64 para almacenar
-      const base64 = await convertToBase64(file);
-      
-      // Crear objeto de archivo
-      const fileData = {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        data: base64,
-        uploadDate: new Date().toISOString()
-      };
+      // Subir archivo a MinIO via backend API
+      const backendBaseUrl = import.meta.env.MODE === 'production' ? '' : 'http://localhost:8000';
+      const endpoint = `${backendBaseUrl}/api/files/upload?prefix=comprobantes`;
 
-      // Simular delay de subida
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      const body = new FormData();
+      body.append('file', file);
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        body
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || errorData.message || 'Error al subir el archivo');
+      }
+
+      const data = await response.json();
+      const fileUrl = data.data?.file_url || data.data?.url || data.file_url || data.url;
+
+      if (!fileUrl) {
+        throw new Error('El servidor no devolvió la URL del comprobante');
+      }
+
+      clearInterval(progressInterval);
       setUploadProgress(100);
       
-      // Llamar callback con los datos del archivo
+      // Llamar callback con la URL del archivo subido a MinIO
       if (onFileUpload) {
-        await onFileUpload(fileData, transaccionId);
+        await onFileUpload({
+          url: fileUrl,
+          file_url: fileUrl,
+          name: file.name,
+          size: file.size,
+          type: file.type
+        }, transaccionId);
       }
       
       setTimeout(() => {
@@ -175,19 +191,10 @@ export function ComprobanteUploader({ onFileUpload, existingFile, transaccionId,
       
     } catch (err) {
       console.error('Error subiendo archivo:', err);
-      setError('Error al subir el archivo. Inténtalo de nuevo.');
+      setError(err.message || 'Error al subir el archivo. Inténtalo de nuevo.');
       setUploading(false);
       setUploadProgress(0);
     }
-  };
-
-  const convertToBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-    });
   };
 
 

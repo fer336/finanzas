@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import ModernSidebar from './ModernSidebar';
 import ModernHeader from './ModernHeader';
+import MobileBottomNav from '../../MobileBottomNav';
+import { useIsMobile } from '../../../hooks/use-mobile';
 
 /**
  * ModernLayout - Layout wrapper con Sidebar + Header + Content
@@ -28,6 +30,7 @@ const ModernLayout = ({
   dashboardSettings
 }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const isMobile = useIsMobile();
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">
@@ -76,6 +79,13 @@ const ModernLayout = ({
           {children}
         </main>
       </div>
+
+      {isMobile && (
+        <MobileBottomNav
+          currentView={currentView}
+          onNavigate={onNavigate}
+        />
+      )}
     </div>
   );
 };

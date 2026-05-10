@@ -1,0 +1,170 @@
+# ====================================================================
+# 🚀 DEPLOY A PRODUCCIÓN - FINANZAS APP
+#   Build → Push a Docker Hub → SSH Deploy a Docker Swarm
+#
+# Secrets requeridos en GitHub:
+#   DOCKER_USERNAME   - usuario de Docker Hub (ej: ferc33)
+#   DOCKER_PASSWORD   - token/password de Docker Hub
+#   SSH_HOST          - IP o dominio del servidor
+#   SSH_USER          - usuario SSH
+#   SSH_KEY           - clave privada SSH
+#   GOOGLE_CLIENT_ID  - Client ID de OAuth Google
+#   OAUTH_URL         - callback URL de OAuth (ej: https://finanzas.qeva.xyz/auth/google/callback)
+#   N8N_WEBHOOK       - webhook de n8n (ej: https://n8nw.qeva.xyz/webhook/finance-agency)
+# ====================================================================
+name: 🚀 Deploy a Producción
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag de versión manual (default: auto vYYYYMMDD-commit)'
+        required: false
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME || 'ferc33' }}
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      # ── 2. Login a Docker Hub ────────────────────────────────────────────
+      - name: 🔑 Login a Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # ── 3. Setup Docker Buildx ───────────────────────────────────────────
+      - name: ⚙️ Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ── 4. Generar tag ───────────────────────────────────────────────────
+      - name: 🏷️ Generar versión tag
+        id: tags
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            echo "VERSION=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "VERSION=v$(date +'%Y%m%d')-${GITHUB_SHA::8}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "🔖 Tag generado: $(echo "$VERSION")"
+
+      # ── 5. Build & Push Backend ──────────────────────────────────────────
+      - name: 🐍 Build & Push Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.DOCKER_USERNAME }}/finanzas-backend:${{ steps.tags.outputs.VERSION }}
+            ${{ env.DOCKER_USERNAME }}/finanzas-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ github.event.repository.updated_at }}
+
+      # ── 6. Build & Push Frontend ─────────────────────────────────────────
+      - name: 🎨 Build & Push Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          build-args: |
+            VITE_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            VITE_BACKEND_URL=
+            VITE_OAUTH_PROD_URL=${{ secrets.OAUTH_URL }}
+            VITE_N8N_WEBHOOK=${{ secrets.N8N_WEBHOOK }}
+          tags: |
+            ${{ env.DOCKER_USERNAME }}/finanzas-frontend:${{ steps.tags.outputs.VERSION }}
+            ${{ env.DOCKER_USERNAME }}/finanzas-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ github.event.repository.updated_at }}
+
+      # ── 7. Deploy vía SSH ────────────────────────────────────────────────
+      - name: 🚀 Deploy a producción vía SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script_timeout: 5m
+          script: |
+            set -e
+
+            VERSION="${{ steps.tags.outputs.VERSION }}"
+            STACK_NAME="finanzas"
+            COMPOSE_FILE="docker-compose.yml"
+            echo "🚀 Desplegando versión: ${VERSION}"
+
+            # ── Ir al directorio del proyecto ──
+            cd ~/finanzas || cd /opt/finanzas || cd /srv/finanzas || {
+              echo "❌ No se encontró el directorio del proyecto"
+              exit 1
+            }
+            echo "📂 Directorio: $(pwd)"
+
+            # ── Sincronizar docker-compose.yml del repo ──
+            # Si docker-compose.yml está en el repo, lo trackeamos
+            # Si no (está en .gitignore), lo dejamos como está en el servidor
+
+            # ── Actualizar tags en docker-compose.yml ──
+            if [ -f "${COMPOSE_FILE}" ]; then
+              echo "📝 Actualizando tags en ${COMPOSE_FILE}..."
+              sudo sed -i "s|finanzas-backend:v[0-9.]\+|finanzas-backend:${VERSION}|g" "${COMPOSE_FILE}"
+              sudo sed -i "s|finanzas-frontend:v[0-9.]\+|finanzas-frontend:${VERSION}|g" "${COMPOSE_FILE}"
+              echo "✅ Tags actualizados"
+            else
+              echo "⚠️  No se encuentra ${COMPOSE_FILE}"
+            fi
+
+            # ── Pull imágenes nuevas ──
+            echo "📦 Pull de imágenes nuevas..."
+            sudo docker pull "${{ env.DOCKER_USERNAME }}/finanzas-backend:${VERSION}"
+            sudo docker pull "${{ env.DOCKER_USERNAME }}/finanzas-frontend:${VERSION}"
+            echo "✅ Imágenes descargadas"
+
+            # ── Redeploy stack ──
+            echo "🔄 Redeploy del stack..."
+            sudo docker stack deploy -c "${COMPOSE_FILE}" "${STACK_NAME}"
+            echo "✅ Stack desplegado"
+
+            # ── Verificar ──
+            echo ""
+            echo "═══════════════════════════════════"
+            echo "📋 Servicios:"
+            sudo docker service ls | grep "${STACK_NAME}"
+            echo "═══════════════════════════════════"
+            echo ""
+            echo "✅ Deploy completado: ${VERSION}"
+
+      # ── 8. Notificación ──────────────────────────────────────────────────
+      - name: ✅ Notificar resultado
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "🎉 Deploy exitoso: ${{ steps.tags.outputs.VERSION }}"
+          else
+            echo "❌ Deploy falló"
+            exit 1
+          fi

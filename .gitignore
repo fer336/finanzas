@@ -91,6 +91,9 @@ lerna-debug.log*
 *.sqlite3
 *.db-journal
 
+# Datos generados por la app (runtime)
+backend/data/ai_history.json
+
 # 🔧 HERRAMIENTAS DE DESARROLLO
 # ===================================
 .vscode/

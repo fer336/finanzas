@@ -12,7 +12,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_DB=1  # DB dedicada para LangGraph
     secrets:
-      - source: finanzas_backend_env
+      - source: finanzas_env
         target: /run/secrets/backend.env
     volumes:
       - backend_logs:/app/logs
@@ -90,7 +90,7 @@ services:
     depends_on:
       - backend
     secrets:
-      - source: finanzas_backend_env
+      - source: finanzas_env
         target: /run/secrets/backend.env
     deploy:
       mode: replicated
@@ -129,6 +129,6 @@ volumes:
       device: /var/log/finanzas
 
 secrets:
-  finanzas_backend_env:
+  finanzas_env:
     external: true
     # Un solo secreto compartido entre backend y frontend

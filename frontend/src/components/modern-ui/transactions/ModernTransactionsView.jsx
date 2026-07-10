@@ -2,10 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   Plus, Search, Download, Upload, Edit, Trash2,
-  ChevronLeft, ChevronRight, Calendar, CalendarDays,
-  ChevronDown, Check, RefreshCw, Filter
+  ChevronLeft, ChevronRight, CalendarDays,
+  ChevronDown, Check, RefreshCw,
 } from 'lucide-react';
-import FloatingActionButton from '../common/FloatingActionButton';
+import { Button } from '../../ui/button';
+import { Badge } from '../../ui/badge';
+import KpiCard from '../common/KpiCard';
+import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
 import { useRefresh } from '../../../hooks/useRefresh';
 import { QUERY_KEYS } from '../../../hooks/useFinancialData';
 import { useIsMobile } from '../../../hooks/use-mobile';
@@ -26,8 +29,15 @@ const MESES = [
   { key: 12, label: 'Dic', fullLabel: 'Diciembre' },
 ];
 
-const TX_MONTHS_KEY   = 'tx_selected_months';   // acumulado: meses checkeados
+const RANGE_OPTIONS = [
+  { value: 'day',   label: 'Día' },
+  { value: 'week',  label: 'Semana' },
+  { value: 'month', label: 'Mes' },
+];
+
+const TX_MONTHS_KEY    = 'tx_selected_months';   // acumulado: meses checkeados
 const TX_VIEW_MODE_KEY = 'tx_view_mode';         // 'monthly' | 'accumulated'
+const TX_RANGE_KEY     = 'tx_range';             // 'day' | 'week' | 'month' — further-filtra dentro del período
 
 const loadSelectedMonths = () => {
   try {
@@ -46,6 +56,57 @@ const loadViewMode = () => {
   } catch { return 'monthly'; }
 };
 
+const loadRange = () => {
+  try {
+    const saved = localStorage.getItem(TX_RANGE_KEY);
+    if (saved === 'day' || saved === 'week' || saved === 'month') return saved;
+  } catch { /* ignore */ }
+  return 'month';
+};
+
+// ─── Toggle de pills genérico (Mensual/Acumulado, Día/Semana/Mes) ───────────
+// Ver design_handoff_rediseno_papel/README.md sección "3. Movimientos".
+const PillToggle = ({ options, value, onChange, activeClassName }) => (
+  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] bg-card p-[3px]">
+    {options.map((opt) => (
+      <button
+        key={opt.value}
+        type="button"
+        onClick={() => onChange(opt.value)}
+        className={`rounded-full px-3 py-1 font-mono text-[12px] transition-colors duration-150 ${
+          value === opt.value
+            ? `${activeClassName} font-semibold`
+            : 'text-[#5d6470] hover:text-foreground'
+        }`}
+      >
+        {opt.label}
+      </button>
+    ))}
+  </div>
+);
+
+PillToggle.propTypes = {
+  options: PropTypes.arrayOf(PropTypes.shape({
+    value: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+  })).isRequired,
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  activeClassName: PropTypes.string.isRequired,
+};
+
+const FilterSelect = (props) => (
+  <select
+    {...props}
+    className="rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+  />
+);
+
+const EmptyState = ({ children }) => (
+  <p className="text-[13.5px] italic text-muted-foreground">{children}</p>
+);
+EmptyState.propTypes = { children: PropTypes.node };
+
 // ─── Componente ───────────────────────────────────────────────────────────────
 const ModernTransactionsView = ({
   transactions = [],
@@ -57,14 +118,18 @@ const ModernTransactionsView = ({
 }) => {
   const { refresh, isRefreshing } = useRefresh([QUERY_KEYS.transactions, QUERY_KEYS.dashboardStats]);
   const isMobile = useIsMobile();
+  const { formatAmount } = useAmountVisibility();
 
   const [searchQuery, setSearchQuery]     = useState('');
   const [selectedType, setSelectedType]   = useState('all');
-  const [selectedCurrency, setSelectedCurrency] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentPage, setCurrentPage]     = useState(1);
 
   // Vista: mensual (un mes con flechas) vs acumulado (multi-mes con checkboxes)
   const [viewMode, setViewMode]           = useState(loadViewMode);
+
+  // Rango dentro del período ya scopeado por mes: día / semana / mes.
+  const [range, setRange] = useState(loadRange);
 
   // Mes único para modo mensual
   const [selectedMonth, setSelectedMonth] = useState(() => {
@@ -86,6 +151,10 @@ const ModernTransactionsView = ({
   useEffect(() => {
     localStorage.setItem(TX_MONTHS_KEY, JSON.stringify(selectedMonths));
   }, [selectedMonths]);
+
+  useEffect(() => {
+    localStorage.setItem(TX_RANGE_KEY, range);
+  }, [range]);
 
   // Sincronizar scope del header con la selección de meses activa en esta vista
   useEffect(() => {
@@ -113,7 +182,7 @@ const ModernTransactionsView = ({
 
   // Reset página en cualquier cambio de filtro
   useEffect(() => { setCurrentPage(1); },
-    [searchQuery, selectedType, selectedCurrency, viewMode, selectedMonth, selectedMonths]);
+    [searchQuery, selectedType, selectedCategory, viewMode, selectedMonth, selectedMonths, range]);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
   const getTransactionDate = (t) => {
@@ -137,12 +206,7 @@ const ModernTransactionsView = ({
     return 'Sin categoría';
   };
 
-  const formatMonto = (n) =>
-    new Intl.NumberFormat('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
-
-
-
-  // ── Filtrado por fecha ────────────────────────────────────────────────────
+  // ── Filtrado por fecha (mes/acumulado) ───────────────────────────────────
   const currentYear = new Date().getFullYear();
 
   const dateFiltered = (() => {
@@ -161,15 +225,35 @@ const ModernTransactionsView = ({
     });
   })();
 
-  // ── Filtrado por búsqueda / tipo / moneda ────────────────────────────────
-  const filtered = dateFiltered.filter(t => {
+  // ── Filtrado por rango día/semana/mes (further-filtra dateFiltered) ─────
+  // día = fecha de hoy; semana = lunes de esta semana → hoy; mes = sin filtro
+  // adicional. Lógica de referencia: design_handoff_rediseno_papel/datos-ejemplo.html
+  const now = new Date();
+  const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const weekStart = (() => {
+    const dow = (todayLocal.getDay() + 6) % 7; // 0 = lunes
+    const d = new Date(todayLocal);
+    d.setDate(todayLocal.getDate() - dow);
+    return d;
+  })();
+
+  const rangeFiltered = dateFiltered.filter(t => {
+    if (range === 'month') return true;
+    const d = getTransactionDate(t);
+    if (!d) return false;
+    if (range === 'day') return d.getTime() === todayLocal.getTime();
+    return d >= weekStart && d <= todayLocal; // week
+  });
+
+  // ── Filtrado por búsqueda / tipo / categoría ─────────────────────────────
+  const filtered = rangeFiltered.filter(t => {
     const desc = t.descripcion || t.Descripcion || '';
     const cat  = getCategoryName(t);
     const matchSearch   = desc.toLowerCase().includes(searchQuery.toLowerCase())
                        || cat.toLowerCase().includes(searchQuery.toLowerCase());
     const matchType     = selectedType === 'all' || t.tipo === selectedType;
-    const matchCurrency = selectedCurrency === 'all' || (t.moneda || t.Moneda || 'ARS') === selectedCurrency;
-    return matchSearch && matchType && matchCurrency;
+    const matchCategory = selectedCategory === 'all' || cat === selectedCategory;
+    return matchSearch && matchType && matchCategory;
   });
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
@@ -185,9 +269,10 @@ const ModernTransactionsView = ({
     },
     { ingresos: 0, gastos: 0 }
   );
+  const balance = totales.ingresos - totales.gastos;
 
-  // ── Monedas disponibles ──────────────────────────────────────────────────
-  const availableCurrencies = [...new Set(transactions.map(t => t.moneda || t.Moneda || 'ARS'))].sort();
+  // ── Categorías disponibles (derivadas de las transacciones del período) ──
+  const availableCategories = [...new Set(dateFiltered.map(t => getCategoryName(t)))].sort();
 
   // ── Helpers selector multi-mes ───────────────────────────────────────────
   const toggleMonth = (key) => {
@@ -218,14 +303,12 @@ const ModernTransactionsView = ({
   const goToNextMonth = () => {
     const [yr, mo] = selectedMonth.split('-').map(Number);
     const d = new Date(yr, mo, 1);
-    const now = new Date();
     if (d <= now) setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
   };
   const goToToday = () => {
-    const now = new Date();
     setSelectedMonth(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`);
   };
-  const isCurrentMonth = selectedMonth >= `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+  const isCurrentMonth = selectedMonth >= `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
   const currentMonthLabel = (() => {
     const [yr, mo] = selectedMonth.split('-').map(Number);
@@ -234,74 +317,97 @@ const ModernTransactionsView = ({
     return `${names[mo - 1]} de ${yr}`;
   })();
 
-  const fabActions = [
-    { icon: Download, label: 'Exportar CSV',       onClick: onExportCSV },
-    { icon: Upload,   label: 'Importar CSV',        onClick: onBulkUpload },
-    { icon: Plus,     label: 'Nueva Transacción',   onClick: onNewTransaction },
-  ];
+  const periodoTitle = viewMode === 'monthly' ? currentMonthLabel : monthsLabel;
+  const periodoEyebrow = viewMode === 'monthly' ? `Período ${selectedMonth}` : `Acumulado ${currentYear}`;
+
+  // ── Acciones de cabecera (Actualizar, Importar, Exportar, + Nueva) ──────
+  const HeaderActions = ({ compact = false }) => (
+    <div className="flex shrink-0 flex-wrap items-center gap-2">
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={refresh}
+        disabled={isRefreshing}
+      >
+        <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+        {!compact && (isRefreshing ? 'Actualizando…' : 'Actualizar')}
+      </Button>
+      {onBulkUpload && (
+        <Button type="button" variant="outline" size="sm" onClick={onBulkUpload}>
+          <Upload className="h-3.5 w-3.5" />
+          {!compact && 'Importar'}
+        </Button>
+      )}
+      {onExportCSV && (
+        <Button type="button" variant="outline" size="sm" onClick={onExportCSV} title="Exportar CSV">
+          <Download className="h-3.5 w-3.5" />
+        </Button>
+      )}
+      {onNewTransaction && (
+        <Button type="button" size="sm" onClick={onNewTransaction}>
+          <Plus className="h-3.5 w-3.5" />
+          Nueva
+        </Button>
+      )}
+    </div>
+  );
+  HeaderActions.propTypes = { compact: PropTypes.bool };
 
   // ── Render Mobile ─────────────────────────────────────────────────────────
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] pb-24">
-
-        {/* Header mobile */}
+      <div className="min-h-screen bg-background pb-8">
         <div className="px-4 pt-4 pb-3">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-[#10b981]" />
-              <h2 className="text-lg font-bold text-white capitalize">
-                {viewMode === 'monthly' ? currentMonthLabel : `Acumulado — ${monthsLabel}`}
-              </h2>
-              {viewMode === 'accumulated' && (
-                <span className="text-[10px] bg-[#10b981]/20 text-[#10b981] px-2 py-0.5 rounded-full border border-[#10b981]/30">
-                  {selectedMonths.length}m
-                </span>
-              )}
+
+          {/* Cabecera de período */}
+          <div className="mb-3 border-b-[3px] border-double border-[#cfc6ae] pb-3">
+            <div className="font-mono text-[10px] uppercase text-[#3d5a80]" style={{ letterSpacing: '.14em' }}>
+              {periodoEyebrow}
             </div>
-            {/* Refresh */}
-            <button
-              onClick={refresh}
-              disabled={isRefreshing}
-              className="p-2 rounded-xl bg-[#18181b] border border-white/5 disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 text-gray-400 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </button>
+            <h1 className="mt-1 font-serif text-[26px] font-bold leading-none text-foreground capitalize">
+              {periodoTitle}
+            </h1>
+            <div className="mt-3">
+              <HeaderActions compact />
+            </div>
           </div>
 
-          {/* Toggle modo */}
-          <div className="bg-[#18181b] rounded-xl border border-white/5 p-1 flex gap-1 mb-3">
-            <button
-              onClick={() => setViewMode('monthly')}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-sm rounded-lg transition-all ${
-                viewMode === 'monthly' ? 'bg-[#10b981] text-white font-medium' : 'text-gray-400'
-              }`}
-            >
-              📅 Mensual
-            </button>
-            <button
-              onClick={() => setViewMode('accumulated')}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-sm rounded-lg transition-all ${
-                viewMode === 'accumulated' ? 'bg-[#10b981] text-white font-medium' : 'text-gray-400'
-              }`}
-            >
-              📊 Acumulado
-            </button>
+          {/* Toggle Mensual/Acumulado */}
+          <div className="mb-2.5">
+            <PillToggle
+              options={[{ value: 'monthly', label: 'Mensual' }, { value: 'accumulated', label: 'Acumulado' }]}
+              value={viewMode}
+              onChange={setViewMode}
+              activeClassName="bg-[#20242c] text-[#f4f0e6]"
+            />
+          </div>
+
+          {/* Toggle Día/Semana/Mes */}
+          <div className="mb-3">
+            <PillToggle
+              options={RANGE_OPTIONS}
+              value={range}
+              onChange={setRange}
+              activeClassName="bg-[#3d5a80] text-[#faf7ef]"
+            />
           </div>
 
           {/* Navegación mes (solo mensual) */}
           {viewMode === 'monthly' && (
-            <div className="flex items-center justify-between bg-[#18181b] rounded-xl border border-white/5 px-3 py-2 mb-3">
-              <button onClick={goToPrevMonth} className="p-1.5 rounded-lg hover:bg-white/5 transition-colors">
-                <ChevronLeft className="w-5 h-5 text-gray-400" />
+            <div className="mb-3 flex items-center justify-between rounded-sm border border-[#ddd5c2] bg-card px-3 py-2">
+              <button onClick={goToPrevMonth} className="p-1.5 rounded-sm hover:bg-black/5 transition-colors">
+                <ChevronLeft className="w-4 h-4 text-[#8a8677]" />
               </button>
-              <span className="text-sm font-medium text-white capitalize">{currentMonthLabel}</span>
+              <button onClick={goToToday} className="font-mono text-[12px] text-[#5d6470] hover:text-foreground">
+                hoy
+              </button>
               <button
                 onClick={goToNextMonth}
                 disabled={isCurrentMonth}
-                className="p-1.5 rounded-lg hover:bg-white/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="p-1.5 rounded-sm hover:bg-black/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                <ChevronRight className="w-5 h-5 text-gray-400" />
+                <ChevronRight className="w-4 h-4 text-[#8a8677]" />
               </button>
             </div>
           )}
@@ -311,21 +417,21 @@ const ModernTransactionsView = ({
             <div className="relative mb-3" ref={monthPickerRef}>
               <button
                 onClick={() => setShowMonthPicker(p => !p)}
-                className="w-full flex items-center justify-between px-4 py-2.5 bg-[#18181b] border border-white/10 rounded-xl text-sm text-gray-300"
+                className="w-full flex items-center justify-between px-3 py-2 bg-card border border-[#ddd5c2] rounded-sm text-[13px] text-foreground"
               >
                 <div className="flex items-center gap-2">
-                  <CalendarDays className="w-4 h-4 text-[#10b981]" />
+                  <CalendarDays className="w-4 h-4 text-[#3d5a80]" />
                   <span>{monthsLabel}</span>
                 </div>
-                <ChevronDown className={`w-4 h-4 transition-transform ${showMonthPicker ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-[#8a8677] transition-transform ${showMonthPicker ? 'rotate-180' : ''}`} />
               </button>
               {showMonthPicker && (
-                <div className="absolute left-0 right-0 top-full mt-2 z-[9999] bg-[#18181b] border border-white/10 rounded-2xl shadow-2xl p-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute left-0 right-0 top-full mt-2 z-[9999] bg-card border border-[#ddd5c2] rounded-md p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-semibold text-white">Seleccionar meses</span>
+                    <span className="text-[13.5px] font-semibold text-foreground">Seleccionar meses</span>
                     <div className="flex gap-3">
-                      <button onClick={selectCurrent} className="text-xs text-gray-400">Solo actual</button>
-                      <button onClick={selectAll} className="text-xs text-[#10b981]">Todos</button>
+                      <button onClick={selectCurrent} className="text-[12px] text-[#5d6470]">Solo actual</button>
+                      <button onClick={selectAll} className="text-[12px] text-[#3d5a80]">Todos</button>
                     </div>
                   </div>
                   <div className="grid grid-cols-4 gap-2">
@@ -336,15 +442,15 @@ const ModernTransactionsView = ({
                         <button
                           key={mes.key}
                           onClick={() => toggleMonth(mes.key)}
-                          className={`relative flex items-center justify-center gap-1 px-2 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                          className={`relative flex items-center justify-center gap-1 px-2 py-2 rounded-sm font-mono text-[12px] font-medium transition-colors ${
                             isSelected
-                              ? 'bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/40'
-                              : 'bg-white/5 text-gray-400 border border-transparent'
+                              ? 'bg-[#5a7d52]/10 text-[#476442] border border-[#5a7d52]/40'
+                              : 'bg-transparent text-[#5d6470] border border-[#ddd5c2]'
                           }`}
                         >
                           {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
                           <span>{mes.label}</span>
-                          {isCurrent && <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#10b981] rounded-full" />}
+                          {isCurrent && <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#3d5a80] rounded-full" />}
                         </button>
                       );
                     })}
@@ -355,129 +461,117 @@ const ModernTransactionsView = ({
           )}
 
           {/* Buscador */}
-          <div className="relative mb-3">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <div className="relative mb-2.5">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a8677]" />
             <input
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Buscar..."
-              className="w-full pl-10 pr-4 py-2.5 bg-[#18181b] text-white text-sm border border-white/5 rounded-2xl placeholder:text-gray-500 focus:outline-none focus:border-[#10b981]/30"
+              placeholder="Buscar…"
+              className="w-full pl-9 pr-3 py-2 bg-white text-foreground text-[13px] border border-[#ddd5c2] rounded-sm placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
 
-          {/* Filtros tipo / moneda */}
+          {/* Filtros tipo / categoría */}
           <div className="flex gap-2 mb-3">
-            <select
+            <FilterSelect
               value={selectedType}
               onChange={e => setSelectedType(e.target.value)}
-              className="flex-1 px-3 py-2 bg-[#18181b] text-white text-sm border border-white/5 rounded-xl focus:outline-none"
+              className="flex-1 rounded-sm border border-[#ddd5c2] bg-white px-3 py-2 font-mono text-[12px] text-foreground focus:outline-none"
             >
               <option value="all">Todos los tipos</option>
               <option value="ingreso">Ingresos</option>
               <option value="gasto">Gastos</option>
-            </select>
-            <select
-              value={selectedCurrency}
-              onChange={e => setSelectedCurrency(e.target.value)}
-              className="flex-1 px-3 py-2 bg-[#18181b] text-white text-sm border border-white/5 rounded-xl focus:outline-none"
+            </FilterSelect>
+            <FilterSelect
+              value={selectedCategory}
+              onChange={e => setSelectedCategory(e.target.value)}
+              className="flex-1 rounded-sm border border-[#ddd5c2] bg-white px-3 py-2 font-mono text-[12px] text-foreground focus:outline-none"
             >
-              <option value="all">Todas</option>
-              {availableCurrencies.map(c => (
+              <option value="all">Todas las categorías</option>
+              {availableCategories.map(c => (
                 <option key={c} value={c}>{c}</option>
               ))}
-            </select>
+            </FilterSelect>
           </div>
         </div>
 
-        {/* Tarjetas totales */}
+        {/* KPIs */}
         <div className="grid grid-cols-3 gap-2 px-4 mb-4">
-          <div className="bg-[#18181b] rounded-xl border border-white/5 p-3">
-            <p className="text-[10px] text-gray-500 mb-1">{viewMode === 'monthly' ? 'INGRESOS' : 'ING. ACUM.'}</p>
-            <p className="text-xs font-bold text-[#10b981] truncate">+${formatMonto(totales.ingresos)}</p>
-            <p className="text-[10px] text-gray-400 mt-0.5">{filtered.filter(t => t.tipo === 'ingreso').length} tx</p>
-          </div>
-          <div className="bg-[#18181b] rounded-xl border border-white/5 p-3">
-            <p className="text-[10px] text-gray-500 mb-1">{viewMode === 'monthly' ? 'GASTOS' : 'GTO. ACUM.'}</p>
-            <p className="text-xs font-bold text-[#ec4899] truncate">-${formatMonto(totales.gastos)}</p>
-            <p className="text-[10px] text-gray-400 mt-0.5">{filtered.filter(t => t.tipo === 'gasto').length} tx</p>
-          </div>
-          <div className="bg-[#18181b] rounded-xl border border-white/5 p-3">
-            <p className="text-[10px] text-gray-500 mb-1">BALANCE</p>
-            <p className={`text-xs font-bold truncate ${totales.ingresos - totales.gastos >= 0 ? 'text-[#10b981]' : 'text-[#ec4899]'}`}>
-              {totales.ingresos - totales.gastos >= 0 ? '+' : '-'}${formatMonto(Math.abs(totales.ingresos - totales.gastos))}
-            </p>
-            <p className="text-[10px] text-gray-400 mt-0.5">{filtered.length} tx</p>
-          </div>
+          <KpiCard
+            label="Ingresos"
+            value={formatAmount(totales.ingresos, { decimals: 0 })}
+            subtext={`${filtered.filter(t => t.tipo === 'ingreso').length} tx`}
+            borderColor="#5a7d52"
+            valueColor="#476442"
+          />
+          <KpiCard
+            label="Gastos"
+            value={formatAmount(totales.gastos, { decimals: 0 })}
+            subtext={`${filtered.filter(t => t.tipo === 'gasto').length} tx`}
+            borderColor="#b35a42"
+            valueColor="#a04a34"
+          />
+          <KpiCard
+            label="Balance"
+            value={balance < 0 ? `− ${formatAmount(Math.abs(balance), { decimals: 0 })}` : formatAmount(balance, { decimals: 0 })}
+            subtext={`${filtered.length} tx`}
+            borderColor="#3d5a80"
+            valueColor={balance >= 0 ? '#476442' : '#a04a34'}
+          />
         </div>
 
         {/* Lista de transacciones como cards */}
         <div className="px-4 flex flex-col gap-2">
           {paginated.length === 0 ? (
-            <div className="bg-[#18181b] rounded-2xl border border-white/5 py-12 flex flex-col items-center justify-center gap-2">
-              <span className="text-3xl">📋</span>
-              <p className="text-sm text-gray-500 text-center">
-                No hay transacciones para {viewMode === 'monthly' ? currentMonthLabel : `los meses seleccionados (${monthsLabel})`}
-              </p>
+            <div className="rounded-md border border-[#ddd5c2] bg-card py-10 flex items-center justify-center">
+              <EmptyState>Sin movimientos en esta vista.</EmptyState>
             </div>
           ) : (
             paginated.map(t => {
-              const moneda      = t.moneda || t.Moneda || 'ARS';
-              const monto       = t.monto || t.monto_ars || 0;
               const categoryName = getCategoryName(t);
               const fecha       = getTransactionDate(t);
               const displayDate = fecha ? fecha.toLocaleDateString('es-AR') : '-';
               const descripcion = t.descripcion || t.Descripcion || 'Sin descripción';
-              const icono       = t.icono || '💰';
               const tipo        = t.tipo || 'gasto';
+              const esIngreso   = tipo === 'ingreso';
+              const monto       = Math.abs(t.monto || t.monto_ars || 0);
               const rowId       = t.id || t.Id;
+              const pillColor   = esIngreso ? '#476442' : '#a04a34';
 
               return (
-                <div key={rowId} className="bg-[#18181b] rounded-2xl border border-white/5 px-4 py-3 flex items-center gap-3">
-                  {/* Ícono */}
-                  <div className={`w-10 h-10 rounded-xl ${t.color || 'bg-zinc-700'} flex items-center justify-center flex-shrink-0 shadow-md`}>
-                    {icono}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate">{descripcion}</p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <span className="text-xs text-gray-500 truncate">{categoryName}</span>
-                      <span className="text-gray-600">·</span>
-                      <span className="text-xs text-gray-500">{displayDate}</span>
-                      {moneda !== 'ARS' && (
-                        <>
-                          <span className="text-gray-600">·</span>
-                          <span className="text-[10px] bg-[#0a0a0a] text-gray-300 px-1.5 py-0.5 rounded border border-white/5">{moneda}</span>
-                        </>
-                      )}
+                <div key={rowId} className="rounded-md border border-[#ddd5c2] bg-card px-3.5 py-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13.5px] text-foreground truncate">{descripcion}</p>
+                      <div className="mt-1 flex items-center gap-2 flex-wrap">
+                        <span className="font-mono text-[11.5px] text-[#8a8677]">{displayDate}</span>
+                        <Badge
+                          variant="outline"
+                          style={{ borderColor: pillColor, color: pillColor }}
+                        >
+                          {categoryName}
+                        </Badge>
+                      </div>
                     </div>
-                  </div>
-
-                  {/* Monto + acciones */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <div className="text-right">
-                      <p className={`text-sm font-bold ${tipo === 'ingreso' ? 'text-[#10b981]' : 'text-white'}`}>
-                        {tipo === 'ingreso' ? '+' : '-'}${Math.abs(monto).toLocaleString('es-AR')}
+                    <div className="text-right shrink-0">
+                      <p className="font-mono font-semibold text-[13.5px]" style={{ color: pillColor }}>
+                        {esIngreso ? '+' : '−'} {formatAmount(monto, { decimals: 0 })}
                       </p>
-                      {moneda !== 'ARS' && t.monto_ars && (
-                        <p className="text-[10px] text-gray-500">≈${Math.abs(t.monto_ars).toLocaleString('es-AR')}</p>
-                      )}
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => onEditTransaction && onEditTransaction(t)}
-                        className="p-1.5 rounded-lg bg-white/5 active:bg-white/10"
-                      >
-                        <Edit className="w-3.5 h-3.5 text-gray-400" />
-                      </button>
-                      <button
-                        onClick={e => { e.stopPropagation(); onDeleteTransaction && onDeleteTransaction(t); }}
-                        className="p-1.5 rounded-lg bg-red-500/10 active:bg-red-500/20"
-                      >
-                        <Trash2 className="w-3.5 h-3.5 text-red-500" />
-                      </button>
-                    </div>
+                  </div>
+                  <div className="mt-2.5 flex justify-end gap-3 border-t border-dashed border-[#e7e0cf] pt-2">
+                    <button
+                      onClick={() => onEditTransaction && onEditTransaction(t)}
+                      className="p-1 text-[#8a8677] hover:text-foreground"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={e => { e.stopPropagation(); onDeleteTransaction && onDeleteTransaction(t); }}
+                      className="p-1 text-[#8a8677] hover:text-[#a04a34]"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               );
@@ -486,384 +580,330 @@ const ModernTransactionsView = ({
 
           {/* Paginación mobile */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between bg-[#18181b] rounded-2xl border border-white/5 px-4 py-3 mt-2">
+            <div className="flex items-center justify-between rounded-md border border-[#ddd5c2] bg-card px-4 py-3 mt-2">
               <button
                 onClick={() => currentPage > 1 && setCurrentPage(p => p - 1)}
                 disabled={currentPage === 1}
-                className="p-2 rounded-lg disabled:opacity-30 active:bg-white/5"
+                className="p-2 rounded-sm disabled:opacity-30 hover:bg-black/5"
               >
-                <ChevronLeft className="w-5 h-5 text-gray-400" />
+                <ChevronLeft className="w-4 h-4 text-[#8a8677]" />
               </button>
-              <span className="text-sm text-gray-400">
-                {currentPage} / {totalPages} <span className="text-gray-600">({filtered.length} resultados)</span>
+              <span className="font-mono text-[12px] text-[#5d6470]">
+                {currentPage} / {totalPages} <span className="text-[#8a8677]">({filtered.length})</span>
               </span>
               <button
                 onClick={() => currentPage < totalPages && setCurrentPage(p => p + 1)}
                 disabled={currentPage >= totalPages}
-                className="p-2 rounded-lg disabled:opacity-30 active:bg-white/5"
+                className="p-2 rounded-sm disabled:opacity-30 hover:bg-black/5"
               >
-                <ChevronRight className="w-5 h-5 text-gray-400" />
+                <ChevronRight className="w-4 h-4 text-[#8a8677]" />
               </button>
             </div>
           )}
         </div>
-
-        <FloatingActionButton actions={fabActions} />
       </div>
     );
   }
 
   // ── Render Desktop ────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#0a0a0a] p-6">
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
 
-      {/* ── Barra superior: título + controles de fecha ── */}
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-
-        {/* Título / mes activo */}
-        <div className="flex items-center gap-3">
-          <Calendar className="w-5 h-5 text-[#10b981]" />
-          <h2 className="text-xl font-bold text-white capitalize">
-            {viewMode === 'monthly' ? currentMonthLabel : `Acumulado — ${monthsLabel}`}
-          </h2>
-          {viewMode === 'accumulated' && (
-            <span className="text-[10px] bg-[#10b981]/20 text-[#10b981] px-2 py-0.5 rounded-full border border-[#10b981]/30">
-              {selectedMonths.length} {selectedMonths.length === 1 ? 'mes' : 'meses'}
-            </span>
-          )}
+        {/* ── Cabecera de período (mismo patrón que Inicio) ── */}
+        <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px]">
+          <div>
+            <div
+              className="font-mono text-[11px] uppercase text-[#3d5a80]"
+              style={{ letterSpacing: '.16em' }}
+            >
+              {periodoEyebrow}
+            </div>
+            <h1 className="mt-1 font-serif text-[42px] font-bold leading-none text-foreground capitalize">
+              {periodoTitle}
+            </h1>
+          </div>
+          <HeaderActions />
         </div>
 
-        {/* Controles de fecha según modo + acciones */}
-        <div className="flex items-center gap-2">
+        {/* ── Controles de rango / navegación ── */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <PillToggle
+              options={[{ value: 'monthly', label: 'Mensual' }, { value: 'accumulated', label: 'Acumulado' }]}
+              value={viewMode}
+              onChange={setViewMode}
+              activeClassName="bg-[#20242c] text-[#f4f0e6]"
+            />
 
-          {/* Toggle modo */}
-          <div className="bg-[#18181b] rounded-xl border border-white/5 p-1 flex gap-1">
-            <button
-              onClick={() => setViewMode('monthly')}
-              className={`px-3 py-1.5 text-sm rounded-lg transition-all ${
-                viewMode === 'monthly' ? 'bg-[#10b981] text-white font-medium' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              📅 Mensual
-            </button>
-            <button
-              onClick={() => setViewMode('accumulated')}
-              className={`px-3 py-1.5 text-sm rounded-lg transition-all ${
-                viewMode === 'accumulated' ? 'bg-[#10b981] text-white font-medium' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              📊 Acumulado
-            </button>
-          </div>
+            {viewMode === 'monthly' && (
+              <div className="flex items-center gap-1 rounded-full border border-[#ddd5c2] bg-card px-1.5 py-1">
+                <button onClick={goToPrevMonth} className="p-1 rounded-full hover:bg-black/5 transition-colors" title="Mes anterior">
+                  <ChevronLeft className="w-4 h-4 text-[#8a8677]" />
+                </button>
+                <button onClick={goToToday} className="px-1.5 font-mono text-[12px] text-[#5d6470] hover:text-foreground transition-colors">
+                  hoy
+                </button>
+                <button
+                  onClick={goToNextMonth}
+                  disabled={isCurrentMonth}
+                  className="p-1 rounded-full hover:bg-black/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  title="Mes siguiente"
+                >
+                  <ChevronRight className="w-4 h-4 text-[#8a8677]" />
+                </button>
+              </div>
+            )}
 
-          {/* Navegación mensual */}
-          {viewMode === 'monthly' && (
-            <div className="flex items-center gap-1">
-              <button
-                onClick={goToPrevMonth}
-                className="p-2 hover:bg-white/5 rounded-lg transition-colors"
-                title="Mes anterior"
-              >
-                <ChevronLeft className="w-5 h-5 text-gray-400" />
-              </button>
-              <button
-                onClick={goToToday}
-                className="px-3 py-1.5 bg-[#18181b] hover:bg-white/5 rounded-lg text-xs text-gray-400 hover:text-white transition-colors border border-white/5"
-              >
-                Hoy
-              </button>
-              <button
-                onClick={goToNextMonth}
-                disabled={isCurrentMonth}
-                className="p-2 hover:bg-white/5 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                title="Mes siguiente"
-              >
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </button>
-            </div>
-          )}
+            {viewMode === 'accumulated' && (
+              <div className="relative" ref={monthPickerRef}>
+                <button
+                  onClick={() => setShowMonthPicker(p => !p)}
+                  className="flex items-center gap-1.5 px-3 py-[7px] bg-card hover:bg-[#f0ead9] border border-[#ddd5c2] rounded-sm text-[13px] text-foreground transition-colors"
+                >
+                  <CalendarDays className="w-4 h-4 text-[#3d5a80]" />
+                  <span>{monthsLabel}</span>
+                  <ChevronDown className={`w-3 h-3 text-[#8a8677] transition-transform ${showMonthPicker ? 'rotate-180' : ''}`} />
+                </button>
 
-          {/* Selector multi-mes (modo acumulado) */}
-          {viewMode === 'accumulated' && (
-            <div className="relative" ref={monthPickerRef}>
-              <button
-                onClick={() => setShowMonthPicker(p => !p)}
-                className="flex items-center gap-1.5 px-3 py-2 bg-[#18181b] hover:bg-white/5 border border-white/10 rounded-xl text-sm text-gray-300 transition-colors"
-              >
-                <CalendarDays className="w-4 h-4 text-[#10b981]" />
-                <span>{monthsLabel}</span>
-                <ChevronDown className={`w-3 h-3 transition-transform ${showMonthPicker ? 'rotate-180' : ''}`} />
-              </button>
+                {showMonthPicker && (
+                  <div className="absolute left-0 top-full mt-2 z-[9999] bg-card border border-[#ddd5c2] rounded-md p-4 w-80">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-[13.5px] font-semibold text-foreground">Seleccionar meses</span>
+                      <div className="flex gap-3">
+                        <button onClick={selectCurrent} className="text-[12px] text-[#5d6470] hover:text-foreground transition-colors">
+                          Solo actual
+                        </button>
+                        <span className="text-[#ddd5c2]">·</span>
+                        <button onClick={selectAll} className="text-[12px] text-[#3d5a80] hover:underline transition-colors">
+                          Todos
+                        </button>
+                      </div>
+                    </div>
 
-              {showMonthPicker && (
-                <div className="absolute right-0 top-full mt-2 z-[9999] bg-[#18181b] border border-white/10 rounded-2xl shadow-2xl p-4 w-80 animate-in fade-in slide-in-from-top-2 duration-200">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-semibold text-white">Seleccionar meses</span>
-                    <div className="flex gap-3">
-                      <button
-                        onClick={selectCurrent}
-                        className="text-xs text-gray-400 hover:text-white transition-colors"
-                      >
-                        Solo actual
-                      </button>
-                      <span className="text-gray-600">·</span>
-                      <button
-                        onClick={selectAll}
-                        className="text-xs text-[#10b981] hover:text-[#34d399] transition-colors"
-                      >
-                        Todos
-                      </button>
+                    <div className="grid grid-cols-4 gap-2">
+                      {MESES.map(mes => {
+                        const isSelected = selectedMonths.includes(mes.key);
+                        const isCurrent  = mes.key === new Date().getMonth() + 1;
+                        return (
+                          <button
+                            key={mes.key}
+                            onClick={() => toggleMonth(mes.key)}
+                            className={`relative flex items-center justify-center gap-1 px-2 py-2 rounded-sm font-mono text-[12px] font-medium transition-colors duration-150 ${
+                              isSelected
+                                ? 'bg-[#5a7d52]/10 text-[#476442] border border-[#5a7d52]/40'
+                                : 'bg-transparent text-[#5d6470] border border-[#ddd5c2] hover:bg-[#f0ead9]'
+                            }`}
+                          >
+                            {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
+                            <span>{mes.label}</span>
+                            {isCurrent && (
+                              <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#3d5a80] rounded-full" />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="mt-3 pt-3 border-t border-[#e7e0cf] text-[12px] text-[#8a8677]">
+                      {selectedMonths.length === 1
+                        ? `Mostrando solo ${MESES.find(m => m.key === selectedMonths[0])?.fullLabel}`
+                        : `Acumulando: ${selectedMonths.map(k => MESES.find(m => m.key === k)?.label).join(', ')}`
+                      }
                     </div>
                   </div>
+                )}
+              </div>
+            )}
+          </div>
 
-                  <div className="grid grid-cols-4 gap-2">
-                    {MESES.map(mes => {
-                      const isSelected = selectedMonths.includes(mes.key);
-                      const isCurrent  = mes.key === new Date().getMonth() + 1;
-                      return (
-                        <button
-                          key={mes.key}
-                          onClick={() => toggleMonth(mes.key)}
-                          className={`
-                            relative flex items-center justify-center gap-1 px-2 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
-                            ${isSelected
-                              ? 'bg-[#10b981]/20 text-[#10b981] border border-[#10b981]/40'
-                              : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-transparent'
-                            }
-                          `}
-                        >
-                          {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
-                          <span>{mes.label}</span>
-                          {isCurrent && (
-                            <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#10b981] rounded-full" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="mt-3 pt-3 border-t border-white/10 text-xs text-gray-500">
-                    {selectedMonths.length === 1
-                      ? `Mostrando solo ${MESES.find(m => m.key === selectedMonths[0])?.fullLabel}`
-                      : `Acumulando: ${selectedMonths.map(k => MESES.find(m => m.key === k)?.label).join(', ')}`
-                    }
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Separador */}
-          <div className="w-px h-6 bg-white/10" />
-
-          {/* Refresh */}
-          <button
-            onClick={refresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-2 px-3 py-2 bg-[#18181b] hover:bg-white/5 border border-white/10 rounded-xl text-sm text-gray-300 hover:text-white transition-all disabled:opacity-50"
-            title="Actualizar datos"
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">{isRefreshing ? 'Actualizando...' : 'Actualizar'}</span>
-          </button>
-
-          {/* Importar CSV */}
-          {onBulkUpload && (
-            <button
-              onClick={onBulkUpload}
-              className="flex items-center gap-2 px-3 py-2 bg-[#18181b] hover:bg-white/5 border border-white/10 rounded-xl text-sm text-gray-300 hover:text-white transition-all"
-              title="Importar CSV masivo"
-            >
-              <Upload className="w-4 h-4" />
-              <span className="hidden sm:inline">Importar</span>
-            </button>
-          )}
-
-          {/* Nueva Transacción */}
-          {onNewTransaction && (
-            <button
-              onClick={onNewTransaction}
-              className="flex items-center gap-2 px-4 py-2 bg-[#10b981] hover:bg-[#0ea572] rounded-xl text-sm text-white font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#10b981]/20"
-            >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Nueva</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ── Filtros ── */}
-      <div className="flex gap-3 mb-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-          <input
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Buscar..."
-            className="w-full pl-11 pr-4 py-2.5 bg-[#18181b] text-white text-sm border border-white/5 rounded-2xl placeholder:text-gray-500 focus:outline-none focus:border-[#10b981]/30 transition-colors"
+          {/* Toggle Día/Semana/Mes */}
+          <PillToggle
+            options={RANGE_OPTIONS}
+            value={range}
+            onChange={setRange}
+            activeClassName="bg-[#3d5a80] text-[#faf7ef]"
           />
         </div>
-        <select
-          value={selectedType}
-          onChange={e => setSelectedType(e.target.value)}
-          className="px-4 py-2.5 bg-[#18181b] text-white text-sm border border-white/5 rounded-xl focus:outline-none"
-        >
-          <option value="all">Todos los tipos</option>
-          <option value="ingreso">Ingresos</option>
-          <option value="gasto">Gastos</option>
-        </select>
-        <select
-          value={selectedCurrency}
-          onChange={e => setSelectedCurrency(e.target.value)}
-          className="px-4 py-2.5 bg-[#18181b] text-white text-sm border border-white/5 rounded-xl focus:outline-none"
-        >
-          <option value="all">Todas las monedas</option>
-          {availableCurrencies.map(c => (
-            <option key={c} value={c}>{c}</option>
-          ))}
-        </select>
-      </div>
 
-      {/* ── Tarjetas de totales ── */}
-      <div className="flex gap-3 mb-4">
-        <div className="flex-1 bg-[#18181b] rounded-xl border border-white/5 p-4">
-          <p className="text-xs text-gray-500 mb-1">
-            {viewMode === 'monthly' ? 'INGRESOS DEL MES' : 'INGRESOS ACUMULADOS'}
-          </p>
-          <p className="text-xl font-bold text-[#10b981]">+${formatMonto(totales.ingresos)}</p>
-          <p className="text-xs text-gray-400 mt-1">{filtered.filter(t => t.tipo === 'ingreso').length} transacciones</p>
-        </div>
-        <div className="flex-1 bg-[#18181b] rounded-xl border border-white/5 p-4">
-          <p className="text-xs text-gray-500 mb-1">
-            {viewMode === 'monthly' ? 'GASTOS DEL MES' : 'GASTOS ACUMULADOS'}
-          </p>
-          <p className="text-xl font-bold text-[#ec4899]">-${formatMonto(totales.gastos)}</p>
-          <p className="text-xs text-gray-400 mt-1">{filtered.filter(t => t.tipo === 'gasto').length} transacciones</p>
-        </div>
-        <div className="flex-1 bg-[#18181b] rounded-xl border border-white/5 p-4">
-          <p className="text-xs text-gray-500 mb-1">
-            {viewMode === 'monthly' ? 'BALANCE DEL MES' : 'BALANCE ACUMULADO'}
-          </p>
-          <p className={`text-xl font-bold ${totales.ingresos - totales.gastos >= 0 ? 'text-[#10b981]' : 'text-[#ec4899]'}`}>
-            {totales.ingresos - totales.gastos >= 0 ? '+' : '-'}${formatMonto(Math.abs(totales.ingresos - totales.gastos))}
-          </p>
-          <p className="text-xs text-gray-400 mt-1">{filtered.length} transacciones</p>
-        </div>
-      </div>
-
-      {/* ── Tabla ── */}
-      <div className="bg-[#18181b] rounded-3xl border border-white/5 overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-white/5">
-              <th className="text-left p-4 text-xs text-gray-500 uppercase">Concepto</th>
-              <th className="text-left p-4 text-xs text-gray-500 uppercase">Categoría</th>
-              <th className="text-center p-4 text-xs text-gray-500 uppercase">Moneda</th>
-              <th className="text-right p-4 text-xs text-gray-500 uppercase">Fecha</th>
-              <th className="text-right p-4 text-xs text-gray-500 uppercase">Monto</th>
-              <th className="text-center p-4 text-xs text-gray-500 uppercase">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginated.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="py-16 text-center text-gray-500 text-sm">
-                  No hay transacciones para{' '}
-                  {viewMode === 'monthly' ? currentMonthLabel : `los meses seleccionados (${monthsLabel})`}
-                </td>
-              </tr>
-            ) : (
-              paginated.map(t => {
-                const moneda      = t.moneda || t.Moneda || 'ARS';
-                const monto       = t.monto || t.monto_ars || 0;
-                const categoryName = getCategoryName(t);
-                const fecha       = getTransactionDate(t);
-                const displayDate = fecha ? fecha.toLocaleDateString('es-AR') : '-';
-                const descripcion = t.descripcion || t.Descripcion || 'Sin descripción';
-                const icono       = t.icono || '💰';
-                const tipo        = t.tipo || 'gasto';
-                const rowId       = t.id || t.Id;
-
-                return (
-                  <tr key={rowId} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-xl ${t.color || 'bg-zinc-700'} flex items-center justify-center shadow-md flex-shrink-0`}>
-                          {icono}
-                        </div>
-                        <span className="text-sm text-white">{descripcion}</span>
-                      </div>
-                    </td>
-                    <td className="p-4 text-sm text-gray-400">{categoryName}</td>
-                    <td className="p-4 text-center">
-                      <span className="px-2 py-1 bg-[#0a0a0a] text-xs font-medium text-gray-300 rounded-lg border border-white/5">
-                        {moneda}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right text-sm text-gray-400">{displayDate}</td>
-                    <td className={`p-4 text-right text-sm font-bold ${tipo === 'ingreso' ? 'text-[#10b981]' : 'text-white'}`}>
-                      <div className="flex flex-col items-end">
-                        <span>{tipo === 'ingreso' ? '+' : '-'}${Math.abs(monto).toLocaleString('es-AR')}</span>
-                        {moneda !== 'ARS' && t.monto_ars && (
-                          <span className="text-xs text-gray-500 mt-0.5">
-                            ≈ ${Math.abs(t.monto_ars).toLocaleString('es-AR')} ARS
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => onEditTransaction && onEditTransaction(t)}
-                          className="p-2 hover:bg-white/5 rounded-lg transition-colors"
-                          title="Editar"
-                        >
-                          <Edit className="w-4 h-4 text-gray-400 hover:text-white" />
-                        </button>
-                        <button
-                          onClick={e => { e.stopPropagation(); onDeleteTransaction && onDeleteTransaction(t); }}
-                          className="p-2 hover:bg-red-500/10 rounded-lg transition-colors"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-
-        {/* Paginación */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-white/5">
-            <p className="text-sm text-gray-500">
-              Página {currentPage} de {totalPages} ({filtered.length} resultados)
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => currentPage > 1 && setCurrentPage(p => p - 1)}
-                disabled={currentPage === 1}
-                className="p-2 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/5"
-              >
-                <ChevronLeft className="w-5 h-5 text-gray-400" />
-              </button>
-              <span className="text-sm text-white px-3 font-medium">{currentPage}</span>
-              <button
-                onClick={() => currentPage < totalPages && setCurrentPage(p => p + 1)}
-                disabled={currentPage >= totalPages}
-                className="p-2 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white/5"
-              >
-                <ChevronRight className="w-5 h-5 text-gray-400" />
-              </button>
-            </div>
+        {/* ── Filtros ── */}
+        <div className="flex gap-2.5 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a8677]" />
+            <input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Buscar…"
+              className="w-full pl-9 pr-3 py-[7px] bg-white text-foreground font-mono text-[12px] border border-[#ddd5c2] rounded-sm placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
+            />
           </div>
-        )}
-      </div>
+          <FilterSelect
+            value={selectedType}
+            onChange={e => setSelectedType(e.target.value)}
+          >
+            <option value="all">Todos los tipos</option>
+            <option value="ingreso">Ingresos</option>
+            <option value="gasto">Gastos</option>
+          </FilterSelect>
+          <FilterSelect
+            value={selectedCategory}
+            onChange={e => setSelectedCategory(e.target.value)}
+          >
+            <option value="all">Todas las categorías</option>
+            {availableCategories.map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </FilterSelect>
+        </div>
 
-      <FloatingActionButton actions={fabActions} />
+        {/* ── KPIs del rango filtrado ── */}
+        <div className="mb-5 grid grid-cols-3 gap-3.5">
+          <KpiCard
+            label="Ingresos"
+            value={formatAmount(totales.ingresos, { decimals: 0 })}
+            subtext={`${filtered.filter(t => t.tipo === 'ingreso').length} transacciones`}
+            borderColor="#5a7d52"
+            valueColor="#476442"
+          />
+          <KpiCard
+            label="Gastos"
+            value={formatAmount(totales.gastos, { decimals: 0 })}
+            subtext={`${filtered.filter(t => t.tipo === 'gasto').length} transacciones`}
+            borderColor="#b35a42"
+            valueColor="#a04a34"
+          />
+          <KpiCard
+            label="Balance"
+            value={balance < 0 ? `− ${formatAmount(Math.abs(balance), { decimals: 0 })}` : formatAmount(balance, { decimals: 0 })}
+            subtext={`${filtered.length} transacciones`}
+            borderColor="#3d5a80"
+            valueColor={balance >= 0 ? '#476442' : '#a04a34'}
+          />
+        </div>
+
+        {/* ── Tabla ── */}
+        <div className="rounded-md border border-[#ddd5c2] bg-card overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b-2 border-[#ddd5c2]">
+                <th
+                  className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]"
+                  style={{ letterSpacing: '.08em' }}
+                >
+                  Fecha
+                </th>
+                <th
+                  className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]"
+                  style={{ letterSpacing: '.08em' }}
+                >
+                  Descripción
+                </th>
+                <th
+                  className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]"
+                  style={{ letterSpacing: '.08em' }}
+                >
+                  Tipo · Categoría
+                </th>
+                <th
+                  className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]"
+                  style={{ letterSpacing: '.08em' }}
+                >
+                  Monto
+                </th>
+                <th
+                  className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]"
+                  style={{ letterSpacing: '.08em' }}
+                >
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginated.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-14 text-center">
+                    <EmptyState>Sin movimientos en esta vista.</EmptyState>
+                  </td>
+                </tr>
+              ) : (
+                paginated.map(t => {
+                  const categoryName = getCategoryName(t);
+                  const fecha       = getTransactionDate(t);
+                  const displayDate = fecha ? fecha.toLocaleDateString('es-AR') : '-';
+                  const descripcion = t.descripcion || t.Descripcion || 'Sin descripción';
+                  const tipo        = t.tipo || 'gasto';
+                  const esIngreso   = tipo === 'ingreso';
+                  const monto       = Math.abs(t.monto || t.monto_ars || 0);
+                  const rowId       = t.id || t.Id;
+                  const pillColor   = esIngreso ? '#476442' : '#a04a34';
+
+                  return (
+                    <tr key={rowId} className="group border-b border-[#e7e0cf] hover:bg-[#f0ead9] transition-colors">
+                      <td className="px-3.5 py-2.5 font-mono text-[12px] text-[#5d6470]">{displayDate}</td>
+                      <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">{descripcion}</td>
+                      <td className="px-3.5 py-2.5">
+                        <Badge
+                          variant="outline"
+                          style={{ borderColor: pillColor, color: pillColor }}
+                        >
+                          {categoryName}
+                        </Badge>
+                      </td>
+                      <td className="px-3.5 py-2.5 text-right font-mono font-semibold" style={{ color: pillColor }}>
+                        {esIngreso ? '+' : '−'} {formatAmount(monto, { decimals: 0 })}
+                      </td>
+                      <td className="px-3.5 py-2.5">
+                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => onEditTransaction && onEditTransaction(t)}
+                            className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
+                            title="Editar"
+                          >
+                            <Edit className="w-4 h-4 text-[#8a8677]" />
+                          </button>
+                          <button
+                            onClick={e => { e.stopPropagation(); onDeleteTransaction && onDeleteTransaction(t); }}
+                            className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-4 h-4 text-[#8a8677] hover:text-[#a04a34]" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+
+          {/* Paginación */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#e7e0cf]">
+              <p className="font-mono text-[12px] text-[#8a8677]">
+                Página {currentPage} de {totalPages} ({filtered.length} resultados)
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => currentPage > 1 && setCurrentPage(p => p - 1)}
+                  disabled={currentPage === 1}
+                  className="p-1.5 rounded-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black/5"
+                >
+                  <ChevronLeft className="w-4 h-4 text-[#8a8677]" />
+                </button>
+                <span className="font-mono text-[12px] text-foreground px-2">{currentPage}</span>
+                <button
+                  onClick={() => currentPage < totalPages && setCurrentPage(p => p + 1)}
+                  disabled={currentPage >= totalPages}
+                  className="p-1.5 rounded-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black/5"
+                >
+                  <ChevronRight className="w-4 h-4 text-[#8a8677]" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

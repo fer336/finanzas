@@ -8,7 +8,7 @@ import { useAuth } from '../auth/auth-provider';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAmountVisibility } from '../../contexts/AmountVisibilityContext';
 import {
-  useDashboardStats,
+  computeDashboardStats,
   useDollarQuotes,
   useCategories,
   usePaymentMethods,
@@ -41,10 +41,11 @@ const ModernPaymentMethodsView = lazy(() => import('./payment-methods/ModernPaym
 const ModernPendingPaymentsView = lazy(() => import('./pending-payments/ModernPendingPaymentsView'));
 const ModernCEDEARsView = lazy(() => import('./cedears/ModernCEDEARsView'));
 const ModernMonedasView = lazy(() => import('./monedas/ModernMonedasView'));
+const ModernInversionesView = lazy(() => import('./inversiones/ModernInversionesView'));
 const ModernResumenesView = lazy(() => import('./resumenes/ModernResumenesView'));
 const ModernReportesView = lazy(() => import('./reportes/ModernReportesView'));
 const ModernAIUsageView = lazy(() => import('./ai-usage/ModernAIUsageView'));
-const ReportesBugsView = lazy(() => import('./bugs/ReportesBugsView'));
+const ModernAjustesView = lazy(() => import('./ajustes/ModernAjustesView'));
 
 // ====== LAZY LOADED MODALS (Solo se cargan cuando se abren) ======
 const DashboardSettingsModal = lazy(() => import('./dashboard/DashboardSettingsModal'));
@@ -77,11 +78,10 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   // ====== CONTEXTS ======
   const { user, logout } = useAuth();
   const { isDarkMode, toggleTheme } = useTheme();
-  const { amountsVisible, toggleAmountVisibility } = useAmountVisibility();
+  const { isAmountVisible: amountsVisible, toggleAmountVisibility } = useAmountVisibility();
 
   // ====== REACT QUERY (Solo datos globales para header) ======
   const queryClient = useQueryClient();
-  const { data: dashboardStats, isLoading: loadingStats } = useDashboardStats();
   const { data: dollarQuotes } = useDollarQuotes();
   const { data: categoriesData } = useCategories(); // Para modales
   const { data: paymentMethodsData } = usePaymentMethods(); // Para modales
@@ -92,12 +92,19 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   const { data: monedasData = [] } = useMonedas();
   const { data: resumenesData = [] } = useResumenes();
 
+  // dashboardStats era antes un query aparte con su propio fetch sin
+  // límite (transaccionesApi.getAll() sin argumentos), duplicando esta
+  // misma llamada y bloqueando toda la app detrás de esa segunda espera.
+  // Ahora es un cómputo puro sobre transactionsData, que ya está acá.
+  const dashboardStats = useMemo(() => computeDashboardStats(transactionsData), [transactionsData]);
+  const loadingStats = loadingTx;
+
   // Extraer datos para compatibilidad con código existente
   const dashboardData = dashboardStats || null;
   const categories = categoriesData || [];
   const paymentMethods = paymentMethodsData || [];
   const notifications = []; // TODO: Implementar notificaciones con React Query
-  
+
   // Estado local sincronizado con React Query para permitir actualizaciones optimistas en modales
   const [cedears, setCedears] = useState([]);
 
@@ -106,7 +113,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
     // refetchQueries fuerza el fetch inmediato (no espera staleTime)
     await Promise.all([
       queryClient.refetchQueries({ queryKey: [QUERY_KEYS.transactions] }),
-      queryClient.refetchQueries({ queryKey: [QUERY_KEYS.dashboardStats] }),
       queryClient.refetchQueries({ queryKey: [QUERY_KEYS.pendingPayments] }),
       queryClient.refetchQueries({ queryKey: [QUERY_KEYS.objetivos] }),
       queryClient.refetchQueries({ queryKey: [QUERY_KEYS.presupuestos] }),
@@ -192,6 +198,17 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
     window.addEventListener('modernDashboardSettingsChanged', handleSettingsChange);
     return () => window.removeEventListener('modernDashboardSettingsChanged', handleSettingsChange);
   }, []);
+
+  // Actualiza dashboardSettings + localStorage + notifica a otros listeners
+  // (mismo contrato que usaba DashboardSettingsModal.handleSave). Ajustes
+  // llama esto directo en cada toggle, sin paso de "Guardar" intermedio.
+  const handleDashboardSettingsChange = (next) => {
+    setDashboardSettings(next);
+    try {
+      localStorage.setItem('modernDashboardSettings', JSON.stringify(next));
+    } catch { /* ignore */ }
+    window.dispatchEvent(new CustomEvent('modernDashboardSettingsChanged', { detail: next }));
+  };
 
   // Scope del header: sincroniza con la selección de meses de la vista activa
   // { mode: 'monthly', month: 'YYYY-MM' } | { mode: 'accumulated', months: [1..12], year: YYYY }
@@ -341,6 +358,12 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
     () => Array.isArray(pendingPaymentsData) ? pendingPaymentsData : [],
     [pendingPaymentsData]
   );
+  // Contador para el badge dorado de "Vencimientos" en ModernTopNav (ver
+  // DESIGN.md "Nav pills" — se muestra solo si hay pendientes).
+  const pendingPaymentsCount = pendingPayments.filter((p) => {
+    const isPaid = p.estado === 'pagado' || p.estado === 'true' || p.pagada === true;
+    return !isPaid;
+  }).length;
   const objetivos = useMemo(
     () => Array.isArray(objetivosData) ? objetivosData : [],
     [objetivosData]
@@ -1026,23 +1049,15 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
       );
     }
 
-    if (loadingStats && !dashboardData) {
-      return <LoadingSpinner message="Cargando datos..." />;
-    }
-
     switch (currentView) {
       case 'dashboard':
         return (
           <ModernDashboard
             user={user}
-            dashboardData={effectiveDashboardData}
-            dashboardSettings={dashboardSettings}
             transactions={transactions}
             pendingPayments={pendingPayments}
-            categories={categories}
-            objetivos={objetivos}
-            presupuestos={presupuestos}
-            resumenesBancarios={resumenesBancarios}
+            dollarQuotes={dollarQuotes}
+            loading={loadingTx}
             onNavigate={handleNavigate}
             onNewTransaction={handleNewTransaction}
           />
@@ -1095,7 +1110,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
             }}
             onDeleteObjetivo={async (id) => {
               if (!id) return;
-              if (!window.confirm('¿Eliminar este objetivo?')) return;
               try {
                 await objetivosApi.delete(id);
                 await refreshData();
@@ -1141,54 +1155,72 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
 
       case 'categories':
       case 'categories-full':
+        // Deviation: ModernCategoriesView ya no trae su propio fondo de
+        // página (ahora vive embebida en Ajustes, ver ModernAjustesView).
+        // Estos ids viejos siguen alcanzables desde el menú móvil
+        // (MobileBottomNav), así que se les da acá el mismo contenedor de
+        // página que usan el resto de las vistas Papel.
         return (
-          <ModernCategoriesView
-            categories={categories}
-            onNewCategory={() => {
-              setEditingCategory(null);
-              setShowCategoryModal(true);
-            }}
-            onEditCategory={(cat) => {
-              setEditingCategory(cat || null);
-              setShowCategoryModal(true);
-            }}
-            onDeleteCategory={async (id) => {
-              try {
-                await categoriesApi.delete(id);
-                await refreshData();
-              } catch (error) {
-                console.error('Error eliminando categoría:', error);
-                alert('Error al eliminar categoría: ' + error.message);
-              }
-            }}
-          />
+          <div className="min-h-screen bg-background">
+            <div className="mx-auto max-w-[1100px] px-4 py-5 sm:px-[34px] sm:py-[28px]">
+              <h1 className="mb-4 font-serif text-[26px] font-bold leading-none text-foreground sm:mb-5 sm:text-[42px]">
+                Categorías
+              </h1>
+              <ModernCategoriesView
+                onNewCategory={() => {
+                  setEditingCategory(null);
+                  setShowCategoryModal(true);
+                }}
+                onEditCategory={(cat) => {
+                  setEditingCategory(cat || null);
+                  setShowCategoryModal(true);
+                }}
+                onDeleteCategory={async (id) => {
+                  try {
+                    await categoriesApi.delete(id);
+                    await refreshData();
+                  } catch (error) {
+                    console.error('Error eliminando categoría:', error);
+                    alert('Error al eliminar categoría: ' + error.message);
+                  }
+                }}
+              />
+            </div>
+          </div>
         );
 
       case 'payment-methods':
       case 'payment-methods-full':
+        // Deviation: idem 'categories-full' — ModernPaymentMethodsView ya
+        // no trae su propio fondo de página (vive embebida en Ajustes).
         return (
-          <ModernPaymentMethodsView
-            paymentMethods={paymentMethods}
-            onNewPaymentMethod={() => {
-              setEditingPaymentMethod(null);
-              setShowPaymentMethodModal(true);
-            }}
-            onEditPaymentMethod={(pm) => {
-              console.log('✏️ Editando método de pago:', pm);
-              setEditingPaymentMethod(pm);
-              setShowPaymentMethodModal(true);
-            }}
-            onDeletePaymentMethod={async (id) => {
-              try {
-                await paymentMethodsApi.delete(id);
-                await refreshData();
-                console.log('✅ Método de pago eliminado');
-              } catch (error) {
-                console.error('❌ Error eliminando método:', error);
-                alert('Error: ' + error.message);
-              }
-            }}
-          />
+          <div className="min-h-screen bg-background">
+            <div className="mx-auto max-w-[1100px] px-4 py-5 sm:px-[34px] sm:py-[28px]">
+              <h1 className="mb-4 font-serif text-[26px] font-bold leading-none text-foreground sm:mb-5 sm:text-[42px]">
+                Métodos de Pago
+              </h1>
+              <ModernPaymentMethodsView
+                paymentMethods={paymentMethods}
+                onNewPaymentMethod={() => {
+                  setEditingPaymentMethod(null);
+                  setShowPaymentMethodModal(true);
+                }}
+                onEditPaymentMethod={(pm) => {
+                  setEditingPaymentMethod(pm);
+                  setShowPaymentMethodModal(true);
+                }}
+                onDeletePaymentMethod={async (id) => {
+                  try {
+                    await paymentMethodsApi.delete(id);
+                    await refreshData();
+                  } catch (error) {
+                    console.error('Error eliminando método de pago:', error);
+                    alert('Error al eliminar método de pago: ' + error.message);
+                  }
+                }}
+              />
+            </div>
+          </div>
         );
 
       case 'pending-payments':
@@ -1267,13 +1299,17 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
 
       case 'ai-usage':
       case 'ai-usage-full':
+        // Deviation: idem 'categories-full' — ModernAIUsageView ya no trae
+        // fondo de página propio (vive embebida en Ajustes).
         return (
-          <ModernAIUsageView />
-        );
-
-      case 'reportes-bugs-full':
-        return (
-          <ReportesBugsView />
+          <div className="min-h-screen bg-background">
+            <div className="mx-auto max-w-[1100px] px-4 py-5 sm:px-[34px] sm:py-[28px]">
+              <h1 className="mb-4 font-serif text-[26px] font-bold leading-none text-foreground sm:mb-5 sm:text-[42px]">
+                Uso de Lucy
+              </h1>
+              <ModernAIUsageView />
+            </div>
+          </div>
         );
 
       case 'resumen-bancario':
@@ -1282,6 +1318,59 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
           <ModernResumenesView
             resumenes={resumenesBancarios}
             onUploadResumen={() => console.log('Upload resumen pendiente implementar')}
+          />
+        );
+
+      case 'inversiones':
+        return (
+          <ModernInversionesView
+            cedears={cedears}
+            onRefreshCedears={async () => {
+              try {
+                const data = await yfinanceService.getAllCedears(30);
+                setCedears(data);
+              } catch (error) {
+                console.error('❌ Error actualizando CEDEARs:', error);
+              }
+            }}
+            onViewCedearDetails={(c) => console.log('Ver detalles:', c)}
+            cotizaciones={dollarQuotes}
+            onRefreshCotizaciones={refreshData}
+            monedas={monedas}
+            onNewMoneda={() => {
+              setEditingCurrency(null);
+              setShowCurrencyModal(true);
+            }}
+            onEditMoneda={(m) => {
+              setEditingCurrency(m);
+              setShowCurrencyModal(true);
+            }}
+            onDeleteMoneda={async (id) => {
+              try {
+                await monedasApi.delete(id);
+                await refreshData();
+              } catch (error) {
+                console.error('❌ Error eliminando moneda:', error);
+                alert('Error al eliminar moneda: ' + error.message);
+              }
+            }}
+            onToggleActiveMoneda={async (id) => {
+              try {
+                await monedasApi.toggleActive(id);
+                await refreshData();
+              } catch (error) {
+                console.error('❌ Error cambiando estado:', error);
+              }
+            }}
+            onInitializeDefaultMonedas={async () => {
+              try {
+                await monedasApi.initializeDefault();
+                await refreshData();
+              } catch (error) {
+                console.error('❌ Error inicializando monedas:', error);
+                alert('Error: ' + error.message);
+              }
+            }}
           />
         );
 
@@ -1333,6 +1422,50 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
           />
         );
 
+      case 'ajustes':
+        return (
+          <ModernAjustesView
+            dashboardSettings={dashboardSettings}
+            onDashboardSettingsChange={handleDashboardSettingsChange}
+            onOpenAIConfig={() => setShowAIConfigModal(true)}
+            onNewCategory={() => {
+              setEditingCategory(null);
+              setShowCategoryModal(true);
+            }}
+            onEditCategory={(cat) => {
+              setEditingCategory(cat || null);
+              setShowCategoryModal(true);
+            }}
+            onDeleteCategory={async (id) => {
+              try {
+                await categoriesApi.delete(id);
+                await refreshData();
+              } catch (error) {
+                console.error('Error eliminando categoría:', error);
+                alert('Error al eliminar categoría: ' + error.message);
+              }
+            }}
+            paymentMethods={paymentMethods}
+            onNewPaymentMethod={() => {
+              setEditingPaymentMethod(null);
+              setShowPaymentMethodModal(true);
+            }}
+            onEditPaymentMethod={(pm) => {
+              setEditingPaymentMethod(pm);
+              setShowPaymentMethodModal(true);
+            }}
+            onDeletePaymentMethod={async (id) => {
+              try {
+                await paymentMethodsApi.delete(id);
+                await refreshData();
+              } catch (error) {
+                console.error('Error eliminando método de pago:', error);
+                alert('Error al eliminar método de pago: ' + error.message);
+              }
+            }}
+          />
+        );
+
       case 'settings':
         return (
           <div className="p-6">
@@ -1350,14 +1483,10 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
         return (
           <ModernDashboard
             user={user}
-            dashboardData={effectiveDashboardData}
-            dashboardSettings={dashboardSettings}
             transactions={transactions}
             pendingPayments={pendingPayments}
-            categories={categories}
-            objetivos={objetivos}
-            presupuestos={presupuestos}
-            resumenesBancarios={resumenesBancarios}
+            dollarQuotes={dollarQuotes}
+            loading={loadingTx}
             onNavigate={handleNavigate}
             onNewTransaction={handleNewTransaction}
           />
@@ -1372,21 +1501,13 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
         currentView={currentView}
         onNavigate={handleNavigate}
         user={user}
-        balanceData={headerBalanceData}
-        currenciesBalance={headerCurrenciesBalance}
-        dollarQuote={dashboardData?.dollarQuote}
-        notifications={notifications}
-        isDarkMode={isDarkMode}
-        onToggleTheme={toggleTheme}
-        amountsVisible={amountsVisible}
-        onToggleAmountVisibility={toggleAmountVisibility}
+        pendingPaymentsCount={pendingPaymentsCount}
         onNewTransaction={handleNewTransaction}
-        onBulkUpload={handleBulkUpload}
         onSearch={handleSearch}
         onLogout={handleLogout}
-        onOpenSettings={() => setShowDashboardSettings(true)}
         onOpenAgent={() => setShowAgentPanel(true)}
-        dashboardSettings={dashboardSettings}
+        amountsVisible={amountsVisible}
+        onToggleAmountVisibility={toggleAmountVisibility}
       >
         <Suspense fallback={<LoadingSpinner message="Cargando vista..." />}>
           {renderView()}

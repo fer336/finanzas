@@ -1,50 +1,84 @@
-import React, { useState, useEffect } from 'react';
-import { X, Save, CreditCard } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Save, Wallet, X } from 'lucide-react';
+
+/**
+ * PaymentMethodModal — alta/edición de método de pago, tema "Papel".
+ * Mismo patrón visual que CategoryModal (overlay rgba(32,36,44,.4),
+ * panel #faf7ef, radius 12px, pills de tipo, paleta de color en tonos
+ * tierra). El ícono sigue siendo un emoji libre — set curado chico,
+ * no amerita el picker reicon-react usado en categorías.
+ */
+const TYPE_OPTIONS = [
+  { value: 'tarjeta', label: 'Tarjeta', icon: '💳' },
+  { value: 'efectivo', label: 'Efectivo', icon: '💵' },
+  { value: 'transferencia', label: 'Transferencia', icon: '🏦' },
+  { value: 'debito', label: 'Débito', icon: '💰' },
+  { value: 'credito', label: 'Crédito', icon: '💎' },
+  { value: 'otro', label: 'Otro', icon: '📋' },
+];
+
+const COLOR_OPTIONS = [
+  '#5a7d52', '#476442', '#b35a42', '#a04a34', '#3d5a80',
+  '#8a6fa0', '#e9c46a', '#8a6a1f', '#9aa2ad', '#5d6470',
+  '#20242c', '#6b8e7a', '#c17a52', '#4a7a9d', '#a37fb8',
+];
+
+const ICON_OPTIONS = ['💳', '💵', '🏦', '💰', '💎', '📋', '🪙', '💸', '🏧', '📱'];
 
 export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = null }) => {
   const [formData, setFormData] = useState({
     nombre: '',
     tipo: 'tarjeta',
-    color: '#3b82f6',
+    color: '#5a7d52',
     icono: '💳',
     descripcion: '',
-    activo: true
+    activo: true,
   });
-
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
+    if (!isOpen) return;
+
     if (paymentMethod) {
       setFormData({
         nombre: paymentMethod.Nombre || paymentMethod.nombre || '',
         tipo: paymentMethod.Tipo || paymentMethod.tipo || 'tarjeta',
-        color: paymentMethod.Color || paymentMethod.color || '#3b82f6',
+        color: paymentMethod.Color || paymentMethod.color || '#5a7d52',
         icono: paymentMethod.Icono || paymentMethod.icono || '💳',
         descripcion: paymentMethod.Descripcion || paymentMethod.descripcion || '',
-        activo: paymentMethod.Activo !== undefined ? paymentMethod.Activo : (paymentMethod.activo !== undefined ? paymentMethod.activo : true)
+        activo:
+          paymentMethod.Activo !== undefined
+            ? paymentMethod.Activo
+            : paymentMethod.activo !== undefined
+              ? paymentMethod.activo
+              : true,
       });
     } else {
       setFormData({
         nombre: '',
         tipo: 'tarjeta',
-        color: '#3b82f6',
+        color: '#5a7d52',
         icono: '💳',
         descripcion: '',
-        activo: true
+        activo: true,
       });
     }
+
+    setErrors({});
   }, [paymentMethod, isOpen]);
 
+  if (!isOpen) return null;
+
   const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    setErrors(prev => ({ ...prev, [field]: '' }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: '' }));
   };
 
   const validate = () => {
-    const newErrors = {};
-    if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es requerido';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const nextErrors = {};
+    if (!formData.nombre.trim()) nextErrors.nombre = 'El nombre es requerido';
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
@@ -59,174 +93,149 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
     }
   };
 
-  if (!isOpen) return null;
-
-  const typeOptions = [
-    { value: 'tarjeta', label: 'Tarjeta', icon: '💳' },
-    { value: 'efectivo', label: 'Efectivo', icon: '💵' },
-    { value: 'transferencia', label: 'Transferencia', icon: '🏦' },
-    { value: 'debito', label: 'Débito', icon: '💰' },
-    { value: 'credito', label: 'Crédito', icon: '💎' },
-    { value: 'otro', label: 'Otro', icon: '📋' }
-  ];
-
-  const colorOptions = [
-    '#3b82f6', '#059467', '#ef4444', '#f59e0b', '#8b5cf6',
-    '#ec4899', '#10b981', '#f97316', '#06b6d4', '#84cc16'
-  ];
-
-  const iconOptions = ['💳', '💵', '🏦', '💰', '💎', '📋', '🪙', '💸', '🏧', '📱'];
-
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
-      <div className="bg-background border border-primary rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="sticky top-0 bg-background border-b border-white/10 p-6 flex items-center justify-between">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: 'rgba(32,36,44,.4)' }}>
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-[#ddd5c2] bg-[#faf7ef]">
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#ddd5c2] bg-[#faf7ef] px-5 py-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#3b82f6]/20 rounded-lg">
-              <CreditCard className="w-6 h-6 text-[#3b82f6]" />
+            <div className="rounded-sm bg-[#f0ead9] p-2">
+              <Wallet className="h-5 w-5 text-primary" />
             </div>
-            <h2 className="text-white text-xl font-bold">
-              {paymentMethod ? 'Editar Método de Pago' : 'Nuevo Método de Pago'}
+            <h2 className="font-serif text-[19px] font-bold text-foreground sm:text-[21px]">
+              {paymentMethod ? 'Editar método de pago' : 'Nuevo método de pago'}
             </h2>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            className="rounded-sm p-2 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-foreground"
           >
-            <X className="w-6 h-6 text-white" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5 p-5 sm:p-6">
           {errors.general && (
-            <div className="p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
+            <div className="rounded-sm border border-[#a04a34]/40 bg-[#a04a34]/5 p-3.5 text-[12.5px] text-[#a04a34]">
               {errors.general}
             </div>
           )}
 
-          {/* Nombre */}
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">
-              Nombre *
-            </label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470]">Nombre *</label>
             <input
               type="text"
               value={formData.nombre}
               onChange={(e) => handleChange('nombre', e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-primary transition-colors"
-              placeholder="ej., Tarjeta Visa, Efectivo, Transferencia"
+              className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder="Ej: Tarjeta Visa, Efectivo, Transferencia"
             />
-            {errors.nombre && <p className="text-red-400 text-sm mt-1">{errors.nombre}</p>}
+            {errors.nombre && <p className="mt-1 text-[11.5px] text-[#a04a34]">{errors.nombre}</p>}
           </div>
 
-          {/* Tipo */}
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">
-              Tipo
-            </label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {typeOptions.map(option => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => handleChange('tipo', option.value)}
-                  className={`min-h-[68px] rounded-lg border px-3 py-2 transition-colors flex flex-col items-center justify-center text-center gap-1.5 ${formData.tipo === option.value
-                      ? 'bg-primary/20 border-primary text-primary'
-                      : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
-                    }`}
-                >
-                  <span className="text-xl leading-none">{option.icon}</span>
-                  <span className="text-xs leading-tight sm:text-sm">{option.label}</span>
-                </button>
-              ))}
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470]">Tipo</label>
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+              {TYPE_OPTIONS.map((option) => {
+                const isSelected = formData.tipo === option.value;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => handleChange('tipo', option.value)}
+                    className="flex h-16 flex-col items-center justify-center gap-1 rounded-sm border transition-all"
+                    style={
+                      isSelected
+                        ? { borderColor: formData.color, backgroundColor: `${formData.color}22` }
+                        : { borderColor: '#ddd5c2', backgroundColor: '#fff' }
+                    }
+                  >
+                    <span className="text-lg leading-none">{option.icon}</span>
+                    <span className="text-[11px] leading-tight text-[#5d6470]">{option.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Color */}
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">
-              Color
-            </label>
-            <div className="grid grid-cols-10 gap-2">
-              {colorOptions.map(color => (
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470]">Ícono</label>
+            <div className="grid grid-cols-5 gap-2 sm:grid-cols-10">
+              {ICON_OPTIONS.map((icon) => {
+                const isSelected = formData.icono === icon;
+                return (
+                  <button
+                    key={icon}
+                    type="button"
+                    onClick={() => handleChange('icono', icon)}
+                    className="flex h-11 items-center justify-center rounded-sm border text-xl transition-all"
+                    style={
+                      isSelected
+                        ? { borderColor: formData.color, backgroundColor: `${formData.color}22` }
+                        : { borderColor: '#ddd5c2', backgroundColor: '#fff' }
+                    }
+                  >
+                    {icon}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470]">Color</label>
+            <div className="grid grid-cols-8 gap-2 sm:grid-cols-10">
+              {COLOR_OPTIONS.map((color) => (
                 <button
                   key={color}
                   type="button"
                   onClick={() => handleChange('color', color)}
-                  className={`w-10 h-10 rounded-lg border-2 transition-all ${formData.color === color ? 'border-white scale-110' : 'border-transparent'
-                    }`}
+                  className={`h-8 rounded-sm border-2 transition-all ${
+                    formData.color === color ? 'scale-105 border-[#20242c]' : 'border-transparent'
+                  }`}
                   style={{ backgroundColor: color }}
                 />
               ))}
             </div>
           </div>
 
-          {/* Ícono */}
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">
-              Ícono
-            </label>
-            <div className="grid grid-cols-10 gap-2">
-              {iconOptions.map(icon => (
-                <button
-                  key={icon}
-                  type="button"
-                  onClick={() => handleChange('icono', icon)}
-                  className={`w-10 h-10 rounded-lg border transition-all text-2xl ${formData.icono === icon
-                      ? 'bg-primary/20 border-primary scale-110'
-                      : 'bg-white/5 border-white/10 hover:bg-white/10'
-                    }`}
-                >
-                  {icon}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Descripción */}
-          <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">
-              Descripción
-            </label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470]">Descripción</label>
             <textarea
               value={formData.descripcion}
               onChange={(e) => handleChange('descripcion', e.target.value)}
               rows={3}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-primary transition-colors resize-none"
-              placeholder="Descripción opcional..."
+              className="w-full resize-none rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder="Descripción opcional"
             />
           </div>
 
-          {/* Activo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <input
+              id="metodo-pago-activo"
               type="checkbox"
-              id="activo"
               checked={formData.activo}
               onChange={(e) => handleChange('activo', e.target.checked)}
-              className="w-5 h-5 rounded border-white/10 bg-white/5 text-primary focus:ring-primary focus:ring-offset-0"
+              className="h-4 w-4 rounded-sm border-[#ddd5c2] text-primary focus:ring-ring"
             />
-            <label htmlFor="activo" className="text-white text-sm">
-              Activo
+            <label htmlFor="metodo-pago-activo" className="text-[13px] text-[#5d6470]">
+              Método activo
             </label>
           </div>
 
-          {/* Acciones */}
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 pt-1">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-lg transition-colors"
+              className="flex-1 rounded-sm border border-[#ddd5c2] bg-white px-4 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#f0ead9]"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors flex items-center justify-center gap-2"
+              className="flex flex-1 items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2.5 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047]"
             >
-              <Save className="w-5 h-5" />
+              <Save className="h-4 w-4" />
               Guardar
             </button>
           </div>

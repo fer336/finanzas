@@ -5,62 +5,76 @@
 
 @layer base {
   :root {
-    /* Base Colors - Zinc/Neutral Palette */
-    --background: #09090b;
-    /* Zinc 950 - Rich Black */
-    --foreground: #fafafa;
-    /* Zinc 50 */
+    /* ============================================================
+     * Tema "Papel" — editorial claro tipo libreta contable.
+     * Fuente de verdad: DESIGN.md (sección "Color Palette").
+     * El tema oscuro queda eliminado a propósito (ver PRODUCT.md
+     * "Anti-references"): no hay set de valores dark alternativo,
+     * solo se neutraliza `.dark` más abajo para que ThemeContext
+     * pueda seguir alternando la clase sin reintroducir el look
+     * oscuro anterior.
+     * ============================================================ */
 
-    /* Card/Panel Colors */
-    --card: #18181b;
-    /* Zinc 900 */
-    --card-foreground: #fafafa;
-    --card-hover: #27272a;
-    /* Zinc 800 */
+    /* Fondos */
+    --background: #f4f0e6;
+    /* Página */
+    --foreground: #20242c;
+    /* Texto principal */
 
-    /* Popover/Modal Colors */
-    --popover: #18181b;
-    --popover-foreground: #fafafa;
+    /* Card/Panel */
+    --card: #faf7ef;
+    /* Superficie / card */
+    --card-foreground: #20242c;
+    --card-hover: #f0ead9;
+    /* Hover de filas de tabla */
 
-    /* Primary - Blue (Action) */
-    --primary: #3b82f6;
-    /* Blue 500 */
-    --primary-foreground: #ffffff;
-    --primary-glow: rgba(59, 130, 246, 0.5);
+    /* Popover/Modal */
+    --popover: #faf7ef;
+    --popover-foreground: #20242c;
 
-    /* Secondary - Zinc (Neutral) */
-    --secondary: #27272a;
-    /* Zinc 800 */
-    --secondary-foreground: #fafafa;
-    --secondary-glow: rgba(39, 39, 42, 0.5);
+    /* Primary - Verde (ingresos / acción primaria) */
+    --primary: #5a7d52;
+    --primary-foreground: #faf7ef;
+    --primary-glow: rgba(90, 125, 82, 0);
+    /* sin glow decorativo — DESIGN.md prohíbe sombras/gradientes */
 
-    /* Muted/Subtle */
-    --muted: #27272a;
-    /* Zinc 800 */
-    --muted-foreground: #a1a1aa;
-    /* Zinc 400 */
+    /* Secondary - Botón/superficie secundaria (borde + blanco) */
+    --secondary: #ffffff;
+    --secondary-foreground: #20242c;
+    --secondary-glow: rgba(221, 213, 194, 0);
 
-    /* Accent - Cyan/Teal (Optional) */
-    --accent: #27272a;
-    --accent-foreground: #fafafa;
+    /* Muted/Subtle - Bordes sutiles / texto terciario */
+    --muted: #e7e0cf;
+    --muted-foreground: #8a8677;
 
-    /* Destructive - Red */
-    --destructive: #ef4444;
-    /* Red 500 */
-    --destructive-foreground: #ffffff;
+    /* Accent - Dorado (avisos / pendiente) */
+    --accent: #fdf6e3;
+    --accent-foreground: #8a6a1f;
 
-    /* Success - Green */
-    --success: #22c55e;
-    /* Green 500 */
-    --success-foreground: #ffffff;
+    /* Destructive - Arcilla (gastos) */
+    --destructive: #b35a42;
+    --destructive-foreground: #faf7ef;
 
-    /* Borders & Inputs */
-    --border: #27272a;
-    /* Zinc 800 */
-    --input: #27272a;
-    --ring: #3b82f6;
+    /* Success - Verde (mismo acento que ingresos/primario) */
+    --success: #5a7d52;
+    --success-foreground: #faf7ef;
 
-    --radius: 0.75rem;
+    /* Bordes & Inputs */
+    --border: #ddd5c2;
+    /* Estándar */
+    --input: #ddd5c2;
+    --ring: #5a7d52;
+
+    --radius: 0.5rem;
+    /* 8px — radio de card, ver tailwind.config.js para escala completa */
+  }
+
+  /* Neutraliza el modo oscuro: ThemeContext puede seguir agregando la
+     clase `.dark` a <html>, pero acá no redefinimos ningún token, por
+     lo que hereda exactamente la paleta Papel de :root. El dueño del
+     producto pidió eliminar la oscuridad del tema actual. */
+  .dark {
+    color-scheme: light;
   }
 }
 
@@ -74,15 +88,12 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-    background-image:
-      radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.08), transparent 25%),
-      radial-gradient(circle at 85% 30%, rgba(39, 39, 42, 0.08), transparent 25%);
-    background-attachment: fixed;
+    font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    line-height: 1.45;
   }
 }
 

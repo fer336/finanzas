@@ -125,45 +125,48 @@ const PendingPaymentPayModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm p-4 flex items-center justify-center"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      style={{ background: 'rgba(32,36,44,.4)' }}
       onClick={(event) => event.target === event.currentTarget && onClose()}
     >
-      <div className="w-full max-w-2xl bg-[#18181b] border border-white/10 rounded-2xl shadow-2xl">
-        <div className="flex items-center justify-between p-5 border-b border-white/10">
+      <div className="w-full max-w-2xl rounded-[12px] border border-[#ddd5c2] bg-[#faf7ef]">
+        <div className="flex items-center justify-between border-b border-[#e7e0cf] p-5">
           <div>
-            <h2 className="text-xl font-bold text-white">Registrar Pago</h2>
-            <p className="text-sm text-gray-400">{payment.nombre} - {(payment.monto || 0).toLocaleString('es-AR')}</p>
+            <h2 className="font-serif text-[20px] font-bold text-foreground">Registrar pago</h2>
+            <p className="mt-0.5 text-[12.5px] text-[#5d6470]">
+              {payment.nombre} · <span className="font-mono">{(payment.monto || 0).toLocaleString('es-AR')}</span>
+            </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+            className="rounded-sm p-2 transition-colors duration-150 hover:bg-black/5"
             type="button"
           >
-            <X className="w-5 h-5 text-gray-300" />
+            <X className="w-5 h-5 text-[#8a8677]" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label className="text-sm text-white/80">
+            <label className="text-[12.5px] text-[#5d6470]">
               <span className="block mb-1">Fecha de pago</span>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a8677]" />
                 <input
                   type="date"
                   value={formData.fecha_pago}
                   onChange={(e) => setFormData((prev) => ({ ...prev, fecha_pago: e.target.value }))}
-                  className="w-full pl-10 pr-3 py-2.5 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#10b981]/40"
+                  className="w-full pl-10 pr-3 py-2.5 bg-white border border-[#ddd5c2] rounded-sm text-foreground font-mono text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
             </label>
 
-            <label className="text-sm text-white/80">
+            <label className="text-[12.5px] text-[#5d6470]">
               <span className="block mb-1">Método de pago</span>
               <select
                 value={formData.metodo_pago_id}
                 onChange={(e) => setFormData((prev) => ({ ...prev, metodo_pago_id: e.target.value }))}
-                className="w-full px-3 py-2.5 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#10b981]/40"
+                className="w-full px-3 py-2.5 bg-white border border-[#ddd5c2] rounded-sm text-foreground text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="">Seleccionar...</option>
                 {paymentMethods.map((method) => (
@@ -175,12 +178,12 @@ const PendingPaymentPayModal = ({
             </label>
           </div>
 
-          <label className="text-sm text-white/80 block">
+          <label className="text-[12.5px] text-[#5d6470] block">
             <span className="block mb-1">Categoría</span>
             <select
               value={formData.categoria_id}
               onChange={(e) => setFormData((prev) => ({ ...prev, categoria_id: e.target.value }))}
-              className="w-full px-3 py-2.5 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#10b981]/40"
+              className="w-full px-3 py-2.5 bg-white border border-[#ddd5c2] rounded-sm text-foreground text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="">Seleccionar...</option>
               {categories.map((category) => (
@@ -191,12 +194,12 @@ const PendingPaymentPayModal = ({
             </select>
           </label>
 
-          <label className="text-sm text-white/80 block">
+          <label className="text-[12.5px] text-[#5d6470] block">
             <span className="block mb-1">Comprobante (se sube a MinIO)</span>
             <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 px-4 py-2.5 bg-[#0a0a0a] border border-white/10 rounded-xl cursor-pointer hover:border-[#10b981]/40 transition-colors">
-                <Upload className="w-4 h-4 text-[#10b981]" />
-                <span className="text-sm text-white">Seleccionar archivo</span>
+              <label className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#ddd5c2] rounded-sm cursor-pointer transition-colors duration-150 hover:bg-[#f0ead9]">
+                <Upload className="w-4 h-4 text-[#5a7d52]" />
+                <span className="text-[13px] text-foreground">Seleccionar archivo</span>
                 <input
                   type="file"
                   accept="image/*,.pdf"
@@ -205,23 +208,23 @@ const PendingPaymentPayModal = ({
                 />
               </label>
               {selectedFile && (
-                <span className="text-xs text-gray-400 truncate max-w-xs">{selectedFile.name}</span>
+                <span className="text-[12px] text-[#8a8677] truncate max-w-xs">{selectedFile.name}</span>
               )}
             </div>
           </label>
 
-          <label className="text-sm text-white/80 block">
+          <label className="text-[12.5px] text-[#5d6470] block">
             <span className="block mb-1">Notas</span>
             <textarea
               value={formData.notas}
               onChange={(e) => setFormData((prev) => ({ ...prev, notas: e.target.value }))}
               rows={3}
-              className="w-full px-3 py-2.5 bg-[#0a0a0a] border border-white/10 rounded-xl text-white focus:outline-none focus:border-[#10b981]/40"
+              className="w-full px-3 py-2.5 bg-white border border-[#ddd5c2] rounded-sm text-foreground text-[13.5px] focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </label>
 
           {error && (
-            <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2">
+            <div className="text-[12.5px] text-[#a04a34] bg-[#fdf6e3] border border-[#e0c98a] rounded-sm px-3 py-2">
               {error}
             </div>
           )}
@@ -230,7 +233,7 @@ const PendingPaymentPayModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+              className="rounded-sm border border-[#ddd5c2] bg-white px-[15px] py-[8px] text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50"
               disabled={saving || uploadingProof}
             >
               Cancelar
@@ -238,7 +241,7 @@ const PendingPaymentPayModal = ({
             <button
               type="submit"
               disabled={saving || uploadingProof}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#10b981] to-[#059669] text-white font-semibold hover:opacity-90 transition-opacity flex items-center gap-2 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-sm bg-primary px-[15px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:opacity-50"
             >
               {(saving || uploadingProof) ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
               {uploadingProof ? 'Subiendo comprobante a MinIO...' : saving ? 'Guardando...' : 'Confirmar pago'}

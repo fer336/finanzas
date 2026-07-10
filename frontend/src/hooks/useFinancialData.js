@@ -373,67 +373,63 @@ export const useResumenes = () => {
 };
 
 // ====== ESTADÍSTICAS DEL DASHBOARD ======
-export const useDashboardStats = () => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.dashboardStats],
-    queryFn: async () => {
-      // Cargar transacciones
-      const transactions = await apiServices.transaccionesApi.getAll();
-      const transactionsList = transactions.list || transactions || [];
+// Cómputo puro sobre transacciones ya cargadas — antes esto era un
+// useQuery con su propio fetch sin límite (transaccionesApi.getAll() sin
+// argumentos, que además defaultea a limit=100 en el service), duplicando
+// la llamada que ya hace useTransactions({limit:1000}) y bloqueando toda
+// la app detrás de esa segunda espera. Ver ModernMissionControl, que ahora
+// llama esto con useMemo sobre transactionsData.
+export const computeDashboardStats = (transactionsList = []) => {
+  // Calcular balance global (ARS)
+  const ingresos = transactionsList
+    .filter(t => t.tipo === 'ingreso' && !t.es_credito)
+    .reduce((sum, t) => sum + parseFloat(t.monto_ars || t.monto || 0), 0);
 
-      // Calcular balance global (ARS)
-      const ingresos = transactionsList
-        .filter(t => t.tipo === 'ingreso' && !t.es_credito)
-        .reduce((sum, t) => sum + parseFloat(t.monto_ars || t.monto || 0), 0);
-      
-      const gastos = transactionsList
-        .filter(t => t.tipo === 'gasto' && !t.es_credito)
-        .reduce((sum, t) => sum + parseFloat(t.monto_ars || t.monto || 0), 0);
+  const gastos = transactionsList
+    .filter(t => t.tipo === 'gasto' && !t.es_credito)
+    .reduce((sum, t) => sum + parseFloat(t.monto_ars || t.monto || 0), 0);
 
-      // Calcular balance por moneda
-      const currenciesMap = {};
-      
-      transactionsList.forEach(t => {
-        if (t.es_credito) return; // Excluir tarjetas de crédito
-        
-        const moneda = t.moneda || t.Moneda || 'ARS';
-        const monto = parseFloat(t.monto || 0);
-        const tipo = t.tipo;
-        
-        if (!currenciesMap[moneda]) {
-          currenciesMap[moneda] = { 
-            moneda, 
-            ingresos: 0, 
-            gastos: 0, 
-            balance: 0,
-            simbolo: moneda === 'USD' ? '$' : moneda === 'EUR' ? '€' : '$'
-          };
-        }
-        
-        if (tipo === 'ingreso') {
-          currenciesMap[moneda].ingresos += monto;
-        } else if (tipo === 'gasto') {
-          currenciesMap[moneda].gastos += monto;
-        }
-        
-        currenciesMap[moneda].balance = 
-          currenciesMap[moneda].ingresos - currenciesMap[moneda].gastos;
-      });
+  // Calcular balance por moneda
+  const currenciesMap = {};
 
-      const currenciesBalance = Object.values(currenciesMap);
+  transactionsList.forEach(t => {
+    if (t.es_credito) return; // Excluir tarjetas de crédito
 
-      return {
-        balance: {
-          ingresos,
-          gastos,
-          balance: ingresos - gastos,
-        },
-        currenciesBalance,
-        transactionsCount: transactionsList.length,
+    const moneda = t.moneda || t.Moneda || 'ARS';
+    const monto = parseFloat(t.monto || 0);
+    const tipo = t.tipo;
+
+    if (!currenciesMap[moneda]) {
+      currenciesMap[moneda] = {
+        moneda,
+        ingresos: 0,
+        gastos: 0,
+        balance: 0,
+        simbolo: moneda === 'USD' ? '$' : moneda === 'EUR' ? '€' : '$'
       };
-    },
-    staleTime: 60 * 1000, // 1 minuto
+    }
+
+    if (tipo === 'ingreso') {
+      currenciesMap[moneda].ingresos += monto;
+    } else if (tipo === 'gasto') {
+      currenciesMap[moneda].gastos += monto;
+    }
+
+    currenciesMap[moneda].balance =
+      currenciesMap[moneda].ingresos - currenciesMap[moneda].gastos;
   });
+
+  const currenciesBalance = Object.values(currenciesMap);
+
+  return {
+    balance: {
+      ingresos,
+      gastos,
+      balance: ingresos - gastos,
+    },
+    currenciesBalance,
+    transactionsCount: transactionsList.length,
+  };
 };
 
 // ====== AI USAGE ======

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { 
-  X, 
-  Save, 
-  Calendar, 
-  DollarSign, 
-  Tag, 
-  FileText, 
+import {
+  X,
+  Save,
+  Calendar,
+  DollarSign,
+  Tag,
+  FileText,
   Eye,
   Info,
   CreditCard,
@@ -140,44 +140,44 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
   return (
     <div className="space-y-3">
       {/* Label */}
-      <div className="flex flex-col gap-0.5 ml-1">
-        <label className="text-white text-sm font-semibold flex items-center gap-1.5">
-          <FileText className="w-3.5 h-3.5" style={{ color: accentColor }} />
+      <div className="flex flex-col gap-0.5">
+        <label className="flex items-center gap-1.5 text-[12.5px] font-medium text-[#5d6470]">
+          <FileText className="h-3.5 w-3.5" style={{ color: accentColor }} />
           {label}
         </label>
-        {hint && <span className="text-gray-500 text-xs">{hint}</span>}
+        {hint && <span className="text-[11.5px] text-[#8a8677]">{hint}</span>}
       </div>
 
       {/* ── Ya hay archivo subido → preview ── */}
       {hasFile && !showUrlInput && (
         <div className="space-y-2">
-          <div className="rounded-2xl overflow-hidden border border-white/10 bg-black/20">
+          <div className="overflow-hidden rounded-md border border-[#ddd5c2] bg-white">
             {isImage ? (
               <div className="relative">
-                <img src={value} alt={previewTitle} className="w-full max-h-56 object-contain bg-black/40" />
+                <img src={value} alt={previewTitle} className="max-h-56 w-full bg-[#f4f0e6] object-contain" />
                 <a href={value} target="_blank" rel="noopener noreferrer"
-                   className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1.5 bg-black/60 backdrop-blur-sm border border-white/10 rounded-lg text-white text-xs font-medium hover:bg-black/80 transition-colors">
-                  <ExternalLink className="w-3 h-3" /> Ver completo
+                   className="absolute right-2 top-2 flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-[#faf7ef] px-3 py-1.5 text-[11.5px] font-medium text-foreground transition-colors hover:bg-[#f0ead9]">
+                  <ExternalLink className="h-3 w-3" /> Ver completo
                 </a>
               </div>
             ) : isPdf ? (
               <div className="relative h-64">
-                <iframe src={value} title={previewTitle} className="w-full h-full border-0" />
+                <iframe src={value} title={previewTitle} className="h-full w-full border-0" />
                 <a href={value} target="_blank" rel="noopener noreferrer"
-                   className="absolute top-2 right-2 flex items-center gap-1.5 px-3 py-1.5 bg-black/60 backdrop-blur-sm border border-white/10 rounded-lg text-white text-xs font-medium hover:bg-black/80 transition-colors">
-                  <ExternalLink className="w-3 h-3" /> Abrir PDF
+                   className="absolute right-2 top-2 flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-[#faf7ef] px-3 py-1.5 text-[11.5px] font-medium text-foreground transition-colors hover:bg-[#f0ead9]">
+                  <ExternalLink className="h-3 w-3" /> Abrir PDF
                 </a>
               </div>
             ) : (
               <div className="flex items-center gap-3 p-4">
-                <div className="p-2.5 rounded-xl" style={{ backgroundColor: `${accentColor}1a` }}>
-                  <FileText className="w-5 h-5" style={{ color: accentColor }} />
+                <div className="rounded-sm p-2.5" style={{ backgroundColor: `${accentColor}1a` }}>
+                  <FileText className="h-5 w-5" style={{ color: accentColor }} />
                 </div>
-                <p className="text-gray-400 text-xs truncate flex-1">{value}</p>
+                <p className="flex-1 truncate text-[12px] text-[#8a8677]">{value}</p>
                 <a href={value} target="_blank" rel="noopener noreferrer"
-                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors shrink-0"
+                   className="flex shrink-0 items-center gap-1.5 rounded-sm px-3 py-1.5 text-[11.5px] font-medium transition-colors"
                    style={{ backgroundColor: `${accentColor}1a`, color: accentColor, border: `1px solid ${accentColor}40` }}>
-                  <ExternalLink className="w-3 h-3" /> Abrir
+                  <ExternalLink className="h-3 w-3" /> Abrir
                 </a>
               </div>
             )}
@@ -186,17 +186,17 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
           {/* Acciones: reemplazar + quitar + editar URL */}
           <div className="flex items-center gap-2">
             <button type="button" onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-colors"
-                    style={{ backgroundColor: `${accentColor}1a`, color: accentColor, border: `1px solid ${accentColor}30` }}>
-              <Upload className="w-3 h-3" /> Reemplazar archivo
+                    className="flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-[11.5px] font-medium transition-colors"
+                    style={{ backgroundColor: `${accentColor}1a`, color: accentColor, border: `1px solid ${accentColor}40` }}>
+              <Upload className="h-3 w-3" /> Reemplazar archivo
             </button>
             <button type="button" onClick={() => onChange('')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-red-400 border border-red-500/20 hover:bg-red-500/10 transition-colors">
-              <Trash2 className="w-3 h-3" /> Quitar
+                    className="flex items-center gap-1.5 rounded-sm border border-[#b35a42]/30 px-3 py-1.5 text-[11.5px] font-medium text-[#a04a34] transition-colors hover:bg-[#a04a34]/10">
+              <Trash2 className="h-3 w-3" /> Quitar
             </button>
             <button type="button" onClick={() => setShowUrlInput(true)}
-                    className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-gray-400 hover:text-white transition-colors">
-              <Link className="w-3 h-3" /> Editar URL
+                    className="ml-auto flex items-center gap-1.5 text-[11.5px] font-medium text-[#8a8677] transition-colors hover:text-foreground">
+              <Link className="h-3 w-3" /> Editar URL
             </button>
           </div>
         </div>
@@ -213,19 +213,19 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
               className={`
-                flex flex-col items-center justify-center gap-2 p-6 rounded-2xl border-2 border-dashed cursor-pointer transition-all
+                flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed p-6 cursor-pointer transition-all
                 ${isDragging
-                  ? 'border-[#10b981] bg-[#10b981]/5'
-                  : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/[0.07]'
+                  ? 'border-primary bg-[#f0ead9]'
+                  : 'border-[#ddd5c2] bg-white hover:border-[#8a8677] hover:bg-[#f0ead9]/50'
                 }
               `}
             >
-              <Upload className="w-8 h-8" style={{ color: `${accentColor}99` }} />
-              <p className="text-white text-sm font-medium">Subir archivo</p>
-              <p className="text-gray-500 text-xs text-center">
+              <Upload className="h-8 w-8" style={{ color: `${accentColor}99` }} />
+              <p className="text-[13.5px] font-medium text-foreground">Subir archivo</p>
+              <p className="text-center text-[11.5px] text-[#8a8677]">
                 Arrastrá un archivo o hace clic para seleccionar
               </p>
-              <p className="text-gray-600 text-xs">
+              <p className="text-[11px] text-[#8a8677]">
                 JPG, PNG, PDF — máx. 10MB
               </p>
             </div>
@@ -237,15 +237,14 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
               type="url"
               value={value || ''}
               onChange={(e) => onChange(e.target.value)}
-              className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 transition-all placeholder:text-gray-600 text-sm"
-              style={{ '--tw-ring-color': `${accentColor}80` }}
+              className="flex-1 rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="https://..."
             />
             {value && (
               <button type="button" onClick={() => onChange('')}
-                      className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 hover:bg-red-500/20 transition-colors"
+                      className="rounded-sm border border-[#b35a42]/30 p-3 text-[#a04a34] transition-colors hover:bg-[#a04a34]/10"
                       title={`Quitar ${label.toLowerCase()}`}>
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="h-4 w-4" />
               </button>
             )}
           </div>
@@ -253,15 +252,15 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
           {/* Toggle: URL manual ⇄ upload */}
           {!hasFile && (
             <button type="button" onClick={() => setShowUrlInput(!showUrlInput)}
-                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1">
-              <Link className="w-3 h-3" />
+                    className="flex items-center gap-1 text-[11.5px] text-[#8a8677] transition-colors hover:text-foreground">
+              <Link className="h-3 w-3" />
               {showUrlInput ? 'Subir archivo en su lugar' : 'O pegar URL manualmente'}
             </button>
           )}
           {hasFile && showUrlInput && (
             <button type="button" onClick={() => setShowUrlInput(false)}
-                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors flex items-center gap-1">
-              <FileText className="w-3 h-3" />
+                    className="flex items-center gap-1 text-[11.5px] text-[#8a8677] transition-colors hover:text-foreground">
+              <FileText className="h-3 w-3" />
               Volver a vista de archivo
             </button>
           )}
@@ -270,12 +269,12 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
 
       {/* ── Progress bar ── */}
       {uploading && (
-        <div className="space-y-2 p-4 rounded-2xl bg-white/5 border border-white/10">
+        <div className="space-y-2 rounded-md border border-[#ddd5c2] bg-white p-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-300 font-medium">Subiendo archivo...</span>
-            <span className="text-sm text-gray-500">{uploadProgress}%</span>
+            <span className="text-[13px] font-medium text-[#5d6470]">Subiendo archivo...</span>
+            <span className="text-[13px] text-[#8a8677]">{uploadProgress}%</span>
           </div>
-          <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+          <div className="h-2 overflow-hidden rounded-full bg-[#e7e0cf]">
             <div className="h-full rounded-full transition-all duration-300"
                  style={{ width: `${uploadProgress}%`, backgroundColor: accentColor }} />
           </div>
@@ -284,12 +283,12 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
 
       {/* ── Error ── */}
       {error && (
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
-          <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
-          <span className="text-sm text-red-300 flex-1">{error}</span>
+        <div className="flex items-center gap-2 rounded-sm border border-[#a04a34]/30 bg-[#a04a34]/10 p-3">
+          <AlertCircle className="h-4 w-4 shrink-0 text-[#a04a34]" />
+          <span className="flex-1 text-[13px] text-[#a04a34]">{error}</span>
           <button type="button" onClick={() => setError(null)}
-                  className="p-1 hover:bg-red-500/10 rounded-lg transition-colors">
-            <X className="w-3.5 h-3.5 text-red-400" />
+                  className="rounded-sm p-1 transition-colors hover:bg-[#a04a34]/10">
+            <X className="h-3.5 w-3.5 text-[#a04a34]" />
           </button>
         </div>
       )}
@@ -302,12 +301,14 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
 };
 
 /**
- * StitchPendingPaymentModal - Modal moderno diseñado con Stitch
+ * StitchPendingPaymentModal — alta/edición de Vencimiento, tema "Papel"
+ * (ver design_handoff_rediseno_papel/README.md "Interactions & Behavior":
+ * "modal fondo #faf7ef, overlay rgba(32,36,44,.4), radius 12px").
  */
-const StitchPendingPaymentModal = ({ 
-  isOpen, 
-  onClose, 
-  onSave, 
+const StitchPendingPaymentModal = ({
+  isOpen,
+  onClose,
+  onSave,
   payment = null,
   categories = [],
   paymentMethods = []
@@ -338,7 +339,7 @@ const StitchPendingPaymentModal = ({
   useEffect(() => {
     if (payment && isOpen) {
       console.log('📝 Cargando pago para editar:', payment);
-      
+
       setFormData({
         Nombre: payment.Nombre || payment.nombre || '',
         Descripcion: payment.Descripcion || payment.descripcion || '',
@@ -376,11 +377,11 @@ const StitchPendingPaymentModal = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    
+
     try {
       // Limpiar campos vacíos (convertir '' a null para UUIDs)
       const cleanedData = { ...formData };
-      
+
       // Campos UUID que deben ser null si están vacíos
       const uuidFields = ['categorias_id', 'metodos_pago_id'];
       uuidFields.forEach(field => {
@@ -396,7 +397,7 @@ const StitchPendingPaymentModal = ({
           cleanedData[field] = null;
         }
       });
-      
+
       // Campos numéricos
       if (cleanedData.interes === '' || cleanedData.interes === undefined) {
         cleanedData.interes = 0;
@@ -407,9 +408,9 @@ const StitchPendingPaymentModal = ({
       if (cleanedData.diasgracia === '' || cleanedData.diasgracia === undefined) {
         cleanedData.diasgracia = 0;
       }
-      
+
       console.log('💾 Datos limpiados para guardar:', cleanedData);
-      
+
       await onSave(cleanedData);
     } catch (error) {
       console.error('Error guardando:', error);
@@ -423,71 +424,72 @@ const StitchPendingPaymentModal = ({
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998]" onClick={onClose} />
+      <div className="fixed inset-0 z-[9998]" style={{ background: 'rgba(32,36,44,.4)' }} onClick={onClose} />
 
       {/* Modal */}
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div className="relative w-full max-w-2xl bg-[#18181b]/90 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
-          
+        <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-[#ddd5c2] bg-[#faf7ef]">
+
           {/* Header (Sticky) */}
-          <div className="sticky top-0 z-20 flex items-center justify-between px-8 py-6 border-b border-white/10 bg-[#18181b]/80 backdrop-blur-md">
+          <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#ddd5c2] bg-[#faf7ef] px-6 py-5 sm:px-8">
             <div className="flex items-center gap-3">
-              <div className="bg-[#10b981]/20 p-2 rounded-lg">
-                <Calendar className="w-6 h-6 text-[#10b981]" />
+              <div className="rounded-sm bg-[#f0ead9] p-2">
+                <Calendar className="h-5 w-5 text-primary" />
               </div>
-              <h2 className="text-white text-xl font-bold">
-                {payment ? 'Editar Pago Pendiente' : 'Nuevo Pago Pendiente'}
+              <h2 className="font-serif text-[19px] font-bold text-foreground sm:text-[21px]">
+                {payment ? 'Editar vencimiento' : 'Nuevo vencimiento'}
               </h2>
             </div>
-            <button 
+            <button
+              type="button"
               onClick={onClose}
-              className="p-2 hover:bg-white/5 rounded-full transition-colors group"
+              className="rounded-sm p-2 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-foreground"
             >
-              <X className="w-5 h-5 text-gray-400 group-hover:text-white" />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* Content (Scrollable) */}
-          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
-            
+          <form onSubmit={handleSubmit} className="custom-scrollbar flex-1 space-y-7 overflow-y-auto p-6 sm:p-8">
+
             {/* Información Básica */}
             <section className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Info className="w-5 h-5 text-[#10b981]" />
-                <h3 className="text-white font-semibold text-lg">Información Básica</h3>
+              <div className="mb-2 flex items-center gap-2">
+                <Info className="h-4 w-4 text-primary" />
+                <h3 className="font-serif text-[16px] font-semibold text-foreground">Información básica</h3>
               </div>
-              
+
               <div className="space-y-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-gray-400 text-sm font-medium ml-1">Nombre del Pago</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470]">Nombre del pago</label>
                   <input
                     type="text"
                     value={formData.Nombre}
                     onChange={(e) => setFormData({...formData, Nombre: e.target.value})}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 focus:border-[#10b981] transition-all placeholder:text-gray-600"
+                    className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Ej: Netflix, Alquiler, Luz..."
                     required
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-gray-400 text-sm font-medium ml-1">Descripción</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470]">Descripción</label>
                   <textarea
                     value={formData.Descripcion}
                     onChange={(e) => setFormData({...formData, Descripcion: e.target.value})}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 transition-all placeholder:text-gray-600 resize-none"
+                    className="resize-none rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Añadir una nota o descripción..."
                     rows={3}
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-gray-400 text-sm font-medium ml-1">Número de Factura</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470]">Número de factura</label>
                   <input
                     type="text"
                     value={formData.num_factura}
                     onChange={(e) => setFormData({...formData, num_factura: e.target.value})}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 placeholder:text-gray-600"
+                    className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Ej: 001-00123456"
                   />
                 </div>
@@ -496,21 +498,21 @@ const StitchPendingPaymentModal = ({
 
             {/* Montos y Fechas */}
             <section className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <DollarSign className="w-5 h-5 text-[#10b981]" />
-                <h3 className="text-white font-semibold text-lg">Montos y Fechas</h3>
+              <div className="mb-2 flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-primary" />
+                <h3 className="font-serif text-[16px] font-semibold text-foreground">Montos y fechas</h3>
               </div>
 
               <div className="space-y-4">
                 {/* Monto */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-gray-400 text-sm font-medium ml-1">Monto</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470]">Monto</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.Monto}
                     onChange={(e) => setFormData({...formData, Monto: e.target.value})}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 placeholder:text-gray-600"
+                    className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 font-mono text-[13.5px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="0.00"
                     required
                   />
@@ -518,11 +520,11 @@ const StitchPendingPaymentModal = ({
 
                 {/* Moneda */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-gray-400 text-sm font-medium ml-1">Moneda</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470]">Moneda</label>
                   <select
                     value={formData.Moneda}
                     onChange={(e) => setFormData({...formData, Moneda: e.target.value})}
-                    className="select-field"
+                    className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="ARS">ARS - Pesos Argentinos</option>
                     <option value="USD">USD - Dólares</option>
@@ -532,12 +534,12 @@ const StitchPendingPaymentModal = ({
 
                 {/* Fecha de Vencimiento */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-gray-400 text-sm font-medium ml-1">Fecha de Vencimiento</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470]">Fecha de vencimiento</label>
                   <input
                     type="date"
                     value={formData.Fechavencimiento}
                     onChange={(e) => setFormData({...formData, Fechavencimiento: e.target.value})}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]/50 [color-scheme:dark]"
+                    className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 font-mono text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     required
                   />
                 </div>
@@ -545,19 +547,19 @@ const StitchPendingPaymentModal = ({
             </section>
 
             {/* Categorización */}
-            <section className="space-y-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Tag className="w-5 h-5 text-[#10b981]" />
-                <h3 className="text-white font-semibold text-lg">Categorización</h3>
+            <section className="space-y-5">
+              <div className="mb-2 flex items-center gap-2">
+                <Tag className="h-4 w-4 text-primary" />
+                <h3 className="font-serif text-[16px] font-semibold text-foreground">Categorización</h3>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-gray-400 text-sm font-medium ml-1">Categoría</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470]">Categoría</label>
                   <select
                     value={formData.categorias_id}
                     onChange={(e) => setFormData({...formData, categorias_id: e.target.value})}
-                    className="select-field"
+                    className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="">Sin categoría</option>
                     {categories.map(cat => (
@@ -569,11 +571,11 @@ const StitchPendingPaymentModal = ({
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-gray-400 text-sm font-medium ml-1">Método de Pago</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470]">Método de pago</label>
                   <select
                     value={formData.metodos_pago_id}
                     onChange={(e) => setFormData({...formData, metodos_pago_id: e.target.value})}
-                    className="select-field"
+                    className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="">Sin método</option>
                     {paymentMethods.map(pm => (
@@ -587,15 +589,15 @@ const StitchPendingPaymentModal = ({
 
               {/* Tipo de Gasto (Radio Buttons Pills) */}
               <div className="space-y-3">
-                <label className="text-gray-400 text-sm font-medium ml-1">Tipo de Gasto</label>
-                <div className="flex flex-wrap gap-3">
+                <label className="text-[12.5px] font-medium text-[#5d6470]">Tipo de gasto</label>
+                <div className="flex flex-wrap gap-2">
                   {['Servicio', 'Factura', 'Alquiler', 'Otro'].map((tipo) => (
-                    <label 
+                    <label
                       key={tipo}
-                      className={`flex items-center gap-2 px-4 py-2 border rounded-full cursor-pointer transition-colors ${
+                      className={`flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-1.5 transition-colors ${
                         formData.Tipo.toLowerCase() === tipo.toLowerCase()
-                          ? 'bg-[#10b981]/20 border-[#10b981] text-[#10b981]'
-                          : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
+                          ? 'border-[#20242c] bg-[#f0ead9] text-[#20242c]'
+                          : 'border-[#ddd5c2] bg-white text-[#8a8677] hover:bg-[#f0ead9]/50'
                       }`}
                     >
                       <input
@@ -605,7 +607,7 @@ const StitchPendingPaymentModal = ({
                         onChange={() => setFormData({...formData, Tipo: tipo.toLowerCase()})}
                         className="hidden"
                       />
-                      <span className="text-sm font-medium">{tipo}</span>
+                      <span className="text-[12.5px] font-medium">{tipo}</span>
                     </label>
                   ))}
                 </div>
@@ -613,22 +615,23 @@ const StitchPendingPaymentModal = ({
 
               {/* Prioridad (Toggle Pills) */}
               <div className="space-y-3">
-                <label className="text-gray-400 text-sm font-medium ml-1">Prioridad</label>
-                <div className="flex gap-2 p-1 bg-white/5 rounded-xl w-fit">
+                <label className="text-[12.5px] font-medium text-[#5d6470]">Prioridad</label>
+                <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] bg-card p-[3px]">
                   {[
-                    { value: 'baja', label: 'Baja', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
-                    { value: 'media', label: 'Media', color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
-                    { value: 'alta', label: 'Alta', color: 'bg-red-500/20 text-red-400 border-red-500/30' }
+                    { value: 'baja', label: 'Baja', bg: '#3d5a80', text: '#faf7ef' },
+                    { value: 'media', label: 'Media', bg: '#e9c46a', text: '#20242c' },
+                    { value: 'alta', label: 'Alta', bg: '#a04a34', text: '#faf7ef' }
                   ].map((pri) => (
                     <button
                       key={pri.value}
                       type="button"
                       onClick={() => setFormData({...formData, Prioridad: pri.value})}
-                      className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                      className="rounded-full px-4 py-1.5 font-mono text-[12px] font-semibold transition-colors duration-150"
+                      style={
                         formData.Prioridad === pri.value
-                          ? `${pri.color} border`
-                          : 'text-gray-400 hover:text-white'
-                      }`}
+                          ? { backgroundColor: pri.bg, color: pri.text }
+                          : { color: '#5d6470' }
+                      }
                     >
                       {pri.label}
                     </button>
@@ -638,30 +641,31 @@ const StitchPendingPaymentModal = ({
             </section>
 
             {/* Estado y Recurrencia */}
-            <section className="space-y-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Repeat className="w-5 h-5 text-[#10b981]" />
-                <h3 className="text-white font-semibold text-lg">Estado y Recurrencia</h3>
+            <section className="space-y-5">
+              <div className="mb-2 flex items-center gap-2">
+                <Repeat className="h-4 w-4 text-primary" />
+                <h3 className="font-serif text-[16px] font-semibold text-foreground">Estado y recurrencia</h3>
               </div>
 
               {/* Estado (Toggle Buttons) */}
               <div className="flex flex-col gap-3">
-                <label className="text-gray-400 text-sm font-medium ml-1">Estado actual</label>
-                <div className="flex p-1 bg-white/5 rounded-xl border border-white/10">
+                <label className="text-[12.5px] font-medium text-[#5d6470]">Estado actual</label>
+                <div className="flex rounded-full border border-[#ddd5c2] bg-card p-[3px]">
                   {[
-                    { value: 'pendiente', label: 'Pendiente', color: 'bg-[#10b981] text-white' },
-                    { value: 'pagado', label: 'Pagado', color: 'bg-[#10b981] text-white' },
-                    { value: 'vencido', label: 'Vencido', color: 'bg-red-500 text-white' }
+                    { value: 'pendiente', label: 'Pendiente', bg: '#e9c46a', text: '#20242c' },
+                    { value: 'pagado', label: 'Pagado', bg: '#5a7d52', text: '#faf7ef' },
+                    { value: 'vencido', label: 'Vencido', bg: '#a04a34', text: '#faf7ef' }
                   ].map((estado) => (
                     <button
                       key={estado.value}
                       type="button"
                       onClick={() => setFormData({...formData, Estado: estado.value})}
-                      className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
+                      className="flex-1 rounded-full py-1.5 text-[12.5px] font-semibold transition-colors duration-150"
+                      style={
                         formData.Estado === estado.value
-                          ? `${estado.color} shadow-lg`
-                          : 'text-gray-400 hover:text-white'
-                      }`}
+                          ? { backgroundColor: estado.bg, color: estado.text }
+                          : { color: '#5d6470' }
+                      }
                     >
                       {estado.label}
                     </button>
@@ -670,38 +674,42 @@ const StitchPendingPaymentModal = ({
               </div>
 
               {/* Recurrente (Toggle Switch) */}
-              <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
+              <div className="flex items-center justify-between rounded-md border border-[#ddd5c2] bg-white p-4">
                 <div className="flex flex-col">
-                  <span className="text-white font-medium">Pago Recurrente</span>
-                  <span className="text-gray-500 text-xs">Se generará automáticamente cada período</span>
+                  <span className="text-[13.5px] font-medium text-foreground">Pago recurrente</span>
+                  <span className="text-[11.5px] text-[#8a8677]">Se generará automáticamente cada período</span>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={formData.Recurrente}
-                    onChange={(e) => setFormData({...formData, Recurrente: e.target.checked})}
-                    className="sr-only peer"
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={formData.Recurrente}
+                  onClick={() => setFormData({...formData, Recurrente: !formData.Recurrente})}
+                  className="relative h-5 w-9 shrink-0 rounded-full transition-colors duration-150"
+                  style={{ background: formData.Recurrente ? '#5a7d52' : '#d8d6cf' }}
+                >
+                  <span
+                    className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all duration-150"
+                    style={{ left: formData.Recurrente ? '18px' : '2px' }}
                   />
-                  <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#10b981]"></div>
-                </label>
+                </button>
               </div>
 
               {/* Frecuencia (solo si es recurrente) */}
               {formData.Recurrente && (
-                <div className="grid grid-cols-3 gap-3 pl-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="grid grid-cols-3 gap-2.5 pl-1">
                   {['Semanal', 'Mensual', 'Anual'].map((freq) => (
                     <button
                       key={freq}
                       type="button"
                       onClick={() => setFormData({...formData, FrecuenciaRecurrencia: freq.toLowerCase()})}
-                      className={`flex items-center justify-center gap-2 py-3 rounded-xl border text-sm font-medium transition-all ${
+                      className={`flex items-center justify-center gap-1.5 rounded-sm border py-2.5 text-[12.5px] font-medium transition-all ${
                         formData.FrecuenciaRecurrencia === freq.toLowerCase()
-                          ? 'border-[#10b981]/50 bg-[#10b981]/10 text-[#10b981] font-bold'
-                          : 'border-white/10 bg-white/5 text-gray-400 hover:bg-white/10'
+                          ? 'border-primary bg-[#f0ead9] font-semibold text-primary'
+                          : 'border-[#ddd5c2] bg-white text-[#8a8677] hover:bg-[#f0ead9]/50'
                       }`}
                     >
                       {formData.FrecuenciaRecurrencia === freq.toLowerCase() && (
-                        <Check className="w-4 h-4" />
+                        <Check className="h-3.5 w-3.5" />
                       )}
                       {freq}
                     </button>
@@ -711,10 +719,10 @@ const StitchPendingPaymentModal = ({
             </section>
 
             {/* Documentos */}
-            <section className="space-y-6 pb-4">
+            <section className="space-y-5 pb-2">
               <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#10b981]" />
-                <h3 className="text-white font-semibold text-lg">Documentos</h3>
+                <FileText className="h-4 w-4 text-primary" />
+                <h3 className="font-serif text-[16px] font-semibold text-foreground">Documentos</h3>
               </div>
 
               {/* ── FACTURA ORIGINAL (url_pdf) ── */}
@@ -724,7 +732,7 @@ const StitchPendingPaymentModal = ({
                 value={formData.url_pdf}
                 onChange={(val) => setFormData({ ...formData, url_pdf: val })}
                 previewTitle="Factura"
-                accentColor="#6366f1"
+                accentColor="#3d5a80"
                 uploadPrefix="facturas"
               />
 
@@ -735,28 +743,30 @@ const StitchPendingPaymentModal = ({
                 value={formData.comprobante}
                 onChange={(val) => setFormData({ ...formData, comprobante: val })}
                 previewTitle="Comprobante"
-                accentColor="#10b981"
+                accentColor="#5a7d52"
                 uploadPrefix="comprobantes"
               />
             </section>
           </form>
 
           {/* Footer (Sticky) */}
-          <div className="sticky bottom-0 z-20 px-8 py-6 border-t border-white/10 bg-[#18181b]/80 backdrop-blur-md flex items-center justify-end gap-4">
+          <div className="sticky bottom-0 z-20 flex items-center justify-end gap-3 border-t border-[#ddd5c2] bg-[#faf7ef] px-6 py-5 sm:px-8">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="px-6 py-3 rounded-xl border border-white/10 text-gray-300 font-semibold hover:bg-white/5 transition-all disabled:opacity-50"
+              className="rounded-sm border border-[#ddd5c2] bg-white px-5 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
+              type="button"
               onClick={handleSubmit}
               disabled={saving}
-              className="px-8 py-3 rounded-xl bg-gradient-to-r from-[#10b981] to-[#34d399] text-white font-bold shadow-lg shadow-[#10b981]/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+              className="flex items-center gap-2 rounded-sm bg-primary px-5 py-2.5 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:opacity-50"
             >
-              {saving ? 'Guardando...' : 'Guardar Cambios'}
+              <Save className="h-4 w-4" />
+              {saving ? 'Guardando…' : 'Guardar cambios'}
             </button>
           </div>
         </div>
@@ -764,23 +774,6 @@ const StitchPendingPaymentModal = ({
 
       {/* Custom Scrollbar Styles */}
       <style jsx>{`
-        .select-field {
-          background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
-          border: 1px solid rgba(16, 185, 129, 0.35);
-          border-radius: 0.75rem;
-          padding: 0.75rem 1rem;
-          color: white;
-          width: 100%;
-          outline: none;
-          transition: border-color .15s, box-shadow .15s, background .15s;
-        }
-        .select-field:focus {
-          border-color: rgba(16, 185, 129, 0.7);
-          box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
-          background: linear-gradient(180deg, rgba(16,185,129,0.14), rgba(16,185,129,0.06));
-        }
-        .select-field option { background: #18181b; color: white; }
-
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }
@@ -788,11 +781,11 @@ const StitchPendingPaymentModal = ({
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(32, 36, 44, 0.15);
           border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(32, 36, 44, 0.25);
         }
       `}</style>
     </>

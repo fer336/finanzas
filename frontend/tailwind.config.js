@@ -56,19 +56,39 @@ module.exports = {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 4px)",
-        sm: "calc(var(--radius) - 8px)",
+        // Escala Papel (DESIGN.md "Radius"): 6px inputs/botones, 8px cards,
+        // 10px paneles grandes. 999px (pills/badges) ya lo cubre `rounded-full`.
+        sm: "6px",
+        md: "8px",
+        lg: "10px",
       },
       fontFamily: {
+        // Fraunces = títulos/wordmark, Work Sans = cuerpo/UI, IBM Plex Mono =
+        // todos los valores numéricos/fechas/tags (ver DESIGN.md "Typography").
+        serif: [
+          'Fraunces',
+          'ui-serif',
+          'Georgia',
+          'serif'
+        ],
         sans: [
-          'Outfit',
+          'Work Sans',
           'Inter',
           'ui-sans-serif',
           'system-ui'
+        ],
+        mono: [
+          'IBM Plex Mono',
+          'ui-monospace',
+          'SFMono-Regular',
+          'monospace'
         ]
       },
       boxShadow: {
+        // Sin sombra decorativa en el tema Papel — la profundidad se logra
+        // solo con bordes y contraste de fondo. Se dejan definidos por si
+        // algún componente aún no restyleado los referencia, pero no se
+        // deben aplicar en código nuevo.
         glow: '0 0 20px rgba(59, 130, 246, 0.3)',
         'glow-lg': '0 0 30px rgba(59, 130, 246, 0.4)',
         'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',

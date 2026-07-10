@@ -1,38 +1,37 @@
-import React from 'react';
 import PropTypes from 'prop-types';
 
 /**
- * LoadingSpinner - Spinner de carga para Suspense fallback
+ * LoadingSpinner — spinner de carga del tema "Papel" (fallback de Suspense /
+ * queries todavía en curso). Un solo anillo sutil en vez del combo
+ * spinner+pulso+puntos rebotando de antes — el pedido fue "más lindo pero
+ * sutil, manteniendo el diseño nuevo".
+ * `fullScreen=false` lo hace embebible dentro de una card/sección (sin
+ * `min-h-screen`), para casos como ModernCategoriesView dentro de Ajustes.
  */
-const LoadingSpinner = ({ message = 'Cargando...' }) => {
+const LoadingSpinner = ({ message = 'Cargando…', fullScreen = true }) => {
+  const content = (
+    <div className="text-center">
+      <div className="mx-auto mb-3 h-9 w-9 animate-spin rounded-full border-[3px] border-[#e7e0cf] border-t-[#3d5a80]" />
+      <p className="font-mono text-[11px] uppercase text-[#8a8677]" style={{ letterSpacing: '.14em' }}>
+        {message}
+      </p>
+    </div>
+  );
+
+  if (!fullScreen) {
+    return <div className="flex items-center justify-center py-14">{content}</div>;
+  }
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a]">
-      <div className="text-center">
-        <div className="relative">
-          {/* Spinner principal */}
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#10b981] border-t-transparent mx-auto mb-4"></div>
-          
-          {/* Pulso de fondo */}
-          <div className="absolute inset-0 animate-pulse">
-            <div className="rounded-full h-16 w-16 bg-[#10b981]/20 mx-auto"></div>
-          </div>
-        </div>
-        
-        <p className="text-gray-400 text-sm font-medium">{message}</p>
-        
-        {/* Puntos animados */}
-        <div className="flex items-center justify-center gap-1 mt-2">
-          <div className="w-1.5 h-1.5 bg-[#10b981] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-          <div className="w-1.5 h-1.5 bg-[#10b981] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-          <div className="w-1.5 h-1.5 bg-[#10b981] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-        </div>
-      </div>
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      {content}
     </div>
   );
 };
 
 LoadingSpinner.propTypes = {
-  message: PropTypes.string
+  message: PropTypes.string,
+  fullScreen: PropTypes.bool,
 };
 
 export default LoadingSpinner;

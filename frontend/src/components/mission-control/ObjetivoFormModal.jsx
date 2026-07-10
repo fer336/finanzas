@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Save, Target, DollarSign, Calendar, Tag, AlertCircle } from 'lucide-react';
+import { X, Save, Target, AlertCircle } from 'lucide-react';
 import apiServices from '../../services/api';
 
 const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, categorias = [] }) => {
@@ -56,7 +56,7 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -117,72 +117,79 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
 
   const iconos = ['🎯', '✈️', '🏠', '🚗', '💻', '📱', '🎓', '💰', '📈', '🏖️', '🎉', '💍', '🎮', '⚽', '🎸', '📷'];
 
+  const prioridades = [
+    { value: 'baja', label: 'Baja' },
+    { value: 'media', label: 'Media' },
+    { value: 'alta', label: 'Alta' }
+  ];
+
   if (!isOpen) return null;
 
+  const inputClass = (hasError) =>
+    `w-full px-3.5 py-2.5 bg-white border ${hasError ? 'border-[#a04a34]' : 'border-[#ddd5c2]'} rounded-sm text-foreground text-[13.5px] placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring transition-colors duration-150`;
+
   const modalContent = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-2 sm:p-4">
-      <div className="bg-[#09090b] border border-white/10 rounded-2xl max-w-2xl w-full max-h-[95vh] overflow-y-auto shadow-2xl">
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      style={{ background: 'rgba(32,36,44,.4)' }}
+      onClick={(event) => event.target === event.currentTarget && handleClose()}
+    >
+      <div className="w-full max-w-2xl max-h-[95vh] overflow-y-auto rounded-[12px] border border-[#ddd5c2] bg-[#faf7ef]">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-[#09090b]/95 backdrop-blur-sm border-b border-white/10 p-4 sm:p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-cyan-500/20 rounded-lg flex items-center justify-center">
-                <Target className="w-5 h-5 text-cyan-400" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-white">
-                  {objetivo ? 'Editar Objetivo' : 'Nuevo Objetivo'}
-                </h2>
-                <p className="text-sm text-zinc-500">
-                  {objetivo ? 'Actualiza los detalles de tu meta' : 'Define tu meta de ahorro'}
-                </p>
-              </div>
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#e7e0cf] bg-[#faf7ef] p-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-[#f0ead9]">
+              <Target className="h-5 w-5 text-primary" />
             </div>
-            <button
-              onClick={handleClose}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-zinc-400" />
-            </button>
+            <div>
+              <h2 className="font-serif text-[20px] font-bold text-foreground">
+                {objetivo ? 'Editar objetivo' : 'Nuevo objetivo'}
+              </h2>
+              <p className="mt-0.5 text-[12.5px] text-[#5d6470]">
+                {objetivo ? 'Actualizá los detalles de tu meta' : 'Definí tu meta de ahorro'}
+              </p>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="rounded-sm p-2 transition-colors duration-150 hover:bg-black/5"
+          >
+            <X className="h-5 w-5 text-[#8a8677]" />
+          </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-          {/* Error general */}
+        <form onSubmit={handleSubmit} className="space-y-4 p-5">
           {errors.general && (
-            <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-              <p className="text-red-400 text-sm">{errors.general}</p>
+            <div className="flex items-start gap-3 rounded-sm border border-[#e0c98a] bg-[#fdf6e3] px-3 py-2.5">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#a04a34]" />
+              <p className="text-[12.5px] text-[#a04a34]">{errors.general}</p>
             </div>
           )}
 
           {/* Nombre */}
-          <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">
-              Nombre del Objetivo <span className="text-red-400">*</span>
-            </label>
+          <label className="block text-[12.5px] text-[#5d6470]">
+            <span className="mb-1 block">
+              Nombre del objetivo <span className="text-[#a04a34]">*</span>
+            </span>
             <input
               type="text"
               value={formData.nombre}
-              onChange={(e) => setFormData(prev => ({ ...prev, nombre: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, nombre: e.target.value }))}
               placeholder="ej. Viaje a Europa, Comprar auto..."
-              className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white/5 border ${
-                errors.nombre ? 'border-red-500/50' : 'border-white/10'
-              } rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-white placeholder-zinc-500 text-sm sm:text-base`}
+              className={inputClass(errors.nombre)}
             />
-            {errors.nombre && <p className="mt-1 text-sm text-red-400">{errors.nombre}</p>}
-          </div>
+            {errors.nombre && <p className="mt-1 text-[12px] text-[#a04a34]">{errors.nombre}</p>}
+          </label>
 
-          {/* Tipo de Objetivo */}
-          <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">
-              Tipo de Objetivo
-            </label>
+          {/* Tipo de objetivo */}
+          <label className="block text-[12.5px] text-[#5d6470]">
+            <span className="mb-1 block">Tipo de objetivo</span>
             <select
               value={formData.tipo}
-              onChange={(e) => setFormData(prev => ({ ...prev, tipo: e.target.value }))}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-white"
+              onChange={(e) => setFormData((prev) => ({ ...prev, tipo: e.target.value }))}
+              className={inputClass(false)}
             >
               {tiposObjetivo.map((tipo) => (
                 <option key={tipo.value} value={tipo.value}>
@@ -190,23 +197,21 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
                 </option>
               ))}
             </select>
-          </div>
+          </label>
 
           {/* Icono */}
-          <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">
-              Icono
-            </label>
-            <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
+          <div className="text-[12.5px] text-[#5d6470]">
+            <span className="mb-1 block">Icono</span>
+            <div className="grid grid-cols-6 gap-2 sm:grid-cols-8">
               {iconos.map((icono) => (
                 <button
                   key={icono}
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, icono }))}
-                  className={`p-3 text-2xl rounded-lg border transition-all ${
+                  onClick={() => setFormData((prev) => ({ ...prev, icono }))}
+                  className={`rounded-sm border p-2.5 text-xl transition-colors duration-150 ${
                     formData.icono === icono
-                      ? 'bg-cyan-500/20 border-cyan-500/50 scale-110'
-                      : 'bg-white/5 border-white/10 hover:bg-white/10'
+                      ? 'border-primary bg-[#f0ead9]'
+                      : 'border-[#ddd5c2] bg-white hover:bg-[#f0ead9]'
                   }`}
                 >
                   {icono}
@@ -215,35 +220,29 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
             </div>
           </div>
 
-          {/* Monto y Moneda */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">
-                Monto Objetivo <span className="text-red-400">*</span>
-              </label>
+          {/* Monto y moneda */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <label className="block text-[12.5px] text-[#5d6470]">
+              <span className="mb-1 block">
+                Monto objetivo <span className="text-[#a04a34]">*</span>
+              </span>
               <input
                 type="number"
                 step="0.01"
                 value={formData.monto_objetivo}
-                onChange={(e) => setFormData(prev => ({ ...prev, monto_objetivo: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, monto_objetivo: e.target.value }))}
                 placeholder="0.00"
-                className={`w-full px-4 py-3 bg-white/5 border ${
-                  errors.monto_objetivo ? 'border-red-500/50' : 'border-white/10'
-                } rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-white placeholder-zinc-500`}
+                className={`${inputClass(errors.monto_objetivo)} font-mono`}
               />
-              {errors.monto_objetivo && (
-                <p className="mt-1 text-sm text-red-400">{errors.monto_objetivo}</p>
-              )}
-            </div>
+              {errors.monto_objetivo && <p className="mt-1 text-[12px] text-[#a04a34]">{errors.monto_objetivo}</p>}
+            </label>
 
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">
-                Moneda
-              </label>
+            <label className="block text-[12.5px] text-[#5d6470]">
+              <span className="mb-1 block">Moneda</span>
               <select
                 value={formData.moneda}
-                onChange={(e) => setFormData(prev => ({ ...prev, moneda: e.target.value }))}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-white"
+                onChange={(e) => setFormData((prev) => ({ ...prev, moneda: e.target.value }))}
+                className={inputClass(false)}
               >
                 <option value="ARS">ARS - Peso Argentino</option>
                 <option value="USD">USD - Dólar</option>
@@ -251,55 +250,45 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
                 <option value="BRL">BRL - Real Brasileño</option>
                 <option value="GBP">GBP - Libra Esterlina</option>
               </select>
-            </div>
+            </label>
           </div>
 
           {/* Fechas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">
-                Fecha de Inicio
-              </label>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <label className="block text-[12.5px] text-[#5d6470]">
+              <span className="mb-1 block">Fecha de inicio</span>
               <input
                 type="date"
                 value={formData.fecha_inicio}
-                onChange={(e) => setFormData(prev => ({ ...prev, fecha_inicio: e.target.value }))}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-white"
+                onChange={(e) => setFormData((prev) => ({ ...prev, fecha_inicio: e.target.value }))}
+                className={`${inputClass(false)} font-mono`}
               />
-            </div>
+            </label>
 
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">
-                Fecha Objetivo (Meta)
-              </label>
+            <label className="block text-[12.5px] text-[#5d6470]">
+              <span className="mb-1 block">Fecha objetivo (meta)</span>
               <input
                 type="date"
                 value={formData.fecha_objetivo}
-                onChange={(e) => setFormData(prev => ({ ...prev, fecha_objetivo: e.target.value }))}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-white"
+                onChange={(e) => setFormData((prev) => ({ ...prev, fecha_objetivo: e.target.value }))}
+                className={`${inputClass(false)} font-mono`}
               />
-            </div>
+            </label>
           </div>
 
           {/* Prioridad */}
-          <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">
-              Prioridad
-            </label>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { value: 'baja', label: 'Baja', color: 'bg-gray-500/20 border-gray-500/30 text-gray-400' },
-                { value: 'media', label: 'Media', color: 'bg-blue-500/20 border-blue-500/30 text-blue-400' },
-                { value: 'alta', label: 'Alta', color: 'bg-red-500/20 border-red-500/30 text-red-400' }
-              ].map((prioridad) => (
+          <div className="text-[12.5px] text-[#5d6470]">
+            <span className="mb-1 block">Prioridad</span>
+            <div className="grid grid-cols-3 gap-2.5">
+              {prioridades.map((prioridad) => (
                 <button
                   key={prioridad.value}
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, prioridad: prioridad.value }))}
-                  className={`px-4 py-3 rounded-lg border transition-all ${
+                  onClick={() => setFormData((prev) => ({ ...prev, prioridad: prioridad.value }))}
+                  className={`rounded-sm border px-3 py-2.5 text-[13px] transition-colors duration-150 ${
                     formData.prioridad === prioridad.value
-                      ? prioridad.color
-                      : 'bg-white/5 border-white/10 text-zinc-400 hover:bg-white/10'
+                      ? 'border-primary bg-[#f0ead9] font-semibold text-foreground'
+                      : 'border-[#ddd5c2] bg-white text-[#5d6470] hover:bg-[#f0ead9]'
                   }`}
                 >
                   {prioridad.label}
@@ -309,57 +298,53 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
           </div>
 
           {/* Descripción */}
-          <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">
-              Descripción
-            </label>
+          <label className="block text-[12.5px] text-[#5d6470]">
+            <span className="mb-1 block">Descripción</span>
             <textarea
               value={formData.descripcion}
-              onChange={(e) => setFormData(prev => ({ ...prev, descripcion: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, descripcion: e.target.value }))}
               placeholder="Describe tu objetivo..."
               rows={3}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-white placeholder-zinc-500 resize-none"
+              className={`${inputClass(false)} resize-none`}
             />
-          </div>
+          </label>
 
           {/* Notas */}
-          <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">
-              Notas Adicionales
-            </label>
+          <label className="block text-[12.5px] text-[#5d6470]">
+            <span className="mb-1 block">Notas adicionales</span>
             <textarea
               value={formData.notas}
-              onChange={(e) => setFormData(prev => ({ ...prev, notas: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, notas: e.target.value }))}
               placeholder="Notas, observaciones o recordatorios..."
               rows={2}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500/50 text-white placeholder-zinc-500 resize-none"
+              className={`${inputClass(false)} resize-none`}
             />
-          </div>
+          </label>
 
           {/* Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-end pt-4 border-t border-white/10">
+          <div className="flex flex-col justify-end gap-3 border-t border-[#e7e0cf] pt-4 sm:flex-row">
             <button
               type="button"
               onClick={handleClose}
               disabled={isSaving}
-              className="w-full sm:w-auto px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-colors disabled:opacity-50 text-sm sm:text-base"
+              className="w-full rounded-sm border border-[#ddd5c2] bg-white px-[15px] py-[8px] text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50 sm:w-auto"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="w-full sm:w-auto px-6 py-3 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/50 text-cyan-400 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
+              className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary px-[15px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:opacity-50 sm:w-auto"
             >
               {isSaving ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#faf7ef] border-t-transparent" />
                   Guardando...
                 </>
               ) : (
                 <>
-                  <Save className="w-4 h-4" />
-                  {objetivo ? 'Actualizar' : 'Crear Objetivo'}
+                  <Save className="h-4 w-4" />
+                  {objetivo ? 'Actualizar' : 'Crear objetivo'}
                 </>
               )}
             </button>
@@ -373,4 +358,3 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
 };
 
 export default ObjetivoFormModal;
-

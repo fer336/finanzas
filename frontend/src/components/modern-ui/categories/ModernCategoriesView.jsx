@@ -1,28 +1,36 @@
 import PropTypes from 'prop-types';
-import { Plus, AlertCircle, RefreshCw, Pencil, Trash2 } from 'lucide-react';
+import { AlertCircle, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import LoadingSpinner from '../common/LoadingSpinner';
+import { getCategoryIcon } from '../common/categoryIcons';
 import { useCategories, QUERY_KEYS } from '../../../hooks/useFinancialData';
 import { useRefresh } from '../../../hooks/useRefresh';
 
+/**
+ * ModernCategoriesView — CRUD de categorías, tema "Papel".
+ * Vive como sub-sección embebida dentro de Ajustes (ver
+ * design_handoff_rediseno_papel/README.md "7. Ajustes" y "Mapa de
+ * migración"), por eso no trae su propio fondo de página / min-h-screen —
+ * se monta dentro de la card de la sección que lo contiene.
+ *
+ * Tabla igual al patrón de CEDEARs/Inversiones (mono uppercase header,
+ * hover #f0ead9) en vez de la grilla de cards anterior — el pedido
+ * explícito fue que la lista de categorías era confusa como grilla.
+ */
 const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory }) => {
   // ====== REACT QUERY ======
   const { data: categoriesData, isLoading, error } = useCategories();
   const { refresh, isRefreshing } = useRefresh([QUERY_KEYS.categories]);
-  
-  // Loading state
+
   if (isLoading) {
-    return <LoadingSpinner message="Cargando categorías..." />;
+    return <LoadingSpinner message="Cargando categorías..." fullScreen={false} />;
   }
 
-  // Error state
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0a0a0a]">
-        <div className="text-center">
-          <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">Error al cargar categorías</h2>
-          <p className="text-gray-400">{error.message}</p>
-        </div>
+      <div className="flex flex-col items-center gap-2 py-10 text-center">
+        <AlertCircle className="h-8 w-8 text-[#a04a34]" />
+        <p className="font-serif text-[15px] font-semibold text-foreground">Error al cargar categorías</p>
+        <p className="text-[12.5px] text-[#8a8677]">{error.message}</p>
       </div>
     );
   }
@@ -31,8 +39,8 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
     id: cat.id || cat.Id,
     nombre: cat.nombre || cat.Nombre || 'Sin nombre',
     tipo: cat.tipo || cat.Tipo || 'gasto',
-    color: cat.color || cat.Color || '#10b981',
-    icono: cat.icono || cat.Icono || '📁',
+    color: cat.color || cat.Color || '#5a7d52',
+    icono: cat.icono || cat.Icono || '',
     activa: cat.activa !== undefined ? cat.activa : (cat.Activa !== undefined ? cat.Activa : true),
     descripcion: cat.descripcion || cat.Descripcion || '',
   }));
@@ -43,93 +51,135 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
   const activas = data.filter((c) => c.activa).length;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] p-3 pb-28 sm:p-5">
-      <div className="mb-4 rounded-3xl border border-white/10 bg-gradient-to-br from-[#0e1927] via-[#161925] to-[#1c1523] p-3.5 sm:mb-5 sm:p-5">
-        <div className="mb-3 flex items-start justify-between gap-2.5">
-          <div>
-            <h1 className="text-lg font-bold text-white sm:text-2xl">Categorías</h1>
-            <p className="mt-0.5 text-[11px] text-white/60 sm:text-sm">Dale orden visual a tus gastos e ingresos</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={refresh}
-              disabled={isRefreshing}
-              className="flex items-center gap-2 rounded-xl border border-white/10 bg-[#18181b]/90 px-2.5 py-1.5 text-xs text-gray-300 transition-all hover:bg-white/5 hover:text-white disabled:opacity-50 sm:px-3 sm:py-2 sm:text-sm"
-              title="Actualizar categorías"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">{isRefreshing ? 'Actualizando...' : 'Actualizar'}</span>
-            </button>
-            <button onClick={onNewCategory} className="flex items-center gap-1.5 rounded-xl bg-[#10b981] px-3 py-1.5 text-xs font-semibold text-white transition-all hover:scale-[1.02] hover:bg-[#0ea572] active:scale-[0.98] sm:gap-2 sm:px-4 sm:py-2 sm:text-sm">
-              <Plus className="w-4 h-4" />
-              <span>Nueva</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-2.5">
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-2.5 sm:p-3">
-            <p className="text-[10px] text-white/50">TOTAL</p>
-            <p className="mt-0.5 text-xl font-bold text-white sm:text-2xl">{total}</p>
-          </div>
-          <div className="rounded-2xl border border-red-400/20 bg-red-400/10 p-2.5 sm:p-3">
-            <p className="text-[10px] text-red-300/80">GASTOS</p>
-            <p className="mt-0.5 text-xl font-bold text-red-300 sm:text-2xl">{gastos}</p>
-          </div>
-          <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/10 p-2.5 sm:p-3">
-            <p className="text-[10px] text-cyan-300/80">INGRESOS</p>
-            <p className="mt-0.5 text-xl font-bold text-cyan-300 sm:text-2xl">{ingresos}</p>
-          </div>
-          <div className="rounded-2xl border border-[#10b981]/20 bg-[#10b981]/10 p-2.5 sm:p-3">
-            <p className="text-[10px] text-[#10b981]/80">ACTIVAS</p>
-            <p className="mt-0.5 text-xl font-bold text-[#10b981] sm:text-2xl">{activas}</p>
-          </div>
+    <div>
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <p className="text-[12.5px] text-[#8a8677]">Dale orden visual a tus gastos e ingresos.</p>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={refresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50"
+            title="Actualizar categorías"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">{isRefreshing ? 'Actualizando…' : 'Actualizar'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={onNewCategory}
+            className="flex items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047]"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            <span>Nueva</span>
+          </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 lg:gap-4">
-        {data.map((cat) => (
-          <div key={cat.id} className="rounded-3xl border border-white/10 bg-gradient-to-br from-[#18181b] via-[#171724] to-[#121823] p-3.5 transition-all hover:border-cyan-400/30 sm:p-4">
-            <div className="flex items-start justify-between gap-2.5 mb-2.5">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-12 h-12 rounded-xl text-2xl flex items-center justify-center shrink-0 border border-white/10" style={{ backgroundColor: `${cat.color}20` }}>{cat.icono}</div>
-                <div className="min-w-0">
-                  <h3 className="text-[15px] font-bold text-white truncate sm:text-base">{cat.nombre}</h3>
-                  <p className="text-[11px] text-white/60 capitalize">{cat.tipo}</p>
-                </div>
-              </div>
+      <div className="mb-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        <div className="rounded-sm border border-[#ddd5c2] bg-white p-3">
+          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#8a8677]">Total</p>
+          <p className="mt-1 font-mono text-[20px] font-semibold text-foreground">{total}</p>
+        </div>
+        <div className="rounded-sm border border-[#ddd5c2] bg-white p-3">
+          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#8a8677]">Gastos</p>
+          <p className="mt-1 font-mono text-[20px] font-semibold text-[#a04a34]">{gastos}</p>
+        </div>
+        <div className="rounded-sm border border-[#ddd5c2] bg-white p-3">
+          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#8a8677]">Ingresos</p>
+          <p className="mt-1 font-mono text-[20px] font-semibold text-[#476442]">{ingresos}</p>
+        </div>
+        <div className="rounded-sm border border-[#ddd5c2] bg-white p-3">
+          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#8a8677]">Activas</p>
+          <p className="mt-1 font-mono text-[20px] font-semibold text-primary">{activas}</p>
+        </div>
+      </div>
 
-              <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  onClick={() => onEditCategory && onEditCategory(cat)}
-                  className="p-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
-                  title="Editar categoría"
-                >
-                  <Pencil className="w-4 h-4 text-cyan-400" />
-                </button>
-                <button
-                  onClick={() => onDeleteCategory && onDeleteCategory(cat.id)}
-                  className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors"
-                  title="Eliminar categoría"
-                >
-                  <Trash2 className="w-4 h-4 text-red-400" />
-                </button>
-              </div>
-            </div>
-
-            {cat.descripcion && (
-              <p className="mb-2.5 text-[11px] text-white/45 line-clamp-2">{cat.descripcion}</p>
+      <div className="overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] bg-card">
+        <table className="w-full min-w-[640px]">
+          <thead>
+            <tr className="border-b-2 border-[#ddd5c2]">
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Categoría</th>
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Tipo</th>
+              <th className="hidden px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] sm:table-cell" style={{ letterSpacing: '.08em' }}>Descripción</th>
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Estado</th>
+              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-14 text-center">
+                  <p className="text-[13.5px] italic text-muted-foreground">Sin categorías creadas.</p>
+                </td>
+              </tr>
+            ) : (
+              data.map((cat) => {
+                const Icon = getCategoryIcon(cat.icono);
+                const isIngreso = cat.tipo === 'ingreso';
+                return (
+                  <tr key={cat.id} className="group border-b border-[#e7e0cf] transition-colors hover:bg-[#f0ead9]">
+                    <td className="px-3.5 py-2.5">
+                      <div className="flex min-w-0 items-center gap-2.5">
+                        <div
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm text-base"
+                          style={{ backgroundColor: `${cat.color}22` }}
+                        >
+                          {Icon ? <Icon size={16} color={cat.color} /> : (cat.icono || '📁')}
+                        </div>
+                        <span className="truncate font-serif text-[14.5px] font-semibold text-foreground">{cat.nombre}</span>
+                      </div>
+                    </td>
+                    <td className="px-3.5 py-2.5">
+                      <span
+                        className="inline-flex rounded-full border px-2 py-[2px] font-mono text-[10.5px] uppercase tracking-[.04em]"
+                        style={{
+                          borderColor: isIngreso ? '#5a7d52' : '#b35a42',
+                          color: isIngreso ? '#476442' : '#a04a34',
+                        }}
+                      >
+                        {cat.tipo}
+                      </span>
+                    </td>
+                    <td className="hidden max-w-[240px] px-3.5 py-2.5 text-[12.5px] text-[#8a8677] sm:table-cell">
+                      <span className="line-clamp-1">{cat.descripcion || '—'}</span>
+                    </td>
+                    <td className="px-3.5 py-2.5">
+                      <span
+                        className={`inline-flex rounded-full border px-2 py-[2px] font-mono text-[10.5px] uppercase tracking-[.04em] ${
+                          cat.activa ? 'border-[#5a7d52] text-[#476442]' : 'border-[#ddd5c2] text-[#8a8677]'
+                        }`}
+                      >
+                        {cat.activa ? 'Activa' : 'Inactiva'}
+                      </span>
+                    </td>
+                    <td className="px-3.5 py-2.5">
+                      <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                        <button
+                          type="button"
+                          onClick={() => onEditCategory && onEditCategory(cat)}
+                          className="rounded-sm p-1.5 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-foreground"
+                          title="Editar categoría"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onDeleteCategory && onDeleteCategory(cat.id)}
+                          className="rounded-sm p-1.5 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-[#a04a34]"
+                          title="Eliminar categoría"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
-
-            <div className="flex items-center justify-between">
-              <span className={`text-xs px-2.5 py-1 rounded-full border ${cat.activa ? 'border-[#10b981]/30 bg-[#10b981]/10 text-[#10b981]' : 'border-zinc-500/30 bg-zinc-500/10 text-zinc-400'}`}>{cat.activa ? 'Activa' : 'Inactiva'}</span>
-              <span className="text-[10px] uppercase tracking-wide text-white/40">{cat.tipo}</span>
-            </div>
-          </div>
-        ))}
+          </tbody>
+        </table>
       </div>
-      
-
     </div>
   );
 };

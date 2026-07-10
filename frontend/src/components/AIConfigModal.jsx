@@ -25,14 +25,14 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
-  
+
   const [validatingApiKey, setValidatingApiKey] = useState(false);
   const [apiKeyValid, setApiKeyValid] = useState(false);
   const [apiKeyError, setApiKeyError] = useState(null);
-  
+
   const [config, setConfig] = useState(null);
   const [modelos, setModelos] = useState([]);
-  
+
   const [formData, setFormData] = useState({
     provider: 'openrouter',
     auth_method: 'api_key',
@@ -82,11 +82,11 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
   const loadData = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Cargar configuración actual
       const configData = await apiServices.aiConfigApi.getConfig();
-      
+
       if (configData) {
         setConfig(configData);
         setFormData({
@@ -100,10 +100,10 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
           temperatura: configData.temperatura,
           max_tokens: configData.max_tokens
         });
-        
+
         // Marcar como válida si ya tiene configuración
         setApiKeyValid(true);
-        
+
         if ((configData.provider || 'openrouter') === 'openrouter') {
           console.log('✅ Usuario con OpenRouter configurado, cargando modelos desde backend...');
           await loadModelsFromBackend();
@@ -149,7 +149,7 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
     try {
       // Usar el nuevo método getMyModels que carga desde la API key del usuario
       const data = await apiServices.aiConfigApi.getMyModels();
-      
+
       if (data.modelos && data.modelos.length > 0) {
         setModelos(data.modelos);
         console.log(`✅ ${data.modelos.length} modelos cargados desde tu cuenta de OpenRouter (source: ${data.source})`);
@@ -209,9 +209,9 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
 
         const data = await response.json();
         const modelosRelevantes = data.data
-          .filter(m => 
-            m.id.includes('gemini') || 
-            m.id.includes('claude') || 
+          .filter(m =>
+            m.id.includes('gemini') ||
+            m.id.includes('claude') ||
             m.id.includes('gpt') ||
             m.id.includes('llama') ||
             m.id.includes('qwen')
@@ -225,13 +225,13 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
 
       setApiKeyValid(true);
       setApiKeyError(null);
-      
+
       console.log(`✅ Credencial válida para ${provider}`);
     } catch (err) {
       console.error('Error validating API key:', err);
       setApiKeyError(err.message || 'No se pudo validar la API key');
       setApiKeyValid(false);
-      
+
       // Cargar modelos por defecto en caso de error
       await loadDefaultModels(provider);
     } finally {
@@ -290,10 +290,10 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
       }
 
       setSuccess(true);
-      
+
       // Recargar configuración
       await loadData();
-      
+
       // Cerrar modal después de 2 segundos
       setTimeout(() => {
         setSuccess(false);
@@ -331,7 +331,7 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
         max_tokens: 4000
       });
       setApiKeyValid(false);
-      
+
       setTimeout(() => {
         setSuccess(false);
         onClose();
@@ -346,51 +346,51 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto"
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-[rgba(32,36,44,.4)] p-4 overflow-y-auto"
       style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div 
-        className="bg-[#1a1a1a] border border-white/10 rounded-xl max-w-2xl w-full shadow-xl m-auto my-8"
+      <div
+        className="m-auto my-8 w-full max-w-2xl rounded-md border border-[#ddd5c2] bg-card"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-white/10">
+        <div className="flex items-center justify-between border-b border-[#ddd5c2] p-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-500/10 rounded-lg">
-              <Bot className="w-6 h-6 text-blue-400" />
+            <div className="rounded-sm bg-[#f0ead9] p-2">
+              <Bot className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Configuración de IA</h2>
-              <p className="text-sm text-white/50">Personalizá tu asistente Luna</p>
+              <h2 className="font-serif text-[20px] font-semibold text-foreground">Configuración de IA</h2>
+              <p className="text-[12.5px] text-[#8a8677]">Personalizá tu asistente Lucy</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            className="rounded-sm p-2 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-foreground"
           >
-            <X className="w-5 h-5 text-white/70" />
+            <X className="h-5 w-5" />
           </button>
         </div>
-        
+
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="space-y-5 p-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
             </div>
           ) : (
             <>
               {/* Info Banner */}
-              <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <div className="rounded-sm border border-[#ddd5c2] bg-[#f0ead9] p-4">
                 <div className="flex gap-3">
-                  <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#3d5a80]" />
                   <div className="flex-1">
-                    <p className="text-sm text-white/80">
+                    <p className="text-[13px] text-[#5d6470]">
                       {config ? (
                         <>
-                          ✅ <strong>Tenés credenciales de IA configuradas.</strong> Podés operar con OpenRouter u otros providers (OpenAI, Google, Anthropic) según el modo elegido.
+                          ✅ <strong className="text-foreground">Tenés credenciales de IA configuradas.</strong> Podés operar con OpenRouter u otros providers (OpenAI, Google, Anthropic) según el modo elegido.
                         </>
                       ) : (
                         <>
@@ -399,13 +399,13 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
                       )}
                     </p>
                     {!config && (
-                      <a 
-                        href="https://openrouter.ai/keys" 
-                        target="_blank" 
+                      <a
+                        href="https://openrouter.ai/keys"
+                        target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 mt-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                        className="mt-2 inline-flex items-center gap-1 text-[12.5px] font-medium text-[#3d5a80] transition-colors hover:underline"
                       >
-                        OpenRouter keys <ExternalLink className="w-3 h-3" />
+                        OpenRouter keys <ExternalLink className="h-3 w-3" />
                       </a>
                     )}
                   </div>
@@ -413,9 +413,9 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
               </div>
 
               {/* Provider + Auth Method */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <label className="block text-sm font-medium text-white/80 mb-2">
+                  <label className="mb-2 block text-[12.5px] font-medium text-[#5d6470]">
                     Provider
                   </label>
                   <select
@@ -438,17 +438,17 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
                       setApiKeyValid(false);
                       setApiKeyError(null);
                     }}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
                   >
-                    <option value="openrouter" className="bg-[#1a1a1a]">OpenRouter</option>
-                    <option value="openai" className="bg-[#1a1a1a]">OpenAI</option>
-                    <option value="google" className="bg-[#1a1a1a]">Google Gemini</option>
-                    <option value="anthropic" className="bg-[#1a1a1a]">Anthropic Claude</option>
+                    <option value="openrouter">OpenRouter</option>
+                    <option value="openai">OpenAI</option>
+                    <option value="google">Google Gemini</option>
+                    <option value="anthropic">Anthropic Claude</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-white/80 mb-2">
+                  <label className="mb-2 block text-[12.5px] font-medium text-[#5d6470]">
                     Método de autenticación
                   </label>
                   <select
@@ -458,18 +458,18 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
                       setApiKeyValid(false);
                       setApiKeyError(null);
                     }}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
                   >
-                    <option value="api_key" className="bg-[#1a1a1a]">API Key</option>
-                    <option value="oauth2" className="bg-[#1a1a1a]">OAuth2 Token</option>
+                    <option value="api_key">API Key</option>
+                    <option value="oauth2">OAuth2 Token</option>
                   </select>
                 </div>
               </div>
 
               {/* API Key */}
               <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">
-                  <Key className="w-4 h-4 inline mr-2" />
+                <label className="mb-2 block text-[12.5px] font-medium text-[#5d6470]">
+                  <Key className="mr-1.5 inline h-3.5 w-3.5" />
                   {formData.auth_method === 'oauth2' ? 'Access Token OAuth2' : `API Key de ${formData.provider}`}
                 </label>
                 <div className="relative">
@@ -496,51 +496,51 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
                               ? 'sk-ant-...'
                               : 'AIza...'
                     }
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-blue-500 transition-colors pr-20"
+                    className="w-full rounded-sm border border-[#ddd5c2] bg-white py-2.5 pl-3.5 pr-20 text-[13.5px] text-foreground placeholder:text-[#8a8677] transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
                   />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                  <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-2">
                     {/* Loading/Success/Error indicator */}
                     {validatingApiKey && (
-                      <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin text-[#3d5a80]" />
                     )}
                     {!validatingApiKey && apiKeyValid && (formData.auth_method === 'oauth2' ? formData.access_token : formData.api_key) && (
-                      <CheckCircle className="w-4 h-4 text-green-400" />
+                      <CheckCircle className="h-4 w-4 text-[#476442]" />
                     )}
                     {!validatingApiKey && apiKeyError && (formData.auth_method === 'oauth2' ? formData.access_token : formData.api_key) && (
-                      <AlertCircle className="w-4 h-4 text-red-400" />
+                      <AlertCircle className="h-4 w-4 text-[#a04a34]" />
                     )}
-                    
+
                     <button
                       type="button"
                       onClick={() => setShowApiKey(!showApiKey)}
-                      className="text-white/50 hover:text-white/80"
+                      className="text-[#8a8677] hover:text-foreground"
                     >
-                      {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
-                
+
                 {/* Validation feedback */}
                 {validatingApiKey && (formData.auth_method === 'oauth2' ? formData.access_token : formData.api_key) && (
-                  <p className="text-xs text-blue-400 mt-1 flex items-center gap-1">
-                    <Loader2 className="w-3 h-3 animate-spin" />
+                  <p className="mt-1 flex items-center gap-1 text-[11.5px] text-[#3d5a80]">
+                    <Loader2 className="h-3 w-3 animate-spin" />
                     Validando credencial y cargando modelos...
                   </p>
                 )}
                 {!validatingApiKey && apiKeyValid && (formData.auth_method === 'oauth2' ? formData.access_token : formData.api_key) && (
-                  <p className="text-xs text-green-400 mt-1 flex items-center gap-1">
-                    <CheckCircle className="w-3 h-3" />
+                  <p className="mt-1 flex items-center gap-1 text-[11.5px] text-[#476442]">
+                    <CheckCircle className="h-3 w-3" />
                     Credencial válida. {modelos.length} modelos disponibles.
                   </p>
                 )}
                 {!validatingApiKey && apiKeyError && (formData.auth_method === 'oauth2' ? formData.access_token : formData.api_key) && (
-                  <p className="text-xs text-red-400 mt-1 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
+                  <p className="mt-1 flex items-center gap-1 text-[11.5px] text-[#a04a34]">
+                    <AlertCircle className="h-3 w-3" />
                     {apiKeyError}
                   </p>
                 )}
                 {config && !formData.api_key && (
-                  <p className="text-xs text-white/50 mt-1">
+                  <p className="mt-1 text-[11.5px] text-[#8a8677]">
                     Dejá vacío para mantener tu API key actual ({config.api_key_preview})
                   </p>
                 )}
@@ -548,7 +548,7 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
 
               {formData.auth_method === 'oauth2' && (
                 <div>
-                  <label className="block text-sm font-medium text-white/80 mb-2">
+                  <label className="mb-2 block text-[12.5px] font-medium text-[#5d6470]">
                     Refresh Token (opcional)
                   </label>
                   <input
@@ -556,34 +556,34 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
                     value={formData.refresh_token}
                     onChange={(e) => setFormData({ ...formData, refresh_token: e.target.value })}
                     placeholder="refresh token..."
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-blue-500 transition-colors"
+                    className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
               )}
 
               {/* Modelo */}
               <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">
-                  <Zap className="w-4 h-4 inline mr-2" />
+                <label className="mb-2 block text-[12.5px] font-medium text-[#5d6470]">
+                  <Zap className="mr-1.5 inline h-3.5 w-3.5" />
                   Modelo de IA {modelos.length > 0 && `(${modelos.length} disponibles)`}
                 </label>
                 <select
                   value={formData.modelo_preferido}
                   onChange={(e) => setFormData({ ...formData, modelo_preferido: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
                   disabled={modelos.length === 0}
                 >
                   {modelos.length === 0 ? (
                     <option value="">Cargando modelos...</option>
                   ) : (
                     modelos.map((modelo) => (
-                      <option key={modelo} value={modelo} className="bg-[#1a1a1a]">
+                      <option key={modelo} value={modelo}>
                         {modelo}
                       </option>
                     ))
                   )}
                 </select>
-                <p className="text-xs text-white/50 mt-1">
+                <p className="mt-1 text-[11.5px] text-[#8a8677]">
                   {apiKeyValid && (formData.auth_method === 'oauth2' ? formData.access_token : formData.api_key)
                     ? `Modelos cargados para ${formData.provider}`
                     : formData.provider === 'openrouter'
@@ -595,45 +595,45 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
 
               {/* Modelo de Visión (OCR) */}
               <div>
-                <label className="block text-sm font-medium text-white/80 mb-2">
-                  <Camera className="w-4 h-4 inline mr-2" />
+                <label className="mb-2 block text-[12.5px] font-medium text-[#5d6470]">
+                  <Camera className="mr-1.5 inline h-3.5 w-3.5" />
                   Modelo de Visión (para procesar tickets)
                 </label>
                 <select
                   value={formData.modelo_vision}
                   onChange={(e) => setFormData({ ...formData, modelo_vision: e.target.value })}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500 transition-colors"
+                  className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
                 >
-                  <option value="google/gemini-pro-vision" className="bg-[#1a1a1a]">
+                  <option value="google/gemini-pro-vision">
                     Google Gemini Pro Vision (Recomendado)
                   </option>
-                  <option value="google/gemini-flash-1.5-8b-exp-vision" className="bg-[#1a1a1a]">
+                  <option value="google/gemini-flash-1.5-8b-exp-vision">
                     Google Gemini Flash Vision (Rápido)
                   </option>
-                  <option value="anthropic/claude-3-5-sonnet" className="bg-[#1a1a1a]">
+                  <option value="anthropic/claude-3-5-sonnet">
                     Anthropic Claude 3.5 Sonnet (Premium, mejor calidad)
                   </option>
-                  <option value="openai/gpt-4o-mini" className="bg-[#1a1a1a]">
+                  <option value="openai/gpt-4o-mini">
                     OpenAI GPT-4o Mini (Económico)
                   </option>
-                  <option value="openai/gpt-4o" className="bg-[#1a1a1a]">
+                  <option value="openai/gpt-4o">
                     OpenAI GPT-4o (Mejor calidad)
                   </option>
                 </select>
-                <p className="text-xs text-white/50 mt-1">
+                <p className="mt-1 text-[11.5px] text-[#8a8677]">
                   📸 Modelo para leer tickets y extraer gastos automáticamente
                 </p>
               </div>
 
               {/* Opciones avanzadas */}
               <details className="group">
-                <summary className="cursor-pointer text-sm font-medium text-white/80 hover:text-white transition-colors">
+                <summary className="cursor-pointer text-[12.5px] font-medium text-[#5d6470] transition-colors hover:text-foreground">
                   Opciones avanzadas (opcional)
                 </summary>
-                <div className="mt-4 space-y-4 pl-4 border-l-2 border-white/10">
+                <div className="mt-4 space-y-4 border-l-2 border-[#ddd5c2] pl-4">
                   {/* Temperatura */}
                   <div>
-                    <label className="block text-sm text-white/70 mb-2">
+                    <label className="mb-2 block text-[12.5px] text-[#5d6470]">
                       Temperatura: {formData.temperatura}
                     </label>
                     <input
@@ -643,16 +643,16 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
                       step="0.1"
                       value={formData.temperatura}
                       onChange={(e) => setFormData({ ...formData, temperatura: parseFloat(e.target.value) })}
-                      className="w-full"
+                      className="w-full accent-primary"
                     />
-                    <p className="text-xs text-white/40 mt-1">
+                    <p className="mt-1 text-[11px] text-[#8a8677]">
                       Más bajo = respuestas más predecibles. Más alto = más creatividad.
                     </p>
                   </div>
 
                   {/* Max Tokens */}
                   <div>
-                    <label className="block text-sm text-white/70 mb-2">
+                    <label className="mb-2 block text-[12.5px] text-[#5d6470]">
                       Máximo de tokens
                     </label>
                     <input
@@ -662,9 +662,9 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
                       step="100"
                       value={formData.max_tokens}
                       onChange={(e) => setFormData({ ...formData, max_tokens: parseInt(e.target.value) })}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                      className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2 text-[13.5px] text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
                     />
-                    <p className="text-xs text-white/40 mt-1">
+                    <p className="mt-1 text-[11px] text-[#8a8677]">
                       Más tokens = respuestas más largas (pero más costosas).
                     </p>
                   </div>
@@ -673,14 +673,14 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
 
               {/* Error/Success Messages */}
               {error && (
-                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
+                <div className="rounded-sm border border-[#a04a34]/40 bg-[#a04a34]/5 p-4 text-[13px] text-[#a04a34]">
                   {error}
                 </div>
               )}
 
               {success && (
-                <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 text-sm flex items-center gap-2">
-                  <Check className="w-4 h-4" />
+                <div className="flex items-center gap-2 rounded-sm border border-[#5a7d52]/40 bg-[#5a7d52]/5 p-4 text-[13px] text-[#476442]">
+                  <Check className="h-4 w-4" />
                   ¡Configuración guardada exitosamente!
                 </div>
               )}
@@ -689,13 +689,13 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-white/10">
+        <div className="flex items-center justify-between border-t border-[#ddd5c2] p-6">
           <div>
             {config && (
               <button
                 onClick={handleDelete}
                 disabled={saving}
-                className="px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
+                className="rounded-sm px-4 py-2 text-[13px] text-[#a04a34] transition-colors hover:bg-[#a04a34]/10 disabled:opacity-50"
               >
                 Eliminar configuración
               </button>
@@ -705,23 +705,23 @@ export const AIConfigModal = ({ isOpen, onClose }) => {
             <button
               onClick={onClose}
               disabled={saving}
-              className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-colors disabled:opacity-50"
+              className="rounded-sm border border-[#ddd5c2] bg-white px-4 py-2 text-[13px] font-medium text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               onClick={handleSave}
               disabled={saving || loading || validatingApiKey}
-              className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-zinc-700 text-white rounded-lg transition-colors flex items-center gap-2"
+              className="flex items-center gap-2 rounded-sm bg-primary px-4 py-2 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? (
                 <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent"></div>
                   Guardando...
                 </>
               ) : (
                 <>
-                  <Check className="w-4 h-4" />
+                  <Check className="h-4 w-4" />
                   Guardar
                 </>
               )}

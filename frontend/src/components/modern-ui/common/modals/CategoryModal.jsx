@@ -1,12 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FolderOpen, Save, X } from 'lucide-react';
+import { CATEGORY_ICON_OPTIONS } from '../categoryIcons';
 
+/**
+ * CategoryModal — alta/edición de categoría, tema "Papel" (ver
+ * design_handoff_rediseno_papel/README.md "Interactions & Behavior":
+ * "modal fondo #faf7ef, overlay rgba(32,36,44,.4), radius 12px").
+ * El picker de íconos usa el set curado reicon-react de
+ * ../categoryIcons — `icono` guarda el `name` del ícono elegido
+ * (string libre igual que antes, cuando guardaba un emoji).
+ */
 export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
   const [formData, setFormData] = useState({
     nombre: '',
     tipo: 'gasto',
-    color: '#10b981',
-    icono: '📁',
+    color: '#5a7d52',
+    icono: CATEGORY_ICON_OPTIONS[0].name,
     descripcion: '',
     activa: true,
   });
@@ -19,8 +28,8 @@ export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
       setFormData({
         nombre: category.Nombre || category.nombre || '',
         tipo: category.Tipo || category.tipo || 'gasto',
-        color: category.Color || category.color || '#10b981',
-        icono: category.Icono || category.icono || '📁',
+        color: category.Color || category.color || '#5a7d52',
+        icono: category.Icono || category.icono || CATEGORY_ICON_OPTIONS[0].name,
         descripcion: category.Descripcion || category.descripcion || '',
         activa:
           category.Activa !== undefined
@@ -33,8 +42,8 @@ export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
       setFormData({
         nombre: '',
         tipo: 'gasto',
-        color: '#10b981',
-        icono: '📁',
+        color: '#5a7d52',
+        icono: CATEGORY_ICON_OPTIONS[0].name,
         descripcion: '',
         activa: true,
       });
@@ -45,20 +54,15 @@ export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
 
   if (!isOpen) return null;
 
-  const emojiOptions = [
-    '📁', '🛒', '🚗', '⛽', '💡', '🏠', '🍔', '💊', '🎬', '📚',
-    '💼', '💰', '📈', '🏦', '🎯', '✈️', '👕', '🐾', '🧾', '📦',
-  ];
-
   const colorOptions = [
-    '#10b981', '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1',
-    '#8b5cf6', '#ec4899', '#f43f5e', '#ef4444', '#f97316',
-    '#f59e0b', '#84cc16', '#22c55e', '#64748b', '#94a3b8',
+    '#5a7d52', '#476442', '#b35a42', '#a04a34', '#3d5a80',
+    '#8a6fa0', '#e9c46a', '#8a6a1f', '#9aa2ad', '#5d6470',
+    '#20242c', '#6b8e7a', '#c17a52', '#4a7a9d', '#a37fb8',
   ];
 
   const typeOptions = [
-    { value: 'gasto', label: 'Gasto', icon: '📉' },
-    { value: 'ingreso', label: 'Ingreso', icon: '📈' },
+    { value: 'gasto', label: 'Gasto' },
+    { value: 'ingreso', label: 'Ingreso' },
   ];
 
   const handleChange = (field, value) => {
@@ -69,7 +73,7 @@ export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
   const validate = () => {
     const nextErrors = {};
     if (!formData.nombre.trim()) nextErrors.nombre = 'El nombre es requerido';
-    if (!formData.icono) nextErrors.icono = 'Elegí un emoji';
+    if (!formData.icono) nextErrors.icono = 'Elegí un ícono';
     if (!formData.color) nextErrors.color = 'Elegí un color';
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -90,129 +94,138 @@ export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#18181b]">
-        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-white/10 bg-[#18181b] px-5 py-4 sm:px-6">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: 'rgba(32,36,44,.4)' }}>
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-[#ddd5c2] bg-[#faf7ef]">
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#ddd5c2] bg-[#faf7ef] px-5 py-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-cyan-500/20 p-2">
-              <FolderOpen className="h-5 w-5 text-cyan-400" />
+            <div className="rounded-sm bg-[#f0ead9] p-2">
+              <FolderOpen className="h-5 w-5 text-primary" />
             </div>
-            <h2 className="text-lg font-bold text-white sm:text-xl">
-              {category ? 'Editar Categoría' : 'Nueva Categoría'}
+            <h2 className="font-serif text-[19px] font-bold text-foreground sm:text-[21px]">
+              {category ? 'Editar categoría' : 'Nueva categoría'}
             </h2>
           </div>
-          <button onClick={onClose} className="rounded-lg p-2 transition-colors hover:bg-white/10">
-            <X className="h-5 w-5 text-white" />
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-sm p-2 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-foreground"
+          >
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5 p-5 sm:p-6">
           <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">Nombre *</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470]">Nombre *</label>
             <input
               type="text"
               value={formData.nombre}
               onChange={(e) => handleChange('nombre', e.target.value)}
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="Ej: Combustible"
             />
-            {errors.nombre && <p className="mt-1 text-xs text-red-400">{errors.nombre}</p>}
+            {errors.nombre && <p className="mt-1 text-[11.5px] text-[#a04a34]">{errors.nombre}</p>}
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">Tipo</label>
-            <div className="grid grid-cols-2 gap-2">
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470]">Tipo</label>
+            <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] bg-card p-[3px]">
               {typeOptions.map((option) => (
                 <button
                   key={option.value}
                   type="button"
                   onClick={() => handleChange('tipo', option.value)}
-                  className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
+                  className={`rounded-full px-4 py-1.5 font-mono text-[12px] transition-colors duration-150 ${
                     formData.tipo === option.value
-                      ? 'border-cyan-500 bg-cyan-500/20 text-cyan-300'
-                      : 'border-white/10 bg-white/5 text-white/70 hover:bg-white/10'
+                      ? 'bg-[#3d5a80] font-semibold text-[#faf7ef]'
+                      : 'text-[#5d6470] hover:text-foreground'
                   }`}
                 >
-                  {option.icon} {option.label}
+                  {option.label}
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">Emoji</label>
-            <div className="grid grid-cols-10 gap-2 sm:grid-cols-12">
-              {emojiOptions.map((emoji) => (
-                <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => handleChange('icono', emoji)}
-                  className={`h-10 rounded-lg border text-xl transition-all ${
-                    formData.icono === emoji
-                      ? 'scale-105 border-cyan-500 bg-cyan-500/20'
-                      : 'border-white/10 bg-white/5 hover:bg-white/10'
-                  }`}
-                >
-                  {emoji}
-                </button>
-              ))}
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470]">Ícono</label>
+            <div className="grid grid-cols-6 gap-2 sm:grid-cols-8">
+              {CATEGORY_ICON_OPTIONS.map(({ name, label, Icon }) => {
+                const isSelected = formData.icono === name;
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => handleChange('icono', name)}
+                    title={label}
+                    className="flex h-11 items-center justify-center rounded-sm border transition-all"
+                    style={
+                      isSelected
+                        ? { borderColor: formData.color, backgroundColor: `${formData.color}22` }
+                        : { borderColor: '#ddd5c2', backgroundColor: '#fff' }
+                    }
+                  >
+                    <Icon size={18} color={isSelected ? formData.color : '#5d6470'} />
+                  </button>
+                );
+              })}
             </div>
-            {errors.icono && <p className="mt-1 text-xs text-red-400">{errors.icono}</p>}
+            {errors.icono && <p className="mt-1 text-[11.5px] text-[#a04a34]">{errors.icono}</p>}
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">Color</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470]">Color</label>
             <div className="grid grid-cols-8 gap-2 sm:grid-cols-10">
               {colorOptions.map((color) => (
                 <button
                   key={color}
                   type="button"
                   onClick={() => handleChange('color', color)}
-                  className={`h-9 rounded-lg border-2 transition-all ${
-                    formData.color === color ? 'scale-105 border-white' : 'border-transparent'
+                  className={`h-8 rounded-sm border-2 transition-all ${
+                    formData.color === color ? 'scale-105 border-[#20242c]' : 'border-transparent'
                   }`}
                   style={{ backgroundColor: color }}
                 />
               ))}
             </div>
-            {errors.color && <p className="mt-1 text-xs text-red-400">{errors.color}</p>}
+            {errors.color && <p className="mt-1 text-[11.5px] text-[#a04a34]">{errors.color}</p>}
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-white/80">Descripción</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470]">Descripción</label>
             <textarea
               value={formData.descripcion}
               onChange={(e) => handleChange('descripcion', e.target.value)}
               rows={3}
-              className="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:border-cyan-500 focus:outline-none"
+              className="w-full resize-none rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="Descripción opcional"
             />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <input
               id="categoria-activa"
               type="checkbox"
               checked={formData.activa}
               onChange={(e) => handleChange('activa', e.target.checked)}
-              className="h-4 w-4 rounded border-white/20 bg-white/10 text-cyan-500"
+              className="h-4 w-4 rounded-sm border-[#ddd5c2] text-primary focus:ring-ring"
             />
-            <label htmlFor="categoria-activa" className="text-sm text-white/80">
+            <label htmlFor="categoria-activa" className="text-[13px] text-[#5d6470]">
               Categoría activa
             </label>
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-1">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white transition-colors hover:bg-white/10"
+              className="flex-1 rounded-sm border border-[#ddd5c2] bg-white px-4 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#f0ead9]"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 rounded-lg bg-cyan-500 px-4 py-3 font-semibold text-white transition-colors hover:bg-cyan-600 flex items-center justify-center gap-2"
+              className="flex flex-1 items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2.5 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047]"
             >
               <Save className="h-4 w-4" />
               Guardar

@@ -1,45 +1,42 @@
 import { useState } from 'react';
-import { 
+import {
   Home,
-  CreditCard,
-  PieChart,
+  ArrowLeftRight,
+  Calendar,
   MoreHorizontal,
   X,
-  DollarSign,
-  Landmark,
-  Calendar,
-  BotMessageSquare,
-  Tags,
-  LogOut,
-  PiggyBank,
-  Activity,
   Target,
-  Coins,
-  Upload
+  TrendingUp,
+  Settings,
+  BotMessageSquare,
+  Upload,
+  LogOut,
 } from 'lucide-react';
 
+/**
+ * MobileBottomNav — nav inferior mobile del tema "Papel". Los 3 ítems
+ * principales + "Más" son el mismo esquema de 6 secciones que ModernTopNav
+ * (ver design_handoff_rediseno_papel/README.md "Mapa de migración"):
+ * Inicio/Movimientos/Vencimientos van fijos abajo, Objetivos/Inversiones/
+ * Ajustes viven en la hoja "Más" junto con las acciones rápidas de
+ * Agente IA y Carga Masiva (que no tienen otro entry point en mobile).
+ */
 const MobileBottomNav = ({ currentView, onNavigate }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const mainNavItems = [
     { id: 'dashboard', icon: Home, label: 'Inicio' },
-    { id: 'transactions', icon: CreditCard, label: 'Transacciones' },
-    { id: 'pending-payments', icon: Calendar, label: 'Pagos' },
+    { id: 'transactions-full', icon: ArrowLeftRight, label: 'Movimientos' },
+    { id: 'pending-payments-full', icon: Calendar, label: 'Vencimientos' },
     { id: 'menu', icon: MoreHorizontal, label: 'Más' }
   ];
 
   const menuItems = [
-    { id: 'bulk-upload', icon: Upload, label: 'Carga Masiva', color: 'purple' },
-    { id: 'agent', icon: BotMessageSquare, label: 'Agente IA', color: 'purple' },
-    { id: 'ai-usage', icon: Activity, label: 'Consumo API', color: 'orange' },
-    { id: 'objetivos-full', icon: Target, label: 'Objetivos', color: 'blue' },
-    { id: 'currency-management', icon: Coins, label: 'Monedas', color: 'yellow' },
-    { id: 'dollar', icon: DollarSign, label: 'Dólar', color: 'green' },
-    { id: 'budgets', icon: PiggyBank, label: 'Presupuestos', color: 'cyan' },
-    { id: 'cedears', icon: PieChart, label: 'Bolsa', color: 'indigo' },
-    { id: 'resumen-bancario', icon: Landmark, label: 'Resumen General', color: 'teal' },
-    { id: 'categories', icon: Tags, label: 'Categorías', color: 'pink' },
-    { id: 'payment-methods', icon: CreditCard, label: 'Métodos de Pago', color: 'orange' }
+    { id: 'objetivos-full', icon: Target, label: 'Objetivos' },
+    { id: 'inversiones', icon: TrendingUp, label: 'Inversiones' },
+    { id: 'ajustes', icon: Settings, label: 'Ajustes' },
+    { id: 'agent', icon: BotMessageSquare, label: 'Agente IA' },
+    { id: 'bulk-upload', icon: Upload, label: 'Carga Masiva' },
   ];
 
   const handleNavClick = (viewId) => {
@@ -66,56 +63,41 @@ const MobileBottomNav = ({ currentView, onNavigate }) => {
     }
   };
 
-  const getColorClasses = (color) => {
-    const colors = {
-      blue: 'bg-blue-500/10 text-blue-400',
-      purple: 'bg-purple-500/10 text-purple-400',
-      orange: 'bg-orange-500/10 text-orange-400',
-      green: 'bg-green-500/10 text-green-400',
-      pink: 'bg-pink-500/10 text-pink-400',
-      cyan: 'bg-cyan-500/10 text-cyan-400',
-      indigo: 'bg-indigo-500/10 text-indigo-400',
-      teal: 'bg-teal-500/10 text-teal-400',
-      yellow: 'bg-yellow-500/10 text-yellow-400'
-    };
-    return colors[color] || colors.blue;
-  };
-
   return (
     <>
       {/* Overlay del menú deslizable */}
       {isMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+        <div
+          className="fixed inset-0 bg-[#20242c]/40 z-40"
           onClick={() => setIsMenuOpen(false)}
           style={{ animation: 'fadeIn 0.3s ease-out' }}
         />
       )}
 
       {/* Menú deslizable desde abajo */}
-      <div 
+      <div
         className={`fixed inset-x-0 bottom-0 z-50 transform transition-transform duration-300 ease-out ${
           isMenuOpen ? 'translate-y-0' : 'translate-y-full'
         }`}
         style={{ maxHeight: '70vh' }}
       >
-        <div className="bg-[#121212] rounded-t-3xl shadow-2xl border-t border-white/10">
+        <div className="bg-card rounded-t-lg border-t border-[#ddd5c2]">
           {/* Handle para arrastrar */}
           <div className="flex justify-center py-3">
-            <div className="w-12 h-1.5 bg-zinc-800 rounded-full" />
+            <div className="w-12 h-1.5 bg-[#e7e0cf] rounded-full" />
           </div>
 
           {/* Header del menú */}
           <div className="flex items-center justify-between px-6 pb-4">
             <div>
-              <h3 className="text-xl font-bold text-white">Menú</h3>
-              <p className="text-sm text-zinc-400">Gestiona tu aplicación</p>
+              <h3 className="text-xl font-serif font-semibold text-foreground">Menú</h3>
+              <p className="text-sm text-[#8a8677]">Gestiona tu aplicación</p>
             </div>
             <button
               onClick={() => setIsMenuOpen(false)}
-              className="w-10 h-10 rounded-full bg-zinc-800/50 hover:bg-zinc-800 flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-full bg-white border border-[#ddd5c2] hover:bg-[#f0ead9] flex items-center justify-center transition-colors"
             >
-              <X className="h-5 w-5 text-zinc-400" />
+              <X className="h-5 w-5 text-[#5d6470]" />
             </button>
           </div>
 
@@ -128,13 +110,13 @@ const MobileBottomNav = ({ currentView, onNavigate }) => {
                   <button
                     key={item.id}
                     onClick={() => handleMenuItemClick(item.id)}
-                    className="p-4 rounded-2xl bg-[#1a1a1a] border border-white/5 active:scale-95 active:bg-[#222] transition-all hover:border-white/10"
+                    className="p-4 rounded-md bg-white border border-[#ddd5c2] active:scale-95 active:bg-[#f0ead9] transition-all hover:border-[#20242c]/20"
                   >
                     <div className="flex flex-col items-center text-center space-y-3">
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${getColorClasses(item.color)}`}>
+                      <div className="w-12 h-12 rounded-md flex items-center justify-center bg-[#faf7ef] border border-[#ddd5c2] text-[#5a7d52]">
                         <Icon className="h-6 w-6" />
                       </div>
-                      <span className="text-sm font-medium text-white/90">{item.label}</span>
+                      <span className="text-sm font-medium text-foreground">{item.label}</span>
                     </div>
                   </button>
                 );
@@ -145,13 +127,13 @@ const MobileBottomNav = ({ currentView, onNavigate }) => {
             <div className="mt-4">
               <button
                 onClick={handleLogout}
-                className="w-full p-4 rounded-2xl bg-[#1a0f0f] border border-red-500/10 active:scale-95 transition-all hover:bg-red-950/20"
+                className="w-full p-4 rounded-md bg-white border border-[#e0c98a] active:scale-95 transition-all hover:bg-[#fdf6e3]"
               >
                 <div className="flex items-center justify-center space-x-3">
-                  <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
-                    <LogOut className="h-5 w-5 text-red-400" />
+                  <div className="w-10 h-10 rounded-md bg-[#fdf6e3] border border-[#e0c98a] flex items-center justify-center">
+                    <LogOut className="h-5 w-5 text-[#a04a34]" />
                   </div>
-                  <span className="text-base font-medium text-red-400">Cerrar Sesión</span>
+                  <span className="text-base font-medium text-[#a04a34]">Cerrar Sesión</span>
                 </div>
               </button>
             </div>
@@ -160,7 +142,7 @@ const MobileBottomNav = ({ currentView, onNavigate }) => {
       </div>
 
   {/* Bottom Navigation Bar */}
-  <nav className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 z-50 safe-area-bottom">
+  <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-[#ddd5c2] z-50 safe-area-bottom">
     <div className="flex items-center justify-between px-6 py-4">
       {mainNavItems.map((item) => {
         const Icon = item.icon;
@@ -171,17 +153,17 @@ const MobileBottomNav = ({ currentView, onNavigate }) => {
           <button
             key={item.id}
             onClick={() => handleNavClick(item.id)}
-            className={`flex flex-col items-center justify-center gap-1.5 transition-colors ${
+            className={`flex flex-col items-center justify-center gap-1.5 transition-colors duration-150 ${
               isActive || (isMenuButton && isMenuOpen)
-                ? 'text-white'
-                : 'text-zinc-600 hover:text-zinc-400'
+                ? 'text-[#20242c]'
+                : 'text-[#8a8677] hover:text-[#5d6470]'
             }`}
           >
-            <Icon 
-              className={`h-6 w-6 ${isActive ? 'fill-current' : ''}`}
-              strokeWidth={isActive ? 0 : 2}
+            <Icon
+              className="h-6 w-6"
+              strokeWidth={isActive ? 2.5 : 2}
             />
-            <span className="text-[10px] font-medium">
+            <span className="text-[10px] font-medium font-sans">
               {item.label}
             </span>
           </button>

@@ -1,84 +1,51 @@
-import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import ModernSidebar from './ModernSidebar';
-import ModernHeader from './ModernHeader';
+import ModernTopNav from './ModernTopNav';
 import MobileBottomNav from '../../MobileBottomNav';
 import { useIsMobile } from '../../../hooks/use-mobile';
 
 /**
- * ModernLayout - Layout wrapper con Sidebar + Header + Content
+ * ModernLayout - Layout wrapper con nav superior (desktop) + bottom nav
+ * (mobile). Reemplaza el viejo Sidebar + Header oscuros por la barra de
+ * navegación superior del tema "Papel" (ver DESIGN.md y
+ * design_handoff_rediseno_papel/README.md sección 1).
  */
 const ModernLayout = ({
   children,
   currentView,
   onNavigate,
   user,
-  balanceData,
-  currenciesBalance,
-  dollarQuote,
-  notifications,
-  isDarkMode,
-  onToggleTheme,
-  amountsVisible,
-  onToggleAmountVisibility,
+  pendingPaymentsCount,
   onNewTransaction,
-  onBulkUpload,
   onSearch,
   onLogout,
-  onOpenSettings,
   onOpenAgent,
-  dashboardSettings
+  amountsVisible,
+  onToggleAmountVisibility,
 }) => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isMobile = useIsMobile();
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
-      {/* Sidebar (solo desktop) */}
+    <div className="min-h-screen bg-background">
+      {/* Nav superior (solo desktop) */}
       <div className="hidden md:block">
-        <ModernSidebar
+        <ModernTopNav
           currentView={currentView}
           onNavigate={onNavigate}
+          pendingPaymentsCount={pendingPaymentsCount}
+          onNewTransaction={onNewTransaction}
+          onSearch={onSearch}
           user={user}
-          collapsed={sidebarCollapsed}
-          onToggleCollapse={setSidebarCollapsed}
           onLogout={onLogout}
-          dashboardSettings={dashboardSettings}
+          onOpenAgent={onOpenAgent}
+          amountsVisible={amountsVisible}
+          onToggleAmountVisibility={onToggleAmountVisibility}
         />
       </div>
 
-      {/* Main Content Area */}
-      <div 
-        className={`
-          transition-all duration-300
-          ml-0
-          ${sidebarCollapsed ? 'md:ml-20' : 'md:ml-56'}
-        `}
-      >
-        {/* Header (solo desktop) */}
-        <div className="hidden md:block">
-          <ModernHeader
-            balanceData={balanceData}
-            currenciesBalance={currenciesBalance}
-            dollarQuote={dollarQuote}
-            notifications={notifications}
-            isDarkMode={isDarkMode}
-            onToggleTheme={onToggleTheme}
-            amountsVisible={amountsVisible}
-            onToggleAmountVisibility={onToggleAmountVisibility}
-            user={user}
-            onOpenSettings={onOpenSettings}
-            onNavigateHome={() => onNavigate && onNavigate('dashboard')}
-            onOpenAgent={onOpenAgent}
-            onLogout={onLogout}
-          />
-        </div>
-
-        {/* Page Content */}
-        <main className="animate-fade-in pb-24 md:pb-0">
-          {children}
-        </main>
-      </div>
+      {/* Page Content */}
+      <main className="pb-24 md:pb-0">
+        {children}
+      </main>
 
       {isMobile && (
         <MobileBottomNav
@@ -95,18 +62,13 @@ ModernLayout.propTypes = {
   currentView: PropTypes.string.isRequired,
   onNavigate: PropTypes.func.isRequired,
   user: PropTypes.object,
-  balanceData: PropTypes.object,
-  dollarQuote: PropTypes.object,
-  notifications: PropTypes.array,
-  isDarkMode: PropTypes.bool,
-  onToggleTheme: PropTypes.func,
-  amountsVisible: PropTypes.bool,
-  onToggleAmountVisibility: PropTypes.func,
+  pendingPaymentsCount: PropTypes.number,
   onNewTransaction: PropTypes.func,
-  onBulkUpload: PropTypes.func,
   onSearch: PropTypes.func,
   onLogout: PropTypes.func,
-  onOpenSettings: PropTypes.func,
+  onOpenAgent: PropTypes.func,
+  amountsVisible: PropTypes.bool,
+  onToggleAmountVisibility: PropTypes.func,
 };
 
 export default ModernLayout;

@@ -30,6 +30,12 @@ services:
         - "traefik.enable=true"
         - "traefik.docker.network=network_public"
         
+        # Router para health check (usado por el workflow de deploy)
+        - "traefik.http.routers.finanzas-health.rule=Host(`finanzas.qeva.xyz`) && Path(`/health`)"
+        - "traefik.http.routers.finanzas-health.entrypoints=websecure"
+        - "traefik.http.routers.finanzas-health.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.finanzas-health.priority=100"
+
         # Router para la API principal (v1)
         - "traefik.http.routers.finanzas-api.rule=Host(`finanzas.qeva.xyz`) && PathPrefix(`/api/v1`)"
         - "traefik.http.routers.finanzas-api.entrypoints=websecure"

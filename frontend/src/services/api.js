@@ -292,6 +292,23 @@ const categoriasApi = {
 };
 
 // ═══════════════════════════════════════════════════════════════
+// 🔑 API KEYS API (Acceso externo)
+// ═══════════════════════════════════════════════════════════════
+const apiKeysApi = {
+  async list() {
+    return await apiRequest('/api-keys');
+  },
+
+  async create(nombre) {
+    return await apiRequest('/api-keys', { method: 'POST', data: { nombre } });
+  },
+
+  async revoke(id) {
+    return await apiRequest(`/api-keys/${id}`, { method: 'DELETE' });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
 // 💳 MÉTODOS DE PAGO API
 // ═══════════════════════════════════════════════════════════════
 const metodosPagoApi = {
@@ -701,7 +718,8 @@ const apiServices = {
   objetivosApi,
   tarjetasApi,
   monedasApi,
-  aiConfigApi
+  aiConfigApi,
+  apiKeysApi
 };
 
 debugLog('✅ API Services initialized with FastAPI backend');

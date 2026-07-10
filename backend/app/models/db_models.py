@@ -70,6 +70,21 @@ class Usuario(Base):
     )
 
 
+class ApiKey(Base):
+    __tablename__ = "api_keys"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    usuario_id = Column(UUID(as_uuid=True), ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False, index=True)
+    nombre = Column(String(100), nullable=False)
+    key_hash = Column(String(64), nullable=False, unique=True, index=True)
+    key_prefix = Column(String(16), nullable=False)
+    creado_en = Column(DateTime(timezone=True), default=datetime.utcnow)
+    ultimo_uso = Column(DateTime(timezone=True), nullable=True)
+    revocado_en = Column(DateTime(timezone=True), nullable=True)
+
+    usuario = relationship("Usuario")
+
+
 class AIConfiguracion(Base):
     __tablename__ = "ai_configuraciones"
 

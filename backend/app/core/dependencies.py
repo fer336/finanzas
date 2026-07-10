@@ -55,7 +55,30 @@ async def get_current_user(
         if not token:
             logger.warning(f"❌ Token vacío desde IP: {client_ip}")
             raise credentials_exception
-            
+
+        if token.startswith("fk_live_"):
+            from app.repositories.api_key_repository import ApiKeyRepository
+            import hashlib
+
+            key_hash = hashlib.sha256(token.encode()).hexdigest()
+            api_key_repo = ApiKeyRepository(db)
+            api_key_row = api_key_repo.find_active_by_hash(key_hash)
+
+            if api_key_row is None:
+                logger.warning(f"❌ API key inválida o revocada desde IP: {client_ip}")
+                raise credentials_exception
+
+            user_service = UserService(db)
+            user = await user_service.get_user_by_id(str(api_key_row.usuario_id))
+
+            if user is None or not user.is_active:
+                logger.warning(f"❌ Usuario de API key inactivo/no encontrado desde IP: {client_ip}")
+                raise credentials_exception
+
+            api_key_repo.touch_last_used(api_key_row.id)
+            logger.info(f"✅ Autenticación por API key exitosa para {user.email} desde IP: {client_ip}")
+            return user
+
         logger.info(f"🔑 Verificando token para IP: {client_ip} (Token hash: {hash_sensitive_data(token)})")
         payload = verify_token(token)
         if payload is None:

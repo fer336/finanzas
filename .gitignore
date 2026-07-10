@@ -167,7 +167,6 @@ static/generated/
 # Scripts y configuraciones de deployment (contienen información sensible)
 deploy-production.sh
 update-production.sh
-docker-compose.yml
 docker-compose.yml.bak
 
 # ===================================

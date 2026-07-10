@@ -89,6 +89,9 @@ services:
       - finanzas-internal
     depends_on:
       - backend
+    secrets:
+      - source: finanzas_backend_env
+        target: /run/secrets/backend.env
     deploy:
       mode: replicated
       replicas: 1
@@ -128,4 +131,4 @@ volumes:
 secrets:
   finanzas_backend_env:
     external: true
-  # Ya no necesitamos el secreto del frontend
+    # Un solo secreto compartido entre backend y frontend

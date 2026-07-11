@@ -1,5 +1,5 @@
 """
-Router for payment operations (payments from pending payments) with Multi-Tenancy
+Router for payment operations (payments from pending payments and préstamos) with Multi-Tenancy
 """
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -10,6 +10,7 @@ import uuid
 
 from app.database import get_db
 from app.repositories.pago_pendiente_repository_pg import PagoPendienteRepositoryPG
+from app.repositories.prestamo_repository import PrestamoRepository
 from app.repositories.transaccion_repository import TransaccionRepository
 from app.core.dependencies import CurrentUser
 from pydantic import BaseModel
@@ -34,7 +35,7 @@ def safe_float(value, default=0.0):
 class PagoRequest(BaseModel):
     """Request model for registering a payment"""
     item_id: str  # ID of pending payment
-    item_type: str  # 'pending_payment'
+    item_type: str  # 'pending_payment' or 'prestamo'
     payment_type: Optional[str] = 'total'  # 'total' (único valor soportado hoy)
     monto: Optional[Decimal] = None  # 🔧 Monto en ARS (opcional, puede ser 0 si solo paga USD)
     monto_usd: Optional[Decimal] = None  # Monto en USD (opcional)
@@ -171,23 +172,39 @@ async def registrar_pago(
         # Extract transaction IDs for later use
         transaccion_ids = [str(t["id"]) for t in created_transactions]
         
-        # Update the source item (pending payment)
+        # Update the source item (pending payment or préstamo)
         if pago_data.item_type == "pending_payment":
             pago_pendiente_repo = PagoPendienteRepositoryPG(db)
-            
+
             # Verificar pertenencia
             pago_existente = pago_pendiente_repo.get_by_id(uuid.UUID(pago_data.item_id))
             if not pago_existente or str(pago_existente.get('usuario_id')) != str(current_user.id):
                 raise HTTPException(status_code=404, detail="Pago pendiente no encontrado")
-            
+
             # Update the pending payment status to "pagado"
             update_data = {
                 "estado": "pagado",
                 "fechapago": pago_data.fecha_pago,
                 "comprobante": pago_data.comprobante
             }
-            
+
             pago_pendiente_repo.update(pago_data.item_id, update_data)
+
+        elif pago_data.item_type == "prestamo":
+            prestamo_repo = PrestamoRepository(db)
+
+            # Verificar pertenencia
+            prestamo_existente = prestamo_repo.get_by_id(uuid.UUID(pago_data.item_id))
+            if not prestamo_existente or str(prestamo_existente.get('usuario_id')) != str(current_user.id):
+                raise HTTPException(status_code=404, detail="Préstamo no encontrado")
+
+            update_data = {
+                "estado": "pagado",
+                "fecha_pago": pago_data.fecha_pago,
+                "comprobante": pago_data.comprobante
+            }
+
+            prestamo_repo.update(pago_data.item_id, update_data)
 
         db.commit()
         
@@ -213,7 +230,7 @@ async def registrar_pago(
 
 class DeshacerPagoRequest(BaseModel):
     """Request model for undoing a payment"""
-    item_type: str  # 'pending_payment'
+    item_type: str  # 'pending_payment' or 'prestamo'
     eliminar_transacciones: bool = False  # Si debe eliminar las transacciones asociadas
     transaccion_ids: Optional[list] = None  # IDs de transacciones a eliminar (opcional)
     moneda: Optional[str] = None  # 'ARS', 'USD', o None para deshacer todo
@@ -290,8 +307,24 @@ async def deshacer_pago(
                 "fechapago": None,
                 "comprobante": None
             }
-            
+
             pago_pendiente_repo.update(item_id, update_data)
+
+        elif request.item_type == "prestamo":
+            prestamo_repo = PrestamoRepository(db)
+
+            # Verificar pertenencia
+            prestamo_existente = prestamo_repo.get_by_id(UUID(item_id))
+            if not prestamo_existente or str(prestamo_existente.get('usuario_id')) != str(current_user.id):
+                raise HTTPException(status_code=404, detail="Préstamo no encontrado")
+
+            update_data = {
+                "estado": "pendiente",
+                "fecha_pago": None,
+                "comprobante": None
+            }
+
+            prestamo_repo.update(item_id, update_data)
 
         else:
             raise HTTPException(status_code=400, detail="Tipo de item inválido")

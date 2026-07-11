@@ -2,14 +2,13 @@
 
 # 💰 Sistema de Gastos Inteligente
 
-### Finanzas personales full-stack, con agente IA y tema editorial "Papel"
+### Finanzas personales full-stack, tema editorial "Papel"
 
 [![React](https://img.shields.io/badge/React-18.2-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-GitHub_Actions-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![OpenRouter](https://img.shields.io/badge/OpenRouter-AI-FF6B6B?style=for-the-badge&logo=openai&logoColor=white)](https://openrouter.ai/)
 
 [Quick start](#-quick-start) • [Tema Papel](#-tema-visual-papel) • [Autenticación y acceso externo](#-autenticación-y-acceso-externo) • [Arquitectura](#️-arquitectura) • [Base de datos](#-base-de-datos) • [Deploy](#-deploy-a-producción)
 
@@ -19,7 +18,7 @@
 
 ## 📖 Qué es
 
-**Sistema de Gastos Inteligente** es una app de finanzas personales de un solo usuario (uso propio, no multi-tenant público): movimientos, vencimientos, objetivos de ahorro, inversiones (CEDEARs, cotización dólar, monedas) y un agente IA conversacional, todo con soporte multi-moneda (ARS/USD/EUR).
+**Sistema de Gastos Inteligente** es una app de finanzas personales de un solo usuario (uso propio, no multi-tenant público): movimientos, vencimientos, préstamos, objetivos de ahorro, inversiones (CEDEARs, cotización dólar, monedas), todo con soporte multi-moneda (ARS/USD/EUR).
 
 La interfaz sigue el tema editorial **"Papel"** — libreta contable clara, sin glassmorphism ni dark mode — documentado en [`DESIGN.md`](./DESIGN.md) (tokens: color, tipografía, spacing, componentes) y [`PRODUCT.md`](./PRODUCT.md) (visión de producto y principios de diseño).
 
@@ -39,11 +38,10 @@ La interfaz sigue el tema editorial **"Papel"** — libreta contable clara, sin 
 |---|---|
 | **Inicio** | Dashboard con balance en tiempo real, KPIs ingresos/gastos, widgets configurables |
 | **Movimientos** | Transacciones multi-moneda, categorías, comprobantes (MinIO), filtros y búsqueda |
-| **Vencimientos** | Pagos pendientes con estado/prioridad/recurrencia, adjuntar factura y comprobante de pago |
+| **Vencimientos** | Tabs: Pagos pendientes (estado/prioridad/recurrencia, adjuntar factura y comprobante) y Préstamos (monto prestado/a devolver, fuente, vencimiento) |
 | **Objetivos** | Metas de ahorro con progreso visual y aportes |
 | **Inversiones** | Tabs: CEDEARs (Yahoo Finance), Cotización Dólar (oficial/blue/MEP/CCL), Monedas |
-| **Ajustes** | Tabs: General (widgets, modo de balance, proveedor IA, uso de Lucy, **acceso API externo**), Categorías, Métodos de pago |
-| **Agente IA ("Lucy")** | Panel lateral conversacional con function calling sobre el sistema financiero |
+| **Ajustes** | Tabs: General (widgets, modo de balance, **acceso API externo**), Categorías, Métodos de pago |
 
 Reportes de bugs vía Linear (que vivía en Ajustes) se dio de baja — ya no es parte del producto.
 
@@ -91,11 +89,18 @@ Todos bajo `/api/v1/...`, todos protegidos, todos con `GET /`, `GET /{id}`, `POS
 
 | Recurso | Prefijo |
 |---|---|
-| Transacciones (gastos/ingresos) | `/api/v1/transacciones` *(también expone `/ingresos`, `/gastos`, `/estadisticas`, bulk ops y deuda de tarjetas)* |
+| Transacciones (gastos/ingresos) | `/api/v1/transacciones` *(también expone `/ingresos`, `/gastos`, `/estadisticas`, `/bulk-create`, `/bulk-delete`)* |
 | Categorías | `/api/v1/categories` |
 | Métodos de pago | `/api/v1/payment-methods` |
 | Pagos pendientes | `/api/v1/pagos-pendientes` |
+| Préstamos | `/api/v1/prestamos` |
+| Objetivos de ahorro | `/api/v1/objetivos` |
+| Presupuestos | `/api/v1/presupuestos` |
+| Monedas del usuario | `/api/v1/monedas-usuario` |
+| Balance neto | `/api/v1/balance-inicial` *(`GET /neto` para el cálculo, resto CRUD de la ancla)* |
 | API keys | `/api/v1/api-keys` |
+
+Marcar un pago pendiente o un préstamo como pagado se hace con el endpoint genérico `POST /api/v1/pagos/registrar` (`item_type: 'pending_payment' | 'prestamo'`) — crea el gasto real en `transacciones` y actualiza el estado del origen.
 
 ---
 
@@ -115,11 +120,11 @@ Todos bajo `/api/v1/...`, todos protegidos, todos con `GET /`, `GET /{id}`, `POS
 │ React 18 + Vite │◄────►│  FastAPI + Uvicorn    │
 │ Nginx (build)   │      │  Router → Repository  │
 └─────────────────┘      └──────┬───────────────┘
-                                ▼          ▼          ▼
-                        ┌────────────┐ ┌──────────┐ ┌───────────┐
-                        │ PostgreSQL │ │  MinIO   │ │ OpenRouter│
-                        │ (SQLAlchemy)│ │  (S3)   │ │   (LLMs)  │
-                        └────────────┘ └──────────┘ └───────────┘
+                                ▼               ▼
+                        ┌────────────┐    ┌──────────┐
+                        │ PostgreSQL │    │  MinIO   │
+                        │ (SQLAlchemy)│   │  (S3)   │
+                        └────────────┘    └──────────┘
 ```
 
 Patrón backend: `router` (FastAPI, valida `CurrentUser`) → `repository` (SQLAlchemy `Session`, scoping por `usuario_id`) — sin capa de service intermedia para los CRUDs simples (ver `app/routers/categories.py` como referencia del patrón).
@@ -132,9 +137,8 @@ Patrón backend: `router` (FastAPI, valida `CurrentUser`) → `repository` (SQLA
 | Backend | FastAPI + Uvicorn, SQLAlchemy 2.x (ORM), Alembic (migraciones), Pydantic v2 |
 | Base de datos | PostgreSQL 16, UUID como PK en todas las tablas |
 | Archivos | MinIO (S3-compatible) para comprobantes/facturas |
-| IA | OpenRouter (Claude/GPT/Gemini intercambiables) |
 | Auth | Google OAuth2 (JWT) + API keys propias (`fk_live_...`) |
-| Infra | Docker + Traefik, deploy vía GitHub Actions → Docker Hub → Portainer webhook |
+| Infra | Docker + Traefik, deploy vía GitHub Actions → GHCR → Portainer webhook (release-gated) |
 
 ---
 
@@ -149,13 +153,13 @@ Tablas reales (`backend/app/models/db_models.py`), UUID PK en todas, todas con F
 | `categorias` | Nombre, tipo (ingreso/gasto), color, ícono |
 | `metodos_pago` | Nombre, tipo, color, ícono, activo |
 | `pagospendientes` | Vencimientos — estado, prioridad, recurrencia, adjuntos (factura/comprobante) |
+| `prestamos` | Préstamos recibidos — monto prestado, monto a devolver, vencimiento, fuente/prestamista |
 | `objetivos_ahorro` / `aportes_objetivo` | Metas de ahorro y sus aportes |
 | `objetivos_financieros` | Objetivos financieros generales |
 | `presupuestos` | Límites por categoría |
-| `resumen_bancario` / `pagos_resumen_bancario` | Resúmenes de tarjeta y sus pagos |
 | `monedas_usuario` | Monedas habilitadas por el usuario |
 | `tipos_cambio` | Cotizaciones históricas |
-| `ai_configuraciones` | Config del proveedor/modelo IA por usuario |
+| `balance_inicial_mes` | Ancla del Balance Neto — saldo inicial configurado por mes/moneda |
 | `api_keys` | Tokens de acceso externo — `key_hash` (SHA-256), nunca la key en texto plano |
 
 Migraciones en `backend/alembic/`, pero **no se corren automáticamente** (no hay paso de `alembic upgrade` en CI/deploy) — cambios de esquema se aplican a mano contra la instancia real.
@@ -226,12 +230,12 @@ No corre migraciones de base de datos — cambios de esquema (como la tabla `api
 
 ## 🗺️ Roadmap
 
-- [x] Dashboard, transacciones multi-moneda, objetivos, vencimientos, deuda de tarjetas
-- [x] Agente IA con function calling
+- [x] Dashboard, transacciones multi-moneda, objetivos, vencimientos, préstamos
 - [x] Autenticación con Google OAuth
 - [x] Migraciones con Alembic
 - [x] Tema "Papel" (rediseño completo, reemplaza el tema oscuro)
 - [x] API keys de larga duración para acceso externo
+- [x] Balance neto real (mes a mes, con ancla configurable)
 - [ ] Notificaciones push de vencimientos
 - [ ] Exportación de reportes en PDF
 - [ ] Modo offline con sync

@@ -53,6 +53,9 @@ class Usuario(Base):
     pagos_pendientes = relationship(
         "PagoPendiente", back_populates="usuario", cascade="all, delete-orphan"
     )
+    prestamos = relationship(
+        "Prestamo", back_populates="usuario", cascade="all, delete-orphan"
+    )
     monedas = relationship(
         "MonedaUsuario", back_populates="usuario", cascade="all, delete-orphan"
     )
@@ -262,6 +265,42 @@ class PagoPendiente(Base):
         Index(
             "idx_pagospendientes_usuario_vencimiento", "usuario_id", "fechavencimiento"
         ),
+    )
+
+
+class Prestamo(Base):
+    """Préstamo tomado por el usuario: monto recibido vs. monto a devolver,
+    con fecha de vencimiento y de dónde vino (nombre_fuente)."""
+
+    __tablename__ = "prestamos"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    nombre_fuente = Column(Text, nullable=False)  # quién prestó (banco/persona)
+    monto_prestado = Column(Numeric(15, 2), nullable=False)
+    monto_a_devolver = Column(Numeric(15, 2), nullable=False)
+    moneda = Column(String(10), nullable=False, default="ARS")
+    fecha_vencimiento = Column(Date, nullable=False)
+    fecha_pago = Column(Date, nullable=True)
+    estado = Column(String(50), nullable=False, default="pendiente")
+    notas = Column(Text, nullable=True)
+    comprobante = Column(Text, nullable=True)
+
+    fecha_creacion = Column(DateTime(timezone=True), default=datetime.utcnow)
+    fecha_actualizacion = Column(
+        DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    usuario_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("usuarios.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+
+    usuario = relationship("Usuario", back_populates="prestamos")
+
+    __table_args__ = (
+        Index("idx_prestamos_usuario_vencimiento", "usuario_id", "fecha_vencimiento"),
     )
 
 

@@ -71,6 +71,7 @@ from app.routers.auth import router as auth_router
 from app.routers.yfinance_router import router as yfinance_router
 from app.routers.files import router as files_router
 from app.routers.pagos_pendientes import router as pagos_pendientes_router
+from app.routers.prestamos import router as prestamos_router
 from app.routers.transacciones import router as transacciones_router
 from app.routers.categories import router as categories_router
 from app.routers.api_keys import router as api_keys_router
@@ -249,6 +250,12 @@ app.include_router(
     pagos_pendientes_router,
     prefix="/api/v1/pagos-pendientes",
     tags=["Pagos Pendientes"],
+)
+
+app.include_router(
+    prestamos_router,
+    prefix="/api/v1/prestamos",
+    tags=["Préstamos"],
 )
 
 app.include_router(

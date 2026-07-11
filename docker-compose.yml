@@ -10,8 +10,6 @@ services:
     secrets:
       - source: finanzas_env
         target: /run/secrets/backend.env
-    volumes:
-      - backend_logs:/app/logs
     deploy:
       mode: replicated
       replicas: 1
@@ -115,14 +113,6 @@ networks:
   finanzas-internal:
     driver: overlay
     internal: true
-
-volumes:
-  backend_logs:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /var/log/finanzas
 
 secrets:
   finanzas_env:

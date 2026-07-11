@@ -7,10 +7,6 @@ services:
     networks:
       - network_public
       - finanzas-internal
-    environment:
-      - REDIS_HOST=redis  # En Docker Swarm se resuelve por nombre de servicio
-      - REDIS_PORT=6379
-      - REDIS_DB=1  # DB dedicada para LangGraph
     secrets:
       - source: finanzas_env
         target: /run/secrets/backend.env

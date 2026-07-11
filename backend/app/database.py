@@ -11,8 +11,8 @@ from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Construct PostgreSQL database URL
-DATABASE_URL = f"postgresql://{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}@{settings.POSTGRES_HOST}:{settings.POSTGRES_PORT}/{settings.POSTGRES_DB}"
+# PostgreSQL database URL (soporta DATABASE_URL directa o las partes POSTGRES_*, ver Settings.DATABASE_URL)
+DATABASE_URL = settings.DATABASE_URL
 
 # Create SQLAlchemy engine
 engine = create_engine(

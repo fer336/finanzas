@@ -31,7 +31,18 @@ class Settings:
 
     @property
     def DATABASE_URL(self) -> str:
-        """Build PostgreSQL connection URL"""
+        """PostgreSQL connection URL.
+
+        Si DATABASE_URL viene seteada por env, se usa tal cual — salvo que
+        pida el driver asyncpg: el motor de la app es síncrono (SQLAlchemy
+        create_engine + Session, sin asyncpg instalado), así que se
+        normaliza a psycopg2 para no romper el arranque.
+        """
+        raw = os.getenv("DATABASE_URL", "").strip()
+        if raw:
+            if "+asyncpg" in raw:
+                raw = raw.replace("+asyncpg", "+psycopg2", 1)
+            return raw
         return f"postgresql+psycopg2://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
     # Configuración de autenticación

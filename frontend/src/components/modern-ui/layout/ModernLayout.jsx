@@ -18,7 +18,6 @@ const ModernLayout = ({
   onNewTransaction,
   onSearch,
   onLogout,
-  onOpenAgent,
   amountsVisible,
   onToggleAmountVisibility,
 }) => {
@@ -36,7 +35,6 @@ const ModernLayout = ({
           onSearch={onSearch}
           user={user}
           onLogout={onLogout}
-          onOpenAgent={onOpenAgent}
           amountsVisible={amountsVisible}
           onToggleAmountVisibility={onToggleAmountVisibility}
         />
@@ -66,7 +64,6 @@ ModernLayout.propTypes = {
   onNewTransaction: PropTypes.func,
   onSearch: PropTypes.func,
   onLogout: PropTypes.func,
-  onOpenAgent: PropTypes.func,
   amountsVisible: PropTypes.bool,
   onToggleAmountVisibility: PropTypes.func,
 };

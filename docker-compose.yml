@@ -72,13 +72,7 @@ services:
         - "traefik.http.routers.finanzas-files.entrypoints=websecure"
         - "traefik.http.routers.finanzas-files.tls.certresolver=letsencryptresolver"
         - "traefik.http.routers.finanzas-files.priority=100"
-        
-        # Router para Agent API
-        - "traefik.http.routers.finanzas-agent.rule=Host(`finanzas.qeva.xyz`) && PathPrefix(`/api/agent`)"
-        - "traefik.http.routers.finanzas-agent.entrypoints=websecure"
-        - "traefik.http.routers.finanzas-agent.tls.certresolver=letsencryptresolver"
-        - "traefik.http.routers.finanzas-agent.priority=100"
-        
+
         # Service definition
         - "traefik.http.services.finanzas-backend.loadbalancer.server.port=8000"
 

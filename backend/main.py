@@ -69,7 +69,6 @@ from app.core.config import settings as get_settings
 from app.dependencies import get_auth_service
 from app.routers.auth import router as auth_router
 from app.routers.yfinance_router import router as yfinance_router
-from app.routers.agent import router as agent_router
 from app.routers.files import router as files_router
 from app.routers.pagos_pendientes import router as pagos_pendientes_router
 from app.routers.transacciones import router as transacciones_router
@@ -245,9 +244,6 @@ app.include_router(auth_router, prefix="")
 # Incluir router de Yahoo Finance (CEDEARs)
 app.include_router(yfinance_router, prefix="/api")
 
-# Incluir router del Agente de IA
-app.include_router(agent_router, prefix="/api/agent", tags=["Agent"])
-
 # Incluir router de archivos (MinIO/S3)
 app.include_router(files_router, prefix="/api/files", tags=["Files"])
 
@@ -374,7 +370,6 @@ async def get_config():
             "minio_enabled": bool(
                 settings.MINIO_ENDPOINT and settings.MINIO_ACCESS_KEY
             ),
-            "ai_agent_enabled": True,
         },
     }
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Search, Sparkles, LogOut, Eye, EyeOff } from 'lucide-react';
+import { Search, LogOut, Eye, EyeOff } from 'lucide-react';
 import Home from 'reicon-react/icons/Home';
 import ArrowSwapHorizontal2 from 'reicon-react/icons/ArrowSwapHorizontal2';
 import Calendar from 'reicon-react/icons/Calendar';
@@ -86,7 +86,6 @@ const ModernTopNav = ({
   onSearch,
   user,
   onLogout,
-  onOpenAgent,
   amountsVisible = true,
   onToggleAmountVisibility,
 }) => {
@@ -194,17 +193,6 @@ const ModernTopNav = ({
           </button>
         )}
 
-        {onOpenAgent && (
-          <button
-            type="button"
-            onClick={onOpenAgent}
-            title="Agente IA"
-            className="rounded-sm border border-[#ddd5c2] bg-white p-2 text-[#8a8677] transition-colors duration-150 hover:bg-[#f0ead9] hover:text-foreground"
-          >
-            <Sparkles className="h-4 w-4" />
-          </button>
-        )}
-
         {user && (
           <div className="relative" ref={userMenuRef}>
             <button
@@ -257,7 +245,6 @@ ModernTopNav.propTypes = {
   onSearch: PropTypes.func,
   user: PropTypes.object,
   onLogout: PropTypes.func,
-  onOpenAgent: PropTypes.func,
   amountsVisible: PropTypes.bool,
   onToggleAmountVisibility: PropTypes.func,
 };

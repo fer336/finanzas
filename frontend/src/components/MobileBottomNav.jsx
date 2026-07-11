@@ -8,7 +8,6 @@ import {
   Target,
   TrendingUp,
   Settings,
-  BotMessageSquare,
   Upload,
   LogOut,
 } from 'lucide-react';
@@ -18,8 +17,8 @@ import {
  * principales + "Más" son el mismo esquema de 6 secciones que ModernTopNav
  * (ver design_handoff_rediseno_papel/README.md "Mapa de migración"):
  * Inicio/Movimientos/Vencimientos van fijos abajo, Objetivos/Inversiones/
- * Ajustes viven en la hoja "Más" junto con las acciones rápidas de
- * Agente IA y Carga Masiva (que no tienen otro entry point en mobile).
+ * Ajustes viven en la hoja "Más" junto con la acción rápida de
+ * Carga Masiva (que no tiene otro entry point en mobile).
  */
 const MobileBottomNav = ({ currentView, onNavigate }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -35,7 +34,6 @@ const MobileBottomNav = ({ currentView, onNavigate }) => {
     { id: 'objetivos-full', icon: Target, label: 'Objetivos' },
     { id: 'inversiones', icon: TrendingUp, label: 'Inversiones' },
     { id: 'ajustes', icon: Settings, label: 'Ajustes' },
-    { id: 'agent', icon: BotMessageSquare, label: 'Agente IA' },
     { id: 'bulk-upload', icon: Upload, label: 'Carga Masiva' },
   ];
 

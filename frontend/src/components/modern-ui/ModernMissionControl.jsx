@@ -49,8 +49,6 @@ const ModernAjustesView = lazy(() => import('./ajustes/ModernAjustesView'));
 
 // ====== LAZY LOADED MODALS (Solo se cargan cuando se abren) ======
 const DashboardSettingsModal = lazy(() => import('./dashboard/DashboardSettingsModal'));
-const ModernAgentChat = lazy(() => import('./agent/ModernAgentChat'));
-const AgentSidePanel = lazy(() => import('./agent/AgentSidePanel'));
 const AIConfigModal = lazy(() => import('../AIConfigModal').then((m) => ({ default: m.AIConfigModal })));
 const ModernTransactionForm = lazy(() => import('../ModernTransactionForm'));
 const PendingPaymentPayModal = lazy(() => import('./pending-payments/PendingPaymentPayModal'));
@@ -166,7 +164,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   const [pendingPaymentToPay, setPendingPaymentToPay] = useState(null);
   const [showDeleteTransactionModal, setShowDeleteTransactionModal] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
-  const [showAgentPanel, setShowAgentPanel] = useState(false);
   const [showAIConfigModal, setShowAIConfigModal] = useState(false);
   const isApplyingHistoryRef = useRef(false);
   const hasInitializedHistoryRef = useRef(false);
@@ -177,10 +174,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
     if (!initialView || initialView === currentView) return;
 
     // Modales: no cambian la vista, abren un panel
-    if (initialView === 'agent') {
-      setShowAgentPanel(true);
-      return;
-    }
     if (initialView === 'bulk-upload') {
       setShowBulkUpload(true);
       return;
@@ -229,7 +222,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
     const buildNavState = () => ({
       appNav: true,
       view: currentView,
-      showAgentPanel,
       showBulkUpload,
     });
 
@@ -246,7 +238,7 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
     }
 
     window.history.pushState(buildNavState(), '');
-  }, [currentView, showAgentPanel, showBulkUpload]);
+  }, [currentView, showBulkUpload]);
 
   useEffect(() => {
     const handlePopState = (event) => {
@@ -257,7 +249,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
           {
             appNav: true,
             view: currentView,
-            showAgentPanel,
             showBulkUpload,
           },
           ''
@@ -267,14 +258,13 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
 
       isApplyingHistoryRef.current = true;
       setCurrentView(navState.view || 'dashboard');
-      setShowAgentPanel(Boolean(navState.showAgentPanel));
       setShowBulkUpload(Boolean(navState.showBulkUpload));
       onNavigate && onNavigate(navState.view || 'dashboard');
     };
 
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [currentView, onNavigate, showAgentPanel, showBulkUpload]);
+  }, [currentView, onNavigate, showBulkUpload]);
 
   useEffect(() => {
     const loadCedears = async () => {
@@ -763,17 +753,9 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
     console.log('🎯 ModernMissionControl.handleNavigate:', view);
 
     // Vistas que abren modales en lugar de cambiar ruta
-    if (view === 'agent') {
-      setShowAgentPanel(true);
-      return;
-    }
     if (view === 'bulk-upload') {
       setShowBulkUpload(true);
       return;
-    }
-
-    if (showAgentPanel) {
-      setShowAgentPanel(false);
     }
 
     if (showBulkUpload) {
@@ -1505,7 +1487,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
         onNewTransaction={handleNewTransaction}
         onSearch={handleSearch}
         onLogout={handleLogout}
-        onOpenAgent={() => setShowAgentPanel(true)}
         amountsVisible={amountsVisible}
         onToggleAmountVisibility={toggleAmountVisibility}
       >
@@ -1703,14 +1684,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
           />
         </Suspense>
       )}
-      {/* Agent Side Panel */}
-      <Suspense fallback={null}>
-        <AgentSidePanel
-          isOpen={showAgentPanel}
-          onClose={() => setShowAgentPanel(false)}
-          balanceData={dashboardData?.balance}
-        />
-      </Suspense>
       {/* Pending Payment Form Modal */}
       {showPendingPaymentModal && (
         <Suspense fallback={null}>

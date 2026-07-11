@@ -1,4 +1,5 @@
 import { Suspense, lazy, useState, useEffect } from 'react';
+import TrendUp2 from 'reicon-react/icons/TrendUp2';
 import { useAuth } from './components/auth/auth-provider';
 import { LoginButton } from './components/auth/login-button';
 import { ConnectionStatus } from './components/connection-status';
@@ -13,8 +14,8 @@ const PaidInvoicesView = lazy(() => import('./components/paid-invoices-view'));
 const CuotaAlimentariaView = lazy(() => import('./components/cuota-alimentaria-view').then(m => ({ default: m.CuotaAlimentariaView })));
 
 const LoadingSpinner = () => (
-  <div className="flex h-screen w-full items-center justify-center bg-black">
-    <p className="text-white/50 text-sm">Cargando...</p>
+  <div className="flex h-screen w-full items-center justify-center bg-background">
+    <p className="text-[13px] text-muted-foreground">Cargando…</p>
   </div>
 );
 
@@ -52,49 +53,55 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <p className="text-white">Cargando...</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-[13px] text-muted-foreground">Cargando…</p>
       </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="w-full max-w-sm">
-          {/* Pulpo con animación */}
-          <div className="text-center mb-12 animate-in fade-in zoom-in duration-500">
-            <div className="text-7xl mb-4 animate-bounce" style={{ animationDuration: '3s' }}>
-              🐙
+          {/* Marca */}
+          <div className="text-center mb-10 animate-in fade-in zoom-in duration-500">
+            <div
+              className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl"
+              style={{ backgroundColor: '#20242c' }}
+            >
+              <TrendUp2 size={26} color="#e9c46a" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2 tracking-tight">
-              Sistema de Gastos
+            <h1 className="font-serif text-[28px] font-bold text-foreground tracking-tight">
+              Finance<span className="text-[#b35a42]">.</span>
             </h1>
-            <p className="text-white/40 text-sm">
-              Gestiona tus finanzas de forma inteligente
+            <p className="mt-1.5 text-[13px] text-muted-foreground">
+              Tu libreta contable, en un solo lugar.
             </p>
           </div>
 
           {/* Card login */}
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 animate-in fade-in slide-in-from-bottom-4 duration-500" style={{ animationDelay: '100ms' }}>
+          <div
+            className="rounded-xl border border-[#ddd5c2] bg-card p-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
+            style={{ animationDelay: '100ms' }}
+          >
             <LoginButton />
           </div>
 
           {/* Footer */}
           <div className="text-center mt-8 space-y-2 animate-in fade-in duration-500" style={{ animationDelay: '300ms' }}>
-            <p className="text-white/20 text-xs">
-              © 2026 Sistema de Gastos
+            <p className="text-[11px] text-[#8a8677]">
+              © 2026 Finance
             </p>
-            <div className="flex items-center justify-center gap-1.5 text-xs">
-              <span className="text-white/20">hecho por</span>
+            <div className="flex items-center justify-center gap-1.5 text-[11px]">
+              <span className="text-[#8a8677]">hecho por</span>
               <a
                 href="https://qeva.xyz"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/60 hover:text-white transition-colors font-medium inline-flex items-center gap-1 group"
+                className="text-[#5d6470] hover:text-foreground transition-colors font-medium inline-flex items-center gap-1 group"
               >
                 Qeva AI
-                <svg className="w-3 h-3 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
               </a>

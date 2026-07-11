@@ -17,7 +17,6 @@ import {
   useObjetivos,
   usePresupuestos,
   useMonedas,
-  useResumenes,
   QUERY_KEYS
 } from '../../hooks/useFinancialData';
 import { useQueryClient } from '@tanstack/react-query';
@@ -42,7 +41,6 @@ const ModernPendingPaymentsView = lazy(() => import('./pending-payments/ModernPe
 const ModernCEDEARsView = lazy(() => import('./cedears/ModernCEDEARsView'));
 const ModernMonedasView = lazy(() => import('./monedas/ModernMonedasView'));
 const ModernInversionesView = lazy(() => import('./inversiones/ModernInversionesView'));
-const ModernResumenesView = lazy(() => import('./resumenes/ModernResumenesView'));
 const ModernReportesView = lazy(() => import('./reportes/ModernReportesView'));
 const ModernAjustesView = lazy(() => import('./ajustes/ModernAjustesView'));
 
@@ -67,7 +65,6 @@ const {
   monedasApi,
   categoriasApi: categoriesApi,
   metodosPagoApi: paymentMethodsApi,
-  resumenesBancariosApi
 } = apiServices;
 
 const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
@@ -86,7 +83,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   const { data: objetivosData = [] } = useObjetivos();
   const { data: presupuestosData = [] } = usePresupuestos();
   const { data: monedasData = [] } = useMonedas();
-  const { data: resumenesData = [] } = useResumenes();
 
   // dashboardStats era antes un query aparte con su propio fetch sin
   // límite (transaccionesApi.getAll() sin argumentos), duplicando esta
@@ -359,10 +355,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
     () => Array.isArray(presupuestosData) ? presupuestosData : [],
     [presupuestosData]
   );
-  const resumenesBancarios = useMemo(
-    () => Array.isArray(resumenesData) ? resumenesData : [],
-    [resumenesData]
-  );
   const monedas = useMemo(
     () => Array.isArray(monedasData) ? monedasData : [],
     [monedasData]
@@ -390,7 +382,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
         pendingResponse,
         objetivosResponse,
         presupuestosResponse,
-        resumenesResponse,
         monedasResponse,
         quotesResponse
       ] = await Promise.all([
@@ -447,15 +438,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
           })
           .catch((err) => {
             console.error('❌ Error cargando presupuestos:', err);
-            return { list: [] };
-          }),
-        resumenesBancariosApi.getAll()
-          .then(res => {
-            console.log('✅ Resúmenes bancarios cargados:', res);
-            return res;
-          })
-          .catch((err) => {
-            console.error('❌ Error cargando resúmenes bancarios:', err);
             return { list: [] };
           }),
         monedasApi.getAll({ activa: true, orden_by: 'orden' })
@@ -571,10 +553,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
       const presupuestosList = presupuestosResponse.list || presupuestosResponse || [];
       console.log('💰 Presupuestos normalizados:', presupuestosList);
 
-      // Normalizar resúmenes bancarios
-      const resumenesList = resumenesResponse.list || resumenesResponse || [];
-      console.log('🏦 Resúmenes bancarios normalizados:', resumenesList);
-
       // Cargar CEDEARs
       let cedearsData = [];
       try {
@@ -594,7 +572,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
       setPendingPayments(transformedPendingPayments);
       setObjetivos(objetivosList);
       setPresupuestos(presupuestosList);
-      setResumenesBancarios(resumenesList);
       setCedears(cedearsData);
       setMonedas(monedasList);
       setCategories(catsResponse.list || []);
@@ -1273,15 +1250,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
                 alert('Error: ' + error.message);
               }
             }}
-          />
-        );
-
-      case 'resumen-bancario':
-      case 'bank-summaries-full':
-        return (
-          <ModernResumenesView
-            resumenes={resumenesBancarios}
-            onUploadResumen={() => console.log('Upload resumen pendiente implementar')}
           />
         );
 

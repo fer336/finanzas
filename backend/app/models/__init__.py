@@ -8,7 +8,6 @@ from .db_models import (
     MetodoPago,
     Transaccion,
     PagoPendiente,
-    ResumenBancario,
     ObjetivoFinanciero,
     Presupuesto,
     TipoCambio
@@ -21,7 +20,6 @@ __all__ = [
     "MetodoPago",
     "Transaccion",
     "PagoPendiente",
-    "ResumenBancario",
     "ObjetivoFinanciero",
     "Presupuesto",
     "TipoCambio"

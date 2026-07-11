@@ -70,8 +70,6 @@ const NAV_ITEMS = [
       'tarjetas-full',
       'presupuestos-full',
       'budgets',
-      'resumen-bancario',
-      'bank-summaries-full',
     ],
   },
 ];

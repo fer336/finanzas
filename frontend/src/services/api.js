@@ -420,33 +420,7 @@ const filesApi = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 🏦 RESÚMENES BANCARIOS API
-// ═══════════════════════════════════════════════════════════════
-const resumenesBancariosApi = {
-  async getAll(limit = 100, offset = 0) {
-    const params = { limit, offset };
-    return await apiRequest('/resumenes-bancarios', { params });
-  },
-
-  async getById(id) {
-    return await apiRequest(`/resumenes-bancarios/${id}`);
-  },
-
-  async create(data) {
-    return await apiRequest('/resumenes-bancarios', { method: 'POST', data });
-  },
-
-  async update(id, data) {
-    return await apiRequest(`/resumenes-bancarios/${id}`, { method: 'PATCH', data });
-  },
-
-  async delete(id) {
-    return await apiRequest(`/resumenes-bancarios/${id}`, { method: 'DELETE' });
-  }
-};
-
-// ═══════════════════════════════════════════════════════════════
-// 💳 PAGOS API (Registrar pagos de pending payments y bank summaries)
+// 💳 PAGOS API (Registrar pagos de pending payments)
 // ═══════════════════════════════════════════════════════════════
 const pagosApi = {
   async registrarPago(pagoData) {
@@ -699,7 +673,6 @@ const apiServices = {
   categoriasApi,
   metodosPagoApi,
   presupuestosApi,
-  resumenesBancariosApi,
   filesApi,
   pagosApi,
   objetivosApi,

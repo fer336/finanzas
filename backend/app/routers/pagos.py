@@ -1,5 +1,5 @@
 """
-Router for payment operations (payments from pending payments and bank summaries) with Multi-Tenancy
+Router for payment operations (payments from pending payments) with Multi-Tenancy
 """
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -7,13 +7,10 @@ from typing import Optional
 from datetime import datetime
 from decimal import Decimal
 import uuid
-import json
 
 from app.database import get_db
 from app.repositories.pago_pendiente_repository_pg import PagoPendienteRepositoryPG
-from app.repositories.resumen_bancario_repository import ResumenBancarioRepository
 from app.repositories.transaccion_repository import TransaccionRepository
-from app.repositories.pago_resumen_bancario_repository import PagoResumenBancarioRepository
 from app.core.dependencies import CurrentUser
 from pydantic import BaseModel
 
@@ -36,9 +33,9 @@ def safe_float(value, default=0.0):
 
 class PagoRequest(BaseModel):
     """Request model for registering a payment"""
-    item_id: str  # ID of pending payment or bank summary
-    item_type: str  # 'pending_payment' or 'bank_summary'
-    payment_type: Optional[str] = 'total'  # 'total' or 'minimo' (for bank summaries)
+    item_id: str  # ID of pending payment
+    item_type: str  # 'pending_payment'
+    payment_type: Optional[str] = 'total'  # 'total' (único valor soportado hoy)
     monto: Optional[Decimal] = None  # 🔧 Monto en ARS (opcional, puede ser 0 si solo paga USD)
     monto_usd: Optional[Decimal] = None  # Monto en USD (opcional)
     tipo_cambio: Optional[Decimal] = None  # Tipo de cambio usado (opcional)
@@ -60,9 +57,9 @@ async def registrar_pago(
     db: Session = Depends(get_db)
 ):
     """
-    Register a payment for a pending payment or bank summary.
+    Register a payment for a pending payment.
     This will:
-    1. Update the status of the pending payment or bank summary
+    1. Update the status of the pending payment
     2. Create a transaction (expense) in the transactions table
     """
     try:
@@ -174,7 +171,7 @@ async def registrar_pago(
         # Extract transaction IDs for later use
         transaccion_ids = [str(t["id"]) for t in created_transactions]
         
-        # Update the source item (pending payment or bank summary)
+        # Update the source item (pending payment)
         if pago_data.item_type == "pending_payment":
             pago_pendiente_repo = PagoPendienteRepositoryPG(db)
             
@@ -191,117 +188,7 @@ async def registrar_pago(
             }
             
             pago_pendiente_repo.update(pago_data.item_id, update_data)
-            
-        elif pago_data.item_type == "bank_summary":
-            resumen_repo = ResumenBancarioRepository(db)
-            
-            # Obtener el resumen para verificar los montos y pertenencia
-            resumen = resumen_repo.get_by_id(pago_data.item_id)
-            if not resumen or str(resumen.usuario_id) != str(current_user.id):
-                raise HTTPException(status_code=404, detail="Resumen bancario no encontrado")
-            
-            # Extraer totales del resumen
-            totales = resumen.totales if resumen.totales else {}
-            if isinstance(totales, str):
-                totales = json.loads(totales)
-            
-            # Determinar qué se está pagando
-            pago_ars = safe_float(pago_data.monto, 0) > 0
-            pago_usd = safe_float(pago_data.monto_usd, 0) > 0
-            
-            # Inicializar datos de actualización
-            update_data = {}
-            
-            # Determinar si el pago es completo, parcial o mínimo
-            if pago_data.payment_type == "minimo":
-                if pago_ars: update_data['pagado_ars'] = True
-                if pago_usd: update_data['pagado_usd'] = True
 
-                minimo_ars = safe_float(totales.get('pago_minimo_pesos', 0), 0)
-                minimo_usd = safe_float(totales.get('pago_minimo_dolares', 0), 0)
-                
-                debe_marcar_pagado = (
-                    (pago_ars and pago_usd) or 
-                    (pago_ars and minimo_usd == 0) or 
-                    (pago_usd and minimo_ars == 0)
-                )
-                
-                if debe_marcar_pagado:
-                    update_data['minimo_pagado'] = True
-                    update_data['fecha_pago_minimo'] = datetime.fromisoformat(pago_data.fecha_pago)
-            
-            elif pago_data.payment_type == "parcial":
-                total_ars = safe_float(totales.get('saldo_actual_pesos', 0), 0)
-                total_usd = safe_float(totales.get('saldo_actual_dolares', 0), 0)
-                
-                monto_ars_pagado = safe_float(pago_data.monto, 0)
-                monto_usd_pagado = safe_float(pago_data.monto_usd, 0)
-                
-                if total_ars > 0 and pago_ars and monto_ars_pagado >= (total_ars - 10):
-                    update_data['pagado_ars'] = True
-                
-                if total_usd > 0 and pago_usd and monto_usd_pagado >= (total_usd - 1):
-                    update_data['pagado_usd'] = True
-
-                minimo_ars = safe_float(totales.get('pago_minimo_pesos', 0), 0)
-                minimo_usd = safe_float(totales.get('pago_minimo_dolares', 0), 0)
-                
-                cubre_minimo = True
-                if minimo_ars > 0:
-                    if not pago_ars or monto_ars_pagado < minimo_ars:
-                        cubre_minimo = False
-                if minimo_usd > 0:
-                    if not pago_usd or monto_usd_pagado < minimo_usd:
-                        cubre_minimo = False
-                
-                if cubre_minimo:
-                    update_data['minimo_pagado'] = True
-                    update_data['fecha_pago_minimo'] = datetime.fromisoformat(pago_data.fecha_pago)
-            
-            else:  # total (default)
-                if pago_ars: update_data['pagado_ars'] = True
-                if pago_usd: update_data['pagado_usd'] = True
-
-                total_ars = safe_float(totales.get('saldo_actual_pesos', 0), 0)
-                total_usd = safe_float(totales.get('saldo_actual_dolares', 0), 0)
-                
-                debe_marcar_pagado = (
-                    (pago_ars and pago_usd) or 
-                    (pago_ars and total_usd == 0) or 
-                    (pago_usd and total_ars == 0)
-                )
-                
-                if debe_marcar_pagado:
-                    update_data['total_pagado'] = True
-                    update_data['minimo_pagado'] = True
-                    update_data['fecha_pago_total'] = datetime.fromisoformat(pago_data.fecha_pago)
-                    update_data['fecha_pago_minimo'] = datetime.fromisoformat(pago_data.fecha_pago)
-            
-            # 📝 Registrar el pago en el historial SOLO si es PARCIAL
-            if pago_data.payment_type == "parcial":
-                pago_historial_repo = PagoResumenBancarioRepository(db)
-                
-                pago_historial_data = {
-                    "resumen_bancario_id": uuid.UUID(pago_data.item_id),
-                    "fecha_pago": datetime.fromisoformat(pago_data.fecha_pago),
-                    "monto_pesos": Decimal(str(pago_data.monto)) if pago_data.monto else Decimal('0'),
-                    "monto_usd": Decimal(str(pago_data.monto_usd)) if pago_data.monto_usd else Decimal('0'),
-                    "tipo_pago": pago_data.payment_type,
-                    "tipo_cambio": Decimal(str(pago_data.tipo_cambio)) if pago_data.tipo_cambio else None,
-                    "transaccion_ids": transaccion_ids,
-                    "metodo_pago_id": uuid.UUID(pago_data.metodo_pago_id) if pago_data.metodo_pago_id else None,
-                    "categoria_id": uuid.UUID(pago_data.categoria_id) if pago_data.categoria_id else None,
-                    "notas": pago_data.notas,
-                    "comprobante": pago_data.comprobante,
-                    "usuario_id": current_user.id  # ✅ Asignar usuario del token
-                }
-                
-                pago_historial_repo.create(pago_historial_data)
-            
-            # Aplicar actualizaciones al resumen
-            if update_data:
-                resumen_repo.update(pago_data.item_id, update_data)
-        
         db.commit()
         
         return {
@@ -326,7 +213,7 @@ async def registrar_pago(
 
 class DeshacerPagoRequest(BaseModel):
     """Request model for undoing a payment"""
-    item_type: str  # 'pending_payment' or 'bank_summary'
+    item_type: str  # 'pending_payment'
     eliminar_transacciones: bool = False  # Si debe eliminar las transacciones asociadas
     transaccion_ids: Optional[list] = None  # IDs de transacciones a eliminar (opcional)
     moneda: Optional[str] = None  # 'ARS', 'USD', o None para deshacer todo
@@ -405,45 +292,7 @@ async def deshacer_pago(
             }
             
             pago_pendiente_repo.update(item_id, update_data)
-            
-        elif request.item_type == "bank_summary":
-            resumen_repo = ResumenBancarioRepository(db)
-            pago_historial_repo = PagoResumenBancarioRepository(db)
-            
-            # Verificar pertenencia
-            resumen = resumen_repo.get_by_id(item_id)
-            if not resumen or str(resumen.usuario_id) != str(current_user.id):
-                raise HTTPException(status_code=404, detail="Resumen bancario no encontrado")
-            
-            # 🗑️ Eliminar registros del historial de pagos
-            pagos_eliminados = pago_historial_repo.delete_by_resumen_id(
-                UUID(item_id), 
-                moneda=request.moneda
-            )
-            
-            if request.moneda:
-                update_data = {}
-                if request.moneda == "ARS":
-                    update_data["pagado_ars"] = False
-                elif request.moneda == "USD":
-                    update_data["pagado_usd"] = False
-                
-                if (request.moneda == "ARS" and not resumen.pagado_usd) or (request.moneda == "USD" and not resumen.pagado_ars):
-                    update_data["total_pagado"] = False
-                    update_data["minimo_pagado"] = False
-                    update_data["fecha_pago_total"] = None
-                    update_data["fecha_pago_minimo"] = None
-            else:
-                update_data = {
-                    "total_pagado": False,
-                    "minimo_pagado": False,
-                    "pagado_ars": False,
-                    "pagado_usd": False,
-                    "fecha_pago_total": None,
-                    "fecha_pago_minimo": None
-                }
-            
-            resumen_repo.update(item_id, update_data)
+
         else:
             raise HTTPException(status_code=400, detail="Tipo de item inválido")
         

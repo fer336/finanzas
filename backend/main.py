@@ -75,7 +75,6 @@ from app.routers.transacciones import router as transacciones_router
 from app.routers.categories import router as categories_router
 from app.routers.api_keys import router as api_keys_router
 from app.routers.payment_methods import router as payment_methods_router
-from app.routers.resumenes_bancarios import router as resumenes_bancarios_router
 from app.routers.pagos import router as pagos_router
 from app.routers.presupuestos import router as presupuestos_router
 from app.routers.objetivos import router as objetivos_router
@@ -262,12 +261,6 @@ app.include_router(api_keys_router, prefix="/api/v1/api-keys", tags=["API Keys"]
 
 app.include_router(
     payment_methods_router, prefix="/api/v1/payment-methods", tags=["Métodos de Pago"]
-)
-
-app.include_router(
-    resumenes_bancarios_router,
-    prefix="/api/v1/resumenes-bancarios",
-    tags=["Resúmenes Bancarios"],
 )
 
 # Router for payment operations

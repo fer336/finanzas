@@ -18,7 +18,6 @@ export const QUERY_KEYS = {
   monedas: 'monedas',
   tarjetas: 'tarjetas',
   cedears: 'cedears',
-  resumenes: 'resumenes',
   dashboardStats: 'dashboardStats',
   dollarQuotes: 'dollarQuotes',
   balanceNeto: 'balanceNeto',
@@ -354,18 +353,6 @@ export const useTarjetas = () => {
       const response = await apiServices.transaccionesApi.getAll(100, 0, {
         metodo_pago: 'Tarjeta de Crédito'
       });
-      return response.list || response || [];
-    },
-    staleTime: 2 * 60 * 1000, // 2 minutos
-  });
-};
-
-// ====== RESÚMENES BANCARIOS ======
-export const useResumenes = () => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.resumenes],
-    queryFn: async () => {
-      const response = await apiServices.resumenesBancariosApi.getAll();
       return response.list || response || [];
     },
     staleTime: 2 * 60 * 1000, // 2 minutos

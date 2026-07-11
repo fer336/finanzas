@@ -53,9 +53,6 @@ class Usuario(Base):
     pagos_pendientes = relationship(
         "PagoPendiente", back_populates="usuario", cascade="all, delete-orphan"
     )
-    resumenes_bancarios = relationship(
-        "ResumenBancario", back_populates="usuario", cascade="all, delete-orphan"
-    )
     monedas = relationship(
         "MonedaUsuario", back_populates="usuario", cascade="all, delete-orphan"
     )
@@ -266,121 +263,6 @@ class PagoPendiente(Base):
             "idx_pagospendientes_usuario_vencimiento", "usuario_id", "fechavencimiento"
         ),
     )
-
-
-class ResumenBancario(Base):
-    __tablename__ = "resumen_bancario"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-
-    # Información básica de la tarjeta
-    banco = Column(String(100), nullable=True)
-    tipo_tarjeta = Column(String(50), nullable=True)
-    numero_resumen = Column(String(100), nullable=True)
-    numero_cuenta = Column(String(50), nullable=True)
-    url_factura = Column(Text, nullable=True)
-
-    # Objetos JSON con información estructurada
-    titular = Column(
-        JSONB, nullable=True
-    )  # nombre, sucursal, direccion, localidad, provincia, numero_socio, codigo_postal
-    ciclo_facturacion = Column(
-        JSONB, nullable=True
-    )  # cierre_actual, proximo_cierre, vencimiento_actual, etc.
-    totales = Column(
-        JSONB, nullable=True
-    )  # pago_minimo_pesos, saldo_actual_pesos, saldo_actual_dolares
-    limites = Column(
-        JSONB, nullable=True
-    )  # compras, adelanto, financiacion, compras_cuotas
-    tasas = Column(
-        JSONB, nullable=True
-    )  # tem_pesos, tna_pesos, tem_dolares, tna_dolares
-    movimientos = Column(
-        JSONB, nullable=True
-    )  # pagos_mes_pesos, consumos_mes_pesos, saldo_anterior_pesos
-    cargos = Column(
-        JSONB, nullable=True
-    )  # iva_21, impuesto_sellos, comision_mantenimiento, intereses_financiacion
-
-    # Información de estado de pago
-    minimo_pagado = Column(Boolean, default=False)
-    total_pagado = Column(Boolean, default=False)
-    fecha_pago_minimo = Column(DateTime(timezone=True), nullable=True)
-    fecha_pago_total = Column(DateTime(timezone=True), nullable=True)
-
-    # Fechas de control
-    fecha_carga = Column(DateTime(timezone=True), default=datetime.utcnow)
-    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
-    updated_at = Column(
-        DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
-    )
-
-    # Foreign Key
-    usuario_id = Column(
-        UUID(as_uuid=True), ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=True
-    )
-
-    # Relationships
-    usuario = relationship("Usuario", back_populates="resumenes_bancarios")
-    pagos = relationship(
-        "PagoResumenBancario",
-        back_populates="resumen_bancario",
-        cascade="all, delete-orphan",
-    )
-
-
-class PagoResumenBancario(Base):
-    """
-    Historial de pagos realizados para resúmenes bancarios.
-    Permite rastrear pagos totales, mínimos y parciales.
-    """
-
-    __tablename__ = "pagos_resumen_bancario"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    resumen_bancario_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("resumen_bancario.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True,
-    )
-
-    # Información del pago
-    fecha_pago = Column(
-        DateTime(timezone=True), nullable=False, default=datetime.utcnow, index=True
-    )
-    monto_pesos = Column(Numeric(15, 2), default=0, nullable=False)
-    monto_usd = Column(Numeric(15, 2), default=0, nullable=False)
-    tipo_pago = Column(
-        String(20), nullable=False, index=True
-    )  # 'total', 'minimo', 'parcial'
-    tipo_cambio = Column(Numeric(10, 2), nullable=True)
-
-    # Transacciones asociadas (Array de UUIDs)
-    transaccion_ids = Column(JSONB, nullable=True)
-
-    # Categorización del pago
-    metodo_pago_id = Column(UUID(as_uuid=True), nullable=True)
-    categoria_id = Column(UUID(as_uuid=True), nullable=True)
-
-    # Información adicional
-    notas = Column(Text, nullable=True)
-    comprobante = Column(String(500), nullable=True)
-
-    # Usuario que registró el pago
-    usuario_id = Column(UUID(as_uuid=True), nullable=True)
-
-    # Timestamp de creación
-    created_at = Column(
-        DateTime(timezone=True), default=datetime.utcnow, nullable=False
-    )
-
-    # Relationships
-    resumen_bancario = relationship("ResumenBancario", back_populates="pagos")
-
-    def __repr__(self):
-        return f"<PagoResumenBancario(id={self.id}, resumen={self.resumen_bancario_id}, tipo={self.tipo_pago}, ARS={self.monto_pesos}, USD={self.monto_usd})>"
 
 
 class ObjetivoFinanciero(Base):

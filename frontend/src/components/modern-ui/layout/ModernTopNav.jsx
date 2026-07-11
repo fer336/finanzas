@@ -66,8 +66,6 @@ const NAV_ITEMS = [
       'categories-full',
       'payment-methods',
       'payment-methods-full',
-      'ai-usage',
-      'ai-usage-full',
       'settings',
       'tarjetas-full',
       'presupuestos-full',

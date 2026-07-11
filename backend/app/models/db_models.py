@@ -62,12 +62,6 @@ class Usuario(Base):
     balances_iniciales = relationship(
         "BalanceInicial", back_populates="usuario", cascade="all, delete-orphan"
     )
-    ai_config = relationship(
-        "AIConfiguracion",
-        back_populates="usuario",
-        uselist=False,
-        cascade="all, delete-orphan",
-    )
 
 
 class ApiKey(Base):
@@ -83,39 +77,6 @@ class ApiKey(Base):
     revocado_en = Column(DateTime(timezone=True), nullable=True)
 
     usuario = relationship("Usuario")
-
-
-class AIConfiguracion(Base):
-    __tablename__ = "ai_configuraciones"
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    usuario_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("usuarios.id", ondelete="CASCADE"),
-        nullable=False,
-        unique=True,
-        index=True,
-    )
-
-    provider = Column(String(50), nullable=False, default="openrouter")
-    auth_method = Column(String(20), nullable=False, default="api_key")
-    api_key = Column(Text, nullable=True)
-    access_token = Column(Text, nullable=True)
-    refresh_token = Column(Text, nullable=True)
-
-    modelo_preferido = Column(
-        String(150), nullable=False, default="google/gemini-3-flash-preview"
-    )
-    modelo_vision = Column(String(150), nullable=True)
-    temperatura = Column(Numeric(3, 2), nullable=False, default=0.7)
-    max_tokens = Column(Integer, nullable=False, default=4000)
-
-    fecha_creacion = Column(DateTime(timezone=True), default=datetime.utcnow)
-    fecha_actualizacion = Column(
-        DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow
-    )
-
-    usuario = relationship("Usuario", back_populates="ai_config")
 
 
 class Categoria(Base):

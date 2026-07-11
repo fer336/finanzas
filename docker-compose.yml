@@ -54,13 +54,7 @@ services:
         - "traefik.http.routers.finanzas-config.entrypoints=websecure"
         - "traefik.http.routers.finanzas-config.tls.certresolver=letsencryptresolver"
         - "traefik.http.routers.finanzas-config.priority=100"
-        
-        # ⭐ Router para AI (NUEVO - FALTABA ESTE!)
-        - "traefik.http.routers.finanzas-ai.rule=Host(`finanzas.qeva.xyz`) && PathPrefix(`/api/ai`)"
-        - "traefik.http.routers.finanzas-ai.entrypoints=websecure"
-        - "traefik.http.routers.finanzas-ai.tls.certresolver=letsencryptresolver"
-        - "traefik.http.routers.finanzas-ai.priority=100"
-        
+
         # Router para YFinance API (CEDEARs)
         - "traefik.http.routers.finanzas-yfinance.rule=Host(`finanzas.qeva.xyz`) && PathPrefix(`/api/yfinance`)"
         - "traefik.http.routers.finanzas-yfinance.entrypoints=websecure"

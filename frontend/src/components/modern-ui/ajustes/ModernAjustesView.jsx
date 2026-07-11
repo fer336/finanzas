@@ -20,15 +20,14 @@ import {
 } from 'lucide-react';
 import ModernCategoriesView from '../categories/ModernCategoriesView';
 import ModernPaymentMethodsView from '../payment-methods/ModernPaymentMethodsView';
-import ModernAIUsageView from '../ai-usage/ModernAIUsageView';
 import LoadingSpinner from '../common/LoadingSpinner';
 import apiServices from '../../../services/api';
 import { useIsMobile } from '../../../hooks/use-mobile';
 
 /**
  * ModernAjustesView — container "Ajustes" del tema "Papel".
- * Tab "General" agrupa Widgets del dashboard + Modo de balance +
- * Uso de Lucy; "Categorías" y "Métodos de pago" viven
+ * Tab "General" agrupa Widgets del dashboard + Modo de balance;
+ * "Categorías" y "Métodos de pago" viven
  * en tabs propios (mismo patrón de tabs que ModernInversionesView) en
  * vez de apilarse como secciones verticales — la lista larga resultaba
  * confusa. El reporte de bugs/Linear se sacó de acá (feature dada de
@@ -500,11 +499,6 @@ const ModernAjustesView = ({
                 value={balanceMode}
                 onChange={setBalanceMode}
               />
-            </Section>
-
-            {/* Uso de Lucy (IA) */}
-            <Section title="Uso de Lucy" description="Historial y costo de las consultas al agente IA.">
-              <ModernAIUsageView />
             </Section>
 
             {/* Acceso API externo */}

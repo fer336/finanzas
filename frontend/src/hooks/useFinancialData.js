@@ -21,7 +21,6 @@ export const QUERY_KEYS = {
   resumenes: 'resumenes',
   dashboardStats: 'dashboardStats',
   dollarQuotes: 'dollarQuotes',
-  aiUsage: 'aiUsage',
   balanceNeto: 'balanceNeto',
 };
 
@@ -431,19 +430,6 @@ export const computeDashboardStats = (transactionsList = []) => {
     currenciesBalance,
     transactionsCount: transactionsList.length,
   };
-};
-
-// ====== AI USAGE ======
-export const useAIUsage = () => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.aiUsage],
-    queryFn: async () => {
-      const response = await apiServices.aiUsageApi?.getStats();
-      return response || { total_cost: 0, total_tokens: 0, interactions: [] };
-    },
-    staleTime: 2 * 60 * 1000, // 2 minutos
-    enabled: !!apiServices.aiUsageApi, // Solo ejecuta si el API existe
-  });
 };
 
 // ====== BALANCE NETO ======

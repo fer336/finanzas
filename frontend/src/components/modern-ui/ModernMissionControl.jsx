@@ -44,7 +44,6 @@ const ModernMonedasView = lazy(() => import('./monedas/ModernMonedasView'));
 const ModernInversionesView = lazy(() => import('./inversiones/ModernInversionesView'));
 const ModernResumenesView = lazy(() => import('./resumenes/ModernResumenesView'));
 const ModernReportesView = lazy(() => import('./reportes/ModernReportesView'));
-const ModernAIUsageView = lazy(() => import('./ai-usage/ModernAIUsageView'));
 const ModernAjustesView = lazy(() => import('./ajustes/ModernAjustesView'));
 
 // ====== LAZY LOADED MODALS (Solo se cargan cuando se abren) ======
@@ -1275,21 +1274,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
               }
             }}
           />
-        );
-
-      case 'ai-usage':
-      case 'ai-usage-full':
-        // Deviation: idem 'categories-full' — ModernAIUsageView ya no trae
-        // fondo de página propio (vive embebida en Ajustes).
-        return (
-          <div className="min-h-screen bg-background">
-            <div className="mx-auto max-w-[1100px] px-4 py-5 sm:px-[34px] sm:py-[28px]">
-              <h1 className="mb-4 font-serif text-[26px] font-bold leading-none text-foreground sm:mb-5 sm:text-[42px]">
-                Uso de Lucy
-              </h1>
-              <ModernAIUsageView />
-            </div>
-          </div>
         );
 
       case 'resumen-bancario':

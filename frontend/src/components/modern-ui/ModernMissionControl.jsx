@@ -31,7 +31,6 @@ import ConfirmModal from './common/ConfirmModal';
 // ====== LAZY LOADED VIEWS (Code Splitting) ======
 const ModernDashboard = lazy(() => import('./dashboard/ModernDashboard'));
 const ModernTransactionsView = lazy(() => import('./transactions/ModernTransactionsView'));
-const ModernTarjetasView = lazy(() => import('./tarjetas/ModernTarjetasView'));
 const ModernObjetivosView = lazy(() => import('./objetivos/ModernObjetivosView'));
 const ModernCotizacionesView = lazy(() => import('./cotizaciones/ModernCotizacionesView'));
 const ModernPresupuestosView = lazy(() => import('./presupuestos/ModernPresupuestosView'));
@@ -333,10 +332,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
     () => normalizedTransactions.filter(t => !t.es_credito),
     [normalizedTransactions]
   );
-  const creditCardTransactions = useMemo(
-    () => normalizedTransactions.filter(t => t.es_credito),
-    [normalizedTransactions]
-  );
   const pendingPayments = useMemo(
     () => Array.isArray(pendingPaymentsData) ? pendingPaymentsData : [],
     [pendingPaymentsData]
@@ -501,14 +496,10 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
 
       // Filtrar transacciones: EXCLUIR las que son tarjeta de crédito
       const transformedTransactions = allTransactions.filter(t => !t.es_credito);
-      
-      // Transacciones de tarjeta de crédito (para la vista de Tarjetas)
-      const creditCardTransactions = allTransactions.filter(t => t.es_credito);
-      
+
       console.log('💳 Filtrado de transacciones:', {
         total: allTransactions.length,
-        transaccionesNormales: transformedTransactions.length,
-        tarjetaCredito: creditCardTransactions.length
+        transaccionesNormales: transformedTransactions.length
       });
 
       console.log('🔄 Transacciones transformadas:', transformedTransactions.slice(0, 3));
@@ -568,7 +559,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
       console.log('💱 Monedas normalizadas:', monedasList);
 
       setTransactions(transformedTransactions);
-      setCreditCardTransactions(creditCardTransactions);
       setPendingPayments(transformedPendingPayments);
       setObjetivos(objetivosList);
       setPresupuestos(presupuestosList);
@@ -771,30 +761,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
     } finally {
       setShowDeleteTransactionModal(false);
       setTransactionToDelete(null);
-    }
-  };
-
-  const handleMarkAsPaid = async (transaction) => {
-    console.log('💳 Marcar como pagado:', transaction);
-    
-    if (!window.confirm(`¿Marcar como pagado: ${transaction.descripcion}?\n\nMonto: $${Math.abs(transaction.monto_ars).toLocaleString()}`)) {
-      return;
-    }
-
-    try {
-      // Actualizar la transacción para marcarla como pagada
-      // Podemos cambiar es_credito a false o agregar un campo fecha_pago_real
-      await transaccionesApi.update(transaction.id, {
-        es_credito: false, // Ahora ya no es deuda de tarjeta
-        fecha_pago_real: new Date().toISOString().split('T')[0], // Fecha de pago
-        notas: (transaction.notas || '') + `\n[Pagado el ${new Date().toLocaleDateString('es-AR')}]`
-      });
-      
-      console.log('✅ Transacción marcada como pagada');
-      await refreshData(); // Recargar datos
-    } catch (error) {
-      console.error('❌ Error marcando como pagado:', error);
-      alert('Error al marcar como pagado: ' + error.message);
     }
   };
 
@@ -1032,23 +998,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
             onBulkUpload={handleBulkUpload}
             onExportCSV={handleExportCSV}
             loading={loadingStats}
-          />
-        );
-
-      
-
-      case 'tarjetas-full':
-        return (
-          <ModernTarjetasView
-            transactions={creditCardTransactions}
-            categories={categories}
-            paymentMethods={paymentMethods}
-            onPagarTarjeta={(tarjeta) => console.log('Pagar:', tarjeta)}
-            onUploadResumen={() => console.log('Upload resumen')}
-            onNewTarjeta={handleNewTransaction}
-            onEditTransaction={handleEditTransaction}
-            onDeleteTransaction={handleDeleteTransaction}
-            onMarkAsPaid={handleMarkAsPaid}
           />
         );
 

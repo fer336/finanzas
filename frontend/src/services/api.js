@@ -528,41 +528,6 @@ const objetivosApi = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// 💳 TARJETAS DE CRÉDITO API
-// ═══════════════════════════════════════════════════════════════
-const tarjetasApi = {
-  // Obtener deuda total y detalle (por mes)
-  async getDeuda(mes = null, usuario_id = null) {
-    debugLog('💳 tarjetasApi.getDeuda called', { mes, usuario_id });
-    const params = {};
-    if (mes) params.mes = mes;
-    if (usuario_id) params.user_id = usuario_id;
-    return await apiRequest('/transacciones/tarjetas/deuda', {
-      method: 'GET',
-      params
-    });
-  },
-
-  // Resumen mensual de gastos con tarjeta
-  async getResumenMensual(monthsBack = 12) {
-    debugLog('💳 tarjetasApi.getResumenMensual called', { monthsBack });
-    return await apiRequest('/transacciones/tarjetas/resumen-mensual', {
-      method: 'GET',
-      params: { months_back: monthsBack }
-    });
-  },
-
-  // Pagar resumen de tarjeta
-  async pagarResumen(data) {
-    debugLog('💳 tarjetasApi.pagarResumen called', data);
-    return await apiRequest('/transacciones/tarjetas/pagar-resumen', {
-      method: 'POST',
-      data
-    });
-  }
-};
-
-// ═══════════════════════════════════════════════════════════════
 // 💱 MONEDAS USUARIO API (Monedas Personalizadas)
 // ═══════════════════════════════════════════════════════════════
 const monedasApi = {
@@ -676,7 +641,6 @@ const apiServices = {
   filesApi,
   pagosApi,
   objetivosApi,
-  tarjetasApi,
   monedasApi,
   apiKeysApi,
   balanceInicialApi

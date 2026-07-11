@@ -140,17 +140,18 @@ app = FastAPI(
     title=settings.app_name,
     description="API para el sistema de gestión de gastos personales con arquitectura robusta y seguridad mejorada",
     version=settings.app_version,
-    docs_url="/docs" if settings.debug else None,
-    redoc_url="/redoc" if settings.debug else None,
-    openapi_url="/openapi.json" if settings.debug else None,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
     lifespan=lifespan,
-    # Configuración adicional de seguridad
+    # Swagger UI queda expuesto a propósito (ver /docs) para que un agente
+    # externo pueda leer el esquema OpenAPI y conectarse — los endpoints en
+    # sí siguen exigiendo Bearer (JWT o fk_live_...), esto solo expone la
+    # forma de la API, no datos.
     swagger_ui_parameters={
         "persistAuthorization": True,
         "displayRequestDuration": True,
-    }
-    if settings.debug
-    else None,
+    },
 )
 
 

@@ -30,6 +30,13 @@ services:
         - "traefik.http.routers.finanzas-health.tls.certresolver=letsencryptresolver"
         - "traefik.http.routers.finanzas-health.priority=100"
 
+        # Router para documentación OpenAPI (Swagger/Redoc) — para que un
+        # agente externo pueda leer el esquema y conectarse
+        - "traefik.http.routers.finanzas-docs.rule=Host(`finanzas.qeva.xyz`) && (Path(`/docs`) || Path(`/redoc`) || Path(`/openapi.json`))"
+        - "traefik.http.routers.finanzas-docs.entrypoints=websecure"
+        - "traefik.http.routers.finanzas-docs.tls.certresolver=letsencryptresolver"
+        - "traefik.http.routers.finanzas-docs.priority=100"
+
         # Router para la API principal (v1)
         - "traefik.http.routers.finanzas-api.rule=Host(`finanzas.qeva.xyz`) && PathPrefix(`/api/v1`)"
         - "traefik.http.routers.finanzas-api.entrypoints=websecure"

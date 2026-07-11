@@ -11,7 +11,6 @@ import {
   TrendingUp,
   Coins,
   Sparkles,
-  Bot,
   KeyRound,
   Plus,
   Copy,
@@ -29,7 +28,7 @@ import { useIsMobile } from '../../../hooks/use-mobile';
 /**
  * ModernAjustesView — container "Ajustes" del tema "Papel".
  * Tab "General" agrupa Widgets del dashboard + Modo de balance +
- * Proveedor de IA + Uso de Lucy; "Categorías" y "Métodos de pago" viven
+ * Uso de Lucy; "Categorías" y "Métodos de pago" viven
  * en tabs propios (mismo patrón de tabs que ModernInversionesView) en
  * vez de apilarse como secciones verticales — la lista larga resultaba
  * confusa. El reporte de bugs/Linear se sacó de acá (feature dada de
@@ -153,8 +152,6 @@ const WIDGETS = [
   { key: 'showMonedas', icon: Coins, title: 'Monedas', description: 'Gestión de monedas multi-currency' },
   { key: 'showUsoCostoIA', icon: Sparkles, title: 'Uso de Lucy', description: 'Tokens y costo del agente IA' },
 ];
-
-const PROVIDERS = ['Gemini', 'OpenAI', 'Claude', 'OpenRouter'];
 
 // ─── Section shell — card estándar con título Fraunces ─────────────────────
 const Section = ({ title, description, children }) => (
@@ -411,7 +408,6 @@ const ApiKeysSection = () => {
 const ModernAjustesView = ({
   dashboardSettings,
   onDashboardSettingsChange,
-  onOpenAIConfig,
   onNewCategory,
   onEditCategory,
   onDeleteCategory,
@@ -506,33 +502,6 @@ const ModernAjustesView = ({
               />
             </Section>
 
-            {/* Proveedor de IA */}
-            <Section
-              title="Proveedor de IA"
-              description="Elegí provider y modelo para Lucy: Gemini, OpenAI, Claude u otros compatibles con OpenRouter."
-            >
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex flex-wrap gap-2">
-                  {PROVIDERS.map((p) => (
-                    <span
-                      key={p}
-                      className="rounded-full border border-[#ddd5c2] bg-white px-3 py-1 font-mono text-[11px] uppercase tracking-[.04em] text-[#5d6470]"
-                    >
-                      {p}
-                    </span>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onOpenAIConfig && onOpenAIConfig()}
-                  className="flex items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047]"
-                >
-                  <Bot className="h-3.5 w-3.5" />
-                  Configurar IA
-                </button>
-              </div>
-            </Section>
-
             {/* Uso de Lucy (IA) */}
             <Section title="Uso de Lucy" description="Historial y costo de las consultas al agente IA.">
               <ModernAIUsageView />
@@ -576,7 +545,6 @@ const ModernAjustesView = ({
 ModernAjustesView.propTypes = {
   dashboardSettings: PropTypes.object,
   onDashboardSettingsChange: PropTypes.func,
-  onOpenAIConfig: PropTypes.func,
   onNewCategory: PropTypes.func,
   onEditCategory: PropTypes.func,
   onDeleteCategory: PropTypes.func,

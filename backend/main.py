@@ -78,7 +78,6 @@ from app.routers.payment_methods import router as payment_methods_router
 from app.routers.resumenes_bancarios import router as resumenes_bancarios_router
 from app.routers.pagos import router as pagos_router
 from app.routers.ai_usage import router as ai_usage_router
-from app.routers.ai_config import router as ai_config_router
 from app.routers.presupuestos import router as presupuestos_router
 from app.routers.objetivos import router as objetivos_router
 from app.routers.monedas_usuario import router as monedas_usuario_router
@@ -287,9 +286,6 @@ app.include_router(
 
 # Router for AI Usage
 app.include_router(ai_usage_router, prefix="/api/ai", tags=["AI Usage"])
-
-# Router for AI Config (provider + keys por usuario)
-app.include_router(ai_config_router, prefix="/api/v1/ai-config", tags=["AI Config"])
 
 # Router for User Currencies (Monedas Personalizadas)
 app.include_router(

@@ -49,7 +49,6 @@ const ModernAjustesView = lazy(() => import('./ajustes/ModernAjustesView'));
 
 // ====== LAZY LOADED MODALS (Solo se cargan cuando se abren) ======
 const DashboardSettingsModal = lazy(() => import('./dashboard/DashboardSettingsModal'));
-const AIConfigModal = lazy(() => import('../AIConfigModal').then((m) => ({ default: m.AIConfigModal })));
 const ModernTransactionForm = lazy(() => import('../ModernTransactionForm'));
 const PendingPaymentPayModal = lazy(() => import('./pending-payments/PendingPaymentPayModal'));
 const BulkTransactionUpload = lazy(() => import('../BulkTransactionUpload'));
@@ -164,7 +163,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   const [pendingPaymentToPay, setPendingPaymentToPay] = useState(null);
   const [showDeleteTransactionModal, setShowDeleteTransactionModal] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
-  const [showAIConfigModal, setShowAIConfigModal] = useState(false);
   const isApplyingHistoryRef = useRef(false);
   const hasInitializedHistoryRef = useRef(false);
 
@@ -1409,7 +1407,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
           <ModernAjustesView
             dashboardSettings={dashboardSettings}
             onDashboardSettingsChange={handleDashboardSettingsChange}
-            onOpenAIConfig={() => setShowAIConfigModal(true)}
             onNewCategory={() => {
               setEditingCategory(null);
               setShowCategoryModal(true);
@@ -1575,17 +1572,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
         <DashboardSettingsModal
           isOpen={showDashboardSettings}
           onClose={() => setShowDashboardSettings(false)}
-          onOpenAIConfig={() => {
-            setShowDashboardSettings(false);
-            setShowAIConfigModal(true);
-          }}
-        />
-      </Suspense>
-
-      <Suspense fallback={null}>
-        <AIConfigModal
-          isOpen={showAIConfigModal}
-          onClose={() => setShowAIConfigModal(false)}
         />
       </Suspense>
 

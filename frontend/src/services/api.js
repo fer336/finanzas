@@ -46,6 +46,7 @@ const apiRequest = async (endpoint, options = {}) => {
     
     const config = {
       method,
+      cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
       },

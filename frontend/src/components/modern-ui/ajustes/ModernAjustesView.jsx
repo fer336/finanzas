@@ -1,16 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Calendar,
-  Target,
-  PieChart,
-  CreditCard,
-  DollarSign,
-  Building2,
-  Wallet,
-  TrendingUp,
-  Coins,
-  Sparkles,
   KeyRound,
   Plus,
   Copy,
@@ -137,20 +127,6 @@ SectionTabs.propTypes = {
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
 };
-
-const WIDGETS = [
-  { key: 'showPagosPendientes', icon: Calendar, title: 'Pagos Pendientes', description: 'Muestra los pagos próximos a vencer' },
-  { key: 'showObjetivos', icon: Target, title: 'Objetivos de Ahorro', description: 'Muestra el progreso de tus metas de ahorro' },
-  { key: 'showCategorias', icon: PieChart, title: 'Gastos por Categoría', description: 'Gráfico con distribución de gastos' },
-  { key: 'showDeudaTarjetas', icon: CreditCard, title: 'Deuda de Tarjetas', description: 'Total de deuda en tarjetas de crédito' },
-  { key: 'showPresupuestos', icon: DollarSign, title: 'Presupuestos', description: 'Estado de tus presupuestos mensuales' },
-  { key: 'showResumenes', icon: Building2, title: 'Resúmenes Bancarios', description: 'Resúmenes pendientes de pago' },
-  { key: 'showMetodosPago', icon: Wallet, title: 'Métodos de Pago', description: 'Estadísticas de uso de métodos de pago' },
-  { key: 'showCEDEARs', icon: TrendingUp, title: 'CEDEARs', description: 'Seguimiento de CEDEARs y análisis técnico' },
-  { key: 'showCotizaciones', icon: DollarSign, title: 'Cotización Dólar', description: 'Cotizaciones y calculadora de conversión' },
-  { key: 'showMonedas', icon: Coins, title: 'Monedas', description: 'Gestión de monedas multi-currency' },
-  { key: 'showUsoCostoIA', icon: Sparkles, title: 'Uso de Lucy', description: 'Tokens y costo del agente IA' },
-];
 
 // ─── Section shell — card estándar con título Fraunces ─────────────────────
 const Section = ({ title, description, children }) => (
@@ -426,10 +402,6 @@ const ModernAjustesView = ({
     } catch { /* ignore */ }
   };
 
-  const toggleWidget = (key) => {
-    onDashboardSettingsChange && onDashboardSettingsChange({ ...settings, [key]: !settings[key] });
-  };
-
   const setBalanceMode = (mode) => {
     onDashboardSettingsChange && onDashboardSettingsChange({ ...settings, balanceMode: mode });
   };
@@ -457,35 +429,6 @@ const ModernAjustesView = ({
 
         {tab === 'general' && (
           <div className="flex flex-col gap-4">
-            {/* Widgets del dashboard */}
-            <Section
-              title="Widgets del dashboard"
-              description="Elegí qué widgets mostrar. Estos toggles persisten en tu navegador."
-            >
-              <div className="flex flex-col divide-y divide-[#e7e0cf]">
-                {WIDGETS.map((widget) => {
-                  const Icon = widget.icon;
-                  const isActive = Boolean(settings[widget.key]);
-                  return (
-                    <div key={widget.key} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-[#f0ead9]">
-                        <Icon className="h-4 w-4 text-[#8a8677]" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[13.5px] font-medium text-foreground">{widget.title}</p>
-                        <p className="text-[12px] text-[#8a8677]">{widget.description}</p>
-                      </div>
-                      <Switch
-                        checked={isActive}
-                        onChange={() => toggleWidget(widget.key)}
-                        label={widget.title}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </Section>
-
             {/* Modo de balance */}
             <Section
               title="Modo de balance"

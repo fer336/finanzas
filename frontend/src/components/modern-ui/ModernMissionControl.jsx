@@ -44,7 +44,6 @@ const ModernReportesView = lazy(() => import('./reportes/ModernReportesView'));
 const ModernAjustesView = lazy(() => import('./ajustes/ModernAjustesView'));
 
 // ====== LAZY LOADED MODALS (Solo se cargan cuando se abren) ======
-const DashboardSettingsModal = lazy(() => import('./dashboard/DashboardSettingsModal'));
 const ModernTransactionForm = lazy(() => import('../ModernTransactionForm'));
 const PendingPaymentPayModal = lazy(() => import('./pending-payments/PendingPaymentPayModal'));
 const BulkTransactionUpload = lazy(() => import('../BulkTransactionUpload'));
@@ -138,7 +137,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   const [showTransactionModal, setShowTransactionModal] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
-  const [showDashboardSettings, setShowDashboardSettings] = useState(false);
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [editingCurrency, setEditingCurrency] = useState(null);
   const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false);
@@ -184,9 +182,8 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
     return () => window.removeEventListener('modernDashboardSettingsChanged', handleSettingsChange);
   }, []);
 
-  // Actualiza dashboardSettings + localStorage + notifica a otros listeners
-  // (mismo contrato que usaba DashboardSettingsModal.handleSave). Ajustes
-  // llama esto directo en cada toggle, sin paso de "Guardar" intermedio.
+  // Actualiza dashboardSettings + localStorage + notifica a otros listeners.
+  // Ajustes llama esto directo en cada toggle, sin paso de "Guardar" intermedio.
   const handleDashboardSettingsChange = (next) => {
     setDashboardSettings(next);
     try {
@@ -1467,14 +1464,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
           />
         </Suspense>
       )}
-
-      {/* Dashboard Settings Modal */}
-      <Suspense fallback={null}>
-        <DashboardSettingsModal
-          isOpen={showDashboardSettings}
-          onClose={() => setShowDashboardSettings(false)}
-        />
-      </Suspense>
 
       {/* Currency Modal */}
       {showCurrencyModal && (

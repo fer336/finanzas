@@ -7,6 +7,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Query
 from fastapi.responses import JSONResponse
 
 from app.services.minio_service import get_minio_service
+from app.core.dependencies import CurrentUser
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +16,7 @@ router = APIRouter()
 
 @router.post("/upload")
 async def upload_file(
+    current_user: CurrentUser,  # 🔒 Requiere autenticación (JWT o API key)
     file: UploadFile = File(...),
     prefix: str = Query(default="comprobantes", description="Prefijo/carpeta en el bucket")
 ):
@@ -77,6 +79,7 @@ async def upload_file(
 
 @router.delete("/delete")
 async def delete_file(
+    current_user: CurrentUser,  # 🔒 Requiere autenticación (JWT o API key)
     object_name: str = Query(..., description="Nombre del objeto en MinIO (ej: comprobantes/archivo.png)")
 ):
     """
@@ -112,6 +115,7 @@ async def delete_file(
 
 @router.get("/presigned-url")
 async def get_presigned_url(
+    current_user: CurrentUser,  # 🔒 Requiere autenticación (JWT o API key)
     object_name: str = Query(..., description="Nombre del objeto en MinIO"),
     expires_hours: int = Query(default=1, description="Horas de expiración (default: 1)")
 ):

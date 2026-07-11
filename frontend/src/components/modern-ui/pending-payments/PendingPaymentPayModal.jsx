@@ -70,8 +70,11 @@ const PendingPaymentPayModal = ({
       const body = new FormData();
       body.append('file', selectedFile);
 
+      const token = localStorage.getItem('auth_token');
       const response = await fetch(endpoint, {
         method: 'POST',
+        cache: 'no-store',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body
       });
 

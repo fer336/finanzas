@@ -97,8 +97,12 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
       const fd = new FormData();
       fd.append('file', processedFile);
 
+      const token = localStorage.getItem('auth_token');
       const res = await fetch(`${baseUrl}/api/files/upload?prefix=${uploadPrefix}`, {
-        method: 'POST', body: fd,
+        method: 'POST',
+        cache: 'no-store',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: fd,
       });
 
       if (!res.ok) {

@@ -208,8 +208,11 @@ export const TransactionModal = ({ isOpen, onClose, onSave, categories, paymentM
         const baseUrl = import.meta.env.MODE === 'production' ? '' : 'http://localhost:8000';
         const endpoint = `${baseUrl}/api/files/upload?prefix=comprobantes`;
         
+        const token = localStorage.getItem('auth_token');
         const response = await fetch(endpoint, {
           method: 'POST',
+          cache: 'no-store',
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
           body: uploadFormData,
         });
 

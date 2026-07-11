@@ -153,8 +153,11 @@ export function ComprobanteUploader({ onFileUpload, existingFile, transaccionId,
       const body = new FormData();
       body.append('file', file);
 
+      const token = localStorage.getItem('auth_token');
       const response = await fetch(endpoint, {
         method: 'POST',
+        cache: 'no-store',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body
       });
 

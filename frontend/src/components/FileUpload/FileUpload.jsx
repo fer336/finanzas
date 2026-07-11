@@ -183,15 +183,18 @@ const FileUpload = ({
       formData.append('file', selectedFile);
 
       // Use full URL in development, relative in production
-      const baseUrl = import.meta.env.MODE === 'production' 
-        ? '' 
+      const baseUrl = import.meta.env.MODE === 'production'
+        ? ''
         : 'http://localhost:8000';
       const endpoint = `${baseUrl}/api/files/upload?prefix=${prefix}`;
-      
+
       console.log('📤 Uploading to:', endpoint);
-      
+
+      const token = localStorage.getItem('auth_token');
       const response = await fetch(endpoint, {
         method: 'POST',
+        cache: 'no-store',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
         body: formData,
       });
 
@@ -242,12 +245,12 @@ const FileUpload = ({
   };
 
   const getFileIcon = (fileName) => {
-    if (!fileName) return <FileText className="w-5 h-5" />;
+    if (!fileName) return <FileText className="w-5 h-5 text-[#8a8677]" />;
     const ext = fileName.split('.').pop()?.toLowerCase();
     if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
-      return <FileText className="w-5 h-5 text-blue-400" />;
+      return <FileText className="w-5 h-5 text-primary" />;
     }
-    return <FileText className="w-5 h-5 text-gray-400" />;
+    return <FileText className="w-5 h-5 text-[#8a8677]" />;
   };
 
   return (
@@ -255,10 +258,10 @@ const FileUpload = ({
       {/* Upload Area */}
       {!uploadedFileUrl && (
         <div
-          className={`relative border-2 border-dashed rounded-lg p-6 transition-colors ${
-            dragActive 
-              ? 'border-[#059467] bg-[#059467]/10' 
-              : 'border-white/20 hover:border-white/40'
+          className={`relative rounded-md border-2 border-dashed p-6 transition-colors ${
+            dragActive
+              ? 'border-primary bg-primary/5'
+              : 'border-[#ddd5c2] hover:border-[#c7bda3] bg-[#f6f1e4]'
           }`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -276,24 +279,24 @@ const FileUpload = ({
           <div className="flex flex-col items-center gap-3 text-center">
             {compressing ? (
               <>
-                <Loader className="w-8 h-8 text-[#059467] animate-spin" />
+                <Loader className="w-7 h-7 text-primary animate-spin" />
                 <div>
-                  <p className="text-white font-medium">Comprimiendo imagen...</p>
-                  <p className="text-white/50 text-sm mt-1">Reduciendo tamaño a menos de 2MB</p>
+                  <p className="text-[13.5px] font-medium text-foreground">Comprimiendo imagen…</p>
+                  <p className="text-[12px] text-[#8a8677] mt-1">Reduciendo tamaño a menos de 2MB</p>
                 </div>
               </>
             ) : (
               <>
-                <Upload className={`w-8 h-8 ${dragActive ? 'text-[#059467]' : 'text-white/60'}`} />
+                <Upload className={`w-7 h-7 ${dragActive ? 'text-primary' : 'text-[#8a8677]'}`} />
                 <div>
-                  <p className="text-white font-medium">
-                    {dragActive ? 'Suelta el archivo aquí' : 'Click para subir o arrastra y suelta'}
+                  <p className="text-[13.5px] font-medium text-foreground">
+                    {dragActive ? 'Soltá el archivo aquí' : 'Click para subir o arrastrá y soltá'}
                   </p>
-                  <p className="text-white/50 text-sm mt-1">
+                  <p className="text-[12px] text-[#8a8677] mt-1">
                     Máximo {maxSizeMB}MB • JPG, PNG, PDF, WEBP
                   </p>
-                  <p className="text-white/40 text-xs mt-1">
-                    ℹ️ Imágenes mayores a 2MB se comprimirán automáticamente
+                  <p className="text-[11px] text-[#a39a80] mt-1">
+                    Imágenes mayores a 2MB se comprimen automáticamente
                   </p>
                 </div>
               </>
@@ -304,23 +307,23 @@ const FileUpload = ({
 
       {/* Selected File Preview */}
       {selectedFile && !uploadedFileUrl && (
-        <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+        <div className="rounded-md border border-[#ddd5c2] bg-card p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               {getFileIcon(selectedFile.name)}
               <div className="flex-1 min-w-0">
-                <p className="text-white font-medium truncate">{selectedFile.name}</p>
-                <p className="text-white/50 text-sm">
+                <p className="text-[13px] font-medium text-foreground truncate">{selectedFile.name}</p>
+                <p className="text-[11.5px] text-[#8a8677]">
                   {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                 </p>
               </div>
             </div>
             <button
               onClick={() => setSelectedFile(null)}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
               disabled={uploading}
             >
-              <X className="w-4 h-4 text-white/60" />
+              <X className="w-4 h-4 text-[#8a8677]" />
             </button>
           </div>
 
@@ -328,10 +331,10 @@ const FileUpload = ({
           {!uploading && (
             <button
               onClick={uploadFile}
-              className="w-full mt-3 px-4 py-2 bg-[#059467] hover:bg-[#048054] rounded-lg text-white font-medium transition-colors flex items-center justify-center gap-2"
+              className="w-full mt-3 px-4 py-[7px] bg-primary hover:bg-[#4f7047] rounded-sm text-primary-foreground text-[13px] font-semibold transition-colors duration-150 flex items-center justify-center gap-2"
             >
-              <Upload className="w-4 h-4" />
-              Upload File
+              <Upload className="w-3.5 h-3.5" />
+              Subir archivo
             </button>
           )}
 
@@ -339,12 +342,12 @@ const FileUpload = ({
           {uploading && (
             <div className="mt-3">
               <div className="flex items-center gap-2 mb-2">
-                <Loader className="w-4 h-4 text-[#059467] animate-spin" />
-                <span className="text-white/80 text-sm">Uploading... {uploadProgress}%</span>
+                <Loader className="w-4 h-4 text-primary animate-spin" />
+                <span className="text-[12px] text-[#5d6470]">Subiendo… {uploadProgress}%</span>
               </div>
-              <div className="w-full bg-white/10 rounded-full h-2">
+              <div className="w-full bg-[#e7e0cf] rounded-full h-1.5">
                 <div
-                  className="bg-[#059467] h-2 rounded-full transition-all duration-300"
+                  className="bg-primary h-1.5 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -355,18 +358,18 @@ const FileUpload = ({
 
       {/* Uploaded File Display */}
       {uploadedFileUrl && (
-        <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+        <div className="rounded-md border border-[#5a7d52] bg-primary/5 p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3 flex-1 min-w-0">
-              <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+              <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
-                <p className="text-green-400 font-medium mb-1">File uploaded successfully</p>
+                <p className="text-[13px] font-medium text-[#476442] mb-1">Archivo subido correctamente</p>
                 {showPreview && uploadedFileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                   <div className="mt-2">
                     <img
                       src={uploadedFileUrl}
                       alt="Preview"
-                      className="max-w-full h-auto rounded-lg border border-white/10 max-h-48 object-contain"
+                      className="max-w-full h-auto rounded-md border border-[#ddd5c2] max-h-48 object-contain"
                       onError={(e) => {
                         e.target.style.display = 'none';
                       }}
@@ -377,7 +380,7 @@ const FileUpload = ({
                     href={uploadedFileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-white/60 text-sm hover:text-white transition-colors break-all"
+                    className="text-[12px] text-[#5d6470] hover:text-foreground transition-colors break-all"
                   >
                     {uploadedFileUrl}
                   </a>
@@ -386,9 +389,9 @@ const FileUpload = ({
             </div>
             <button
               onClick={handleRemoveFile}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors flex-shrink-0"
+              className="p-1.5 rounded-sm hover:bg-black/5 transition-colors flex-shrink-0"
             >
-              <X className="w-4 h-4 text-white/60" />
+              <X className="w-4 h-4 text-[#8a8677]" />
             </button>
           </div>
         </div>
@@ -396,10 +399,10 @@ const FileUpload = ({
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+        <div className="rounded-md border border-[#a04a34] bg-[#a04a34]/5 p-4">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-            <p className="text-red-400 text-sm">{error}</p>
+            <AlertCircle className="w-5 h-5 text-[#a04a34] flex-shrink-0" />
+            <p className="text-[12.5px] text-[#a04a34]">{error}</p>
           </div>
         </div>
       )}

@@ -1,6 +1,6 @@
 {
-  "short_name": "🐺 Gastos",
-  "name": "🐺 Sistema de Gastos - Gestión Financiera",
+  "short_name": "Finance",
+  "name": "Finance - Gestión Financiera",
   "description": "Sistema inteligente de gestión financiera personal",
   "icons": [
     {
@@ -11,12 +11,17 @@
     },
     {
       "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
+      "sizes": "64x64 32x32 16x16",
       "type": "image/x-icon"
+    },
+    {
+      "src": "apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#059669",
-  "background_color": "#000000"
+  "theme_color": "#20242c",
+  "background_color": "#faf7ef"
 }

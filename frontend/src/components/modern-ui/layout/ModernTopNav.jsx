@@ -127,7 +127,7 @@ const ModernTopNav = ({
         onClick={() => onNavigate && onNavigate('dashboard')}
         className="shrink-0 font-serif text-[20px] font-bold text-foreground"
       >
-        Cuentas<span className="text-[#b35a42]">.</span>
+        Finance<span className="text-[#b35a42]">.</span>
       </button>
 
       {/* Nav pills */}

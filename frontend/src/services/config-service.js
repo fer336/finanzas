@@ -134,7 +134,7 @@ class ConfigService {
         environment: 'development'
       },
       app: {
-        name: 'Sistema de Gastos',
+        name: 'Finance',
         version: '1.0.0'
       }
     };

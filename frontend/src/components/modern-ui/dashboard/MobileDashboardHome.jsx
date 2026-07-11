@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Skeleton } from '../../ui/skeleton';
 import { useDashboardHomeData } from './useDashboardHomeData';
+import { useBalanceNeto } from '../../../hooks/useFinancialData';
 
 const EmptyState = ({ children }) => (
   <p className="text-[13.5px] italic text-muted-foreground">{children}</p>
@@ -44,12 +45,15 @@ const MobileDashboardHome = ({
   // README "Mapa de migración" — la acción primaria es "+ Nuevo" en
   // ModernTopNav). Se mantiene en las props/PropTypes por compatibilidad.
 }) => {
+  const now = new Date();
+  const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const { data: balanceNetoData } = useBalanceNeto(mesActual);
   const {
     formatAmount,
     periodoLabel,
     tituloMes,
     veredicto,
-    saldoEstimado,
+    balanceNeto,
     usdEquivalent,
     kpis,
     movimientosRecientes,
@@ -58,7 +62,12 @@ const MobileDashboardHome = ({
     pendientesActivos,
     proximoVencimiento,
     proximoVencimientoLabel,
-  } = useDashboardHomeData({ transactions, pendingPayments, dollarQuotes });
+  } = useDashboardHomeData({
+    transactions,
+    pendingPayments,
+    dollarQuotes,
+    balanceNeto: balanceNetoData?.balance_neto,
+  });
 
   if (loading) {
     return <MobileSkeleton />;
@@ -80,9 +89,9 @@ const MobileDashboardHome = ({
 
       {/* Sello de saldo */}
       <div className="rounded-md border border-[#ddd5c2] bg-card px-[18px] py-3">
-        <div className="font-mono text-[10px] uppercase tracking-[.1em] text-[#8a8677]">Saldo estimado</div>
+        <div className="font-mono text-[10px] uppercase tracking-[.1em] text-[#8a8677]">Balance neto</div>
         <div className="mt-1 font-mono text-[24px] font-semibold text-foreground">
-          {formatAmount(saldoEstimado, { decimals: 0 })}
+          {formatAmount(balanceNeto, { decimals: 0 })}
         </div>
         <div className="font-mono text-[11px] text-[#8a8677]">{usdEquivalent}</div>
       </div>

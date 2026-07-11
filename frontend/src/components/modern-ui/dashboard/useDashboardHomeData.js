@@ -42,7 +42,7 @@ function getTransactionDate(t) {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-export function useDashboardHomeData({ transactions = [], pendingPayments = [], dollarQuotes }) {
+export function useDashboardHomeData({ transactions = [], pendingPayments = [], dollarQuotes, balanceNeto: balanceNetoOverride = null }) {
   const { formatAmount } = useAmountVisibility();
 
   // ── Período (siempre el mes calendario actual — Inicio no expone el
@@ -78,16 +78,20 @@ export function useDashboardHomeData({ transactions = [], pendingPayments = [], 
     return `Balance controlado: los gastos representan el ${ratioGastosIngresos}% de los ingresos.`;
   })();
 
-  // ── Saldo estimado (acumulado histórico) + equivalencia USD con la
-  // cotización blue vigente del sistema ────────────────────────────────────
-  const saldoEstimado = transactions.reduce((sum, t) => {
+  // ── Balance neto: dinero real que debería tener, mes a mes (ancla de
+  // balance-inicial + ingresos - gastos desde ahí, calculado en el backend
+  // vía /api/v1/balance-inicial/neto). Mientras esa consulta resuelve o si
+  // falla, se usa como fallback la suma naive de lo ya cargado en memoria
+  // (no contempla balance inicial, pero evita una pantalla vacía) ──────────
+  const saldoEstimadoFallback = transactions.reduce((sum, t) => {
     const monto = getTransactionAmount(t);
     return sum + (t.tipo === 'ingreso' ? monto : -monto);
   }, 0);
+  const balanceNeto = typeof balanceNetoOverride === 'number' ? balanceNetoOverride : saldoEstimadoFallback;
   const blueQuote = Array.isArray(dollarQuotes) ? dollarQuotes.find((q) => q.casa === 'blue') : null;
   const usdRate = blueQuote?.venta ? parseFloat(blueQuote.venta) : null;
   const usdEquivalent = usdRate
-    ? `≈ USD ${Math.round(saldoEstimado / usdRate).toLocaleString('es-AR')}`
+    ? `≈ USD ${Math.round(balanceNeto / usdRate).toLocaleString('es-AR')}`
     : '≈ USD —';
 
   const kpis = [
@@ -186,7 +190,7 @@ export function useDashboardHomeData({ transactions = [], pendingPayments = [], 
     periodoLabel,
     tituloMes,
     veredicto,
-    saldoEstimado,
+    balanceNeto,
     usdEquivalent,
     kpis,
     movimientosRecientes,

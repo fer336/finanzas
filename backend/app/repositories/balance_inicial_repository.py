@@ -3,12 +3,14 @@ Repository para Balance Inicial
 Maneja las operaciones CRUD de balances iniciales por mes y moneda
 """
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
+from sqlalchemy import and_, func, case
 from typing import List, Optional
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, date
+from decimal import Decimal
+import calendar
 
-from app.models.db_models import BalanceInicial
+from app.models.db_models import BalanceInicial, Transaccion
 from app.schemas.balance_inicial import BalanceInicialCreate, BalanceInicialUpdate
 
 
@@ -280,6 +282,67 @@ class BalanceInicialRepository:
         meses = self.db.query(BalanceInicial.mes).filter(
             BalanceInicial.usuario_id == usuario_id
         ).distinct().order_by(BalanceInicial.mes.desc()).all()
-        
+
         return [mes[0] for mes in meses]
+
+    def calcular_balance_neto(self, usuario_id: UUID, mes: str, moneda: str = "ARS") -> dict:
+        """
+        Balance neto real de un mes: el dinero que el usuario debería tener.
+
+        Ancla en el balance inicial configurado más reciente con mes <= al
+        mes objetivo, y le suma ingresos - gastos desde ese mes (inclusive)
+        hasta el fin del mes objetivo. Si no hay ancla configurada, arranca
+        en 0 desde la primera transacción registrada — así se comporta
+        correctamente para una cuenta recién reseteada.
+        """
+        ancla = (
+            self.db.query(BalanceInicial)
+            .filter(
+                and_(
+                    BalanceInicial.usuario_id == usuario_id,
+                    BalanceInicial.moneda == moneda,
+                    BalanceInicial.mes <= mes,
+                )
+            )
+            .order_by(BalanceInicial.mes.desc())
+            .first()
+        )
+
+        saldo_inicial = ancla.monto if ancla else Decimal("0")
+        fecha_desde = date.fromisoformat(f"{ancla.mes}-01") if ancla else None
+
+        anio, mes_num = (int(p) for p in mes.split("-"))
+        ultimo_dia = calendar.monthrange(anio, mes_num)[1]
+        fecha_hasta = date(anio, mes_num, ultimo_dia)
+
+        query = self.db.query(
+            func.coalesce(
+                func.sum(case((Transaccion.tipo == "ingreso", func.abs(Transaccion.monto_ars)), else_=0)),
+                0,
+            ),
+            func.coalesce(
+                func.sum(case((Transaccion.tipo == "gasto", func.abs(Transaccion.monto_ars)), else_=0)),
+                0,
+            ),
+        ).filter(
+            Transaccion.usuario_id == usuario_id,
+            Transaccion.fecha_transaccion <= fecha_hasta,
+        )
+        if fecha_desde:
+            query = query.filter(Transaccion.fecha_transaccion >= fecha_desde)
+
+        ingresos, gastos = query.first()
+        ingresos = Decimal(ingresos)
+        gastos = Decimal(gastos)
+        balance_neto = saldo_inicial + ingresos - gastos
+
+        return {
+            "mes": mes,
+            "moneda": moneda,
+            "mes_ancla": ancla.mes if ancla else None,
+            "saldo_inicial": float(saldo_inicial),
+            "ingresos": float(ingresos),
+            "gastos": float(gastos),
+            "balance_neto": float(balance_neto),
+        }
 

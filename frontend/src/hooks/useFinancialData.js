@@ -22,6 +22,7 @@ export const QUERY_KEYS = {
   dashboardStats: 'dashboardStats',
   dollarQuotes: 'dollarQuotes',
   aiUsage: 'aiUsage',
+  balanceNeto: 'balanceNeto',
 };
 
 // ====== TRANSACCIONES ======
@@ -442,5 +443,26 @@ export const useAIUsage = () => {
     },
     staleTime: 2 * 60 * 1000, // 2 minutos
     enabled: !!apiServices.aiUsageApi, // Solo ejecuta si el API existe
+  });
+};
+
+// ====== BALANCE NETO ======
+// Dinero real que el usuario debería tener a fin de un mes: ancla en el
+// balance inicial configurado más reciente + ingresos - gastos desde ahí.
+export const useBalanceNeto = (mes) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.balanceNeto, mes],
+    queryFn: () => apiServices.balanceInicialApi.getNeto(mes),
+    staleTime: 60 * 1000,
+  });
+};
+
+export const useSetBalanceInicial = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data) => apiServices.balanceInicialApi.upsert(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.balanceNeto] });
+    },
   });
 };

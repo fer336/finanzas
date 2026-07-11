@@ -5,6 +5,7 @@ import { Skeleton } from '../../ui/skeleton';
 import KpiCard from '../common/KpiCard';
 import MobileDashboardHome from './MobileDashboardHome';
 import { useDashboardHomeData } from './useDashboardHomeData';
+import { useBalanceNeto } from '../../../hooks/useFinancialData';
 
 /**
  * EmptyState — DESIGN.md "Estado vacío": itálico 13.5px #8a8677, nunca un
@@ -57,12 +58,15 @@ const ModernDashboard = ({
   onNewTransaction,
 }) => {
   const isMobile = useIsMobile();
+  const now = new Date();
+  const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const { data: balanceNetoData } = useBalanceNeto(mesActual);
   const {
     formatAmount,
     periodoLabel,
     tituloMes,
     veredicto,
-    saldoEstimado,
+    balanceNeto,
     usdEquivalent,
     kpis,
     movimientosRecientes,
@@ -71,7 +75,12 @@ const ModernDashboard = ({
     pendientesActivos,
     proximoVencimiento,
     proximoVencimientoLabel,
-  } = useDashboardHomeData({ transactions, pendingPayments, dollarQuotes });
+  } = useDashboardHomeData({
+    transactions,
+    pendingPayments,
+    dollarQuotes,
+    balanceNeto: balanceNetoData?.balance_neto,
+  });
 
   // ── Mobile layout ─────────────────────────────────────────────────────────
   if (isMobile) {
@@ -114,10 +123,10 @@ const ModernDashboard = ({
           </div>
           <div className="shrink-0 rounded-md border border-[#ddd5c2] bg-card px-[18px] py-3 text-right">
             <div className="font-mono text-[10px] uppercase tracking-[.1em] text-[#8a8677]">
-              Saldo estimado
+              Balance neto
             </div>
             <div className="mt-1 font-mono text-[24px] font-semibold text-foreground">
-              {formatAmount(saldoEstimado, { decimals: 0 })}
+              {formatAmount(balanceNeto, { decimals: 0 })}
             </div>
             <div className="font-mono text-[11px] text-[#8a8677]">{usdEquivalent}</div>
           </div>

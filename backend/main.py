@@ -83,6 +83,7 @@ from app.routers.ai_config import router as ai_config_router
 from app.routers.presupuestos import router as presupuestos_router
 from app.routers.objetivos import router as objetivos_router
 from app.routers.monedas_usuario import router as monedas_usuario_router
+from app.routers.balance_inicial import router as balance_inicial_router
 from app.middleware.rate_limiting import RateLimitingMiddleware
 from app.middleware.security import (
     SecurityHeadersMiddleware,
@@ -297,6 +298,11 @@ app.include_router(ai_config_router, prefix="/api/v1/ai-config", tags=["AI Confi
 # Router for User Currencies (Monedas Personalizadas)
 app.include_router(
     monedas_usuario_router, prefix="/api/v1/monedas-usuario", tags=["Monedas Usuario"]
+)
+
+# Router for Balance Inicial / Balance Neto
+app.include_router(
+    balance_inicial_router, prefix="/api/v1/balance-inicial", tags=["Balance Neto"]
 )
 
 

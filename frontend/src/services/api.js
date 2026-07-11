@@ -340,6 +340,10 @@ const metodosPagoApi = {
 // 📁 FILES API (MinIO)
 // ═══════════════════════════════════════════════════════════════
 const _getBaseUrl = () => import.meta.env.MODE === 'production' ? '' : 'http://localhost:8000';
+const _authHeaders = () => {
+  const token = localStorage.getItem('auth_token');
+  return token ? { Authorization: `Bearer ${token}` } : undefined;
+};
 
 const filesApi = {
   /**
@@ -357,6 +361,8 @@ const filesApi = {
 
     const response = await fetch(endpoint, {
       method: 'POST',
+      cache: 'no-store',
+      headers: _authHeaders(),
       body
     });
 
@@ -393,6 +399,8 @@ const filesApi = {
       
       const response = await fetch(endpoint, {
         method: 'DELETE',
+        cache: 'no-store',
+        headers: _authHeaders(),
       });
       
       if (!response.ok) {
@@ -705,6 +713,31 @@ const aiConfigApi = {
 };
 
 // ═══════════════════════════════════════════════════════════════
+// 💰 BALANCE NETO / BALANCE INICIAL API
+// ═══════════════════════════════════════════════════════════════
+const balanceInicialApi = {
+  // Balance neto real de un mes (ancla + ingresos - gastos desde ahí)
+  async getNeto(mes, moneda = 'ARS') {
+    debugLog('💰 balanceInicialApi.getNeto called:', { mes, moneda });
+    return await apiRequest('/balance-inicial/neto', { params: { mes, moneda } });
+  },
+
+  // Listar anclas configuradas
+  async list(mes) {
+    return await apiRequest('/balance-inicial', { params: mes ? { mes } : null });
+  },
+
+  // Crear o actualizar el balance inicial de un mes/moneda
+  async upsert({ mes, moneda = 'ARS', monto }) {
+    debugLog('💰 balanceInicialApi.upsert called:', { mes, moneda, monto });
+    return await apiRequest('/balance-inicial', {
+      method: 'PUT',
+      data: { mes, moneda, monto },
+    });
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════
 // 📤 EXPORTAR TODOS LOS SERVICIOS
 // ═══════════════════════════════════════════════════════════════
 const apiServices = {
@@ -720,7 +753,8 @@ const apiServices = {
   tarjetasApi,
   monedasApi,
   aiConfigApi,
-  apiKeysApi
+  apiKeysApi,
+  balanceInicialApi
 };
 
 debugLog('✅ API Services initialized with FastAPI backend');

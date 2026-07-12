@@ -197,7 +197,7 @@ No corre migraciones de base de datos — los cambios de esquema se aplican manu
 
 <div align="center">
 
-**Fernando Ariel Cassera** (fer336) — [GitHub](https://github.com/fer336) · [LinkedIn](https://www.linkedin.com/in/fcassera) · fcassera@protonmail.com
+**Fernando Ariel Cassera** (fer336) — [GitHub](https://github.com/fer336) · fcassera@protonmail.com
 
 Uso personal. Para uso comercial, contactar al autor.
 

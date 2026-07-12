@@ -8,6 +8,7 @@ import {
 import { Button } from '../../ui/button';
 import { Badge } from '../../ui/badge';
 import KpiCard from '../common/KpiCard';
+import PillToggle from '../common/PillToggle';
 import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
 import { useRefresh } from '../../../hooks/useRefresh';
 import { QUERY_KEYS } from '../../../hooks/useFinancialData';
@@ -63,27 +64,6 @@ const loadRange = () => {
   } catch { /* ignore */ }
   return 'month';
 };
-
-// ─── Toggle de pills genérico (Mensual/Acumulado, Día/Semana/Mes) ───────────
-// Ver design_handoff_rediseno_papel/README.md sección "3. Movimientos".
-const PillToggle = ({ options, value, onChange, activeClassName }) => (
-  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] bg-card p-[3px]">
-    {options.map((opt) => (
-      <button
-        key={opt.value}
-        type="button"
-        onClick={() => onChange(opt.value)}
-        className={`rounded-full px-3 py-1 font-mono text-[12px] transition-colors duration-150 ${
-          value === opt.value
-            ? `${activeClassName} font-semibold`
-            : 'text-[#5d6470] hover:text-foreground'
-        }`}
-      >
-        {opt.label}
-      </button>
-    ))}
-  </div>
-);
 
 PillToggle.propTypes = {
   options: PropTypes.arrayOf(PropTypes.shape({

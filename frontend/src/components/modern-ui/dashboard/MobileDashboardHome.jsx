@@ -1,9 +1,16 @@
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Skeleton } from '../../ui/skeleton';
 import CategoriaDonut from './CategoriaDonut';
+import PillToggle from '../common/PillToggle';
 import { useDashboardHomeData } from './useDashboardHomeData';
 import { useBalanceNeto } from '../../../hooks/useFinancialData';
+
+function mesActualStr() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
 
 const EmptyState = ({ children }) => (
   <p className="text-[13.5px] italic text-muted-foreground">{children}</p>
@@ -47,8 +54,10 @@ const MobileDashboardHome = ({
   // ModernTopNav). Se mantiene en las props/PropTypes por compatibilidad.
 }) => {
   const now = new Date();
-  const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const { data: balanceNetoData } = useBalanceNeto(mesActual);
+  const [selectedMonth, setSelectedMonth] = useState(mesActualStr);
+  const [balanceMode, setBalanceMode] = useState('acumulado');
+  const [donutMode, setDonutMode] = useState('gastos');
+  const { data: balanceNetoData } = useBalanceNeto(selectedMonth);
   const {
     formatAmount,
     periodoLabel,
@@ -57,8 +66,10 @@ const MobileDashboardHome = ({
     balanceNeto,
     usdEquivalent,
     kpis,
+    resultadoMes,
     movimientosRecientes,
     categoriasOrdenadas,
+    categoriasIngresosOrdenadas,
     totalPendiente,
     pendientesActivos,
     proximoVencimiento,
@@ -68,7 +79,25 @@ const MobileDashboardHome = ({
     pendingPayments,
     dollarQuotes,
     balanceNeto: balanceNetoData?.balance_neto,
+    mes: selectedMonth,
   });
+
+  const goToPrevMonth = () => {
+    const [yr, mo] = selectedMonth.split('-').map(Number);
+    const d = new Date(yr, mo - 2, 1);
+    setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  };
+  const goToNextMonth = () => {
+    const [yr, mo] = selectedMonth.split('-').map(Number);
+    const d = new Date(yr, mo, 1);
+    if (d <= now) setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  };
+  const goToToday = () => setSelectedMonth(mesActualStr());
+  const isCurrentMonth = selectedMonth >= mesActualStr();
+
+  const donutData = donutMode === 'gastos' ? categoriasOrdenadas : categoriasIngresosOrdenadas;
+  const donutTotal = donutData.reduce((sum, c) => sum + c.monto, 0);
+  const balanceMostrado = balanceMode === 'mensual' ? resultadoMes : balanceNeto;
 
   if (loading) {
     return <MobileSkeleton />;
@@ -79,8 +108,26 @@ const MobileDashboardHome = ({
 
       {/* ── Cabecera de período ── */}
       <div>
-        <div className="font-mono text-[10px] uppercase text-[#3d5a80]" style={{ letterSpacing: '.16em' }}>
-          Período {periodoLabel}
+        <div className="flex items-center justify-between gap-2">
+          <div className="font-mono text-[10px] uppercase text-[#3d5a80]" style={{ letterSpacing: '.16em' }}>
+            Período {periodoLabel}
+          </div>
+          <div className="flex items-center gap-1 rounded-full border border-[#ddd5c2] bg-card px-1.5 py-1">
+            <button onClick={goToPrevMonth} className="p-1 rounded-full hover:bg-black/5 transition-colors" title="Mes anterior">
+              <ChevronLeft className="w-3.5 h-3.5 text-[#8a8677]" />
+            </button>
+            <button onClick={goToToday} className="px-1.5 font-mono text-[11px] text-[#5d6470] hover:text-foreground transition-colors">
+              hoy
+            </button>
+            <button
+              onClick={goToNextMonth}
+              disabled={isCurrentMonth}
+              className="p-1 rounded-full hover:bg-black/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Mes siguiente"
+            >
+              <ChevronRight className="w-3.5 h-3.5 text-[#8a8677]" />
+            </button>
+          </div>
         </div>
         <h1 className="mt-1 font-serif text-[30px] font-bold leading-tight text-foreground">
           {tituloMes}
@@ -90,11 +137,23 @@ const MobileDashboardHome = ({
 
       {/* Sello de saldo */}
       <div className="rounded-md border border-[#ddd5c2] bg-card px-[18px] py-3">
-        <div className="font-mono text-[10px] uppercase tracking-[.1em] text-[#8a8677]">Balance neto</div>
-        <div className="mt-1 font-mono text-[24px] font-semibold text-foreground">
-          {formatAmount(balanceNeto, { decimals: 0 })}
+        <div className="flex items-center justify-between gap-2">
+          <div className="font-mono text-[10px] uppercase tracking-[.1em] text-[#8a8677]">
+            {balanceMode === 'mensual' ? 'Resultado del mes' : 'Balance neto'}
+          </div>
+          <PillToggle
+            options={[{ value: 'mensual', label: 'Mensual' }, { value: 'acumulado', label: 'Acumulado' }]}
+            value={balanceMode}
+            onChange={setBalanceMode}
+            activeClassName="bg-[#20242c] text-[#f4f0e6]"
+          />
         </div>
-        <div className="font-mono text-[11px] text-[#8a8677]">{usdEquivalent}</div>
+        <div className="mt-1 font-mono text-[24px] font-semibold text-foreground">
+          {balanceMostrado < 0 ? '− ' : ''}{formatAmount(Math.abs(balanceMostrado), { decimals: 0 })}
+        </div>
+        {balanceMode === 'acumulado' && (
+          <div className="font-mono text-[11px] text-[#8a8677]">{usdEquivalent}</div>
+        )}
       </div>
 
       {/* ── KPIs (1 columna en mobile) ── */}
@@ -159,21 +218,31 @@ const MobileDashboardHome = ({
         )}
       </div>
 
-      {/* ── Gastos por categoría ── */}
+      {/* ── Gastos / Ingresos por categoría ── */}
       <div className="rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px]">
-        <h2 className="mb-3 font-serif text-[17px] font-semibold text-foreground">Gastos por categoría</h2>
-        {categoriasOrdenadas.length === 0 ? (
-          <EmptyState>Sin gastos en esta vista.</EmptyState>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <h2 className="font-serif text-[17px] font-semibold text-foreground">
+            {donutMode === 'gastos' ? 'Gastos por categoría' : 'Ingresos por categoría'}
+          </h2>
+          <PillToggle
+            options={[{ value: 'gastos', label: 'Gastos' }, { value: 'ingresos', label: 'Ingresos' }]}
+            value={donutMode}
+            onChange={setDonutMode}
+            activeClassName="bg-[#20242c] text-[#f4f0e6]"
+          />
+        </div>
+        {donutData.length === 0 ? (
+          <EmptyState>Sin {donutMode === 'gastos' ? 'gastos' : 'ingresos'} en esta vista.</EmptyState>
         ) : (
           <div className="flex items-center gap-4">
             <CategoriaDonut
-              categorias={categoriasOrdenadas}
-              total={categoriasOrdenadas.reduce((sum, c) => sum + c.monto, 0)}
+              categorias={donutData}
+              total={donutTotal}
               formatAmount={formatAmount}
               size={96}
             />
             <div className="grid flex-1 grid-cols-[1fr_auto] gap-x-3.5 gap-y-[5px] text-[12.5px]">
-              {categoriasOrdenadas.map((c) => (
+              {donutData.map((c) => (
                 <Fragment key={c.nombre}>
                   <span className="flex items-center gap-[7px] text-foreground">
                     <span className="h-[9px] w-[9px] shrink-0 rounded-sm" style={{ background: c.color }} />

@@ -42,15 +42,26 @@ function getTransactionDate(t) {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
-export function useDashboardHomeData({ transactions = [], pendingPayments = [], dollarQuotes, balanceNeto: balanceNetoOverride = null }) {
+function mesActualStr() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
+export function useDashboardHomeData({
+  transactions = [],
+  pendingPayments = [],
+  dollarQuotes,
+  balanceNeto: balanceNetoOverride = null,
+  mes = mesActualStr(),
+}) {
   const { formatAmount } = useAmountVisibility();
 
-  // ── Período (siempre el mes calendario actual — Inicio no expone el
-  // toggle Mensual/Acumulado de Ajustes, ver README "Interactions") ─────────
-  const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
-  const periodoLabel = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+  // ── Período: mes seleccionado por el usuario en Inicio (selector de mes,
+  // default: mes calendario actual) ─────────────────────────────────────────
+  const [anioStr, mesStr] = mes.split('-');
+  const currentYear = parseInt(anioStr, 10);
+  const currentMonth = parseInt(mesStr, 10) - 1;
+  const periodoLabel = mes;
   const tituloMes = `${MESES[currentMonth].replace(/^./, (c) => c.toUpperCase())} ${currentYear}`;
 
   const movimientosDelMes = transactions.filter((t) => {
@@ -125,9 +136,9 @@ export function useDashboardHomeData({ transactions = [], pendingPayments = [], 
     },
   ];
 
-  // ── Movimientos recientes (últimos 5; `transactions` ya viene ordenado
-  // desc por fecha desde ModernMissionControl) ─────────────────────────────
-  const movimientosRecientes = transactions.slice(0, 5).map((t) => {
+  // ── Movimientos recientes (últimos 5 DEL MES seleccionado; `transactions`
+  // ya viene ordenado desc por fecha desde ModernMissionControl) ───────────
+  const movimientosRecientes = movimientosDelMes.slice(0, 5).map((t) => {
     const fecha = getTransactionDate(t);
     const esIngreso = t.tipo === 'ingreso';
     return {
@@ -142,21 +153,26 @@ export function useDashboardHomeData({ transactions = [], pendingPayments = [], 
     };
   });
 
-  // ── Gastos por categoría (barra apilada) ─────────────────────────────────
-  const categoriaTotales = {};
-  gastosDelMes.forEach((t) => {
-    const nombre = t.categoria || 'Sin categoría';
-    categoriaTotales[nombre] = (categoriaTotales[nombre] || 0) + getTransactionAmount(t);
-  });
-  const totalGastosCategorias = Object.values(categoriaTotales).reduce((a, b) => a + b, 0);
-  const categoriasOrdenadas = Object.entries(categoriaTotales)
-    .sort((a, b) => b[1] - a[1])
-    .map(([nombre, monto], index) => ({
-      nombre,
-      monto,
-      pct: totalGastosCategorias > 0 ? Math.round((monto / totalGastosCategorias) * 100) : 0,
-      color: getCategoryColor(index),
-    }));
+  // ── Gastos e ingresos por categoría (donut) ───────────────────────────────
+  function agruparPorCategoria(movimientos) {
+    const totales = {};
+    movimientos.forEach((t) => {
+      const nombre = t.categoria || 'Sin categoría';
+      totales[nombre] = (totales[nombre] || 0) + getTransactionAmount(t);
+    });
+    const total = Object.values(totales).reduce((a, b) => a + b, 0);
+    return Object.entries(totales)
+      .sort((a, b) => b[1] - a[1])
+      .map(([nombre, monto], index) => ({
+        nombre,
+        monto,
+        pct: total > 0 ? Math.round((monto / total) * 100) : 0,
+        color: getCategoryColor(index),
+      }));
+  }
+
+  const categoriasOrdenadas = agruparPorCategoria(gastosDelMes);
+  const categoriasIngresosOrdenadas = agruparPorCategoria(ingresosDelMes);
 
   // ── Evolución mensual (últimos 6 meses, ingresos vs gastos) ──────────────
   const evolucionMensual = (() => {
@@ -211,8 +227,10 @@ export function useDashboardHomeData({ transactions = [], pendingPayments = [], 
     balanceNeto,
     usdEquivalent,
     kpis,
+    resultadoMes,
     movimientosRecientes,
     categoriasOrdenadas,
+    categoriasIngresosOrdenadas,
     evolucionMensual,
     totalPendiente,
     pendientesActivos,

@@ -1,13 +1,20 @@
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useIsMobile } from '../../../hooks/use-mobile';
 import { Skeleton } from '../../ui/skeleton';
 import KpiCard from '../common/KpiCard';
+import PillToggle from '../common/PillToggle';
 import MobileDashboardHome from './MobileDashboardHome';
 import CategoriaDonut from './CategoriaDonut';
 import { useDashboardHomeData } from './useDashboardHomeData';
 import { useBalanceNeto } from '../../../hooks/useFinancialData';
+
+function mesActualStr() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
 
 /**
  * EvolucionMensualChart — barras ingresos/gastos, últimos 6 meses.
@@ -96,8 +103,10 @@ const ModernDashboard = ({
 }) => {
   const isMobile = useIsMobile();
   const now = new Date();
-  const mesActual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-  const { data: balanceNetoData } = useBalanceNeto(mesActual);
+  const [selectedMonth, setSelectedMonth] = useState(mesActualStr);
+  const [balanceMode, setBalanceMode] = useState('acumulado');
+  const [donutMode, setDonutMode] = useState('gastos');
+  const { data: balanceNetoData } = useBalanceNeto(selectedMonth);
   const {
     formatAmount,
     periodoLabel,
@@ -106,8 +115,10 @@ const ModernDashboard = ({
     balanceNeto,
     usdEquivalent,
     kpis,
+    resultadoMes,
     movimientosRecientes,
     categoriasOrdenadas,
+    categoriasIngresosOrdenadas,
     evolucionMensual,
     totalPendiente,
     pendientesActivos,
@@ -118,7 +129,25 @@ const ModernDashboard = ({
     pendingPayments,
     dollarQuotes,
     balanceNeto: balanceNetoData?.balance_neto,
+    mes: selectedMonth,
   });
+
+  const goToPrevMonth = () => {
+    const [yr, mo] = selectedMonth.split('-').map(Number);
+    const d = new Date(yr, mo - 2, 1);
+    setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  };
+  const goToNextMonth = () => {
+    const [yr, mo] = selectedMonth.split('-').map(Number);
+    const d = new Date(yr, mo, 1);
+    if (d <= now) setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  };
+  const goToToday = () => setSelectedMonth(mesActualStr());
+  const isCurrentMonth = selectedMonth >= mesActualStr();
+
+  const donutData = donutMode === 'gastos' ? categoriasOrdenadas : categoriasIngresosOrdenadas;
+  const donutTotal = donutData.reduce((sum, c) => sum + c.monto, 0);
+  const balanceMostrado = balanceMode === 'mensual' ? resultadoMes : balanceNeto;
 
   // ── Mobile layout ─────────────────────────────────────────────────────────
   if (isMobile) {
@@ -146,11 +175,29 @@ const ModernDashboard = ({
         {/* ── Cabecera de período ── */}
         <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px]">
           <div>
-            <div
-              className="font-mono text-[11px] uppercase text-[#3d5a80]"
-              style={{ letterSpacing: '.16em' }}
-            >
-              Período {periodoLabel}
+            <div className="flex items-center gap-2.5">
+              <div
+                className="font-mono text-[11px] uppercase text-[#3d5a80]"
+                style={{ letterSpacing: '.16em' }}
+              >
+                Período {periodoLabel}
+              </div>
+              <div className="flex items-center gap-1 rounded-full border border-[#ddd5c2] bg-card px-1.5 py-1">
+                <button onClick={goToPrevMonth} className="p-1 rounded-full hover:bg-black/5 transition-colors" title="Mes anterior">
+                  <ChevronLeft className="w-3.5 h-3.5 text-[#8a8677]" />
+                </button>
+                <button onClick={goToToday} className="px-1.5 font-mono text-[11px] text-[#5d6470] hover:text-foreground transition-colors">
+                  hoy
+                </button>
+                <button
+                  onClick={goToNextMonth}
+                  disabled={isCurrentMonth}
+                  className="p-1 rounded-full hover:bg-black/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  title="Mes siguiente"
+                >
+                  <ChevronRight className="w-3.5 h-3.5 text-[#8a8677]" />
+                </button>
+              </div>
             </div>
             <h1 className="mt-1 font-serif text-[42px] font-bold leading-none text-foreground">
               {tituloMes}
@@ -160,13 +207,23 @@ const ModernDashboard = ({
             </p>
           </div>
           <div className="shrink-0 rounded-md border border-[#ddd5c2] bg-card px-[18px] py-3 text-right">
-            <div className="font-mono text-[10px] uppercase tracking-[.1em] text-[#8a8677]">
-              Balance neto
+            <div className="flex items-center justify-end gap-2">
+              <div className="font-mono text-[10px] uppercase tracking-[.1em] text-[#8a8677]">
+                {balanceMode === 'mensual' ? 'Resultado del mes' : 'Balance neto'}
+              </div>
+              <PillToggle
+                options={[{ value: 'mensual', label: 'Mensual' }, { value: 'acumulado', label: 'Acumulado' }]}
+                value={balanceMode}
+                onChange={setBalanceMode}
+                activeClassName="bg-[#20242c] text-[#f4f0e6]"
+              />
             </div>
             <div className="mt-1 font-mono text-[24px] font-semibold text-foreground">
-              {formatAmount(balanceNeto, { decimals: 0 })}
+              {balanceMostrado < 0 ? '− ' : ''}{formatAmount(Math.abs(balanceMostrado), { decimals: 0 })}
             </div>
-            <div className="font-mono text-[11px] text-[#8a8677]">{usdEquivalent}</div>
+            {balanceMode === 'acumulado' && (
+              <div className="font-mono text-[11px] text-[#8a8677]">{usdEquivalent}</div>
+            )}
           </div>
         </div>
 
@@ -235,20 +292,30 @@ const ModernDashboard = ({
           {/* Columna derecha */}
           <div className="flex flex-col gap-4">
 
-            {/* Gastos por categoría */}
+            {/* Gastos / Ingresos por categoría */}
             <div className="rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px]">
-              <h2 className="mb-3 font-serif text-[17px] font-semibold text-foreground">Gastos por categoría</h2>
-              {categoriasOrdenadas.length === 0 ? (
-                <EmptyState>Sin gastos en esta vista.</EmptyState>
+              <div className="mb-3 flex items-center justify-between gap-2">
+                <h2 className="font-serif text-[17px] font-semibold text-foreground">
+                  {donutMode === 'gastos' ? 'Gastos por categoría' : 'Ingresos por categoría'}
+                </h2>
+                <PillToggle
+                  options={[{ value: 'gastos', label: 'Gastos' }, { value: 'ingresos', label: 'Ingresos' }]}
+                  value={donutMode}
+                  onChange={setDonutMode}
+                  activeClassName="bg-[#20242c] text-[#f4f0e6]"
+                />
+              </div>
+              {donutData.length === 0 ? (
+                <EmptyState>Sin {donutMode === 'gastos' ? 'gastos' : 'ingresos'} en esta vista.</EmptyState>
               ) : (
                 <div className="flex items-center gap-4">
                   <CategoriaDonut
-                    categorias={categoriasOrdenadas}
-                    total={categoriasOrdenadas.reduce((sum, c) => sum + c.monto, 0)}
+                    categorias={donutData}
+                    total={donutTotal}
                     formatAmount={formatAmount}
                   />
                   <div className="grid flex-1 grid-cols-[1fr_auto] gap-x-3.5 gap-y-[5px] text-[12.5px]">
-                    {categoriasOrdenadas.map((c) => (
+                    {donutData.map((c) => (
                       <Fragment key={c.nombre}>
                         <span className="flex items-center gap-[7px] text-foreground">
                           <span className="h-[9px] w-[9px] shrink-0 rounded-sm" style={{ background: c.color }} />

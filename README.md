@@ -1,96 +1,78 @@
 <div align="center">
 
-# 💰 Sistema de Gastos Inteligente
+# Sistema de Gastos Inteligente
 
-### Finanzas personales full-stack, tema editorial "Papel"
+### App de finanzas personales, un solo usuario, tema editorial "Papel"
 
 [![React](https://img.shields.io/badge/React-18.2-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Docker](https://img.shields.io/badge/Docker-GitHub_Actions-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-
-[Quick start](#-quick-start) • [Tema Papel](#-tema-visual-papel) • [Autenticación y acceso externo](#-autenticación-y-acceso-externo) • [Arquitectura](#️-arquitectura) • [Base de datos](#-base-de-datos) • [Deploy](#-deploy-a-producción)
 
 </div>
 
 ---
 
-## 📖 Qué es
+## Qué es esto
 
-**Sistema de Gastos Inteligente** es una app de finanzas personales de un solo usuario (uso propio, no multi-tenant público): movimientos, vencimientos, préstamos, objetivos de ahorro, inversiones (CEDEARs, cotización dólar, monedas), todo con soporte multi-moneda (ARS/USD/EUR).
-
-La interfaz sigue el tema editorial **"Papel"** — libreta contable clara, sin glassmorphism ni dark mode — documentado en [`DESIGN.md`](./DESIGN.md) (tokens: color, tipografía, spacing, componentes) y [`PRODUCT.md`](./PRODUCT.md) (visión de producto y principios de diseño).
+Finanzas personales de un solo usuario (uso propio, no multi-tenant): movimientos, vencimientos, préstamos, objetivos de ahorro, inversiones (CEDEARs, cotización dólar, monedas), todo multi-moneda (ARS/USD/EUR). Corre en producción en `finanzas.qeva.xyz`, expone su API vía JWT o API key para que un agente externo la use directamente.
 
 ---
 
-## 🚀 Quick start
+## Quick path
 
-1. **Backend**: `cd backend && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt`, configurar `.env` (ver [Variables de entorno](#variables-de-entorno)), luego `uvicorn main:app --reload --port 8000`.
+1. **Backend**: `cd backend && python -m venv venv && source venv/bin/activate && pip install -r requirements.txt`, configurar `backend/.env` (ver tabla abajo), luego `uvicorn main:app --reload --port 8000`.
 2. **Frontend**: `cd frontend && npm install && npm run dev` → `http://localhost:5173`.
-3. **Verificación**: abrir el frontend, loguearse con Google (email debe estar en `AUTHORIZED_EMAILS` y existir en la tabla `usuarios` con `active = true`), confirmar que carga el dashboard.
+3. **Verificación**: loguearse con Google (el email debe estar en `AUTHORIZED_EMAILS` y existir en `usuarios` con `active = true`) y confirmar que carga el dashboard.
 
 ---
 
-## ✨ Características principales
+## Details
 
-| Sección (nav superior) | Qué incluye |
+### Features (nav superior)
+
+| Sección | Qué incluye |
 |---|---|
-| **Inicio** | Dashboard con balance en tiempo real, KPIs ingresos/gastos, widgets configurables |
-| **Movimientos** | Transacciones multi-moneda, categorías, comprobantes (MinIO), filtros y búsqueda |
-| **Vencimientos** | Tabs: Pagos pendientes (estado/prioridad/recurrencia, adjuntar factura y comprobante) y Préstamos (monto prestado/a devolver, fuente, vencimiento) |
-| **Objetivos** | Metas de ahorro con progreso visual y aportes |
-| **Inversiones** | Tabs: CEDEARs (Yahoo Finance), Cotización Dólar (oficial/blue/MEP/CCL), Monedas |
-| **Ajustes** | Tabs: General (widgets, modo de balance, **acceso API externo**), Categorías, Métodos de pago |
+| Inicio | Dashboard: balance neto, KPIs de ingresos/gastos, donut de gastos por categoría, evolución mensual |
+| Movimientos | Transacciones multi-moneda, categorías, comprobantes (MinIO), carga masiva por CSV |
+| Vencimientos | Pestañas: Pagos pendientes y Préstamos (monto prestado/a devolver, fuente, vencimiento) |
+| Objetivos | Metas de ahorro con progreso visual y aportes |
+| Inversiones | Pestañas: CEDEARs (Yahoo Finance), Cotización Dólar (oficial/blue/MEP/CCL), Monedas |
+| Ajustes | General (acceso API externo), Categorías, Métodos de pago |
 
-Reportes de bugs vía Linear (que vivía en Ajustes) se dio de baja — ya no es parte del producto.
-
----
-
-## 🎨 Tema visual "Papel"
-
-Editorial, calmo, "libreta contable" — reemplaza por completo el tema oscuro/glassmorphism anterior. Fondo página `#f4f0e6`, cards `#faf7ef`, texto principal `#20242c`, todos los valores numéricos en IBM Plex Mono, títulos en Fraunces, sin sombras decorativas.
-
-No se documenta la paleta acá para evitar que quede desincronizada — la fuente de verdad es **[`DESIGN.md`](./DESIGN.md)** (tokens completos) y **[`PRODUCT.md`](./PRODUCT.md)** (por qué se eligió este approach). Iconografía: [`reicon-react`](https://github.com/dqev/reicon) para el picker de categorías, `lucide-react` para el resto de la UI.
-
----
-
-## 🔐 Autenticación y acceso externo
-
-Hay dos formas de autenticarse contra la API — ambas resuelven al mismo `CurrentUser` en el backend (`app/core/dependencies.py`), así que cualquier endpoint funciona igual con cualquiera de las dos:
+### Auth (dos formas, mismo `CurrentUser`)
 
 | Mecanismo | Para qué | Duración | Cómo se obtiene |
 |---|---|---|---|
-| **JWT (Google OAuth)** | La web app | 24h (`ACCESS_TOKEN_EXPIRE_MINUTES`), sin refresh token | Login con Google en el frontend (`/auth/google`) |
-| **API key** (`fk_live_...`) | Agentes/scripts externos | Sin expiración, revocable individualmente | Ajustes → General → "Acceso API externo" → Generar token |
-
-Las API keys se guardan **hasheadas** (SHA-256) en la tabla `api_keys` — la key en texto plano se muestra una única vez al crearla y no queda persistida en ningún lado.
-
-**Generar una key** (Ajustes → General, o por curl con un JWT vigente):
+| JWT (Google OAuth) | La web app | 24h, sin refresh token | Login con Google en el frontend |
+| API key (`fk_live_...`) | Agentes/scripts externos | Sin expiración, revocable | Ajustes → General → "Acceso API externo" |
 
 ```bash
+# Generar una key (con un JWT vigente)
 curl -X POST https://finanzas.qeva.xyz/api/v1/api-keys/ \
   -H "Authorization: Bearer <TU_JWT>" -H "Content-Type: application/json" \
   -d '{"nombre": "Agente externo"}'
-# → { "key": "fk_live_...", ... }  (se muestra una sola vez, guardala)
-```
+# → { "key": "fk_live_...", ... }  se muestra una sola vez, guardala
 
-**Usarla** contra cualquier endpoint protegido:
-
-```bash
+# Usarla contra cualquier endpoint protegido
 curl https://finanzas.qeva.xyz/api/v1/categories/ -H "Authorization: Bearer fk_live_..."
 ```
 
-**Revocar**: mismo panel de Ajustes, botón "Revocar" junto a la key — o `DELETE /api/v1/api-keys/{id}` con el JWT del dueño.
+Las keys se guardan hasheadas (SHA-256) en `api_keys` — la key en texto plano nunca queda persistida.
 
-### Endpoints CRUD disponibles
+### API para agentes externos
 
-Todos bajo `/api/v1/...`, todos protegidos, todos con `GET /`, `GET /{id}`, `POST /`, `PATCH /{id}`, `DELETE /{id}`:
+El schema OpenAPI completo está expuesto en producción a propósito, para que un agente lo lea y se conecte solo:
+
+- **`https://finanzas.qeva.xyz/openapi.json`** — schema crudo, esto es lo que le das a un agente
+- **`https://finanzas.qeva.xyz/docs`** — Swagger UI interactivo, para uso humano
+
+Endpoints CRUD (todos bajo `/api/v1/...`, todos protegidos, todos con `GET /`, `GET /{id}`, `POST /`, `PATCH /{id}`, `DELETE /{id}`):
 
 | Recurso | Prefijo |
 |---|---|
-| Transacciones (gastos/ingresos) | `/api/v1/transacciones` *(también expone `/ingresos`, `/gastos`, `/estadisticas`, `/bulk-create`, `/bulk-delete`)* |
-| Carga masiva desde el agente | `POST /api/v1/transacciones/bulk-create` con `{ "transactions": [...] }` (hasta 1000 filas, respuesta con `created_count`/`failed_count`/`created_ids`/`errors`) |
+| Transacciones | `/api/v1/transacciones` *(+ `/ingresos`, `/gastos`, `/estadisticas`, `/bulk-create`, `/bulk-delete`)* |
+| Carga masiva desde el agente | `POST /api/v1/transacciones/bulk-create` con `{ "transactions": [...] }` (hasta 1000 filas; responde `created_count`/`failed_count`/`created_ids`/`errors`) |
 | Categorías | `/api/v1/categories` |
 | Métodos de pago | `/api/v1/payment-methods` |
 | Pagos pendientes | `/api/v1/pagos-pendientes` |
@@ -98,84 +80,59 @@ Todos bajo `/api/v1/...`, todos protegidos, todos con `GET /`, `GET /{id}`, `POS
 | Objetivos de ahorro | `/api/v1/objetivos` |
 | Presupuestos | `/api/v1/presupuestos` |
 | Monedas del usuario | `/api/v1/monedas-usuario` |
-| Balance neto | `/api/v1/balance-inicial` *(`GET /neto` para el cálculo, resto CRUD de la ancla)* |
+| Balance neto | `/api/v1/balance-inicial` *(`GET /neto` para el cálculo)* |
 | API keys | `/api/v1/api-keys` |
 
-Marcar un pago pendiente o un préstamo como pagado se hace con el endpoint genérico `POST /api/v1/pagos/registrar` (`item_type: 'pending_payment' | 'prestamo'`) — crea el gasto real en `transacciones` y actualiza el estado del origen.
+Marcar un pago pendiente o un préstamo como pagado usa el endpoint genérico `POST /api/v1/pagos/registrar` (`item_type: 'pending_payment' | 'prestamo'`) — crea el gasto real en `transacciones` y actualiza el estado del origen.
 
----
-
-## 🏗️ Arquitectura
+### Arquitectura
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         INTERNET (HTTPS)                        │
-└──────────────────────────┬──────────────────────────────────────┘
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                  TRAEFIK (Reverse Proxy + SSL)                  │
-└────────┬─────────────────────────┬──────────────────────────────┘
-         ▼                         ▼
-┌─────────────────┐      ┌──────────────────────┐
-│   FRONTEND      │      │      BACKEND         │
-│ React 18 + Vite │◄────►│  FastAPI + Uvicorn    │
-│ Nginx (build)   │      │  Router → Repository  │
-└─────────────────┘      └──────┬───────────────┘
-                                ▼               ▼
-                        ┌────────────┐    ┌──────────┐
-                        │ PostgreSQL │    │  MinIO   │
-                        │ (SQLAlchemy)│   │  (S3)   │
-                        └────────────┘    └──────────┘
+INTERNET (HTTPS) → Traefik (proxy + SSL)
+                       ├─ Frontend: React 18 + Vite, servido por Nginx
+                       └─ Backend:  FastAPI + Uvicorn
+                                       ├─ PostgreSQL (SQLAlchemy, UUID PK)
+                                       └─ MinIO (S3, comprobantes/facturas)
 ```
 
-Patrón backend: `router` (FastAPI, valida `CurrentUser`) → `repository` (SQLAlchemy `Session`, scoping por `usuario_id`) — sin capa de service intermedia para los CRUDs simples (ver `app/routers/categories.py` como referencia del patrón).
+Patrón backend: `router` (FastAPI, valida `CurrentUser`) → `repository` (SQLAlchemy `Session`, scoping por `usuario_id`) — sin capa de service para CRUDs simples (ver `app/routers/categories.py` como referencia).
 
 ### Tech stack
 
 | Capa | Stack |
 |---|---|
-| Frontend | React 18.2 + Vite, Tailwind CSS 3.4, `@tanstack/react-query`, `reicon-react` + `lucide-react`, Recharts |
-| Backend | FastAPI + Uvicorn, SQLAlchemy 2.x (ORM), Alembic (migraciones), Pydantic v2 |
+| Frontend | React 18.2 + Vite 5, Tailwind CSS 3.4, `@tanstack/react-query`, Recharts, `reicon-react` + `lucide-react` |
+| Backend | FastAPI 0.104+, Uvicorn, SQLAlchemy 2.x, Alembic, Pydantic v2 |
 | Base de datos | PostgreSQL 16, UUID como PK en todas las tablas |
 | Archivos | MinIO (S3-compatible) para comprobantes/facturas |
-| Auth | Google OAuth2 (JWT) + API keys propias (`fk_live_...`) |
-| Infra | Docker + Traefik, deploy vía GitHub Actions → GHCR → Portainer webhook (release-gated) |
+| Auth | Google OAuth2 (JWT) + API keys propias |
+| Infra | Docker + Traefik, deploy vía GitHub Actions → Docker Hub → Portainer webhook |
 
----
+### Base de datos
 
-## 💾 Base de datos
-
-Tablas reales (`backend/app/models/db_models.py`), UUID PK en todas, todas con FK a `usuarios` salvo donde se indica:
+Tablas en `backend/app/models/db_models.py`, UUID PK, todas con FK a `usuarios` salvo donde se indica:
 
 | Tabla | Contenido |
 |---|---|
-| `usuarios` | Cuenta, email autorizado, preferencias (moneda, timezone, tema) |
+| `usuarios` | Cuenta, email autorizado, preferencias |
 | `transacciones` | Movimientos — monto, moneda, tipo, categoría, método de pago, `es_credito` |
 | `categorias` | Nombre, tipo (ingreso/gasto), color, ícono |
 | `metodos_pago` | Nombre, tipo, color, ícono, activo |
-| `pagospendientes` | Vencimientos — estado, prioridad, recurrencia, adjuntos (factura/comprobante) |
-| `prestamos` | Préstamos recibidos — monto prestado, monto a devolver, vencimiento, fuente/prestamista |
+| `pagospendientes` | Vencimientos — estado, prioridad, recurrencia, adjuntos |
+| `prestamos` | Préstamos recibidos — monto prestado, monto a devolver, vencimiento, fuente |
 | `objetivos_ahorro` / `aportes_objetivo` | Metas de ahorro y sus aportes |
 | `objetivos_financieros` | Objetivos financieros generales |
 | `presupuestos` | Límites por categoría |
 | `monedas_usuario` | Monedas habilitadas por el usuario |
 | `tipos_cambio` | Cotizaciones históricas |
-| `balance_inicial_mes` | Ancla del Balance Neto — saldo inicial configurado por mes/moneda |
+| `balance_inicial_mes` | Ancla del Balance Neto — saldo inicial por mes/moneda |
 | `api_keys` | Tokens de acceso externo — `key_hash` (SHA-256), nunca la key en texto plano |
 
-Migraciones en `backend/alembic/`, pero **no se corren automáticamente** (no hay paso de `alembic upgrade` en CI/deploy) — cambios de esquema se aplican a mano contra la instancia real.
-
----
-
-## ⚙️ Instalación
-
-### Prerrequisitos
-
-Node.js 18+, Python 3.11+, PostgreSQL 16, cuenta de MinIO (o compatible S3), credenciales OAuth de Google.
+Migraciones en `backend/alembic/`, pero **no se corren automáticamente** — no hay `alembic upgrade` en CI/deploy, los cambios de esquema se aplican a mano contra la instancia real.
 
 ### Variables de entorno
 
-**Backend** (`backend/.env`) — ver `app/core/config.py` para la lista completa; las claves principales:
+**`backend/.env`** (ver `app/core/config.py` para la lista completa):
 
 ```env
 SECRET_KEY=...
@@ -193,76 +150,55 @@ DEV_FRONTEND_URL=http://localhost:3000
 DEV_BACKEND_URL=http://localhost:8000
 ```
 
-**Frontend** (`frontend/.env`):
+**`frontend/.env`**:
 
 ```env
 VITE_API_URL=http://localhost:8000
 ```
 
-### Backend
+### Deploy a producción
+
+`.github/workflows/deploy.yml` se dispara **solo con un Release publicado** (`release: types: [published]`) o manualmente (`workflow_dispatch`) — un `push` a `main` por sí solo **no** despliega nada.
 
 ```bash
-cd backend
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-uvicorn main:app --reload --host 127.0.0.1 --port 8000
+git tag vX.Y.Z && git push origin vX.Y.Z
+gh release create vX.Y.Z --generate-notes
 ```
 
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev   # http://localhost:5173
-```
-
----
-
-## 🚀 Deploy a producción
-
-`.github/workflows/deploy.yml` — se dispara con `push` a `main` o manualmente (`workflow_dispatch`):
-
-1. Build de imágenes backend + frontend, push a Docker Hub (`ferc33/finanzas-backend`, `ferc33/finanzas-frontend`), tag `vYYYYMMDD-<sha>` + `latest`.
+1. Build de imágenes backend + frontend, push a Docker Hub (`ferc33/finanzas-backend`, `ferc33/finanzas-frontend`), tag `vX.Y.Z` + `latest`.
 2. Llama al webhook de Portainer para redeploy del stack.
 
-No corre migraciones de base de datos — cambios de esquema (como la tabla `api_keys`) se aplican manualmente antes de mergear el código que los usa.
+No corre migraciones de base de datos — los cambios de esquema se aplican manualmente antes de cortar el release que los usa.
 
 ---
 
-## 🗺️ Roadmap
+## Checklist para levantar el entorno local
 
-- [x] Dashboard, transacciones multi-moneda, objetivos, vencimientos, préstamos
-- [x] Autenticación con Google OAuth
-- [x] Migraciones con Alembic
-- [x] Tema "Papel" (rediseño completo, reemplaza el tema oscuro)
-- [x] API keys de larga duración para acceso externo
-- [x] Balance neto real (mes a mes, con ancla configurable)
-- [ ] Notificaciones push de vencimientos
-- [ ] Exportación de reportes en PDF
-- [ ] Modo offline con sync
+- [ ] Node.js 18+, Python 3.11+, PostgreSQL 16 y una cuenta MinIO (o S3-compatible) instalados
+- [ ] Credenciales OAuth de Google creadas (`GOOGLE_CLIENT_ID`/`SECRET`)
+- [ ] `backend/.env` y `frontend/.env` completos
+- [ ] Tu email agregado a `AUTHORIZED_EMAILS` y con una fila en `usuarios` (`active = true`)
+- [ ] Backend corriendo (`uvicorn main:app --reload`) y `python -c "from main import app"` sin errores
+- [ ] Frontend corriendo (`npm run dev`) y `npm run build` sin errores
+- [ ] Login con Google funciona y el dashboard carga datos
 
 ---
 
-## 🤝 Convenciones de código
+## Next step
 
-- **Frontend**: componentes funcionales, Tailwind utility-first, patrón `Modern*View.jsx` para vistas de sección
-- **Backend**: `router` → `repository` (SQLAlchemy `Session`), sin capa de service para CRUDs simples
-- **Commits**: Conventional Commits (`feat:`, `fix:`, `docs:`, etc.), sin atribución de IA
-- **Diseño**: cualquier UI nueva sigue [`DESIGN.md`](./DESIGN.md) — no reintroducir dark mode/glassmorphism
-
----
-
-## 📚 Documentación relacionada
-
-- [`DESIGN.md`](./DESIGN.md) — tokens de diseño del tema Papel
-- [`PRODUCT.md`](./PRODUCT.md) — visión de producto y principios
+- [`DESIGN.md`](./DESIGN.md) — tokens de diseño del tema Papel (fuente de verdad, no duplicar acá)
+- [`PRODUCT.md`](./PRODUCT.md) — visión de producto y principios de diseño
 - [`AGENTS.md`](./AGENTS.md) — guía para agentes IA trabajando en este repo
 - [`design_handoff_rediseno_papel/`](./design_handoff_rediseno_papel/) — handoff original del rediseño
 
+**Convenciones de código**: componentes funcionales + Tailwind utility-first en frontend (`Modern*View.jsx` por sección), `router → repository` sin service intermedio en backend, Conventional Commits sin atribución de IA, ninguna UI nueva reintroduce dark mode/glassmorphism.
+
 ---
 
-## 👨‍💻 Autor
+<div align="center">
 
 **Fernando Ariel Cassera** (fer336) — [GitHub](https://github.com/fer336) · [LinkedIn](https://www.linkedin.com/in/fcassera) · fcassera@protonmail.com
 
 Uso personal. Para uso comercial, contactar al autor.
+
+</div>

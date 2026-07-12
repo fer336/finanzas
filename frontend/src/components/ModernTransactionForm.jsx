@@ -84,7 +84,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
         setTransactionType(editingTransaction.tipo || 'ingreso');
         setFormData({
           description: editingTransaction.descripcion || '',
-          amount: editingTransaction.monto || '',
+          amount: editingTransaction.monto != null ? Math.abs(editingTransaction.monto) : '',
           currency: editingTransaction.moneda || 'ARS',
           category: editingTransaction.categoria_id || '',
           paymentMethod: editingTransaction.metodo_pago_id || '',

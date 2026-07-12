@@ -66,6 +66,7 @@ El schema OpenAPI completo está expuesto en producción a propósito, para que 
 
 - **`https://finanzas.qeva.xyz/openapi.json`** — schema crudo, esto es lo que le das a un agente
 - **`https://finanzas.qeva.xyz/docs`** — Swagger UI interactivo, para uso humano
+- **[`API_AGENTS.md`](./API_AGENTS.md)** — gotchas de negocio que el schema no explica (signo de montos, `pagos/registrar`, carga masiva)
 
 Endpoints CRUD (todos bajo `/api/v1/...`, todos protegidos, todos con `GET /`, `GET /{id}`, `POST /`, `PATCH /{id}`, `DELETE /{id}`):
 

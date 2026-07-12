@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Plus, Search, Download, Upload, Edit, Trash2,
+  Plus, Search, Download, Upload, Edit, Trash2, Eye,
   ChevronLeft, ChevronRight, CalendarDays,
   ChevronDown, Check, RefreshCw,
 } from 'lucide-react';
@@ -537,6 +537,7 @@ const ModernTransactionsView = ({
               const monto       = Math.abs(t.monto || t.monto_ars || 0);
               const rowId       = t.id || t.Id;
               const pillColor   = esIngreso ? '#476442' : '#a04a34';
+              const comprobanteUrl = t.archivo_adjunto || t.ArchivoAdjunto || t.comprobante || t.Comprobante || '';
 
               return (
                 <div key={rowId} className="rounded-md border border-[#ddd5c2] bg-card px-3.5 py-3">
@@ -560,6 +561,15 @@ const ModernTransactionsView = ({
                     </div>
                   </div>
                   <div className="mt-2.5 flex justify-end gap-3 border-t border-dashed border-[#e7e0cf] pt-2">
+                    {comprobanteUrl && (
+                      <button
+                        onClick={e => { e.stopPropagation(); window.open(comprobanteUrl, '_blank', 'noopener,noreferrer'); }}
+                        className="p-1 text-[#8a8677] hover:text-foreground"
+                        title="Ver comprobante"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    )}
                     <button
                       onClick={() => onEditTransaction && onEditTransaction(t)}
                       className="p-1 text-[#8a8677] hover:text-foreground"
@@ -836,6 +846,7 @@ const ModernTransactionsView = ({
                   const monto       = Math.abs(t.monto || t.monto_ars || 0);
                   const rowId       = t.id || t.Id;
                   const pillColor   = esIngreso ? '#476442' : '#a04a34';
+                  const comprobanteUrl = t.archivo_adjunto || t.ArchivoAdjunto || t.comprobante || t.Comprobante || '';
 
                   return (
                     <tr key={rowId} className="group border-b border-[#e7e0cf] hover:bg-[#f0ead9] transition-colors">
@@ -854,6 +865,15 @@ const ModernTransactionsView = ({
                       </td>
                       <td className="px-3.5 py-2.5">
                         <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {comprobanteUrl && (
+                            <button
+                              onClick={e => { e.stopPropagation(); window.open(comprobanteUrl, '_blank', 'noopener,noreferrer'); }}
+                              className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
+                              title="Ver comprobante"
+                            >
+                              <Eye className="w-4 h-4 text-[#8a8677]" />
+                            </button>
+                          )}
                           <button
                             onClick={() => onEditTransaction && onEditTransaction(t)}
                             className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"

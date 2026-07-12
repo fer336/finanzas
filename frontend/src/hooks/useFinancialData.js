@@ -230,8 +230,11 @@ export const useCreatePrestamo = () => {
   return useMutation({
     mutationFn: (data) => apiServices.prestamosApi.create(data),
     onSuccess: () => {
+      // Crear un préstamo también crea la transacción de ingreso vinculada
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.prestamos] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.dashboardStats] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.transactions] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.balanceNeto] });
     },
   });
 };
@@ -254,8 +257,11 @@ export const useDeletePrestamo = () => {
   return useMutation({
     mutationFn: (id) => apiServices.prestamosApi.delete(id),
     onSuccess: () => {
+      // Eliminar un préstamo también borra la transacción de ingreso vinculada
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.prestamos] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.dashboardStats] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.transactions] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.balanceNeto] });
     },
   });
 };

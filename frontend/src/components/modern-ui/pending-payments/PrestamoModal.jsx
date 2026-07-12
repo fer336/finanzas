@@ -13,6 +13,7 @@ const PrestamoModal = ({ isOpen, onClose, onSave, prestamo = null }) => {
     monto_prestado: '',
     monto_a_devolver: '',
     moneda: 'ARS',
+    fecha_prestamo: new Date().toISOString().split('T')[0],
     fecha_vencimiento: new Date().toISOString().split('T')[0],
     notas: '',
   });
@@ -25,6 +26,7 @@ const PrestamoModal = ({ isOpen, onClose, onSave, prestamo = null }) => {
         monto_prestado: prestamo?.monto_prestado ?? '',
         monto_a_devolver: prestamo?.monto_a_devolver ?? '',
         moneda: prestamo?.moneda || 'ARS',
+        fecha_prestamo: (prestamo?.fecha_prestamo || '').split('T')[0] || new Date().toISOString().split('T')[0],
         fecha_vencimiento: (prestamo?.fecha_vencimiento || '').split('T')[0] || new Date().toISOString().split('T')[0],
         notas: prestamo?.notas || '',
       });
@@ -135,6 +137,17 @@ const PrestamoModal = ({ isOpen, onClose, onSave, prestamo = null }) => {
                   <option value="USD">USD - Dólares</option>
                   <option value="EUR">EUR - Euros</option>
                 </select>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[12.5px] font-medium text-[#5d6470]">Fecha del préstamo</label>
+                <input
+                  type="date"
+                  value={formData.fecha_prestamo}
+                  onChange={(e) => setFormData({ ...formData, fecha_prestamo: e.target.value })}
+                  className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 font-mono text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  required
+                />
+                <p className="text-[11px] text-[#8a8677]">Cuándo recibiste el dinero — se registra como ingreso en Movimientos.</p>
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="text-[12.5px] font-medium text-[#5d6470]">Fecha de vencimiento</label>

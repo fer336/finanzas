@@ -16,7 +16,18 @@ import apiServices from '../services/api';
 import dolarService, { TIPOS_DOLAR } from '../services/dolarService';
 import FileUpload from './FileUpload/FileUpload';
 
-const { transaccionesApi, categoriasApi, metodosPagoApi, objetivosApi, monedasApi } = apiServices;
+const { transaccionesApi, categoriasApi, metodosPagoApi, objetivosApi, monedasApi, pagosPendientesApi } = apiServices;
+
+const FRECUENCIAS_RECURRENCIA = ['semanal', 'mensual', 'anual'];
+
+function proximaFechaVencimiento(fechaBase, frecuencia) {
+  const [y, m, d] = fechaBase.split('-').map(Number);
+  const fecha = new Date(y, m - 1, d);
+  if (frecuencia === 'semanal') fecha.setDate(fecha.getDate() + 7);
+  else if (frecuencia === 'anual') fecha.setFullYear(fecha.getFullYear() + 1);
+  else fecha.setMonth(fecha.getMonth() + 1); // mensual (default)
+  return fecha.toISOString().split('T')[0];
+}
 
 const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction }) => {
   const [transactionType, setTransactionType] = useState('ingreso');
@@ -35,6 +46,8 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
     objetivo: '', // 🎯 Nuevo campo para objetivo de ahorro
     esAporteObjetivo: true, // 🎯 Si es aporte (suma) o uso (resta) del objetivo
     esCredito: false, // 💳 Si es gasto con tarjeta de crédito
+    esRecurrente: false, // 🔁 Si es un gasto fijo (crea un vencimiento futuro)
+    frecuenciaRecurrente: 'mensual',
     date: new Date().toISOString().split('T')[0],
     notes: '',
     archivoAdjunto: '', // URL of the attached file
@@ -91,7 +104,9 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
           objetivo: editingTransaction.objetivo_id || '', // 🎯 Cargar objetivo si existe
           esAporteObjetivo: editingTransaction.es_aporte_objetivo !== false, // 🎯 Por defecto true
           esCredito: editingTransaction.es_credito || false, // 💳 Cargar si es crédito
-          date: editingTransaction.fecha_transaccion 
+          esRecurrente: false, // 🔁 No se retroactiva al editar
+          frecuenciaRecurrente: 'mensual',
+          date: editingTransaction.fecha_transaccion
             ? new Date(editingTransaction.fecha_transaccion).toISOString().split('T')[0]
             : new Date().toISOString().split('T')[0],
           notes: editingTransaction.notas || '',
@@ -108,6 +123,8 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
           objetivo: '', // 🎯 Vacío por defecto
           esAporteObjetivo: true, // 🎯 Por defecto es aporte (suma)
           esCredito: false, // 💳 Por defecto NO es crédito
+          esRecurrente: false, // 🔁 Por defecto NO es recurrente
+          frecuenciaRecurrente: 'mensual',
           date: new Date().toISOString().split('T')[0],
           notes: '',
           archivoAdjunto: '',
@@ -169,6 +186,8 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
       objetivo: '', // 🎯 Reset objetivo
       esAporteObjetivo: true, // 🎯 Reset a aporte por defecto
       esCredito: false, // 💳 Reset crédito
+      esRecurrente: false, // 🔁 Reset recurrente
+      frecuenciaRecurrente: 'mensual',
       date: new Date().toISOString().split('T')[0],
       notes: ''
     });
@@ -236,6 +255,27 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
         console.log('Creating new transaction:', transactionData);
         const result = await transaccionesApi.create(transactionData);
         if (onSuccess) onSuccess({ ...transactionData, id: result.id });
+
+        // 🔁 Gasto fijo/recurrente: además de la transacción (lo que ya se
+        // pagó), se crea el próximo vencimiento en Pagos Pendientes para
+        // que no se pierda de vista el mes que viene.
+        if (transactionType === 'gasto' && formData.esRecurrente) {
+          try {
+            await pagosPendientesApi.create({
+              nombre: formData.description.trim(),
+              monto: Math.abs(parseFloat(formData.amount)),
+              moneda: formData.currency,
+              fechavencimiento: proximaFechaVencimiento(formData.date, formData.frecuenciaRecurrente),
+              categorias_id: formData.category || null,
+              notas: `Generado automáticamente desde el gasto "${formData.description.trim()}" (${formData.date})`,
+              recurrente: true,
+              frecuencia_recurrencia: formData.frecuenciaRecurrente,
+              estado: 'pendiente'
+            });
+          } catch (recurrenteError) {
+            console.error('Error creando el próximo vencimiento recurrente:', recurrenteError);
+          }
+        }
       }
 
       handleCancel();
@@ -577,6 +617,48 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                   />
                   <div className="h-6 w-11 rounded-full bg-[#ddd5c2] transition-colors duration-150 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full" />
                 </label>
+              </div>
+            )}
+
+            {transactionType === 'gasto' && (
+              <div className="rounded-sm border border-[#ddd5c2] bg-white p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-[13.5px] font-medium text-foreground">Gasto fijo / recurrente</span>
+                    <span className="text-[12px] text-[#8a8677]">Crea el próximo vencimiento en Pagos Pendientes (ej: alquiler, luz, streaming)</span>
+                  </div>
+                  <label className="relative inline-flex shrink-0 cursor-pointer items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.esRecurrente}
+                      onChange={(e) => setFormData(prev => ({ ...prev, esRecurrente: e.target.checked }))}
+                      className="peer sr-only"
+                    />
+                    <div className="h-6 w-11 rounded-full bg-[#ddd5c2] transition-colors duration-150 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full" />
+                  </label>
+                </div>
+
+                {formData.esRecurrente && (
+                  <div className="mt-3 flex items-center gap-2 border-t border-[#e7e0cf] pt-3">
+                    <span className="text-[12.5px] text-[#5d6470]">Frecuencia</span>
+                    <div className="flex gap-1.5">
+                      {FRECUENCIAS_RECURRENCIA.map((freq) => (
+                        <button
+                          key={freq}
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, frecuenciaRecurrente: freq }))}
+                          className={`rounded-sm border px-3 py-1 text-[12.5px] font-medium capitalize transition-colors duration-150 ${
+                            formData.frecuenciaRecurrente === freq
+                              ? 'border-primary bg-[#f0ead9] font-semibold text-foreground'
+                              : 'border-[#ddd5c2] bg-white text-[#5d6470] hover:bg-[#f0ead9]'
+                          }`}
+                        >
+                          {freq}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </section>

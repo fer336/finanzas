@@ -140,6 +140,17 @@ const ModernTransactionsView = ({
   // Multi-meses para modo acumulado
   const [selectedMonths, setSelectedMonths] = useState(loadSelectedMonths);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
+
+  // Al pasar a Acumulado, tildar automáticamente enero → mes actual (antes
+  // arrancaba con un único mes tildado, dando la falsa impresión de que el
+  // balance de meses previos "no sumaba"). El usuario puede destildar a mano.
+  const handleViewModeChange = (mode) => {
+    if (mode === 'accumulated' && viewMode !== 'accumulated') {
+      const nowMonth = new Date().getMonth() + 1;
+      setSelectedMonths(Array.from({ length: nowMonth }, (_, i) => i + 1));
+    }
+    setViewMode(mode);
+  };
   const monthPickerRef = useRef(null);
   const itemsPerPage = 15;
 
@@ -378,7 +389,7 @@ const ModernTransactionsView = ({
             <PillToggle
               options={[{ value: 'monthly', label: 'Mensual' }, { value: 'accumulated', label: 'Acumulado' }]}
               value={viewMode}
-              onChange={setViewMode}
+              onChange={handleViewModeChange}
               activeClassName="bg-[#20242c] text-[#f4f0e6]"
             />
           </div>
@@ -642,7 +653,7 @@ const ModernTransactionsView = ({
             <PillToggle
               options={[{ value: 'monthly', label: 'Mensual' }, { value: 'accumulated', label: 'Acumulado' }]}
               value={viewMode}
-              onChange={setViewMode}
+              onChange={handleViewModeChange}
               activeClassName="bg-[#20242c] text-[#f4f0e6]"
             />
 

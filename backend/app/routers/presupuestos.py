@@ -202,17 +202,17 @@ async def delete_presupuesto(
 @router.post("/analyze-purchase")
 async def analyze_purchase(
     data: Dict[str, Any],
+    current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
 ):
     """
     Analyze if a purchase fits within budget
-    
+
     Body:
         - monto: float (required)
         - categoria_id: str (optional)
         - fecha: str (optional, default: today)
-        - usuario_id: str (optional)
-    
+
     Returns:
         - tiene_presupuesto: bool
         - puede_comprar: bool
@@ -220,22 +220,21 @@ async def analyze_purchase(
     """
     try:
         repo = PresupuestoRepository(db)
-        
+
         monto = data.get('monto')
         if not monto:
             raise HTTPException(status_code=400, detail="El campo 'monto' es requerido")
-        
+
         categoria_id = UUID(data['categoria_id']) if data.get('categoria_id') else None
-        usuario_id = UUID(data['usuario_id']) if data.get('usuario_id') else None
         fecha = date.fromisoformat(data['fecha']) if data.get('fecha') else date.today()
-        
+
         result = repo.analyze_purchase(
             monto=float(monto),
             categoria_id=categoria_id,
             fecha=fecha,
-            usuario_id=usuario_id
+            usuario_id=current_user.id
         )
-        
+
         return result
         
     except HTTPException:

@@ -188,9 +188,7 @@ No corre migraciones de base de datos — los cambios de esquema se aplican manu
 ## Next step
 
 - [`DESIGN.md`](./DESIGN.md) — tokens de diseño del tema Papel (fuente de verdad, no duplicar acá)
-- [`PRODUCT.md`](./PRODUCT.md) — visión de producto y principios de diseño
-- [`AGENTS.md`](./AGENTS.md) — guía para agentes IA trabajando en este repo
-- [`design_handoff_rediseno_papel/`](./design_handoff_rediseno_papel/) — handoff original del rediseño
+- [`API_AGENTS.md`](./API_AGENTS.md) — guía de la API para agentes externos
 
 **Convenciones de código**: componentes funcionales + Tailwind utility-first en frontend (`Modern*View.jsx` por sección), `router → repository` sin service intermedio en backend, Conventional Commits sin atribución de IA, ninguna UI nueva reintroduce dark mode/glassmorphism.
 

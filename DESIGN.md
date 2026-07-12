@@ -79,4 +79,4 @@ Sin gradientes, sin glassmorphism. Sombras: ninguna — la profundidad se logra 
 
 ## Sources of truth
 
-Tokens tomados literalmente de `design_handoff_rediseno_papel/README.md` y `reference-papel.html`. Lógica de datos y filtros de referencia en `design_handoff_rediseno_papel/datos-ejemplo.html`.
+Este archivo (`DESIGN.md`) es la fuente de verdad de los tokens del tema Papel — el handoff original del rediseño ya no vive en el repo.

@@ -1,5 +1,4 @@
 import { Suspense, lazy, useState, useEffect } from 'react';
-import TrendUp2 from 'reicon-react/icons/TrendUp2';
 import { useAuth } from './components/auth/auth-provider';
 import { LoginButton } from './components/auth/login-button';
 import { ConnectionStatus } from './components/connection-status';
@@ -69,7 +68,7 @@ function App() {
               className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl"
               style={{ backgroundColor: '#20242c' }}
             >
-              <TrendUp2 size={26} color="#e9c46a" />
+              <img src="/favicon.svg" alt="" className="h-[26px] w-[26px]" />
             </div>
             <h1 className="font-serif text-[28px] font-bold text-foreground tracking-tight">
               Finance<span className="text-[#b35a42]">.</span>

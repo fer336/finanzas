@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!-- Favicon Finance — ícono TrendUp2 (reicon-react), tema Papel -->
+<!-- Favicon Finance — ícono búho (icons8 softteal), embebido como PNG -->
 <svg
    version="1.1"
    id="svg1"
    width="64"
    height="64"
-   viewBox="0 0 24 24"
-   xmlns="http://www.w3.org/2000/svg">
-  <rect width="24" height="24" rx="6" fill="#20242c" />
-  <path d="M16.5 9.5L12.3 13.7L10.7 11.3L7.5 14.5" stroke="#e9c46a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-  <path d="M14.5 9.5H16.5V11.5" stroke="#e9c46a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+   viewBox="0 0 64 64"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink">
+  <image width="64" height="64" xlink:href="data:image/png;base64,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" />
 </svg>

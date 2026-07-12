@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Skeleton } from '../../ui/skeleton';
+import CategoriaDonut from './CategoriaDonut';
 import { useDashboardHomeData } from './useDashboardHomeData';
 import { useBalanceNeto } from '../../../hooks/useFinancialData';
 
@@ -164,13 +165,14 @@ const MobileDashboardHome = ({
         {categoriasOrdenadas.length === 0 ? (
           <EmptyState>Sin gastos en esta vista.</EmptyState>
         ) : (
-          <>
-            <div className="mb-3 flex h-3.5 overflow-hidden rounded-full">
-              {categoriasOrdenadas.map((c) => (
-                <span key={c.nombre} style={{ width: `${c.pct}%`, background: c.color }} />
-              ))}
-            </div>
-            <div className="grid grid-cols-[1fr_auto] gap-x-3.5 gap-y-[5px] text-[12.5px]">
+          <div className="flex items-center gap-4">
+            <CategoriaDonut
+              categorias={categoriasOrdenadas}
+              total={categoriasOrdenadas.reduce((sum, c) => sum + c.monto, 0)}
+              formatAmount={formatAmount}
+              size={96}
+            />
+            <div className="grid flex-1 grid-cols-[1fr_auto] gap-x-3.5 gap-y-[5px] text-[12.5px]">
               {categoriasOrdenadas.map((c) => (
                 <Fragment key={c.nombre}>
                   <span className="flex items-center gap-[7px] text-foreground">
@@ -181,7 +183,7 @@ const MobileDashboardHome = ({
                 </Fragment>
               ))}
             </div>
-          </>
+          </div>
         )}
       </div>
 

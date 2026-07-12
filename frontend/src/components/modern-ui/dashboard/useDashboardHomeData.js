@@ -158,6 +158,24 @@ export function useDashboardHomeData({ transactions = [], pendingPayments = [], 
       color: getCategoryColor(index),
     }));
 
+  // ── Evolución mensual (últimos 6 meses, ingresos vs gastos) ──────────────
+  const evolucionMensual = (() => {
+    const meses = [];
+    for (let i = 5; i >= 0; i -= 1) {
+      const d = new Date(currentYear, currentMonth - i, 1);
+      meses.push({ year: d.getFullYear(), month: d.getMonth(), label: MESES[d.getMonth()].slice(0, 3) });
+    }
+    return meses.map(({ year, month, label }) => {
+      const delMes = transactions.filter((t) => {
+        const fecha = getTransactionDate(t);
+        return fecha && fecha.getMonth() === month && fecha.getFullYear() === year;
+      });
+      const ingresos = delMes.filter((t) => t.tipo === 'ingreso').reduce((sum, t) => sum + getTransactionAmount(t), 0);
+      const gastos = delMes.filter((t) => t.tipo === 'gasto').reduce((sum, t) => sum + getTransactionAmount(t), 0);
+      return { mes: label, ingresos, gastos };
+    });
+  })();
+
   // ── Aviso vencimientos ────────────────────────────────────────────────────
   const pendientesActivos = pendingPayments
     .map((p) => {
@@ -195,6 +213,7 @@ export function useDashboardHomeData({ transactions = [], pendingPayments = [], 
     kpis,
     movimientosRecientes,
     categoriasOrdenadas,
+    evolucionMensual,
     totalPendiente,
     pendientesActivos,
     proximoVencimiento,

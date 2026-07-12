@@ -1,11 +1,48 @@
 import { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useIsMobile } from '../../../hooks/use-mobile';
 import { Skeleton } from '../../ui/skeleton';
 import KpiCard from '../common/KpiCard';
 import MobileDashboardHome from './MobileDashboardHome';
+import CategoriaDonut from './CategoriaDonut';
 import { useDashboardHomeData } from './useDashboardHomeData';
 import { useBalanceNeto } from '../../../hooks/useFinancialData';
+
+/**
+ * EvolucionMensualChart — barras ingresos/gastos, últimos 6 meses.
+ */
+const EvolucionMensualChart = ({ data, formatAmount }) => (
+  <div className="h-[160px] w-full">
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart data={data} barGap={2}>
+        <XAxis
+          dataKey="mes"
+          axisLine={false}
+          tickLine={false}
+          tick={{ fontSize: 11, fill: '#8a8677', fontFamily: 'IBM Plex Mono, monospace' }}
+        />
+        <Tooltip
+          formatter={(value, name) => [formatAmount(value, { decimals: 0 }), name === 'ingresos' ? 'Ingresos' : 'Gastos']}
+          cursor={{ fill: 'rgba(32,36,44,.04)' }}
+          contentStyle={{
+            background: '#faf7ef',
+            border: '1px solid #ddd5c2',
+            borderRadius: 6,
+            fontSize: 12.5,
+          }}
+        />
+        <Bar dataKey="ingresos" fill="#5a7d52" radius={[3, 3, 0, 0]} maxBarSize={18} />
+        <Bar dataKey="gastos" fill="#b35a42" radius={[3, 3, 0, 0]} maxBarSize={18} />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+);
+
+EvolucionMensualChart.propTypes = {
+  data: PropTypes.array.isRequired,
+  formatAmount: PropTypes.func.isRequired,
+};
 
 /**
  * EmptyState — DESIGN.md "Estado vacío": itálico 13.5px #8a8677, nunca un
@@ -71,6 +108,7 @@ const ModernDashboard = ({
     kpis,
     movimientosRecientes,
     categoriasOrdenadas,
+    evolucionMensual,
     totalPendiente,
     pendientesActivos,
     proximoVencimiento,
@@ -203,13 +241,13 @@ const ModernDashboard = ({
               {categoriasOrdenadas.length === 0 ? (
                 <EmptyState>Sin gastos en esta vista.</EmptyState>
               ) : (
-                <>
-                  <div className="mb-3 flex h-3.5 overflow-hidden rounded-full">
-                    {categoriasOrdenadas.map((c) => (
-                      <span key={c.nombre} style={{ width: `${c.pct}%`, background: c.color }} />
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-[1fr_auto] gap-x-3.5 gap-y-[5px] text-[12.5px]">
+                <div className="flex items-center gap-4">
+                  <CategoriaDonut
+                    categorias={categoriasOrdenadas}
+                    total={categoriasOrdenadas.reduce((sum, c) => sum + c.monto, 0)}
+                    formatAmount={formatAmount}
+                  />
+                  <div className="grid flex-1 grid-cols-[1fr_auto] gap-x-3.5 gap-y-[5px] text-[12.5px]">
                     {categoriasOrdenadas.map((c) => (
                       <Fragment key={c.nombre}>
                         <span className="flex items-center gap-[7px] text-foreground">
@@ -220,7 +258,7 @@ const ModernDashboard = ({
                       </Fragment>
                     ))}
                   </div>
-                </>
+                </div>
               )}
             </div>
 
@@ -252,6 +290,18 @@ const ModernDashboard = ({
               )}
             </button>
           </div>
+        </div>
+
+        {/* ── Evolución mensual (últimos 6 meses) ── */}
+        <div className="mt-4 rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px]">
+          <div className="mb-3 flex items-center gap-4">
+            <h2 className="font-serif text-[17px] font-semibold text-foreground">Evolución mensual</h2>
+            <div className="flex items-center gap-3 text-[11.5px] text-[#5d6470]">
+              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[#5a7d52]" />Ingresos</span>
+              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[#b35a42]" />Gastos</span>
+            </div>
+          </div>
+          <EvolucionMensualChart data={evolucionMensual} formatAmount={formatAmount} />
         </div>
       </div>
     </div>

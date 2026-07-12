@@ -4,10 +4,20 @@ import { Search, Edit, Trash2, Check, ChevronLeft, ChevronRight, RefreshCw } fro
 import { Badge } from '../../ui/badge';
 import KpiCard from '../common/KpiCard';
 import ConfirmModal from '../common/ConfirmModal';
+import ModernPrestamosSection from './ModernPrestamosSection';
 import { usePendingPayments, QUERY_KEYS } from '../../../hooks/useFinancialData';
 import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
 import { useRefresh } from '../../../hooks/useRefresh';
 import { useIsMobile } from '../../../hooks/use-mobile';
+
+const SECTION_KEY = 'vencimientos_section'; // 'vencimientos' | 'prestamos'
+const loadSection = () => {
+  try {
+    return localStorage.getItem(SECTION_KEY) || 'vencimientos';
+  } catch {
+    return 'vencimientos';
+  }
+};
 
 // ─── Helpers de fecha ────────────────────────────────────────────────────────
 const parseDateSafe = (value) => {
@@ -75,11 +85,20 @@ const ModernPendingPaymentsView = ({
   onMarcarPagado,
   onEditPago,
   onDeletePago,
+  onNewPrestamo,
+  onEditPrestamo,
+  onDeletePrestamo,
+  onMarcarPagadoPrestamo,
 }) => {
   const { data: pagosData, isLoading, error } = usePendingPayments();
   const { refresh, isRefreshing } = useRefresh([QUERY_KEYS.pendingPayments]);
   const isMobile = useIsMobile();
   const { formatAmount } = useAmountVisibility();
+
+  const [section, setSection] = useState(loadSection);
+  useEffect(() => {
+    try { localStorage.setItem(SECTION_KEY, section); } catch { /* ignore */ }
+  }, [section]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('pending'); // all | pending | overdue | paid
@@ -190,6 +209,37 @@ const ModernPendingPaymentsView = ({
     </button>
   );
 
+  // ── Toggle de sección (Vencimientos / Préstamos) ─────────────────────────
+  const SectionToggle = () => (
+    <PillToggle
+      options={[{ value: 'vencimientos', label: 'Vencimientos' }, { value: 'prestamos', label: 'Préstamos' }]}
+      value={section}
+      onChange={setSection}
+      activeClassName="bg-[#20242c] text-[#f4f0e6]"
+    />
+  );
+
+  if (section === 'prestamos') {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="mx-auto max-w-[1100px] px-4 py-4 sm:px-[34px] sm:py-[28px]">
+          <div className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] ${isMobile ? 'mb-3 pb-3' : 'mb-[22px] pb-[18px]'}`}>
+            <h1 className={`font-serif font-bold leading-none text-foreground ${isMobile ? 'text-[26px]' : 'text-[42px]'}`}>Vencimientos</h1>
+          </div>
+          <div className="mb-4">
+            <SectionToggle />
+          </div>
+          <ModernPrestamosSection
+            onNewPrestamo={onNewPrestamo}
+            onEditPrestamo={onEditPrestamo}
+            onDeletePrestamo={onDeletePrestamo}
+            onMarcarPagado={onMarcarPagadoPrestamo}
+          />
+        </div>
+      </div>
+    );
+  }
+
   // ── Loading / error ──────────────────────────────────────────────────────
   if (isLoading) {
     return (
@@ -223,6 +273,10 @@ const ModernPendingPaymentsView = ({
           <div className="mb-3 flex items-end justify-between gap-3 border-b-[3px] border-double border-[#cfc6ae] pb-3">
             <h1 className="font-serif text-[26px] font-bold leading-none text-foreground">Vencimientos</h1>
             <RefreshButton />
+          </div>
+
+          <div className="mb-3">
+            <SectionToggle />
           </div>
 
           <div className="mb-3">
@@ -374,6 +428,10 @@ const ModernPendingPaymentsView = ({
         <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px]">
           <h1 className="font-serif text-[42px] font-bold leading-none text-foreground">Vencimientos</h1>
           <RefreshButton />
+        </div>
+
+        <div className="mb-4">
+          <SectionToggle />
         </div>
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -539,6 +597,10 @@ ModernPendingPaymentsView.propTypes = {
   onMarcarPagado: PropTypes.func,
   onEditPago: PropTypes.func,
   onDeletePago: PropTypes.func,
+  onNewPrestamo: PropTypes.func,
+  onEditPrestamo: PropTypes.func,
+  onDeletePrestamo: PropTypes.func,
+  onMarcarPagadoPrestamo: PropTypes.func,
 };
 
 export default ModernPendingPaymentsView;

@@ -267,6 +267,35 @@ const pagosPendientesApi = {
 };
 
 // ═══════════════════════════════════════════════════════════════
+// 💸 PRÉSTAMOS API
+// ═══════════════════════════════════════════════════════════════
+const prestamosApi = {
+  async getAll(limit = 100, offset = 0) {
+    debugLog('💸 prestamosApi.getAll called:', { limit, offset });
+    const params = { limit, offset };
+    return await apiRequest('/prestamos', { params });
+  },
+
+  async getById(id) {
+    return await apiRequest(`/prestamos/${id}`);
+  },
+
+  async create(data) {
+    debugLog('📝 Creating préstamo:', data);
+    return await apiRequest('/prestamos', { method: 'POST', data });
+  },
+
+  async update(id, data) {
+    debugLog('✏️ Updating préstamo:', id, data);
+    return await apiRequest(`/prestamos/${id}`, { method: 'PATCH', data });
+  },
+
+  async delete(id) {
+    return await apiRequest(`/prestamos/${id}`, { method: 'DELETE' });
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
 // 📁 CATEGORÍAS API
 // ═══════════════════════════════════════════════════════════════
 const categoriasApi = {
@@ -635,6 +664,7 @@ const balanceInicialApi = {
 const apiServices = {
   transaccionesApi,
   pagosPendientesApi,
+  prestamosApi,
   categoriasApi,
   metodosPagoApi,
   presupuestosApi,

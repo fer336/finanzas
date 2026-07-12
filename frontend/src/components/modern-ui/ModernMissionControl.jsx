@@ -51,6 +51,8 @@ const BudgetModal = lazy(() => import('../modals/BudgetModal'));
 const AsignarDineroModal = lazy(() => import('../modals/AsignarDineroModal'));
 const ObjetivoFormModal = lazy(() => import('../mission-control/ObjetivoFormModal'));
 const StitchPendingPaymentModal = lazy(() => import('./pending-payments/StitchPendingPaymentModal'));
+const PrestamoModal = lazy(() => import('./pending-payments/PrestamoModal'));
+const PrestamoPayModal = lazy(() => import('./pending-payments/PrestamoPayModal'));
 const CurrencyModal = lazy(() => import('./common/modals/CurrencyModal').then(m => ({ default: m.CurrencyModal })));
 const PaymentMethodModal = lazy(() => import('./common/modals/PaymentMethodModal').then(m => ({ default: m.PaymentMethodModal })));
 const CategoryModal = lazy(() => import('./common/modals/CategoryModal').then(m => ({ default: m.CategoryModal })));
@@ -104,9 +106,9 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
     await Promise.all([
       queryClient.refetchQueries({ queryKey: [QUERY_KEYS.transactions] }),
       queryClient.refetchQueries({ queryKey: [QUERY_KEYS.pendingPayments] }),
+      queryClient.refetchQueries({ queryKey: [QUERY_KEYS.prestamos] }),
       queryClient.refetchQueries({ queryKey: [QUERY_KEYS.objetivos] }),
       queryClient.refetchQueries({ queryKey: [QUERY_KEYS.presupuestos] }),
-      queryClient.refetchQueries({ queryKey: [QUERY_KEYS.resumenes] }),
       queryClient.refetchQueries({ queryKey: [QUERY_KEYS.monedas] }),
       queryClient.refetchQueries({ queryKey: [QUERY_KEYS.categories] }),
       queryClient.refetchQueries({ queryKey: [QUERY_KEYS.paymentMethods] }),
@@ -153,6 +155,10 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   const [editingPendingPayment, setEditingPendingPayment] = useState(null);
   const [showPayPendingPaymentModal, setShowPayPendingPaymentModal] = useState(false);
   const [pendingPaymentToPay, setPendingPaymentToPay] = useState(null);
+  const [showPrestamoModal, setShowPrestamoModal] = useState(false);
+  const [editingPrestamo, setEditingPrestamo] = useState(null);
+  const [showPayPrestamoModal, setShowPayPrestamoModal] = useState(false);
+  const [prestamoToPay, setPrestamoToPay] = useState(null);
   const [showDeleteTransactionModal, setShowDeleteTransactionModal] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState(null);
   const isApplyingHistoryRef = useRef(false);
@@ -790,6 +796,36 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
     }
   };
 
+  const handleMarkPrestamoAsPaid = async (prestamo) => {
+    setPrestamoToPay(prestamo);
+    setShowPayPrestamoModal(true);
+  };
+
+  const handleConfirmPrestamoPayment = async (paymentPayload) => {
+    try {
+      await apiServices.pagosApi.registrarPago({
+        item_id: paymentPayload.item_id,
+        item_type: 'prestamo',
+        monto: paymentPayload.monto,
+        moneda: paymentPayload.moneda || 'ARS',
+        fecha_pago: paymentPayload.fecha_pago,
+        categoria_id: paymentPayload.categoria_id,
+        metodo_pago_id: paymentPayload.metodo_pago_id,
+        notas: paymentPayload.notas,
+        comprobante: paymentPayload.comprobante
+      });
+
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.prestamos] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.transactions] });
+      setShowPayPrestamoModal(false);
+      setPrestamoToPay(null);
+      console.log('✅ Devolución de préstamo registrada correctamente');
+    } catch (error) {
+      console.error('❌ Error registrando devolución de préstamo:', error);
+      throw error;
+    }
+  };
+
   const handleBulkUpload = () => {
     setShowBulkUpload(true);
   };
@@ -1149,6 +1185,24 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
               }
             }}
             onMarcarPagado={handleMarkPendingPaymentAsPaid}
+            onNewPrestamo={() => {
+              setEditingPrestamo(null);
+              setShowPrestamoModal(true);
+            }}
+            onEditPrestamo={(p) => {
+              setEditingPrestamo(p);
+              setShowPrestamoModal(true);
+            }}
+            onDeletePrestamo={async (id) => {
+              try {
+                await apiServices.prestamosApi.delete(id);
+                queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.prestamos] });
+              } catch (error) {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+              }
+            }}
+            onMarcarPagadoPrestamo={handleMarkPrestamoAsPaid}
           />
         );
 
@@ -1631,6 +1685,55 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
               setPendingPaymentToPay(null);
             }}
             onConfirm={handleConfirmPendingPayment}
+          />
+        </Suspense>
+      )}
+
+      {/* Préstamo Form Modal */}
+      {showPrestamoModal && (
+        <Suspense fallback={null}>
+          <PrestamoModal
+            isOpen={showPrestamoModal}
+            onClose={() => {
+              setShowPrestamoModal(false);
+              setEditingPrestamo(null);
+            }}
+            onSave={async (prestamoData) => {
+              try {
+                if (editingPrestamo) {
+                  await apiServices.prestamosApi.update(editingPrestamo.id, prestamoData);
+                  console.log('✅ Préstamo actualizado');
+                } else {
+                  await apiServices.prestamosApi.create(prestamoData);
+                  console.log('✅ Préstamo creado');
+                }
+
+                await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.prestamos] });
+                setShowPrestamoModal(false);
+                setEditingPrestamo(null);
+              } catch (error) {
+                console.error('❌ Error:', error);
+                alert('Error: ' + error.message);
+                throw error;
+              }
+            }}
+            prestamo={editingPrestamo}
+          />
+        </Suspense>
+      )}
+
+      {showPayPrestamoModal && (
+        <Suspense fallback={null}>
+          <PrestamoPayModal
+            isOpen={showPayPrestamoModal}
+            prestamo={prestamoToPay}
+            categories={categories}
+            paymentMethods={paymentMethods}
+            onClose={() => {
+              setShowPayPrestamoModal(false);
+              setPrestamoToPay(null);
+            }}
+            onConfirm={handleConfirmPrestamoPayment}
           />
         </Suspense>
       )}

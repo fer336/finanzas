@@ -13,6 +13,7 @@ export const QUERY_KEYS = {
   categories: 'categories',
   paymentMethods: 'paymentMethods',
   pendingPayments: 'pendingPayments',
+  prestamos: 'prestamos',
   objetivos: 'objetivos',
   presupuestos: 'presupuestos',
   monedas: 'monedas',
@@ -201,11 +202,59 @@ export const useUpdatePendingPayment = () => {
 
 export const useDeletePendingPayment = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id) => apiServices.pagosPendientesApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.pendingPayments] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.dashboardStats] });
+    },
+  });
+};
+
+// ====== PRÉSTAMOS ======
+export const usePrestamos = () => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.prestamos],
+    queryFn: async () => {
+      const response = await apiServices.prestamosApi.getAll();
+      return response.list || response || [];
+    },
+    staleTime: 60 * 1000,
+  });
+};
+
+export const useCreatePrestamo = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data) => apiServices.prestamosApi.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.prestamos] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.dashboardStats] });
+    },
+  });
+};
+
+export const useUpdatePrestamo = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }) => apiServices.prestamosApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.prestamos] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.dashboardStats] });
+    },
+  });
+};
+
+export const useDeletePrestamo = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id) => apiServices.prestamosApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.prestamos] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.dashboardStats] });
     },
   });

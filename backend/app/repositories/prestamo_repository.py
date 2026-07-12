@@ -107,6 +107,7 @@ class PrestamoRepository:
             "monto_prestado": float(prestamo.monto_prestado) if prestamo.monto_prestado else 0,
             "monto_a_devolver": float(prestamo.monto_a_devolver) if prestamo.monto_a_devolver else 0,
             "moneda": prestamo.moneda,
+            "fecha_prestamo": prestamo.fecha_prestamo.isoformat() if prestamo.fecha_prestamo else None,
             "fecha_vencimiento": prestamo.fecha_vencimiento.isoformat() if prestamo.fecha_vencimiento else None,
             "fecha_pago": prestamo.fecha_pago.isoformat() if prestamo.fecha_pago else None,
             "estado": prestamo.estado,

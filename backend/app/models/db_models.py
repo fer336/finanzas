@@ -241,6 +241,8 @@ class PagoPendiente(Base):
     estado = Column(String(50), default="pendiente")
     fechapago = Column(Date, nullable=True)
     comprobante = Column(Text, nullable=True)
+    recurrente = Column(Boolean, default=False)
+    frecuencia_recurrencia = Column(String(20), nullable=True)
 
     # Foreign Keys
     categorias_id = Column(
@@ -279,6 +281,7 @@ class Prestamo(Base):
     monto_prestado = Column(Numeric(15, 2), nullable=False)
     monto_a_devolver = Column(Numeric(15, 2), nullable=False)
     moneda = Column(String(10), nullable=False, default="ARS")
+    fecha_prestamo = Column(Date, nullable=True)  # cuándo se recibió el dinero
     fecha_vencimiento = Column(Date, nullable=False)
     fecha_pago = Column(Date, nullable=True)
     estado = Column(String(50), nullable=False, default="pendiente")

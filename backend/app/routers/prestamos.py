@@ -5,10 +5,12 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from sqlalchemy.orm import Session
 from typing import Optional, Dict, Any
 from uuid import UUID
+from datetime import date
 import logging
 
 from app.database import get_db
 from app.repositories.prestamo_repository import PrestamoRepository
+from app.repositories.transaccion_repository import TransaccionRepository
 from app.core.dependencies import CurrentUser
 
 router = APIRouter()
@@ -83,7 +85,29 @@ async def create_prestamo(
         prestamo_data['usuario_id'] = current_user.id
 
         logger.info(f"📝 Creating préstamo for user {current_user.id}")
-        return repo.create(prestamo_data)
+        nuevo_prestamo = repo.create(prestamo_data)
+
+        # Recibir un préstamo es plata que entra — se refleja como ingreso
+        # real en Movimientos, mismo patrón que pagos.py usa para el lado
+        # del repago (transacción creada "a mano" con TransaccionRepository,
+        # tageada en notas para poder rastrearla/borrarla después).
+        transaccion_repo = TransaccionRepository(db)
+        fecha_prestamo = nuevo_prestamo.get('fecha_prestamo') or date.today().isoformat()
+        monto_prestado = nuevo_prestamo.get('monto_prestado', 0)
+        transaccion_data = {
+            "monto": abs(float(monto_prestado)),
+            "moneda": nuevo_prestamo.get('moneda', 'ARS'),
+            "monto_ars": abs(float(monto_prestado)),
+            "tasa_cambio": 1.0,
+            "descripcion": f"Préstamo recibido — {nuevo_prestamo.get('nombre_fuente')}",
+            "fecha_transaccion": fecha_prestamo,
+            "tipo": "ingreso",
+            "notas": f"Préstamo recibido\n[PRESTAMO_ID: {nuevo_prestamo['id']}]",
+            "usuario_id": current_user.id,
+        }
+        nueva_transaccion = transaccion_repo.create(transaccion_data)
+
+        return {**nuevo_prestamo, "transaccion_id": nueva_transaccion["id"]}
 
     except HTTPException:
         raise
@@ -134,6 +158,15 @@ async def delete_prestamo(
         prestamo_existente = repo.get_by_id(UUID(prestamo_id))
         if not prestamo_existente or str(prestamo_existente.get('usuario_id')) != str(current_user.id):
             raise HTTPException(status_code=404, detail="Préstamo no encontrado")
+
+        # Borrar también el ingreso que se creó al recibir el préstamo (mismo
+        # patrón de búsqueda por tag en notas que usa pagos.py/deshacer_pago)
+        transaccion_repo = TransaccionRepository(db)
+        result = transaccion_repo.get_all(usuario_id=current_user.id, tipo='ingreso', limit=1000)
+        tag = f"[PRESTAMO_ID: {prestamo_id}]"
+        for t in result.get('list', []):
+            if tag in str(t.get('notas', '')):
+                transaccion_repo.delete(UUID(str(t['id'])))
 
         success = repo.delete(UUID(prestamo_id))
         if not success:

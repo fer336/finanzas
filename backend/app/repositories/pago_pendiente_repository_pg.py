@@ -144,6 +144,8 @@ class PagoPendienteRepositoryPG:
             "estado": pago.estado,
             "fechapago": pago.fechapago.isoformat() if pago.fechapago else None,
             "comprobante": pago.comprobante,
+            "recurrente": pago.recurrente or False,
+            "frecuencia_recurrencia": pago.frecuencia_recurrencia,
             "categorias_id": str(pago.categorias_id) if pago.categorias_id else None,
             "metodos_pago_id": str(pago.metodos_pago_id) if pago.metodos_pago_id else None,
             "usuario_id": str(pago.usuario_id) if pago.usuario_id else None,

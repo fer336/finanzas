@@ -86,27 +86,34 @@ async def create_pending_payment(
         }
         
         # Remove invalid fields (capitalized versions)
-        invalid_fields = ['Estado', 'Nombre', 'Descripcion', 'Monto', 'Moneda', 'Fechavencimiento', 
+        invalid_fields = ['Estado', 'Nombre', 'Descripcion', 'Monto', 'Moneda', 'Fechavencimiento',
                           'Tipo', 'Prioridad', 'Notas', 'status']
         for field in invalid_fields:
             if field in pago_data:
                 pago_data.pop(field, None)
-        
+
+        # Mapear Recurrente/FrecuenciaRecurrencia (PascalCase, como las manda
+        # el frontend) a las columnas reales del modelo (snake_case)
+        if 'Recurrente' in pago_data:
+            pago_data['recurrente'] = pago_data.pop('Recurrente')
+        if 'FrecuenciaRecurrencia' in pago_data:
+            pago_data['frecuencia_recurrencia'] = pago_data.pop('FrecuenciaRecurrencia') or None
+
         # Si viene 'estado' en español con mayúscula, normalizarlo
         if 'estado' in pago_data:
             estado_value = pago_data['estado']
             if estado_value in STATUS_MAP:
                 pago_data['estado'] = STATUS_MAP[estado_value]
-        
+
         # Convert string IDs to UUID
         if pago_data.get('categorias_id'):
             pago_data['categorias_id'] = UUID(pago_data['categorias_id'])
         if pago_data.get('metodos_pago_id'):
             pago_data['metodos_pago_id'] = UUID(pago_data['metodos_pago_id'])
-        
+
         # Forzar el usuario_id del token
         pago_data['usuario_id'] = current_user.id
-        
+
         logger.info(f"📝 Creating pago pendiente for user {current_user.id}")
         nuevo_pago = repo.create(pago_data)
         return nuevo_pago
@@ -149,13 +156,19 @@ async def update_pending_payment(
         if 'estado' in pago_data and pago_data['estado'] in STATUS_MAP:
             original = pago_data['estado']
             pago_data['estado'] = STATUS_MAP[original]
-        
+
+        # Mapear Recurrente/FrecuenciaRecurrencia (PascalCase) a snake_case
+        if 'Recurrente' in pago_data:
+            pago_data['recurrente'] = pago_data.pop('Recurrente')
+        if 'FrecuenciaRecurrencia' in pago_data:
+            pago_data['frecuencia_recurrencia'] = pago_data.pop('FrecuenciaRecurrencia') or None
+
         # Convert string IDs to UUID
         if pago_data.get('categorias_id'):
             pago_data['categorias_id'] = UUID(pago_data['categorias_id'])
         if pago_data.get('metodos_pago_id'):
             pago_data['metodos_pago_id'] = UUID(pago_data['metodos_pago_id'])
-        
+
         # No permitir cambiar el usuario_id
         pago_data.pop('usuario_id', None)
         

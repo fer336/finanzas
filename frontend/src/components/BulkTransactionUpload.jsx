@@ -2,12 +2,39 @@ import React, { useState, useEffect } from 'react';
 import { X, Upload, FileSpreadsheet, Plus, Trash2, Download, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import apiServices from '../services/api';
 
+// Parser de línea CSV que respeta campos entre comillas (soporta comas
+// dentro de una descripción, ej: "Compra, supermercado").
+const parseCSVLine = (line) => {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      result.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current);
+  return result;
+};
+
 const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
   const [activeTab, setActiveTab] = useState('csv'); // 'csv' or 'manual'
   const [loading, setLoading] = useState(false);
   const [csvFile, setCsvFile] = useState(null);
   const [csvData, setCsvData] = useState([]);
   const [previewData, setPreviewData] = useState([]);
+  const [dragActive, setDragActive] = useState(false);
   const [categorias, setCategorias] = useState([]);
   const [metodosPago, setMetodosPago] = useState([]);
   const [result, setResult] = useState(null);
@@ -52,8 +79,16 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
     }
   };
 
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = () => setDragActive(false);
+
   const handleDrop = (e) => {
     e.preventDefault();
+    setDragActive(false);
     const file = e.dataTransfer.files[0];
     if (file && (file.type === 'text/csv' || file.name.endsWith('.csv'))) {
       setCsvFile(file);
@@ -66,10 +101,10 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
     reader.onload = (e) => {
       const text = e.target.result;
       const lines = text.split('\n').filter(line => line.trim());
-      const headers = lines[0].split(',').map(h => h.trim());
-      
+      const headers = parseCSVLine(lines[0]).map(h => h.trim());
+
       const data = lines.slice(1).map((line, index) => {
-        const values = line.split(',');
+        const values = parseCSVLine(line);
         const obj = { _rowNumber: index + 2 };
         headers.forEach((header, i) => {
           obj[header] = values[i] ? values[i].trim() : '';
@@ -100,7 +135,7 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
       const transactions = csvData.map(row => {
         // Helper to convert empty strings to null
         const toNullIfEmpty = (val) => (val && val.trim() !== '') ? val.trim() : null;
-        
+
         return {
           fecha_transaccion: row.fecha_transaccion || new Date().toISOString().split('T')[0],
           tipo: row.tipo?.toLowerCase() || 'gasto',
@@ -117,7 +152,7 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
       });
 
       const response = await apiServices.transaccionesApi.bulkCreate(transactions);
-      
+
       // Transform backend response to match frontend expectations
       const transformedResult = {
         success: Array(response.created_count || 0).fill({}),
@@ -126,14 +161,14 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
         failed_count: response.failed_count || 0,
         errors: response.errors || []
       };
-      
+
       setResult(transformedResult);
 
       if (transformedResult.created_count > 0) {
         setCsvFile(null);
         setCsvData([]);
         setPreviewData([]);
-        
+
         if (onSuccess) {
           onSuccess();
         }
@@ -172,7 +207,7 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
 
   const handleSaveManual = async () => {
     const validRows = manualRows.filter(row => row.descripcion.trim() && row.monto);
-    
+
     if (validRows.length === 0) {
       alert('Por favor completa al menos una transacción con descripción y monto');
       return;
@@ -197,7 +232,7 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
       }));
 
       const response = await apiServices.transaccionesApi.bulkCreate(transactions);
-      
+
       // Transform backend response to match frontend expectations
       const transformedResult = {
         success: Array(response.created_count || 0).fill({}),
@@ -206,21 +241,21 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
         failed_count: response.failed_count || 0,
         errors: response.errors || []
       };
-      
+
       setResult(transformedResult);
 
       if (transformedResult.created_count > 0) {
-        setManualRows([{ 
-          id: Date.now(), 
-          fecha_transaccion: new Date().toISOString().split('T')[0], 
-          tipo: 'gasto', 
-          descripcion: '', 
-          monto: '', 
-          categoria_id: '', 
-          metodo_pago_id: '', 
-          notas: '' 
+        setManualRows([{
+          id: Date.now(),
+          fecha_transaccion: new Date().toISOString().split('T')[0],
+          tipo: 'gasto',
+          descripcion: '',
+          monto: '',
+          categoria_id: '',
+          metodo_pago_id: '',
+          notas: ''
         }]);
-        
+
         if (onSuccess) {
           onSuccess();
         }
@@ -235,35 +270,43 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
 
   if (!isOpen) return null;
 
+  const tipoBadgeClass = (tipo) =>
+    tipo === 'ingreso'
+      ? 'border border-[#5a7d52] text-[#476442]'
+      : 'border border-[#ddd5c2] text-[#a04a34]';
+
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[1000] flex items-center justify-center p-2 sm:p-4">
-      <div className="relative w-full max-w-6xl bg-[#09090b] rounded-xl sm:rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]">
+    <div
+      className="fixed inset-0 z-[1000] flex items-center justify-center p-2 sm:p-4"
+      style={{ background: 'rgba(32,36,44,.4)' }}
+    >
+      <div className="relative flex w-full max-w-6xl flex-col overflow-hidden rounded-xl border border-[#ddd5c2] bg-[#faf7ef] max-h-[95vh] sm:max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 border-b border-white/5 bg-[#09090b]">
+        <div className="flex items-center justify-between border-b border-[#ddd5c2] bg-[#faf7ef] px-3 py-3 sm:px-6 sm:py-4">
           <div className="flex-1 min-w-0">
-            <h2 className="text-base sm:text-xl font-bold text-white tracking-tight truncate">
+            <h2 className="truncate font-serif text-[17px] font-bold text-foreground sm:text-[20px]">
               {isMobile ? 'Carga Masiva' : 'Carga Masiva de Transacciones'}
             </h2>
             {!isMobile && (
-              <p className="text-zinc-400 mt-0.5 text-xs sm:text-sm">Importa desde CSV o agrega múltiples transacciones manualmente</p>
+              <p className="mt-0.5 text-[12.5px] text-[#8a8677]">Importa desde CSV o agregá múltiples transacciones manualmente</p>
             )}
           </div>
-          <button 
+          <button
             onClick={onClose}
-            className="p-2 hover:bg-white/5 rounded-full transition-colors group flex-shrink-0"
+            className="flex-shrink-0 rounded-sm p-2 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-foreground"
           >
-            <X className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-white/5 px-2 sm:px-6 bg-zinc-900/30">
+        <div className="flex border-b border-[#ddd5c2] bg-[#f6f1e4] px-2 sm:px-6">
           <button
             onClick={() => setActiveTab('csv')}
-            className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-all relative ${
+            className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 text-[12.5px] sm:text-[13.5px] font-medium transition-colors ${
               activeTab === 'csv'
-                ? 'text-blue-400 border-b-2 border-blue-500'
-                : 'text-zinc-400 hover:text-white'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-[#8a8677] hover:text-foreground'
             }`}
           >
             <FileSpreadsheet size={isMobile ? 14 : 16} />
@@ -271,10 +314,10 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
           </button>
           <button
             onClick={() => setActiveTab('manual')}
-            className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-all relative ${
+            className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 sm:py-3 text-[12.5px] sm:text-[13.5px] font-medium transition-colors ${
               activeTab === 'manual'
-                ? 'text-blue-400 border-b-2 border-blue-500'
-                : 'text-zinc-400 hover:text-white'
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-[#8a8677] hover:text-foreground'
             }`}
           >
             <Plus size={isMobile ? 14 : 16} />
@@ -287,17 +330,17 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
           {activeTab === 'csv' ? (
             <div className="space-y-4 sm:space-y-6">
               {/* Download Template */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 sm:p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <div className="flex flex-col items-start justify-between gap-3 rounded-md border border-[#ddd5c2] bg-[#3d5a80]/5 p-3 sm:flex-row sm:items-center sm:p-4">
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <Download className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0" />
+                  <Download className="h-4 w-4 flex-shrink-0 text-[#3d5a80] sm:h-5 sm:w-5" />
                   <div>
-                    <p className="text-xs sm:text-sm font-medium text-white">Descargar Plantilla CSV</p>
-                    {!isMobile && <p className="text-xs text-zinc-400 mt-0.5">Usa esta plantilla para preparar tus datos</p>}
+                    <p className="text-[12.5px] font-medium text-foreground sm:text-[13.5px]">Descargar plantilla CSV</p>
+                    {!isMobile && <p className="mt-0.5 text-[11.5px] text-[#8a8677]">Usá esta plantilla para preparar tus datos</p>}
                   </div>
                 </div>
                 <button
                   onClick={downloadTemplate}
-                  className="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors"
+                  className="w-full rounded-sm bg-primary px-4 py-2 text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] sm:w-auto sm:text-[13px]"
                 >
                   Descargar
                 </button>
@@ -306,15 +349,20 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
               {/* Upload Zone */}
               <div
                 onDrop={handleDrop}
-                onDragOver={(e) => e.preventDefault()}
-                className="border-2 border-dashed border-zinc-700 hover:border-blue-500/50 rounded-lg p-6 sm:p-12 text-center transition-all cursor-pointer bg-zinc-900/30 hover:bg-zinc-900/50"
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
                 onClick={() => document.getElementById('csv-upload').click()}
+                className={`cursor-pointer rounded-md border-2 border-dashed p-6 text-center transition-colors sm:p-12 ${
+                  dragActive
+                    ? 'border-primary bg-[#f0ead9]'
+                    : 'border-[#ddd5c2] bg-white hover:border-[#8a8677] hover:bg-[#f0ead9]/50'
+                }`}
               >
-                <Upload className="w-8 h-8 sm:w-12 sm:h-12 text-zinc-600 mx-auto mb-3 sm:mb-4" />
-                <p className="text-white font-medium mb-1 text-sm sm:text-base">
-                  {isMobile ? 'Seleccionar archivo CSV' : 'Click para seleccionar o arrastra el archivo aquí'}
+                <Upload className="mx-auto mb-3 h-8 w-8 text-[#8a8677] sm:mb-4 sm:h-12 sm:w-12" />
+                <p className="mb-1 text-[13px] font-medium text-foreground sm:text-[15px]">
+                  {isMobile ? 'Seleccionar archivo CSV' : dragActive ? 'Soltá el archivo aquí' : 'Click para seleccionar o arrastrá el archivo aquí'}
                 </p>
-                <p className="text-xs sm:text-sm text-zinc-500">Formato: CSV (máximo 1000 transacciones)</p>
+                <p className="text-[11.5px] text-[#8a8677] sm:text-[12.5px]">Formato: CSV (máximo 1000 transacciones)</p>
                 <input
                   id="csv-upload"
                   type="file"
@@ -328,14 +376,14 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
               {previewData.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xs sm:text-sm font-bold text-white">Vista Previa ({csvData.length} transacciones)</h3>
+                    <h3 className="text-[12.5px] font-semibold text-foreground sm:text-[13.5px]">Vista previa ({csvData.length} transacciones)</h3>
                     <button
                       onClick={() => {
                         setCsvFile(null);
                         setCsvData([]);
                         setPreviewData([]);
                       }}
-                      className="text-xs text-red-400 hover:text-red-300"
+                      className="text-[11.5px] text-[#a04a34] hover:text-[#8a3a29]"
                     >
                       Limpiar
                     </button>
@@ -345,50 +393,46 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
                   {isMobile ? (
                     <div className="space-y-2">
                       {previewData.map((row, index) => (
-                        <div key={index} className="p-3 bg-zinc-900/50 border border-white/10 rounded-lg space-y-2">
+                        <div key={index} className="space-y-2 rounded-md border border-[#ddd5c2] bg-card p-3">
                           <div className="flex items-center justify-between">
-                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                              row.tipo === 'ingreso' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
-                            }`}>
+                            <span className={`rounded-full px-2 py-0.5 font-mono text-[10.5px] uppercase ${tipoBadgeClass(row.tipo)}`}>
                               {row.tipo}
                             </span>
-                            <span className="text-xs text-zinc-500">{row.fecha_transaccion}</span>
+                            <span className="text-[11px] text-[#8a8677]">{row.fecha_transaccion}</span>
                           </div>
-                          <p className="text-sm text-white font-medium">{row.descripcion}</p>
+                          <p className="text-[13.5px] font-medium text-foreground">{row.descripcion}</p>
                           <div className="flex items-center justify-between">
-                            <span className="text-xs text-zinc-400">{row.notas || 'Sin notas'}</span>
-                            <span className="text-sm font-mono text-white font-bold">${row.monto}</span>
+                            <span className="text-[11.5px] text-[#8a8677]">{row.notas || 'Sin notas'}</span>
+                            <span className="font-mono text-[13.5px] font-semibold text-foreground">${row.monto}</span>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
                     /* Desktop: Table View */
-                    <div className="overflow-x-auto border border-white/10 rounded-lg">
-                      <table className="w-full text-sm">
-                        <thead className="bg-zinc-900/50 border-b border-white/5">
-                          <tr>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-zinc-400">Fecha</th>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-zinc-400">Tipo</th>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-zinc-400">Descripción</th>
-                            <th className="px-3 py-2 text-right text-xs font-medium text-zinc-400">Monto</th>
-                            <th className="px-3 py-2 text-left text-xs font-medium text-zinc-400">Notas</th>
+                    <div className="overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] bg-card">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b-2 border-[#ddd5c2]">
+                            <th className="px-3 py-2.5 text-left font-mono text-[10.5px] uppercase tracking-[.08em] text-[#8a8677]">Fecha</th>
+                            <th className="px-3 py-2.5 text-left font-mono text-[10.5px] uppercase tracking-[.08em] text-[#8a8677]">Tipo</th>
+                            <th className="px-3 py-2.5 text-left font-mono text-[10.5px] uppercase tracking-[.08em] text-[#8a8677]">Descripción</th>
+                            <th className="px-3 py-2.5 text-right font-mono text-[10.5px] uppercase tracking-[.08em] text-[#8a8677]">Monto</th>
+                            <th className="px-3 py-2.5 text-left font-mono text-[10.5px] uppercase tracking-[.08em] text-[#8a8677]">Notas</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody>
                           {previewData.map((row, index) => (
-                            <tr key={index} className="hover:bg-white/5">
-                              <td className="px-3 py-2 text-xs text-white">{row.fecha_transaccion}</td>
-                              <td className="px-3 py-2 text-xs">
-                                <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                  row.tipo === 'ingreso' ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
-                                }`}>
+                            <tr key={index} className="border-b border-[#e7e0cf] transition-colors hover:bg-[#f0ead9]">
+                              <td className="px-3 py-2 font-mono text-[12px] text-[#5d6470]">{row.fecha_transaccion}</td>
+                              <td className="px-3 py-2">
+                                <span className={`rounded-full px-2 py-0.5 font-mono text-[10.5px] uppercase ${tipoBadgeClass(row.tipo)}`}>
                                   {row.tipo}
                                 </span>
                               </td>
-                              <td className="px-3 py-2 text-xs text-white">{row.descripcion}</td>
-                              <td className="px-3 py-2 text-xs text-right font-mono text-white">${row.monto}</td>
-                              <td className="px-3 py-2 text-xs text-zinc-400 truncate max-w-xs">{row.notas}</td>
+                              <td className="px-3 py-2 text-[12.5px] text-foreground">{row.descripcion}</td>
+                              <td className="px-3 py-2 text-right font-mono text-[12.5px] text-foreground">${row.monto}</td>
+                              <td className="max-w-xs truncate px-3 py-2 text-[12px] text-[#8a8677]">{row.notas}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -397,7 +441,7 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
                   )}
 
                   {csvData.length > 10 && (
-                    <p className="text-xs text-zinc-500 text-center">Mostrando 10 de {csvData.length} transacciones</p>
+                    <p className="text-center text-[11.5px] text-[#8a8677]">Mostrando 10 de {csvData.length} transacciones</p>
                   )}
                 </div>
               )}
@@ -407,17 +451,17 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
                 <button
                   onClick={handleImportCSV}
                   disabled={loading}
-                  className="w-full px-4 sm:px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-lg shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
+                  className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary px-4 py-3 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:opacity-50 sm:px-6"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Importando...
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Importando…
                     </>
                   ) : (
                     <>
-                      <Upload size={20} />
-                      Importar {csvData.length} Transacciones
+                      <Upload size={18} />
+                      Importar {csvData.length} transacciones
                     </>
                   )}
                 </button>
@@ -429,13 +473,13 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
               {isMobile ? (
                 <div className="space-y-3">
                   {manualRows.map((row, index) => (
-                    <div key={row.id} className="p-3 bg-zinc-900/50 border border-white/10 rounded-lg space-y-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold text-zinc-400">Transacción #{index + 1}</span>
+                    <div key={row.id} className="space-y-3 rounded-md border border-[#ddd5c2] bg-card p-3">
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="text-[11.5px] font-semibold text-[#8a8677]">Transacción #{index + 1}</span>
                         <button
                           onClick={() => removeRow(row.id)}
                           disabled={manualRows.length === 1}
-                          className="p-1.5 hover:bg-red-500/10 text-red-400 rounded disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="rounded-sm p-1.5 text-[#a04a34] hover:bg-[#a04a34]/10 disabled:cursor-not-allowed disabled:opacity-30"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -443,22 +487,22 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
 
                       <div className="grid grid-cols-2 gap-2">
                         <div className="col-span-2">
-                          <label className="text-xs text-zinc-400 mb-1 block">Descripción *</label>
+                          <label className="mb-1 block text-[11.5px] text-[#5d6470]">Descripción *</label>
                           <input
                             type="text"
                             value={row.descripcion}
                             onChange={(e) => updateRow(row.id, 'descripcion', e.target.value)}
                             placeholder="Ej: Supermercado"
-                            className="w-full p-2.5 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-600 focus:border-blue-500 focus:outline-none"
+                            className="w-full rounded-sm border border-[#ddd5c2] bg-white p-2.5 text-[13px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
                           />
                         </div>
 
                         <div>
-                          <label className="text-xs text-zinc-400 mb-1 block">Tipo</label>
+                          <label className="mb-1 block text-[11.5px] text-[#5d6470]">Tipo</label>
                           <select
                             value={row.tipo}
                             onChange={(e) => updateRow(row.id, 'tipo', e.target.value)}
-                            className="w-full p-2.5 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white focus:border-blue-500 focus:outline-none"
+                            className="w-full rounded-sm border border-[#ddd5c2] bg-white p-2.5 text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                           >
                             <option value="gasto">Gasto</option>
                             <option value="ingreso">Ingreso</option>
@@ -466,33 +510,33 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
                         </div>
 
                         <div>
-                          <label className="text-xs text-zinc-400 mb-1 block">Monto *</label>
+                          <label className="mb-1 block text-[11.5px] text-[#5d6470]">Monto *</label>
                           <input
                             type="number"
                             value={row.monto}
                             onChange={(e) => updateRow(row.id, 'monto', e.target.value)}
                             placeholder="0.00"
-                            className="w-full p-2.5 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-right text-white placeholder-zinc-600 focus:border-blue-500 focus:outline-none"
+                            className="w-full rounded-sm border border-[#ddd5c2] bg-white p-2.5 text-right font-mono text-[13px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
                             step="0.01"
                           />
                         </div>
 
                         <div className="col-span-2">
-                          <label className="text-xs text-zinc-400 mb-1 block">Fecha</label>
+                          <label className="mb-1 block text-[11.5px] text-[#5d6470]">Fecha</label>
                           <input
                             type="date"
                             value={row.fecha_transaccion}
                             onChange={(e) => updateRow(row.id, 'fecha_transaccion', e.target.value)}
-                            className="w-full p-2.5 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white focus:border-blue-500 focus:outline-none"
+                            className="w-full rounded-sm border border-[#ddd5c2] bg-white p-2.5 font-mono text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                           />
                         </div>
 
                         <div>
-                          <label className="text-xs text-zinc-400 mb-1 block">Categoría</label>
+                          <label className="mb-1 block text-[11.5px] text-[#5d6470]">Categoría</label>
                           <select
                             value={row.categoria_id}
                             onChange={(e) => updateRow(row.id, 'categoria_id', e.target.value)}
-                            className="w-full p-2.5 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white focus:border-blue-500 focus:outline-none"
+                            className="w-full rounded-sm border border-[#ddd5c2] bg-white p-2.5 text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                           >
                             <option value="">Sin categoría</option>
                             {categorias.map(c => (
@@ -502,11 +546,11 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
                         </div>
 
                         <div>
-                          <label className="text-xs text-zinc-400 mb-1 block">Método</label>
+                          <label className="mb-1 block text-[11.5px] text-[#5d6470]">Método</label>
                           <select
                             value={row.metodo_pago_id}
                             onChange={(e) => updateRow(row.id, 'metodo_pago_id', e.target.value)}
-                            className="w-full p-2.5 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white focus:border-blue-500 focus:outline-none"
+                            className="w-full rounded-sm border border-[#ddd5c2] bg-white p-2.5 text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                           >
                             <option value="">Sin método</option>
                             {metodosPago.map(m => (
@@ -520,35 +564,35 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
                 </div>
               ) : (
                 /* Desktop: Table View */
-                <div className="overflow-x-auto border border-white/10 rounded-lg">
-                  <table className="w-full text-sm">
-                    <thead className="bg-zinc-900/50 border-b border-white/5">
-                      <tr>
-                        <th className="px-2 py-2 text-left text-xs font-medium text-zinc-400 w-28">Fecha</th>
-                        <th className="px-2 py-2 text-left text-xs font-medium text-zinc-400 w-24">Tipo</th>
-                        <th className="px-2 py-2 text-left text-xs font-medium text-zinc-400">Descripción</th>
-                        <th className="px-2 py-2 text-right text-xs font-medium text-zinc-400 w-28">Monto</th>
-                        <th className="px-2 py-2 text-left text-xs font-medium text-zinc-400 w-32">Categoría</th>
-                        <th className="px-2 py-2 text-left text-xs font-medium text-zinc-400 w-32">Método</th>
-                        <th className="px-2 py-2 text-center text-xs font-medium text-zinc-400 w-12"></th>
+                <div className="overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] bg-card">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b-2 border-[#ddd5c2]">
+                        <th className="w-28 px-2 py-2.5 text-left font-mono text-[10.5px] uppercase tracking-[.08em] text-[#8a8677]">Fecha</th>
+                        <th className="w-24 px-2 py-2.5 text-left font-mono text-[10.5px] uppercase tracking-[.08em] text-[#8a8677]">Tipo</th>
+                        <th className="px-2 py-2.5 text-left font-mono text-[10.5px] uppercase tracking-[.08em] text-[#8a8677]">Descripción</th>
+                        <th className="w-28 px-2 py-2.5 text-right font-mono text-[10.5px] uppercase tracking-[.08em] text-[#8a8677]">Monto</th>
+                        <th className="w-32 px-2 py-2.5 text-left font-mono text-[10.5px] uppercase tracking-[.08em] text-[#8a8677]">Categoría</th>
+                        <th className="w-32 px-2 py-2.5 text-left font-mono text-[10.5px] uppercase tracking-[.08em] text-[#8a8677]">Método</th>
+                        <th className="w-12 px-2 py-2.5 text-center font-mono text-[10.5px] uppercase text-[#8a8677]" />
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody>
                       {manualRows.map((row) => (
-                        <tr key={row.id} className="hover:bg-white/5">
+                        <tr key={row.id} className="border-b border-[#e7e0cf] transition-colors hover:bg-[#f0ead9]">
                           <td className="px-2 py-2">
                             <input
                               type="date"
                               value={row.fecha_transaccion}
                               onChange={(e) => updateRow(row.id, 'fecha_transaccion', e.target.value)}
-                              className="w-full p-1.5 bg-zinc-900/50 border border-white/10 rounded text-xs text-white focus:border-blue-500 focus:outline-none"
+                              className="w-full rounded-sm border border-[#ddd5c2] bg-white p-1.5 font-mono text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                             />
                           </td>
                           <td className="px-2 py-2">
                             <select
                               value={row.tipo}
                               onChange={(e) => updateRow(row.id, 'tipo', e.target.value)}
-                              className="w-full p-1.5 bg-zinc-900/50 border border-white/10 rounded text-xs text-white focus:border-blue-500 focus:outline-none"
+                              className="w-full rounded-sm border border-[#ddd5c2] bg-white p-1.5 text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                             >
                               <option value="ingreso">Ingreso</option>
                               <option value="gasto">Gasto</option>
@@ -560,7 +604,7 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
                               value={row.descripcion}
                               onChange={(e) => updateRow(row.id, 'descripcion', e.target.value)}
                               placeholder="Descripción"
-                              className="w-full p-1.5 bg-zinc-900/50 border border-white/10 rounded text-xs text-white placeholder-zinc-600 focus:border-blue-500 focus:outline-none"
+                              className="w-full rounded-sm border border-[#ddd5c2] bg-white p-1.5 text-[12px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
                             />
                           </td>
                           <td className="px-2 py-2">
@@ -569,7 +613,7 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
                               value={row.monto}
                               onChange={(e) => updateRow(row.id, 'monto', e.target.value)}
                               placeholder="0.00"
-                              className="w-full p-1.5 bg-zinc-900/50 border border-white/10 rounded text-xs text-right text-white placeholder-zinc-600 focus:border-blue-500 focus:outline-none"
+                              className="w-full rounded-sm border border-[#ddd5c2] bg-white p-1.5 text-right font-mono text-[12px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
                               step="0.01"
                             />
                           </td>
@@ -577,7 +621,7 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
                             <select
                               value={row.categoria_id}
                               onChange={(e) => updateRow(row.id, 'categoria_id', e.target.value)}
-                              className="w-full p-1.5 bg-zinc-900/50 border border-white/10 rounded text-xs text-white focus:border-blue-500 focus:outline-none"
+                              className="w-full rounded-sm border border-[#ddd5c2] bg-white p-1.5 text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                             >
                               <option value="">Sin categoría</option>
                               {categorias.map(c => (
@@ -589,7 +633,7 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
                             <select
                               value={row.metodo_pago_id}
                               onChange={(e) => updateRow(row.id, 'metodo_pago_id', e.target.value)}
-                              className="w-full p-1.5 bg-zinc-900/50 border border-white/10 rounded text-xs text-white focus:border-blue-500 focus:outline-none"
+                              className="w-full rounded-sm border border-[#ddd5c2] bg-white p-1.5 text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                             >
                               <option value="">Sin método</option>
                               {metodosPago.map(m => (
@@ -601,7 +645,7 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
                             <button
                               onClick={() => removeRow(row.id)}
                               disabled={manualRows.length === 1}
-                              className="p-1 hover:bg-red-500/10 text-red-400 rounded disabled:opacity-30 disabled:cursor-not-allowed"
+                              className="rounded-sm p-1 text-[#a04a34] hover:bg-[#a04a34]/10 disabled:cursor-not-allowed disabled:opacity-30"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -616,10 +660,10 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
               {/* Add Row Button */}
               <button
                 onClick={addRow}
-                className="w-full px-4 py-3 border-2 border-dashed border-zinc-700 hover:border-blue-500/50 text-zinc-400 hover:text-white rounded-lg transition-all flex items-center justify-center gap-2 text-sm font-medium"
+                className="flex w-full items-center justify-center gap-2 rounded-md border-2 border-dashed border-[#ddd5c2] px-4 py-3 text-[13px] font-medium text-[#8a8677] transition-colors hover:border-primary hover:text-primary"
               >
                 <Plus size={18} />
-                Agregar Fila
+                Agregar fila
               </button>
 
               {/* Save Button */}
@@ -627,17 +671,17 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
                 <button
                   onClick={handleSaveManual}
                   disabled={loading}
-                  className="w-full px-4 sm:px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-lg shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
+                  className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary px-4 py-3 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:opacity-50 sm:px-6"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Guardando...
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Guardando…
                     </>
                   ) : (
                     <>
                       <CheckCircle size={20} />
-                      Guardar {manualRows.filter(r => r.descripcion && r.monto).length} Transacciones
+                      Guardar {manualRows.filter(r => r.descripcion && r.monto).length} transacciones
                     </>
                   )}
                 </button>
@@ -647,28 +691,28 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
 
           {/* Result Summary */}
           {result && (
-            <div className={`mt-6 p-4 sm:p-6 rounded-lg border-2 ${
+            <div className={`mt-6 rounded-md border p-4 sm:p-6 ${
               (result.created_count || 0) > 0
-                ? 'bg-green-500/10 border-green-500/30'
-                : 'bg-red-500/10 border-red-500/30'
+                ? 'border-[#5a7d52] bg-primary/5'
+                : 'border-[#a04a34] bg-[#a04a34]/5'
             }`}>
               <div className="flex items-start gap-3 sm:gap-4">
                 {(result.created_count || 0) > 0 ? (
-                  <CheckCircle className="w-6 h-6 sm:w-8 sm:h-8 text-green-400 flex-shrink-0" />
+                  <CheckCircle className="h-6 w-6 flex-shrink-0 text-primary sm:h-7 sm:w-7" />
                 ) : (
-                  <AlertCircle className="w-6 h-6 sm:w-8 sm:h-8 text-red-400 flex-shrink-0" />
+                  <AlertCircle className="h-6 w-6 flex-shrink-0 text-[#a04a34] sm:h-7 sm:w-7" />
                 )}
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base sm:text-lg font-bold text-white mb-2">
-                    {(result.created_count || 0) > 0 ? '✅ Importación Exitosa' : '❌ Error en Importación'}
+                <div className="min-w-0 flex-1">
+                  <h3 className="mb-2 text-[15px] font-semibold text-foreground sm:text-[17px]">
+                    {(result.created_count || 0) > 0 ? 'Importación exitosa' : 'Error en la importación'}
                   </h3>
-                  <div className="space-y-1 text-xs sm:text-sm">
-                    <p className="text-zinc-300">
-                      <span className="font-bold text-green-400">{result.created_count || 0}</span> transacciones creadas
+                  <div className="space-y-1 text-[12.5px] sm:text-[13px]">
+                    <p className="text-[#5d6470]">
+                      <span className="font-semibold text-[#476442]">{result.created_count || 0}</span> transacciones creadas
                     </p>
                     {result.failed_count > 0 && (
-                      <p className="text-zinc-300">
-                        <span className="font-bold text-red-400">{result.failed_count}</span> fallidas
+                      <p className="text-[#5d6470]">
+                        <span className="font-semibold text-[#a04a34]">{result.failed_count}</span> fallidas
                       </p>
                     )}
                   </div>
@@ -679,7 +723,7 @@ const BulkTransactionUpload = ({ isOpen, onClose, onSuccess }) => {
                         onClose();
                       }
                     }}
-                    className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors"
+                    className="mt-4 rounded-sm border border-[#ddd5c2] bg-white px-4 py-2 text-[13px] font-medium text-foreground transition-colors duration-150 hover:bg-[#f0ead9]"
                   >
                     Cerrar
                   </button>

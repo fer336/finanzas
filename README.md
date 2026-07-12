@@ -90,6 +90,7 @@ Todos bajo `/api/v1/...`, todos protegidos, todos con `GET /`, `GET /{id}`, `POS
 | Recurso | Prefijo |
 |---|---|
 | Transacciones (gastos/ingresos) | `/api/v1/transacciones` *(también expone `/ingresos`, `/gastos`, `/estadisticas`, `/bulk-create`, `/bulk-delete`)* |
+| Carga masiva desde el agente | `POST /api/v1/transacciones/bulk-create` con `{ "transactions": [...] }` (hasta 1000 filas, respuesta con `created_count`/`failed_count`/`created_ids`/`errors`) |
 | Categorías | `/api/v1/categories` |
 | Métodos de pago | `/api/v1/payment-methods` |
 | Pagos pendientes | `/api/v1/pagos-pendientes` |

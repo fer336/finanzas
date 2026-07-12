@@ -491,7 +491,8 @@ async def bulk_create_transactions(
         created_count = 0
         failed_count = 0
         errors = []
-        
+        created_ids = []
+
         for idx, transaccion_data in enumerate(transactions):
             try:
                 # Remove 'id' if present
@@ -531,9 +532,10 @@ async def bulk_create_transactions(
                 if 'fecha' in transaccion_data:
                     transaccion_data['fecha_transaccion'] = transaccion_data.pop('fecha')
                 
-                repo.create(transaccion_data)
+                nueva = repo.create(transaccion_data)
                 created_count += 1
-                
+                created_ids.append(nueva.get('id'))
+
             except Exception as e:
                 failed_count += 1
                 errors.append({
@@ -547,6 +549,7 @@ async def bulk_create_transactions(
             "message": f"{created_count} transacciones creadas exitosamente",
             "created_count": created_count,
             "failed_count": failed_count,
+            "created_ids": created_ids,
             "errors": errors[:10]  # Limit to first 10 errors
         }
         

@@ -22,17 +22,34 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
         
         # Content Security Policy para APIs
-        response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; "
-            "script-src 'self'; "
-            "style-src 'self' 'unsafe-inline'; "
-            "img-src 'self' data: https:; "
-            "connect-src 'self'; "
-            "font-src 'self'; "
-            "object-src 'none'; "
-            "media-src 'self'; "
-            "frame-src 'none';"
-        )
+        docs_paths = {"/docs", "/redoc", "/docs/oauth2-redirect"}
+        if request.url.path in docs_paths:
+            # /docs y /redoc renderizan Swagger UI / ReDoc, que por defecto
+            # cargan su JS/CSS desde CDNs (jsdelivr, Google Fonts) — la CSP
+            # estricta de las rutas de API dejaba la página en blanco acá.
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                "script-src 'self' https://cdn.jsdelivr.net; "
+                "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+                "img-src 'self' data: https:; "
+                "connect-src 'self'; "
+                "font-src 'self' https://fonts.gstatic.com; "
+                "object-src 'none'; "
+                "media-src 'self'; "
+                "frame-src 'none';"
+            )
+        else:
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                "script-src 'self'; "
+                "style-src 'self' 'unsafe-inline'; "
+                "img-src 'self' data: https:; "
+                "connect-src 'self'; "
+                "font-src 'self'; "
+                "object-src 'none'; "
+                "media-src 'self'; "
+                "frame-src 'none';"
+            )
         
         # HSTS en producción
         if not request.url.hostname in ["localhost", "127.0.0.1"]:

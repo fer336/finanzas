@@ -8,14 +8,17 @@ import PropTypes from 'prop-types';
  */
 const KpiCard = ({ label, value, subtext, borderColor, valueColor }) => (
   <div
-    className="rounded-md border border-[#ddd5c2] bg-card px-[18px] py-4"
+    className="rounded-md border border-[#ddd5c2] bg-card px-2.5 py-3 sm:px-[18px] sm:py-4"
     style={{ borderTop: `3px solid ${borderColor}` }}
   >
-    <div className="text-[11px] uppercase tracking-[.06em] text-[#8a8677]">{label}</div>
-    <div className="mt-1.5 font-mono text-[24px] font-semibold" style={{ color: valueColor }}>
+    <div className="truncate text-[10px] uppercase tracking-[.06em] text-[#8a8677] sm:text-[11px]">{label}</div>
+    <div
+      className="mt-1.5 truncate font-mono text-[15px] font-semibold sm:text-[19px] md:text-[24px]"
+      style={{ color: valueColor }}
+    >
       {value}
     </div>
-    {subtext ? <div className="mt-0.5 text-[12px] text-[#8a8677]">{subtext}</div> : null}
+    {subtext ? <div className="mt-0.5 truncate text-[11px] text-[#8a8677] sm:text-[12px]">{subtext}</div> : null}
   </div>
 );
 

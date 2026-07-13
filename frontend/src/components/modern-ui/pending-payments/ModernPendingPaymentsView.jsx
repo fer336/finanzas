@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Search, Edit, Trash2, Check, ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { Search, Edit, Trash2, Check, ChevronLeft, ChevronRight, RefreshCw, Plus } from 'lucide-react';
 import { Badge } from '../../ui/badge';
 import KpiCard from '../common/KpiCard';
 import ConfirmModal from '../common/ConfirmModal';
@@ -83,6 +83,7 @@ PillToggle.propTypes = {
 
 const ModernPendingPaymentsView = ({
   onMarcarPagado,
+  onNewPago,
   onEditPago,
   onDeletePago,
   onNewPrestamo,
@@ -209,6 +210,17 @@ const ModernPendingPaymentsView = ({
     </button>
   );
 
+  const NewPagoButton = () => (
+    <button
+      type="button"
+      onClick={() => onNewPago && onNewPago()}
+      className="flex items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047]"
+    >
+      <Plus className="h-3.5 w-3.5" />
+      Nuevo
+    </button>
+  );
+
   // ── Toggle de sección (Vencimientos / Préstamos) ─────────────────────────
   const SectionToggle = () => (
     <PillToggle
@@ -272,7 +284,10 @@ const ModernPendingPaymentsView = ({
         <div className="px-4 pt-4 pb-3">
           <div className="mb-3 flex items-end justify-between gap-3 border-b-[3px] border-double border-[#cfc6ae] pb-3">
             <h1 className="font-serif text-[26px] font-bold leading-none text-foreground">Vencimientos</h1>
-            <RefreshButton />
+            <div className="flex items-center gap-2">
+              <RefreshButton />
+              <NewPagoButton />
+            </div>
           </div>
 
           <div className="mb-3">
@@ -427,7 +442,10 @@ const ModernPendingPaymentsView = ({
       <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
         <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px]">
           <h1 className="font-serif text-[42px] font-bold leading-none text-foreground">Vencimientos</h1>
-          <RefreshButton />
+          <div className="flex items-center gap-2">
+            <RefreshButton />
+            <NewPagoButton />
+          </div>
         </div>
 
         <div className="mb-4">
@@ -595,6 +613,7 @@ const ModernPendingPaymentsView = ({
 
 ModernPendingPaymentsView.propTypes = {
   onMarcarPagado: PropTypes.func,
+  onNewPago: PropTypes.func,
   onEditPago: PropTypes.func,
   onDeletePago: PropTypes.func,
   onNewPrestamo: PropTypes.func,

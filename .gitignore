@@ -61,6 +61,10 @@ coverage/
 .nyc_output/
 *.lcov
 .jest/
+.coverage
+coverage.xml
+*.cover
+htmlcov/
 
 # TestSprite - Archivos temporales
 testsprite_tests/tmp/

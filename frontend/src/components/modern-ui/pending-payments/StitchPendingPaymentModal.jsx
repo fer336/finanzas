@@ -160,7 +160,7 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
               <div className="relative">
                 <img src={value} alt={previewTitle} className="max-h-56 w-full bg-[#f4f0e6] object-contain" />
                 <a href={value} target="_blank" rel="noopener noreferrer"
-                   className="absolute right-2 top-2 flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-[#faf7ef] px-3 py-1.5 text-[11.5px] font-medium text-foreground transition-colors hover:bg-[#f0ead9]">
+                   className="absolute right-2 top-2 flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-[#faf7ef] px-3 py-1.5 text-[11.5px] font-medium text-foreground transition-colors hover:bg-[#f0ead9] dark:border-[#2e3844] dark:bg-[#212836] dark:hover:bg-[#2e3844]">
                   <ExternalLink className="h-3 w-3" /> Ver completo
                 </a>
               </div>
@@ -168,7 +168,7 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
               <div className="relative h-64">
                 <iframe src={value} title={previewTitle} className="h-full w-full border-0" />
                 <a href={value} target="_blank" rel="noopener noreferrer"
-                   className="absolute right-2 top-2 flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-[#faf7ef] px-3 py-1.5 text-[11.5px] font-medium text-foreground transition-colors hover:bg-[#f0ead9]">
+                   className="absolute right-2 top-2 flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-[#faf7ef] px-3 py-1.5 text-[11.5px] font-medium text-foreground transition-colors hover:bg-[#f0ead9] dark:border-[#2e3844] dark:bg-[#212836] dark:hover:bg-[#2e3844]">
                   <ExternalLink className="h-3 w-3" /> Abrir PDF
                 </a>
               </div>
@@ -219,8 +219,8 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
               className={`
                 flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed p-6 cursor-pointer transition-all
                 ${isDragging
-                  ? 'border-primary bg-[#f0ead9]'
-                  : 'border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] hover:border-[#8a8677] hover:bg-[#f0ead9]/50'
+                  ? 'border-primary bg-[#f0ead9] dark:bg-[#212836]'
+                  : 'border-[#ddd5c2] bg-white hover:border-[#8a8677] hover:bg-[#f0ead9]/50 dark:border-[#2e3844] dark:bg-[#212836] dark:hover:bg-[#2e3844]'
                 }
               `}
             >
@@ -432,12 +432,12 @@ const StitchPendingPaymentModal = ({
 
       {/* Modal */}
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-[#ddd5c2] dark:border-[#2e3844] bg-[#faf7ef]">
+        <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-[#ddd5c2] bg-[#faf7ef] dark:border-[#2e3844] dark:bg-[#1a2029]">
 
           {/* Header (Sticky) */}
-          <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#ddd5c2] dark:border-[#2e3844] bg-[#faf7ef] px-6 py-5 sm:px-8">
+          <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#ddd5c2] bg-[#faf7ef] px-6 py-5 dark:border-[#2e3844] dark:bg-[#1a2029] sm:px-8">
             <div className="flex items-center gap-3">
-              <div className="rounded-sm bg-[#f0ead9] p-2">
+              <div className="rounded-sm bg-[#f0ead9] p-2 dark:bg-[#212836]">
                 <Calendar className="h-5 w-5 text-primary" />
               </div>
               <h2 className="font-serif text-[19px] font-bold text-foreground sm:text-[21px]">
@@ -447,7 +447,7 @@ const StitchPendingPaymentModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-sm p-2 text-[#8a8677] dark:text-[#93a0af] transition-colors hover:bg-black/5 hover:text-foreground"
+              className="rounded-sm p-2 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-foreground dark:text-[#93a0af] dark:hover:bg-white/5"
             >
               <X className="h-5 w-5" />
             </button>
@@ -600,8 +600,8 @@ const StitchPendingPaymentModal = ({
                       key={tipo}
                       className={`flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-1.5 transition-colors ${
                         formData.Tipo.toLowerCase() === tipo.toLowerCase()
-                          ? 'border-[#20242c] bg-[#f0ead9] text-[#20242c]'
-                          : 'border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] text-[#8a8677] dark:text-[#93a0af] hover:bg-[#f0ead9]/50'
+                          ? 'border-[#20242c] bg-[#f0ead9] text-[#20242c] dark:border-primary dark:bg-[#212836] dark:text-foreground'
+                          : 'border-[#ddd5c2] bg-white text-[#8a8677] hover:bg-[#f0ead9]/50 dark:border-[#2e3844] dark:bg-[#212836] dark:text-[#93a0af] dark:hover:bg-[#2e3844]'
                       }`}
                     >
                       <input
@@ -708,8 +708,8 @@ const StitchPendingPaymentModal = ({
                       onClick={() => setFormData({...formData, FrecuenciaRecurrencia: freq.toLowerCase()})}
                       className={`flex items-center justify-center gap-1.5 rounded-sm border py-2.5 text-[12.5px] font-medium transition-all ${
                         formData.FrecuenciaRecurrencia === freq.toLowerCase()
-                          ? 'border-primary bg-[#f0ead9] font-semibold text-primary'
-                          : 'border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] text-[#8a8677] dark:text-[#93a0af] hover:bg-[#f0ead9]/50'
+                          ? 'border-primary bg-[#f0ead9] font-semibold text-primary dark:bg-[#212836]'
+                          : 'border-[#ddd5c2] bg-white text-[#8a8677] hover:bg-[#f0ead9]/50 dark:border-[#2e3844] dark:bg-[#212836] dark:text-[#93a0af] dark:hover:bg-[#2e3844]'
                       }`}
                     >
                       {formData.FrecuenciaRecurrencia === freq.toLowerCase() && (
@@ -754,12 +754,12 @@ const StitchPendingPaymentModal = ({
           </form>
 
           {/* Footer (Sticky) */}
-          <div className="sticky bottom-0 z-20 flex items-center justify-end gap-3 border-t border-[#ddd5c2] dark:border-[#2e3844] bg-[#faf7ef] px-6 py-5 sm:px-8">
+          <div className="sticky bottom-0 z-20 flex items-center justify-end gap-3 border-t border-[#ddd5c2] bg-[#faf7ef] px-6 py-5 dark:border-[#2e3844] dark:bg-[#1a2029] sm:px-8">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-5 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50"
+              className="rounded-sm border border-[#ddd5c2] bg-white px-5 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50 dark:border-[#2e3844] dark:bg-[#212836] dark:hover:bg-[#2e3844]"
             >
               Cancelar
             </button>
@@ -767,7 +767,7 @@ const StitchPendingPaymentModal = ({
               type="button"
               onClick={handleSubmit}
               disabled={saving}
-              className="flex items-center gap-2 rounded-sm bg-primary px-5 py-2.5 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:opacity-50"
+              className="flex items-center gap-2 rounded-sm bg-primary px-5 py-2.5 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:opacity-50 dark:hover:bg-[#7d9970]"
             >
               <Save className="h-4 w-4" />
               {saving ? 'Guardando…' : 'Guardar cambios'}

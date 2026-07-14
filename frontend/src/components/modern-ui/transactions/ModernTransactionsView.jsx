@@ -75,12 +75,13 @@ PillToggle.propTypes = {
   activeClassName: PropTypes.string.isRequired,
 };
 
-const FilterSelect = (props) => (
+const FilterSelect = ({ className = '', ...props }) => (
   <select
     {...props}
-    className="rounded-sm border border-border bg-secondary px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+    className={`min-w-0 rounded-sm border border-border bg-secondary px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring ${className}`}
   />
 );
+FilterSelect.propTypes = { className: PropTypes.string };
 
 const EmptyState = ({ children }) => (
   <p className="text-[13.5px] italic text-muted-foreground">{children}</p>
@@ -463,11 +464,11 @@ const ModernTransactionsView = ({
           </div>
 
           {/* Filtros tipo / categoría */}
-          <div className="flex gap-2 mb-3">
+          <div className="grid grid-cols-2 gap-2 mb-3">
             <FilterSelect
               value={selectedType}
               onChange={e => setSelectedType(e.target.value)}
-              className="flex-1 rounded-sm border border-border bg-secondary px-3 py-2 font-mono text-[12px] text-foreground focus:outline-none"
+              className="w-full py-2"
             >
               <option value="all">Todos los tipos</option>
               <option value="ingreso">Ingresos</option>
@@ -476,7 +477,7 @@ const ModernTransactionsView = ({
             <FilterSelect
               value={selectedCategory}
               onChange={e => setSelectedCategory(e.target.value)}
-              className="flex-1 rounded-sm border border-border bg-secondary px-3 py-2 font-mono text-[12px] text-foreground focus:outline-none"
+              className="w-full py-2"
             >
               <option value="all">Todas las categorías</option>
               {availableCategories.map(c => (

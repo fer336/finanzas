@@ -205,10 +205,12 @@ const ModernPendingPaymentsView = ({
       type="button"
       onClick={refresh}
       disabled={isRefreshing}
-      className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50 dark:border-border dark:bg-secondary dark:hover:bg-card-hover"
+      title={isRefreshing ? 'Actualizando…' : 'Actualizar'}
+      aria-label={isRefreshing ? 'Actualizando…' : 'Actualizar'}
+      className="flex items-center justify-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-white px-2.5 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50 dark:border-border dark:bg-secondary dark:hover:bg-card-hover sm:px-3"
     >
       <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-      {isRefreshing ? 'Actualizando…' : 'Actualizar'}
+      <span className="hidden sm:inline">{isRefreshing ? 'Actualizando…' : 'Actualizar'}</span>
     </button>
   );
 
@@ -216,10 +218,12 @@ const ModernPendingPaymentsView = ({
     <button
       type="button"
       onClick={() => onNewPago && onNewPago()}
-      className="flex items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047]"
+      title="Nuevo vencimiento"
+      aria-label="Nuevo vencimiento"
+      className="flex items-center justify-center gap-1.5 rounded-sm bg-primary px-2.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] sm:px-3.5"
     >
       <Plus className="h-3.5 w-3.5" />
-      Nuevo
+      <span className="hidden sm:inline">Nuevo</span>
     </button>
   );
 
@@ -284,9 +288,9 @@ const ModernPendingPaymentsView = ({
     return (
       <div className="min-h-screen bg-background pb-8">
         <div className="px-4 pt-4 pb-3">
-          <div className="mb-3 flex items-end justify-between gap-3 border-b-[3px] border-double border-[#cfc6ae] pb-3 dark:border-border">
-            <h1 className="font-serif text-[26px] font-bold leading-none text-foreground">Vencimientos</h1>
-            <div className="flex items-center gap-2">
+          <div className="mb-3 flex items-end justify-between gap-2 border-b-[3px] border-double border-[#cfc6ae] pb-3 dark:border-border">
+            <h1 className="min-w-0 flex-1 truncate font-serif text-[26px] font-bold leading-none text-foreground">Vencimientos</h1>
+            <div className="flex shrink-0 items-center gap-2">
               <RefreshButton />
               <NewPagoButton />
             </div>
@@ -306,7 +310,7 @@ const ModernPendingPaymentsView = ({
             />
           </div>
 
-          <div className="mb-2.5 flex items-center gap-2">
+          <div className="mb-2.5 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2">
             <PillToggle
               options={[{ value: 'monthly', label: 'Mensual' }, { value: 'accumulated', label: 'Acumulado' }]}
               value={viewMode}
@@ -318,7 +322,7 @@ const ModernPendingPaymentsView = ({
                 type="month"
                 value={selectedMonthFilter}
                 onChange={(e) => setSelectedMonthFilter(e.target.value)}
-                className="flex-1 rounded-sm border border-[#ddd5c2] bg-white px-3 py-1.5 font-mono text-[12px] text-foreground focus:outline-none dark:border-border dark:bg-secondary"
+                className="min-w-0 rounded-sm border border-[#ddd5c2] bg-white px-2 py-1.5 font-mono text-[11.5px] text-foreground focus:outline-none dark:border-border dark:bg-secondary"
               />
             )}
           </div>

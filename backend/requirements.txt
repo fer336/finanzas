@@ -5,7 +5,7 @@ pydantic[email]>=2.5.0
 # pydantic-settings>=2.1.0  # REMOVED - causaba conflictos con env vars
 
 # Autenticación OAuth2
-authlib>=1.2.1
+authlib>=1.7.2
 python-jose[cryptography]>=3.5.0
 PyJWT>=2.8.0
 passlib[bcrypt]>=1.7.4

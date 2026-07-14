@@ -126,11 +126,11 @@ const PrestamoPayModal = ({
       style={{ background: 'rgba(32,36,44,.4)' }}
       onClick={(event) => event.target === event.currentTarget && onClose()}
     >
-      <div className="w-full max-w-2xl rounded-[12px] border border-[#ddd5c2] bg-[#faf7ef]">
-        <div className="flex items-center justify-between border-b border-[#e7e0cf] p-5">
+      <div className="w-full max-w-2xl rounded-[12px] border border-[#ddd5c2] dark:border-[#2e3844] bg-[#faf7ef] dark:bg-[#1a2029]">
+        <div className="flex items-center justify-between border-b border-[#e7e0cf] dark:border-[#2e3844] p-5">
           <div>
             <h2 className="font-serif text-[20px] font-bold text-foreground">Registrar devolución</h2>
-            <p className="mt-0.5 text-[12.5px] text-[#5d6470]">
+            <p className="mt-0.5 text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
               {prestamo.nombre_fuente} · <span className="font-mono">{(prestamo.monto_a_devolver || 0).toLocaleString('es-AR')}</span>
             </p>
           </div>
@@ -139,7 +139,7 @@ const PrestamoPayModal = ({
             className="rounded-sm p-2 transition-colors duration-150 hover:bg-black/5"
             type="button"
           >
-            <X className="w-5 h-5 text-[#8a8677]" />
+            <X className="w-5 h-5 text-[#8a8677] dark:text-[#93a0af]" />
           </button>
         </div>
 

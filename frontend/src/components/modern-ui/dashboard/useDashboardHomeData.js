@@ -52,6 +52,8 @@ export function useDashboardHomeData({
   pendingPayments = [],
   dollarQuotes,
   balanceNeto: balanceNetoOverride = null,
+  balanceDisponible: balanceDisponibleOverride = null,
+  apartadoObjetivos: apartadoObjetivosOverride = null,
   mes = mesActualStr(),
 }) {
   const { formatAmount } = useAmountVisibility();
@@ -99,10 +101,17 @@ export function useDashboardHomeData({
     return sum + (t.tipo === 'ingreso' ? monto : -monto);
   }, 0);
   const balanceNeto = typeof balanceNetoOverride === 'number' ? balanceNetoOverride : saldoEstimadoFallback;
+  // Apartado en objetivos: plata ya asignada a un objetivo de ahorro (no
+  // generó un gasto real, pero tampoco está disponible para gastar) — ver
+  // GET /balance-inicial/neto → apartado_objetivos / balance_disponible.
+  const apartadoObjetivos = typeof apartadoObjetivosOverride === 'number' ? apartadoObjetivosOverride : 0;
+  const balanceDisponible = typeof balanceDisponibleOverride === 'number'
+    ? balanceDisponibleOverride
+    : balanceNeto - apartadoObjetivos;
   const blueQuote = Array.isArray(dollarQuotes) ? dollarQuotes.find((q) => q.casa === 'blue') : null;
   const usdRate = blueQuote?.venta ? parseFloat(blueQuote.venta) : null;
   const usdEquivalent = usdRate
-    ? `≈ USD ${Math.round(balanceNeto / usdRate).toLocaleString('es-AR')}`
+    ? `≈ USD ${Math.round(balanceDisponible / usdRate).toLocaleString('es-AR')}`
     : '≈ USD —';
 
   const kpis = [
@@ -225,6 +234,8 @@ export function useDashboardHomeData({
     tituloMes,
     veredicto,
     balanceNeto,
+    balanceDisponible,
+    apartadoObjetivos,
     usdEquivalent,
     kpis,
     resultadoMes,

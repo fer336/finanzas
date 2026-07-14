@@ -41,12 +41,13 @@ const calcularDiasRestantes = (fechaVencimiento) => {
 };
 
 // ─── Piezas de UI compartidas con el patrón Papel (ver ModernTransactionsView) ──
-const FilterSelect = (props) => (
+const FilterSelect = ({ className = '', ...props }) => (
   <select
     {...props}
-    className="rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+    className={`rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring dark:border-border dark:bg-secondary ${className}`}
   />
 );
+FilterSelect.propTypes = { className: PropTypes.string };
 
 const EmptyState = ({ children }) => (
   <p className="text-[13.5px] italic text-muted-foreground">{children}</p>
@@ -55,14 +56,14 @@ EmptyState.propTypes = { children: PropTypes.node };
 
 // Toggle de pills Mensual/Acumulado (mismo patrón visual que Movimientos).
 const PillToggle = ({ options, value, onChange, activeClassName }) => (
-  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] bg-card p-[3px]">
+  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] bg-card p-[3px] dark:border-border">
     {options.map((opt) => (
       <button
         key={opt.value}
         type="button"
         onClick={() => onChange(opt.value)}
         className={`rounded-full px-3 py-1 font-mono text-[12px] transition-colors duration-150 ${
-          value === opt.value ? `${activeClassName} font-semibold` : 'text-[#5d6470] hover:text-foreground'
+          value === opt.value ? `${activeClassName} font-semibold` : 'text-[#5d6470] hover:text-foreground dark:text-muted-foreground'
         }`}
       >
         {opt.label}
@@ -182,16 +183,17 @@ const ModernPendingPaymentsView = ({
   const renderFecha = (fechaVencimiento) => {
     const fecha = parseDateSafe(fechaVencimiento);
     if (!fecha) {
-      return <span className="font-mono text-[12px] italic text-[#8a8677]">a confirmar</span>;
+      return <span className="font-mono text-[12px] italic text-[#8a8677] dark:text-muted-foreground">a confirmar</span>;
     }
-    return <span className="font-mono text-[12px] text-[#5d6470]">{fecha.toLocaleDateString('es-AR')}</span>;
+    return <span className="font-mono text-[12px] text-[#5d6470] dark:text-muted-foreground">{fecha.toLocaleDateString('es-AR')}</span>;
   };
 
   const EstadoPill = ({ isPaid }) => {
-    const color = isPaid ? '#476442' : '#8a6a1f';
-    const borderColor = isPaid ? '#476442' : '#e0c98a';
+    const pillClassName = isPaid
+      ? 'border-[#476442] text-[#476442] dark:border-[#8fae7f] dark:text-[#8fae7f]'
+      : 'border-[#e0c98a] text-[#8a6a1f] dark:border-[#d8ac5a] dark:text-[#d8ac5a]';
     return (
-      <Badge variant="outline" style={{ borderColor, color }}>
+      <Badge variant="outline" className={pillClassName}>
         {isPaid ? 'pagado' : 'pendiente'}
       </Badge>
     );
@@ -203,7 +205,7 @@ const ModernPendingPaymentsView = ({
       type="button"
       onClick={refresh}
       disabled={isRefreshing}
-      className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50"
+      className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50 dark:border-border dark:bg-secondary dark:hover:bg-card-hover"
     >
       <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
       {isRefreshing ? 'Actualizando…' : 'Actualizar'}
@@ -235,7 +237,7 @@ const ModernPendingPaymentsView = ({
     return (
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-[1100px] px-4 py-4 sm:px-[34px] sm:py-[28px]">
-          <div className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] ${isMobile ? 'mb-3 pb-3' : 'mb-[22px] pb-[18px]'}`}>
+          <div className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] dark:border-border ${isMobile ? 'mb-3 pb-3' : 'mb-[22px] pb-[18px]'}`}>
             <h1 className={`font-serif font-bold leading-none text-foreground ${isMobile ? 'text-[26px]' : 'text-[42px]'}`}>Vencimientos</h1>
           </div>
           <div className="mb-4">
@@ -257,9 +259,9 @@ const ModernPendingPaymentsView = ({
     return (
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
-          <div className="h-8 w-56 animate-pulse rounded-sm bg-[#e7e0cf]" />
-          <div className="mt-4 h-24 w-full max-w-xs animate-pulse rounded-md bg-[#e7e0cf]" />
-          <div className="mt-5 h-64 w-full animate-pulse rounded-md bg-[#e7e0cf]" />
+          <div className="h-8 w-56 animate-pulse rounded-sm bg-[#e7e0cf] dark:bg-muted" />
+          <div className="mt-4 h-24 w-full max-w-xs animate-pulse rounded-md bg-[#e7e0cf] dark:bg-muted" />
+          <div className="mt-5 h-64 w-full animate-pulse rounded-md bg-[#e7e0cf] dark:bg-muted" />
         </div>
       </div>
     );
@@ -282,7 +284,7 @@ const ModernPendingPaymentsView = ({
     return (
       <div className="min-h-screen bg-background pb-8">
         <div className="px-4 pt-4 pb-3">
-          <div className="mb-3 flex items-end justify-between gap-3 border-b-[3px] border-double border-[#cfc6ae] pb-3">
+          <div className="mb-3 flex items-end justify-between gap-3 border-b-[3px] border-double border-[#cfc6ae] pb-3 dark:border-border">
             <h1 className="font-serif text-[26px] font-bold leading-none text-foreground">Vencimientos</h1>
             <div className="flex items-center gap-2">
               <RefreshButton />
@@ -316,25 +318,25 @@ const ModernPendingPaymentsView = ({
                 type="month"
                 value={selectedMonthFilter}
                 onChange={(e) => setSelectedMonthFilter(e.target.value)}
-                className="flex-1 rounded-sm border border-[#ddd5c2] bg-white px-3 py-1.5 font-mono text-[12px] text-foreground focus:outline-none"
+                className="flex-1 rounded-sm border border-[#ddd5c2] bg-white px-3 py-1.5 font-mono text-[12px] text-foreground focus:outline-none dark:border-border dark:bg-secondary"
               />
             )}
           </div>
 
           <div className="relative mb-2.5">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8a8677]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8a8677] dark:text-muted-foreground" />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar…"
-              className="w-full rounded-sm border border-[#ddd5c2] bg-white py-2 pl-9 pr-3 text-[13px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full rounded-sm border border-[#ddd5c2] bg-white py-2 pl-9 pr-3 text-[13px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring dark:border-border dark:bg-secondary dark:placeholder:text-muted-foreground"
             />
           </div>
 
           <FilterSelect
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3 py-2 font-mono text-[12px] text-foreground focus:outline-none"
+            className="w-full py-2"
           >
             <option value="all">Todos los estados</option>
             <option value="pending">Pendientes</option>
@@ -345,7 +347,7 @@ const ModernPendingPaymentsView = ({
 
         <div className="flex flex-col gap-2 px-4">
           {paginatedData.length === 0 ? (
-            <div className="flex items-center justify-center rounded-md border border-[#ddd5c2] bg-card py-10">
+            <div className="flex items-center justify-center rounded-md border border-[#ddd5c2] bg-card py-10 dark:border-border">
               <EmptyState>
                 {searchQuery ? `Sin resultados para "${searchQuery}".` : 'Sin vencimientos en esta vista.'}
               </EmptyState>
@@ -354,7 +356,7 @@ const ModernPendingPaymentsView = ({
             paginatedData.map((p) => {
               const isPaid = isPagoPaid(p);
               return (
-                <div key={p.id} className="rounded-md border border-[#ddd5c2] bg-card px-3.5 py-3">
+                <div key={p.id} className="rounded-md border border-[#ddd5c2] bg-card px-3.5 py-3 dark:border-border">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="text-[13.5px] text-foreground truncate">{p.nombre}</p>
@@ -372,14 +374,14 @@ const ModernPendingPaymentsView = ({
                       </div>
                     </div>
                   </div>
-                  <div className="mt-2.5 flex items-center justify-between border-t border-dashed border-[#e7e0cf] pt-2">
+                  <div className="mt-2.5 flex items-center justify-between border-t border-dashed border-[#e7e0cf] pt-2 dark:border-muted">
                     <div className="flex gap-3">
-                      <button onClick={() => onEditPago && onEditPago(p)} className="p-1 text-[#8a8677] hover:text-foreground">
+                      <button onClick={() => onEditPago && onEditPago(p)} className="p-1 text-[#8a8677] hover:text-foreground dark:text-muted-foreground">
                         <Edit className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => { setPagoToDelete(p); setShowDeleteConfirm(true); }}
-                        className="p-1 text-[#8a8677] hover:text-[#a04a34]"
+                        className="p-1 text-[#8a8677] hover:text-[#a04a34] dark:text-muted-foreground dark:hover:text-[#c26a52]"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -400,23 +402,23 @@ const ModernPendingPaymentsView = ({
           )}
 
           {totalPages > 1 && (
-            <div className="mt-2 flex items-center justify-between rounded-md border border-[#ddd5c2] bg-card px-4 py-3">
+            <div className="mt-2 flex items-center justify-between rounded-md border border-[#ddd5c2] bg-card px-4 py-3 dark:border-border">
               <button
                 onClick={() => currentPage > 1 && setCurrentPage((p) => p - 1)}
                 disabled={currentPage === 1}
-                className="rounded-sm p-2 hover:bg-black/5 disabled:opacity-30"
+                className="rounded-sm p-2 hover:bg-black/5 disabled:opacity-30 dark:hover:bg-card-hover"
               >
-                <ChevronLeft className="h-4 w-4 text-[#8a8677]" />
+                <ChevronLeft className="h-4 w-4 text-[#8a8677] dark:text-muted-foreground" />
               </button>
-              <span className="font-mono text-[12px] text-[#5d6470]">
-                {currentPage} / {totalPages} <span className="text-[#8a8677]">({sortedData.length})</span>
+              <span className="font-mono text-[12px] text-[#5d6470] dark:text-muted-foreground">
+                {currentPage} / {totalPages} <span className="text-[#8a8677] dark:text-muted-foreground">({sortedData.length})</span>
               </span>
               <button
                 onClick={() => currentPage < totalPages && setCurrentPage((p) => p + 1)}
                 disabled={currentPage >= totalPages}
-                className="rounded-sm p-2 hover:bg-black/5 disabled:opacity-30"
+                className="rounded-sm p-2 hover:bg-black/5 disabled:opacity-30 dark:hover:bg-card-hover"
               >
-                <ChevronRight className="h-4 w-4 text-[#8a8677]" />
+                <ChevronRight className="h-4 w-4 text-[#8a8677] dark:text-muted-foreground" />
               </button>
             </div>
           )}
@@ -440,7 +442,7 @@ const ModernPendingPaymentsView = ({
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
-        <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px]">
+        <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px] dark:border-border">
           <h1 className="font-serif text-[42px] font-bold leading-none text-foreground">Vencimientos</h1>
           <div className="flex items-center gap-2">
             <RefreshButton />
@@ -464,19 +466,19 @@ const ModernPendingPaymentsView = ({
               type="month"
               value={selectedMonthFilter}
               onChange={(e) => setSelectedMonthFilter(e.target.value)}
-              className="rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none"
+              className="rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none dark:border-border dark:bg-secondary"
             />
           )}
         </div>
 
         <div className="mb-4 flex gap-2.5">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8a8677]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8a8677] dark:text-muted-foreground" />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar…"
-              className="w-full rounded-sm border border-[#ddd5c2] bg-white py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
+              className="w-full rounded-sm border border-[#ddd5c2] bg-white py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring transition-colors dark:border-border dark:bg-secondary dark:placeholder:text-muted-foreground"
             />
           </div>
           <FilterSelect value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}>
@@ -497,16 +499,16 @@ const ModernPendingPaymentsView = ({
           />
         </div>
 
-        <div className="rounded-md border border-[#ddd5c2] bg-card overflow-hidden">
+        <div className="rounded-md border border-[#ddd5c2] bg-card overflow-hidden dark:border-border">
           <table className="w-full">
             <thead>
-              <tr className="border-b-2 border-[#ddd5c2]">
-                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Vence</th>
-                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Descripción</th>
-                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Categoría</th>
-                <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Monto</th>
-                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Estado</th>
-                <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Acciones</th>
+              <tr className="border-b-2 border-[#ddd5c2] dark:border-border">
+                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Vence</th>
+                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Descripción</th>
+                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Categoría</th>
+                <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Monto</th>
+                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Estado</th>
+                <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -522,7 +524,7 @@ const ModernPendingPaymentsView = ({
                 paginatedData.map((p) => {
                   const isPaid = isPagoPaid(p);
                   return (
-                    <tr key={p.id} className="group border-b border-[#e7e0cf] hover:bg-[#f0ead9] transition-colors">
+                    <tr key={p.id} className="group border-b border-[#e7e0cf] hover:bg-[#f0ead9] transition-colors dark:border-muted dark:hover:bg-card-hover">
                       <td className="px-3.5 py-2.5">{renderFecha(p.fechaVencimiento)}</td>
                       <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">{p.nombre}</td>
                       <td className="px-3.5 py-2.5">
@@ -548,17 +550,17 @@ const ModernPendingPaymentsView = ({
                           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                               onClick={() => onEditPago && onEditPago(p)}
-                              className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
+                              className="p-1.5 rounded-sm hover:bg-black/5 transition-colors dark:hover:bg-card-hover"
                               title="Editar"
                             >
-                              <Edit className="h-4 w-4 text-[#8a8677]" />
+                              <Edit className="h-4 w-4 text-[#8a8677] dark:text-muted-foreground" />
                             </button>
                             <button
                               onClick={() => { setPagoToDelete(p); setShowDeleteConfirm(true); }}
-                              className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
+                              className="p-1.5 rounded-sm hover:bg-black/5 transition-colors dark:hover:bg-card-hover"
                               title="Eliminar"
                             >
-                              <Trash2 className="h-4 w-4 text-[#8a8677] hover:text-[#a04a34]" />
+                              <Trash2 className="h-4 w-4 text-[#8a8677] hover:text-[#a04a34] dark:text-muted-foreground dark:hover:text-[#c26a52]" />
                             </button>
                           </div>
                         </div>
@@ -571,25 +573,25 @@ const ModernPendingPaymentsView = ({
           </table>
 
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#e7e0cf]">
-              <p className="font-mono text-[12px] text-[#8a8677]">
+            <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#e7e0cf] dark:border-muted">
+              <p className="font-mono text-[12px] text-[#8a8677] dark:text-muted-foreground">
                 Página {currentPage} de {totalPages} ({sortedData.length} resultados)
               </p>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => currentPage > 1 && setCurrentPage((p) => p - 1)}
                   disabled={currentPage === 1}
-                  className="p-1.5 rounded-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black/5"
+                  className="p-1.5 rounded-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black/5 dark:hover:bg-card-hover"
                 >
-                  <ChevronLeft className="h-4 w-4 text-[#8a8677]" />
+                  <ChevronLeft className="h-4 w-4 text-[#8a8677] dark:text-muted-foreground" />
                 </button>
                 <span className="font-mono text-[12px] text-foreground px-2">{currentPage}</span>
                 <button
                   onClick={() => currentPage < totalPages && setCurrentPage((p) => p + 1)}
                   disabled={currentPage >= totalPages}
-                  className="p-1.5 rounded-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black/5"
+                  className="p-1.5 rounded-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black/5 dark:hover:bg-card-hover"
                 >
-                  <ChevronRight className="h-4 w-4 text-[#8a8677]" />
+                  <ChevronRight className="h-4 w-4 text-[#8a8677] dark:text-muted-foreground" />
                 </button>
               </div>
             </div>

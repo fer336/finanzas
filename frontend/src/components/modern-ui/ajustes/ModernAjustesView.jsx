@@ -52,10 +52,10 @@ const Switch = ({ checked, onChange, label }) => (
     aria-label={label}
     onClick={onChange}
     className="relative h-5 w-9 shrink-0 rounded-full transition-colors duration-150"
-    style={{ background: checked ? '#5a7d52' : '#d8d6cf' }}
+    style={{ background: checked ? 'var(--primary)' : 'var(--border)' }}
   >
     <span
-      className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all duration-150"
+      className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all duration-150 dark:bg-[#212836]"
       style={{ left: checked ? '18px' : '2px' }}
     />
   </button>
@@ -70,7 +70,7 @@ Switch.propTypes = {
 // Toggle de pills — mismo patrón visual que Mensual/Acumulado en
 // ModernTransactionsView (activa en azul #3d5a80, es un modo de "scope").
 const PillToggle = ({ options, value, onChange }) => (
-  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] bg-card p-[3px]">
+  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] bg-card p-[3px] dark:border-[#2e3844]">
     {options.map((opt) => (
       <button
         key={opt.value}
@@ -79,7 +79,7 @@ const PillToggle = ({ options, value, onChange }) => (
         className={`rounded-full px-4 py-1.5 font-mono text-[12px] transition-colors duration-150 ${
           value === opt.value
             ? 'bg-[#3d5a80] font-semibold text-[#faf7ef]'
-            : 'text-[#5d6470] hover:text-foreground'
+            : 'text-[#5d6470] hover:text-foreground dark:text-[#93a0af]'
         }`}
       >
         {opt.label}
@@ -101,7 +101,7 @@ PillToggle.propTypes = {
 // #20242c en la pill activa, porque estos tabs cambian de contenido
 // completo en vez de filtrar un rango).
 const SectionTabs = ({ options, value, onChange }) => (
-  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] bg-card p-[3px]">
+  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] bg-card p-[3px] dark:border-[#2e3844]">
     {options.map((opt) => (
       <button
         key={opt.value}
@@ -109,8 +109,8 @@ const SectionTabs = ({ options, value, onChange }) => (
         onClick={() => onChange(opt.value)}
         className={`rounded-full px-4 py-1.5 font-mono text-[12px] transition-colors duration-150 ${
           value === opt.value
-            ? 'bg-[#20242c] font-semibold text-[#f4f0e6]'
-            : 'text-[#5d6470] hover:text-foreground'
+            ? 'bg-[#20242c] font-semibold text-[#f4f0e6] dark:bg-[#ece7d8] dark:text-[#12161c]'
+            : 'text-[#5d6470] hover:text-foreground dark:text-[#93a0af]'
         }`}
       >
         {opt.label}
@@ -130,9 +130,9 @@ SectionTabs.propTypes = {
 
 // ─── Section shell — card estándar con título Fraunces ─────────────────────
 const Section = ({ title, description, children }) => (
-  <section className="rounded-md border border-[#ddd5c2] bg-card p-5">
+  <section className="rounded-md border border-[#ddd5c2] bg-card p-5 dark:border-[#2e3844]">
     <h2 className="font-serif text-[17px] font-semibold text-foreground">{title}</h2>
-    {description && <p className="mt-1 text-[12.5px] text-[#8a8677]">{description}</p>}
+    {description && <p className="mt-1 text-[12.5px] text-[#8a8677] dark:text-[#93a0af]">{description}</p>}
     <div className="mt-4">{children}</div>
   </section>
 );
@@ -228,10 +228,10 @@ const ApiKeysSection = () => {
   return (
     <div>
       {justCreatedKey && (
-        <div className="mb-4 rounded-sm border border-[#e9c46a] bg-[#fdf6e3] p-4">
+        <div className="mb-4 rounded-sm border border-[#e9c46a] bg-[#fdf6e3] p-4 dark:border-[#d8ac5a] dark:bg-[rgba(216,172,90,0.14)]">
           <div className="mb-2 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-[#8a6a1f]" />
-            <p className="font-serif text-[14px] font-semibold text-[#8a6a1f]">
+            <AlertTriangle className="h-4 w-4 text-[#8a6a1f] dark:text-[#d8ac5a]" />
+            <p className="font-serif text-[14px] font-semibold text-[#8a6a1f] dark:text-[#d8ac5a]">
               Guardá esta key ahora — no se va a volver a mostrar
             </p>
           </div>
@@ -241,24 +241,24 @@ const ApiKeysSection = () => {
               readOnly
               value={justCreatedKey.key}
               onClick={(e) => e.target.select()}
-              className="w-full rounded-sm border border-[#e9c46a] bg-white px-3 py-2 font-mono text-[12.5px] text-[#20242c]"
+              className="w-full rounded-sm border border-[#e9c46a] bg-white px-3 py-2 font-mono text-[12.5px] text-[#20242c] dark:border-[#d8ac5a] dark:bg-[#212836] dark:text-[#ece7d8]"
             />
             <button
               type="button"
               onClick={handleCopy}
-              className="flex shrink-0 items-center gap-1.5 rounded-sm border border-[#e9c46a] bg-white px-3 py-2 font-sans text-[12.5px] font-medium text-[#8a6a1f] transition-colors duration-150 hover:bg-[#f0ead9]"
+              className="flex shrink-0 items-center gap-1.5 rounded-sm border border-[#e9c46a] bg-white px-3 py-2 font-sans text-[12.5px] font-medium text-[#8a6a1f] transition-colors duration-150 hover:bg-[#f0ead9] dark:border-[#d8ac5a] dark:bg-[#212836] dark:text-[#d8ac5a] dark:hover:bg-[#2e3844]"
             >
               {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
               {copied ? 'Copiado' : 'Copiar'}
             </button>
           </div>
-          <p className="mt-2 text-[11.5px] text-[#8a6a1f]">
+          <p className="mt-2 text-[11.5px] text-[#8a6a1f] dark:text-[#d8ac5a]">
             Por seguridad, esta es la única vez que vas a poder ver el token completo.
           </p>
           <button
             type="button"
             onClick={() => setJustCreatedKey(null)}
-            className="mt-3 rounded-sm border border-[#e9c46a] bg-white px-3 py-[6px] font-sans text-[11.5px] text-[#8a6a1f] transition-colors duration-150 hover:bg-[#f0ead9]"
+            className="mt-3 rounded-sm border border-[#e9c46a] bg-white px-3 py-[6px] font-sans text-[11.5px] text-[#8a6a1f] transition-colors duration-150 hover:bg-[#f0ead9] dark:border-[#d8ac5a] dark:bg-[#212836] dark:text-[#d8ac5a] dark:hover:bg-[#2e3844]"
           >
             Ya la guardé, cerrar
           </button>
@@ -266,17 +266,17 @@ const ApiKeysSection = () => {
       )}
 
       {error && (
-        <div className="mb-4 rounded-sm border border-[#a04a34]/40 bg-[#a04a34]/5 p-3 text-[12.5px] text-[#a04a34]">
+        <div className="mb-4 rounded-sm border border-[#a04a34]/40 bg-[#a04a34]/5 p-3 text-[12.5px] text-[#a04a34] dark:border-[#c26a52]/40 dark:bg-[#c26a52]/10 dark:text-[#c26a52]">
           {error}
         </div>
       )}
 
       <div className="mb-4 flex items-start justify-between gap-3">
-        <p className="text-[12.5px] text-[#8a8677]">Cada key da acceso completo a tu cuenta vía la API.</p>
+        <p className="text-[12.5px] text-[#8a8677] dark:text-[#93a0af]">Cada key da acceso completo a tu cuenta vía la API.</p>
         <button
           type="button"
           onClick={() => setShowCreateForm((v) => !v)}
-          className="flex shrink-0 items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047]"
+          className="flex shrink-0 items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] dark:hover:bg-[#7d9970]"
         >
           <Plus className="h-3.5 w-3.5" />
           Generar token
@@ -284,7 +284,7 @@ const ApiKeysSection = () => {
       </div>
 
       {showCreateForm && (
-        <form onSubmit={handleCreate} className="mb-4 flex items-center gap-2 rounded-sm border border-[#ddd5c2] bg-white p-3">
+        <form onSubmit={handleCreate} className="mb-4 flex items-center gap-2 rounded-sm border border-[#ddd5c2] bg-white p-3 dark:border-[#2e3844] dark:bg-[#212836]">
           <input
             type="text"
             value={nombre}
@@ -292,28 +292,28 @@ const ApiKeysSection = () => {
             placeholder="Ej: Agente Lucy externo"
             maxLength={100}
             autoFocus
-            className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3 py-2 text-[13.5px] text-foreground placeholder:text-[#8a8677] transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3 py-2 text-[13.5px] text-foreground placeholder:text-[#8a8677] transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#2e3844] dark:bg-[#212836] dark:placeholder:text-[#93a0af]"
           />
           <button
             type="submit"
             disabled={creating || !nombre.trim()}
-            className="shrink-0 rounded-sm bg-primary px-3.5 py-2 font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:cursor-not-allowed disabled:opacity-50"
+            className="shrink-0 rounded-sm bg-primary px-3.5 py-2 font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-[#7d9970]"
           >
             {creating ? 'Creando…' : 'Crear'}
           </button>
         </form>
       )}
 
-      <div className="overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] bg-card">
+      <div className="overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] bg-card dark:border-[#2e3844]">
         <table className="w-full min-w-[640px]">
           <thead>
-            <tr className="border-b-2 border-[#ddd5c2]">
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Nombre</th>
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Prefijo</th>
-              <th className="hidden px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] sm:table-cell" style={{ letterSpacing: '.08em' }}>Creado</th>
-              <th className="hidden px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] sm:table-cell" style={{ letterSpacing: '.08em' }}>Último uso</th>
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Estado</th>
-              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Acciones</th>
+            <tr className="border-b-2 border-[#ddd5c2] dark:border-[#2e3844]">
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Nombre</th>
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Prefijo</th>
+              <th className="hidden px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] sm:table-cell dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Creado</th>
+              <th className="hidden px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] sm:table-cell dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Último uso</th>
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Estado</th>
+              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -327,28 +327,28 @@ const ApiKeysSection = () => {
               keys.map((k) => {
                 const isRevoked = Boolean(k.revocado_en);
                 return (
-                  <tr key={k.id} className="group border-b border-[#e7e0cf] transition-colors hover:bg-[#f0ead9]">
+                  <tr key={k.id} className="group border-b border-[#e7e0cf] transition-colors hover:bg-[#f0ead9] dark:border-[#2e3844] dark:hover:bg-[#212836]">
                     <td className="px-3.5 py-2.5">
                       <div className="flex min-w-0 items-center gap-2.5">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-[#f0ead9]">
-                          <KeyRound className="h-4 w-4 text-[#8a8677]" />
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-[#f0ead9] dark:bg-[#212836]">
+                          <KeyRound className="h-4 w-4 text-[#8a8677] dark:text-[#93a0af]" />
                         </div>
                         <span className="truncate font-serif text-[14.5px] font-semibold text-foreground">{k.nombre}</span>
                       </div>
                     </td>
                     <td className="px-3.5 py-2.5">
-                      <span className="font-mono text-[12px] text-[#5d6470]">{k.key_prefix}…</span>
+                      <span className="font-mono text-[12px] text-[#5d6470] dark:text-[#93a0af]">{k.key_prefix}…</span>
                     </td>
-                    <td className="hidden px-3.5 py-2.5 font-mono text-[11.5px] text-[#8a8677] sm:table-cell">
+                    <td className="hidden px-3.5 py-2.5 font-mono text-[11.5px] text-[#8a8677] sm:table-cell dark:text-[#93a0af]">
                       {formatDate(k.creado_en) || '—'}
                     </td>
-                    <td className="hidden px-3.5 py-2.5 font-mono text-[11.5px] text-[#8a8677] sm:table-cell">
+                    <td className="hidden px-3.5 py-2.5 font-mono text-[11.5px] text-[#8a8677] sm:table-cell dark:text-[#93a0af]">
                       {formatDate(k.ultimo_uso) || 'Nunca'}
                     </td>
                     <td className="px-3.5 py-2.5">
                       <span
                         className={`inline-flex rounded-full border px-2 py-[2px] font-mono text-[10.5px] uppercase tracking-[.04em] ${
-                          isRevoked ? 'border-[#ddd5c2] text-[#8a8677]' : 'border-[#5a7d52] text-[#476442]'
+                          isRevoked ? 'border-[#ddd5c2] text-[#8a8677] dark:border-[#2e3844] dark:text-[#93a0af]' : 'border-[#5a7d52] text-[#476442] dark:border-[#8fae7f] dark:text-[#8fae7f]'
                         }`}
                       >
                         {isRevoked ? 'Revocada' : 'Activa'}
@@ -360,7 +360,7 @@ const ApiKeysSection = () => {
                           <button
                             type="button"
                             onClick={() => handleRevoke(k.id)}
-                            className="flex items-center gap-1 rounded-sm px-1.5 py-1 text-[#8a8677] opacity-0 transition-colors group-hover:opacity-100 hover:bg-black/5 hover:text-[#a04a34]"
+                            className="flex items-center gap-1 rounded-sm px-1.5 py-1 text-[#8a8677] opacity-0 transition-colors group-hover:opacity-100 hover:bg-black/5 hover:text-[#a04a34] dark:text-[#93a0af] dark:hover:bg-white/5 dark:hover:text-[#c26a52]"
                             title="Revocar API key"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -413,7 +413,7 @@ const ModernAjustesView = ({
       <div className={`mx-auto max-w-[1100px] ${isMobile ? 'px-4 py-4' : 'px-[34px] py-[28px]'}`}>
         {/* Cabecera (mismo patrón que Movimientos / Vencimientos / Inversiones) */}
         <div
-          className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] ${
+          className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] dark:border-[#2e3844] ${
             isMobile ? 'mb-3 pb-3' : 'mb-[22px] pb-[18px]'
           }`}
         >

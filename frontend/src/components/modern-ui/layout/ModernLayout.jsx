@@ -20,6 +20,8 @@ const ModernLayout = ({
   onLogout,
   amountsVisible,
   onToggleAmountVisibility,
+  isDarkMode,
+  onToggleTheme,
 }) => {
   const isMobile = useIsMobile();
 
@@ -37,6 +39,8 @@ const ModernLayout = ({
           onLogout={onLogout}
           amountsVisible={amountsVisible}
           onToggleAmountVisibility={onToggleAmountVisibility}
+          isDarkMode={isDarkMode}
+          onToggleTheme={onToggleTheme}
         />
       </div>
 
@@ -49,6 +53,8 @@ const ModernLayout = ({
         <MobileBottomNav
           currentView={currentView}
           onNavigate={onNavigate}
+          isDarkMode={isDarkMode}
+          onToggleTheme={onToggleTheme}
         />
       )}
     </div>
@@ -66,6 +72,8 @@ ModernLayout.propTypes = {
   onLogout: PropTypes.func,
   amountsVisible: PropTypes.bool,
   onToggleAmountVisibility: PropTypes.func,
+  isDarkMode: PropTypes.bool,
+  onToggleTheme: PropTypes.func,
 };
 
 export default ModernLayout;

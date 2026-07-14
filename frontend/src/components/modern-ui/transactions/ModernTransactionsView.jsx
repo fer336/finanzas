@@ -78,7 +78,7 @@ PillToggle.propTypes = {
 const FilterSelect = (props) => (
   <select
     {...props}
-    className="rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+    className="rounded-sm border border-border bg-secondary px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
   />
 );
 
@@ -352,7 +352,7 @@ const ModernTransactionsView = ({
         <div className="px-4 pt-4 pb-3">
 
           {/* Cabecera de período */}
-          <div className="mb-3 border-b-[3px] border-double border-[#cfc6ae] pb-3">
+          <div className="mb-3 border-b-[3px] border-double border-[#cfc6ae] pb-3 dark:border-border">
             <div className="font-mono text-[10px] uppercase text-[#3d5a80]" style={{ letterSpacing: '.14em' }}>
               {periodoEyebrow}
             </div>
@@ -386,7 +386,7 @@ const ModernTransactionsView = ({
 
           {/* Navegación mes (solo mensual) */}
           {viewMode === 'monthly' && (
-            <div className="mb-3 flex items-center justify-between rounded-sm border border-[#ddd5c2] bg-card px-3 py-2">
+            <div className="mb-3 flex items-center justify-between rounded-sm border border-border bg-card px-3 py-2">
               <button onClick={goToPrevMonth} className="p-1.5 rounded-sm hover:bg-black/5 transition-colors">
                 <ChevronLeft className="w-4 h-4 text-[#8a8677]" />
               </button>
@@ -408,7 +408,7 @@ const ModernTransactionsView = ({
             <div className="relative mb-3" ref={monthPickerRef}>
               <button
                 onClick={() => setShowMonthPicker(p => !p)}
-                className="w-full flex items-center justify-between px-3 py-2 bg-card border border-[#ddd5c2] rounded-sm text-[13px] text-foreground"
+                className="w-full flex items-center justify-between px-3 py-2 bg-card border border-border rounded-sm text-[13px] text-foreground"
               >
                 <div className="flex items-center gap-2">
                   <CalendarDays className="w-4 h-4 text-[#3d5a80]" />
@@ -417,7 +417,7 @@ const ModernTransactionsView = ({
                 <ChevronDown className={`w-4 h-4 text-[#8a8677] transition-transform ${showMonthPicker ? 'rotate-180' : ''}`} />
               </button>
               {showMonthPicker && (
-                <div className="absolute left-0 right-0 top-full mt-2 z-[9999] bg-card border border-[#ddd5c2] rounded-md p-4">
+                <div className="absolute left-0 right-0 top-full mt-2 z-[9999] bg-card border border-border rounded-md p-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-[13.5px] font-semibold text-foreground">Seleccionar meses</span>
                     <div className="flex gap-3">
@@ -436,7 +436,7 @@ const ModernTransactionsView = ({
                           className={`relative flex items-center justify-center gap-1 px-2 py-2 rounded-sm font-mono text-[12px] font-medium transition-colors ${
                             isSelected
                               ? 'bg-[#5a7d52]/10 text-[#476442] border border-[#5a7d52]/40'
-                              : 'bg-transparent text-[#5d6470] border border-[#ddd5c2]'
+                              : 'bg-transparent text-[#5d6470] border border-border dark:text-muted-foreground'
                           }`}
                         >
                           {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
@@ -458,7 +458,7 @@ const ModernTransactionsView = ({
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Buscar…"
-              className="w-full pl-9 pr-3 py-2 bg-white text-foreground text-[13px] border border-[#ddd5c2] rounded-sm placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full pl-9 pr-3 py-2 bg-secondary text-foreground text-[13px] border border-border rounded-sm placeholder:text-[#8a8677] dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
 
@@ -467,7 +467,7 @@ const ModernTransactionsView = ({
             <FilterSelect
               value={selectedType}
               onChange={e => setSelectedType(e.target.value)}
-              className="flex-1 rounded-sm border border-[#ddd5c2] bg-white px-3 py-2 font-mono text-[12px] text-foreground focus:outline-none"
+              className="flex-1 rounded-sm border border-border bg-secondary px-3 py-2 font-mono text-[12px] text-foreground focus:outline-none"
             >
               <option value="all">Todos los tipos</option>
               <option value="ingreso">Ingresos</option>
@@ -476,7 +476,7 @@ const ModernTransactionsView = ({
             <FilterSelect
               value={selectedCategory}
               onChange={e => setSelectedCategory(e.target.value)}
-              className="flex-1 rounded-sm border border-[#ddd5c2] bg-white px-3 py-2 font-mono text-[12px] text-foreground focus:outline-none"
+              className="flex-1 rounded-sm border border-border bg-secondary px-3 py-2 font-mono text-[12px] text-foreground focus:outline-none"
             >
               <option value="all">Todas las categorías</option>
               {availableCategories.map(c => (
@@ -514,7 +514,7 @@ const ModernTransactionsView = ({
         {/* Lista de transacciones como cards */}
         <div className="px-4 flex flex-col gap-2">
           {paginated.length === 0 ? (
-            <div className="rounded-md border border-[#ddd5c2] bg-card py-10 flex items-center justify-center">
+            <div className="rounded-md border border-border bg-card py-10 flex items-center justify-center">
               <EmptyState>Sin movimientos en esta vista.</EmptyState>
             </div>
           ) : (
@@ -531,7 +531,7 @@ const ModernTransactionsView = ({
               const comprobanteUrl = t.archivo_adjunto || t.ArchivoAdjunto || t.comprobante || t.Comprobante || '';
 
               return (
-                <div key={rowId} className="rounded-md border border-[#ddd5c2] bg-card px-3.5 py-3">
+                <div key={rowId} className="rounded-md border border-border bg-card px-3.5 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="text-[13.5px] text-foreground truncate">{descripcion}</p>
@@ -551,7 +551,7 @@ const ModernTransactionsView = ({
                       </p>
                     </div>
                   </div>
-                  <div className="mt-2.5 flex justify-end gap-3 border-t border-dashed border-[#e7e0cf] pt-2">
+                  <div className="mt-2.5 flex justify-end gap-3 border-t border-dashed border-muted pt-2">
                     {comprobanteUrl && (
                       <button
                         onClick={e => { e.stopPropagation(); window.open(comprobanteUrl, '_blank', 'noopener,noreferrer'); }}
@@ -581,7 +581,7 @@ const ModernTransactionsView = ({
 
           {/* Paginación mobile */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between rounded-md border border-[#ddd5c2] bg-card px-4 py-3 mt-2">
+            <div className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3 mt-2">
               <button
                 onClick={() => currentPage > 1 && setCurrentPage(p => p - 1)}
                 disabled={currentPage === 1}
@@ -612,7 +612,7 @@ const ModernTransactionsView = ({
       <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
 
         {/* ── Cabecera de período (mismo patrón que Inicio) ── */}
-        <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px]">
+        <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px] dark:border-border">
           <div>
             <div
               className="font-mono text-[11px] uppercase text-[#3d5a80]"
@@ -638,7 +638,7 @@ const ModernTransactionsView = ({
             />
 
             {viewMode === 'monthly' && (
-              <div className="flex items-center gap-1 rounded-full border border-[#ddd5c2] bg-card px-1.5 py-1">
+              <div className="flex items-center gap-1 rounded-full border border-border bg-card px-1.5 py-1">
                 <button onClick={goToPrevMonth} className="p-1 rounded-full hover:bg-black/5 transition-colors" title="Mes anterior">
                   <ChevronLeft className="w-4 h-4 text-[#8a8677]" />
                 </button>
@@ -660,7 +660,7 @@ const ModernTransactionsView = ({
               <div className="relative" ref={monthPickerRef}>
                 <button
                   onClick={() => setShowMonthPicker(p => !p)}
-                  className="flex items-center gap-1.5 px-3 py-[7px] bg-card hover:bg-[#f0ead9] border border-[#ddd5c2] rounded-sm text-[13px] text-foreground transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-[7px] bg-card hover:bg-card-hover border border-border rounded-sm text-[13px] text-foreground transition-colors"
                 >
                   <CalendarDays className="w-4 h-4 text-[#3d5a80]" />
                   <span>{monthsLabel}</span>
@@ -668,14 +668,14 @@ const ModernTransactionsView = ({
                 </button>
 
                 {showMonthPicker && (
-                  <div className="absolute left-0 top-full mt-2 z-[9999] bg-card border border-[#ddd5c2] rounded-md p-4 w-80">
+                  <div className="absolute left-0 top-full mt-2 z-[9999] bg-card border border-border rounded-md p-4 w-80">
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-[13.5px] font-semibold text-foreground">Seleccionar meses</span>
                       <div className="flex gap-3">
                         <button onClick={selectCurrent} className="text-[12px] text-[#5d6470] hover:text-foreground transition-colors">
                           Solo actual
                         </button>
-                        <span className="text-[#ddd5c2]">·</span>
+                        <span className="text-muted">·</span>
                         <button onClick={selectAll} className="text-[12px] text-[#3d5a80] hover:underline transition-colors">
                           Todos
                         </button>
@@ -693,7 +693,7 @@ const ModernTransactionsView = ({
                             className={`relative flex items-center justify-center gap-1 px-2 py-2 rounded-sm font-mono text-[12px] font-medium transition-colors duration-150 ${
                               isSelected
                                 ? 'bg-[#5a7d52]/10 text-[#476442] border border-[#5a7d52]/40'
-                                : 'bg-transparent text-[#5d6470] border border-[#ddd5c2] hover:bg-[#f0ead9]'
+                                : 'bg-transparent text-[#5d6470] border border-border hover:bg-card-hover dark:text-muted-foreground'
                             }`}
                           >
                             {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
@@ -706,7 +706,7 @@ const ModernTransactionsView = ({
                       })}
                     </div>
 
-                    <div className="mt-3 pt-3 border-t border-[#e7e0cf] text-[12px] text-[#8a8677]">
+                    <div className="mt-3 pt-3 border-t border-muted text-[12px] text-[#8a8677] dark:text-muted-foreground">
                       {selectedMonths.length === 1
                         ? `Mostrando solo ${MESES.find(m => m.key === selectedMonths[0])?.fullLabel}`
                         : `Acumulando: ${selectedMonths.map(k => MESES.find(m => m.key === k)?.label).join(', ')}`
@@ -735,7 +735,7 @@ const ModernTransactionsView = ({
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Buscar…"
-              className="w-full pl-9 pr-3 py-[7px] bg-white text-foreground font-mono text-[12px] border border-[#ddd5c2] rounded-sm placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
+              className="w-full pl-9 pr-3 py-[7px] bg-secondary text-foreground font-mono text-[12px] border border-border rounded-sm placeholder:text-[#8a8677] dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
             />
           </div>
           <FilterSelect
@@ -783,36 +783,36 @@ const ModernTransactionsView = ({
         </div>
 
         {/* ── Tabla ── */}
-        <div className="rounded-md border border-[#ddd5c2] bg-card overflow-hidden">
+        <div className="rounded-md border border-border bg-card overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b-2 border-[#ddd5c2]">
+              <tr className="border-b border-border">
                 <th
-                  className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]"
+                  className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground"
                   style={{ letterSpacing: '.08em' }}
                 >
                   Fecha
                 </th>
                 <th
-                  className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]"
+                  className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground"
                   style={{ letterSpacing: '.08em' }}
                 >
                   Descripción
                 </th>
                 <th
-                  className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]"
+                  className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground"
                   style={{ letterSpacing: '.08em' }}
                 >
                   Tipo · Categoría
                 </th>
                 <th
-                  className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]"
+                  className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground"
                   style={{ letterSpacing: '.08em' }}
                 >
                   Monto
                 </th>
                 <th
-                  className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]"
+                  className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground"
                   style={{ letterSpacing: '.08em' }}
                 >
                   Acciones
@@ -840,8 +840,8 @@ const ModernTransactionsView = ({
                   const comprobanteUrl = t.archivo_adjunto || t.ArchivoAdjunto || t.comprobante || t.Comprobante || '';
 
                   return (
-                    <tr key={rowId} className="group border-b border-[#e7e0cf] hover:bg-[#f0ead9] transition-colors">
-                      <td className="px-3.5 py-2.5 font-mono text-[12px] text-[#5d6470]">{displayDate}</td>
+                    <tr key={rowId} className="group border-b border-muted hover:bg-card-hover transition-colors last:border-b-0">
+                      <td className="px-3.5 py-2.5 font-mono text-[12px] text-[#5d6470] dark:text-muted-foreground">{displayDate}</td>
                       <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">{descripcion}</td>
                       <td className="px-3.5 py-2.5">
                         <Badge
@@ -890,8 +890,8 @@ const ModernTransactionsView = ({
 
           {/* Paginación */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#e7e0cf]">
-              <p className="font-mono text-[12px] text-[#8a8677]">
+            <div className="flex items-center justify-between px-5 py-3.5 border-t border-muted">
+              <p className="font-mono text-[12px] text-[#8a8677] dark:text-muted-foreground">
                 Página {currentPage} de {totalPages} ({filtered.length} resultados)
               </p>
               <div className="flex items-center gap-2">

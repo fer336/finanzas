@@ -29,8 +29,8 @@ const CategoriaDonut = ({ categorias, total, formatAmount, size = 120 }) => (
         <Tooltip
           formatter={(value, name) => [formatAmount(value, { decimals: 0 }), name]}
           contentStyle={{
-            background: '#faf7ef',
-            border: '1px solid #ddd5c2',
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
             borderRadius: 6,
             fontSize: 12.5,
           }}
@@ -38,7 +38,7 @@ const CategoriaDonut = ({ categorias, total, formatAmount, size = 120 }) => (
       </PieChart>
     </ResponsiveContainer>
     <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-      <p className="font-mono text-[9.5px] uppercase tracking-[.06em] text-[#8a8677]">Total</p>
+      <p className="font-mono text-[9.5px] uppercase tracking-[.06em] text-[#8a8677] dark:text-[#93a0af]">Total</p>
       <p className="font-mono text-[13px] font-semibold text-foreground">{formatAmount(total, { decimals: 0 })}</p>
     </div>
   </div>

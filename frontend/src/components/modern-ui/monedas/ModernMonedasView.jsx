@@ -51,7 +51,7 @@ const ModernMonedasView = ({
           type="button"
           onClick={refresh}
           disabled={isRefreshing}
-          className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] dark:hover:bg-[#212836] disabled:opacity-50"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
           {isRefreshing ? 'Actualizando…' : 'Actualizar'}
@@ -73,7 +73,7 @@ const ModernMonedasView = ({
       </div>
 
       {sorted.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-4 rounded-md border border-[#ddd5c2] bg-card py-14">
+        <div className="flex flex-col items-center justify-center gap-4 rounded-md border border-[#ddd5c2] dark:border-[#2e3844] bg-card py-14">
           <p className="text-[13.5px] italic text-muted-foreground">Sin monedas configuradas.</p>
           {onInitializeDefault && (
             <Button type="button" variant="outline" size="sm" onClick={onInitializeDefault}>
@@ -82,20 +82,20 @@ const ModernMonedasView = ({
           )}
         </div>
       ) : (
-        <div className="overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] bg-card">
+        <div className="overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] dark:border-[#2e3844] bg-card">
           <table className="w-full min-w-[640px]">
             <thead>
-              <tr className="border-b-2 border-[#ddd5c2]">
-                <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Código</th>
-                <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Nombre</th>
-                <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Tasa ARS</th>
-                <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Estado</th>
-                <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Acciones</th>
+              <tr className="border-b-2 border-[#ddd5c2] dark:border-[#2e3844]">
+                <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Código</th>
+                <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Nombre</th>
+                <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Tasa ARS</th>
+                <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Estado</th>
+                <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {sorted.map((moneda) => (
-                <tr key={moneda.id} className="group border-b border-[#e7e0cf] transition-colors hover:bg-[#f0ead9]">
+                <tr key={moneda.id} className="group border-b border-[#e7e0cf] dark:border-[#2e3844] transition-colors hover:bg-[#f0ead9] dark:hover:bg-[#212836]">
                   <td className="px-3.5 py-2.5">
                     <span className="font-mono text-[12px] font-semibold text-foreground">{moneda.codigo}</span>
                     {moneda.esPredeterminada && (
@@ -103,7 +103,7 @@ const ModernMonedasView = ({
                     )}
                   </td>
                   <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">
-                    {moneda.nombre} <span className="text-[#8a8677]">({moneda.simbolo})</span>
+                    {moneda.nombre} <span className="text-[#8a8677] dark:text-[#93a0af]">({moneda.simbolo})</span>
                   </td>
                   <td className="px-3.5 py-2.5 text-right font-mono text-[12px] text-foreground">
                     {moneda.tasaCambioARS && moneda.tasaCambioARS !== 1
@@ -112,9 +112,9 @@ const ModernMonedasView = ({
                   </td>
                   <td className="px-3.5 py-2.5">
                     {moneda.activa ? (
-                      <Badge variant="outline" style={{ borderColor: '#476442', color: '#476442' }}>Activa</Badge>
+                      <Badge variant="outline" className="border-[#476442] text-[#476442] dark:border-[#8fae7f] dark:text-[#8fae7f]">Activa</Badge>
                     ) : (
-                      <Badge variant="outline" style={{ borderColor: '#ddd5c2', color: '#8a8677' }}>Inactiva</Badge>
+                      <Badge variant="outline" className="border-[#ddd5c2] text-[#8a8677] dark:border-[#2e3844] dark:text-[#93a0af]">Inactiva</Badge>
                     )}
                   </td>
                   <td className="px-3.5 py-2.5">
@@ -126,9 +126,9 @@ const ModernMonedasView = ({
                         title={moneda.activa ? 'Desactivar' : 'Activar'}
                       >
                         {moneda.activa ? (
-                          <EyeOff className="h-4 w-4 text-[#8a8677]" />
+                          <EyeOff className="h-4 w-4 text-[#8a8677] dark:text-[#93a0af]" />
                         ) : (
-                          <Eye className="h-4 w-4 text-[#476442]" />
+                          <Eye className="h-4 w-4 text-[#476442] dark:text-[#8fae7f]" />
                         )}
                       </button>
                       <button
@@ -137,7 +137,7 @@ const ModernMonedasView = ({
                         className="rounded-sm p-1.5 transition-colors hover:bg-black/5"
                         title="Editar"
                       >
-                        <Edit className="h-4 w-4 text-[#8a8677]" />
+                        <Edit className="h-4 w-4 text-[#8a8677] dark:text-[#93a0af]" />
                       </button>
                       {!moneda.esPredeterminada && (
                         <button
@@ -150,7 +150,7 @@ const ModernMonedasView = ({
                           className="rounded-sm p-1.5 transition-colors hover:bg-black/5"
                           title="Eliminar"
                         >
-                          <Trash2 className="h-4 w-4 text-[#8a8677] hover:text-[#a04a34]" />
+                          <Trash2 className="h-4 w-4 text-[#8a8677] dark:text-[#93a0af] hover:text-[#a04a34] dark:hover:text-[#c26a52]" />
                         </button>
                       )}
                     </div>

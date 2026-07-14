@@ -17,6 +17,7 @@ import {
   useObjetivos,
   usePresupuestos,
   useMonedas,
+  useBalanceNeto,
   QUERY_KEYS
 } from '../../hooks/useFinancialData';
 import { useQueryClient } from '@tanstack/react-query';
@@ -67,10 +68,15 @@ const {
   metodosPagoApi: paymentMethodsApi,
 } = apiServices;
 
+function mesActualStr() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+}
+
 const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   // ====== CONTEXTS ======
   const { user, logout } = useAuth();
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { isDark: isDarkMode, toggleTheme } = useTheme();
   const { isAmountVisible: amountsVisible, toggleAmountVisibility } = useAmountVisibility();
 
   // ====== REACT QUERY (Solo datos globales para header) ======
@@ -83,6 +89,10 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   const { data: objetivosData = [] } = useObjetivos();
   const { data: presupuestosData = [] } = usePresupuestos();
   const { data: monedasData = [] } = useMonedas();
+  // Mismo balance autoritativo (saldo_inicial + ingresos - gastos - apartado
+  // en objetivos) que ya usa el dashboard — evita recalcularlo naive acá y
+  // que termine mostrando un número distinto al que el usuario ve en Inicio.
+  const { data: balanceNetoData } = useBalanceNeto(mesActualStr());
 
   // dashboardStats era antes un query aparte con su propio fetch sin
   // límite (transaccionesApi.getAll() sin argumentos), duplicando esta
@@ -1438,6 +1448,8 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
         onLogout={handleLogout}
         amountsVisible={amountsVisible}
         onToggleAmountVisibility={toggleAmountVisibility}
+        isDarkMode={isDarkMode}
+        onToggleTheme={toggleTheme}
       >
         <Suspense fallback={<LoadingSpinner message="Cargando vista..." />}>
           {renderView()}
@@ -1513,7 +1525,7 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
             }}
             objetivo={objetivoToFund}
             onSuccess={handleAsignarDineroSuccess}
-            balanceDisponible={headerBalanceData?.total || 0}
+            balanceDisponible={balanceNetoData?.balance_disponible ?? 0}
             balancePorMoneda={headerCurrenciesBalance || {}}
           />
         </Suspense>

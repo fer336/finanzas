@@ -8,11 +8,14 @@
     /* ============================================================
      * Tema "Papel" — editorial claro tipo libreta contable.
      * Fuente de verdad: DESIGN.md (sección "Color Palette").
-     * El tema oscuro queda eliminado a propósito (ver PRODUCT.md
-     * "Anti-references"): no hay set de valores dark alternativo,
-     * solo se neutraliza `.dark` más abajo para que ThemeContext
-     * pueda seguir alternando la clase sin reintroducir el look
-     * oscuro anterior.
+     * Nota histórica: el tema oscuro NEÓN anterior (glassmorphism,
+     * glow, sidebar oscuro) fue descartado explícitamente (ver
+     * PRODUCT.md "Anti-references", ahora archivado). Ese rechazo
+     * era a ESE look puntual, no a un dark mode en general — los
+     * valores `.dark` de acá abajo son una variante oscura del mismo
+     * sistema Papel (misma tipografía, mismos roles de acento, cero
+     * sombra/gradiente decorativo), tomada de
+     * resumen-diario-2026-07-13.html.
      * ============================================================ */
 
     /* Fondos */
@@ -69,12 +72,55 @@
     /* 8px — radio de card, ver tailwind.config.js para escala completa */
   }
 
-  /* Neutraliza el modo oscuro: ThemeContext puede seguir agregando la
-     clase `.dark` a <html>, pero acá no redefinimos ningún token, por
-     lo que hereda exactamente la paleta Papel de :root. El dueño del
-     producto pidió eliminar la oscuridad del tema actual. */
+  /* Variante oscura del tema Papel — mismos roles semánticos que
+     :root (verde=ingresos, arcilla=gastos, dorado=pendiente,
+     azul=info), paleta tomada de resumen-diario-2026-07-13.html. */
   .dark {
-    color-scheme: light;
+    color-scheme: dark;
+
+    /* Fondos */
+    --background: #12161c;
+    --foreground: #ece7d8;
+
+    /* Card/Panel */
+    --card: #1a2029;
+    --card-foreground: #ece7d8;
+    --card-hover: #212836;
+
+    /* Popover/Modal */
+    --popover: #1a2029;
+    --popover-foreground: #ece7d8;
+
+    /* Primary - Verde (ingresos / acción primaria) */
+    --primary: #8fae7f;
+    --primary-foreground: #12161c;
+    --primary-glow: rgba(143, 174, 127, 0);
+
+    /* Secondary - Botón/superficie secundaria */
+    --secondary: #212836;
+    --secondary-foreground: #ece7d8;
+    --secondary-glow: rgba(46, 56, 68, 0);
+
+    /* Muted/Subtle - Bordes sutiles / texto terciario */
+    --muted: #2e3844;
+    --muted-foreground: #93a0af;
+
+    /* Accent - Dorado (avisos / pendiente) */
+    --accent: rgba(216, 172, 90, 0.14);
+    --accent-foreground: #d8ac5a;
+
+    /* Destructive - Arcilla (gastos) */
+    --destructive: #c26a52;
+    --destructive-foreground: #ece7d8;
+
+    /* Success - Verde (mismo acento que ingresos/primario) */
+    --success: #8fae7f;
+    --success-foreground: #12161c;
+
+    /* Bordes & Inputs */
+    --border: #2e3844;
+    --input: #2e3844;
+    --ring: #8fae7f;
   }
 }
 

@@ -45,16 +45,18 @@ const ModernCEDEARsView = ({ cedears = [], onRefresh, onViewDetails }) => {
     if (macd === 'venta') return 'Venta';
     return 'Neutral';
   };
-  const macdColor = (macd) => {
-    if (macd === 'compra') return '#476442';
-    if (macd === 'venta') return '#a04a34';
-    return '#5d6470';
+  // Devuelven clases Tailwind (no hex crudo) para que el par claro/dark
+  // conviva en el mismo lugar — ver mapeo de colores del tema "Papel".
+  const macdColorClass = (macd) => {
+    if (macd === 'compra') return 'text-[#476442] dark:text-[#8fae7f]';
+    if (macd === 'venta') return 'text-[#a04a34] dark:text-[#c26a52]';
+    return 'text-[#5d6470] dark:text-[#93a0af]';
   };
-  const rsiColor = (rsi) => {
-    if (rsi === null || rsi === undefined) return '#5d6470';
-    if (rsi >= 70) return '#a04a34';
-    if (rsi <= 30) return '#476442';
-    return '#5d6470';
+  const rsiColorClass = (rsi) => {
+    if (rsi === null || rsi === undefined) return 'text-[#5d6470] dark:text-[#93a0af]';
+    if (rsi >= 70) return 'text-[#a04a34] dark:text-[#c26a52]';
+    if (rsi <= 30) return 'text-[#476442] dark:text-[#8fae7f]';
+    return 'text-[#5d6470] dark:text-[#93a0af]';
   };
 
   return (
@@ -62,19 +64,19 @@ const ModernCEDEARsView = ({ cedears = [], onRefresh, onViewDetails }) => {
       {/* Buscador + refrescar */}
       <div className="mb-4 flex gap-2.5">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8a8677]" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8a8677] dark:text-[#93a0af]" />
           <input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar CEDEAR (ej: GGAL)…"
-            className="w-full rounded-sm border border-[#ddd5c2] bg-white py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
+            className="w-full rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-[#8a8677] dark:placeholder:text-[#93a0af] focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
           />
         </div>
         <button
           type="button"
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] dark:hover:bg-[#212836] disabled:opacity-50"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
           {isRefreshing ? 'Actualizando…' : 'Actualizar'}
@@ -82,17 +84,17 @@ const ModernCEDEARsView = ({ cedears = [], onRefresh, onViewDetails }) => {
       </div>
 
       {/* Tabla (patrón Movimientos) */}
-      <div className="overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] bg-card">
+      <div className="overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] dark:border-[#2e3844] bg-card">
         <table className="w-full min-w-[720px]">
           <thead>
-            <tr className="border-b-2 border-[#ddd5c2]">
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Ticker</th>
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Nombre</th>
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Sector</th>
-              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Precio</th>
-              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Variación</th>
-              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>RSI</th>
-              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>MACD</th>
+            <tr className="border-b-2 border-[#ddd5c2] dark:border-[#2e3844]">
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Ticker</th>
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Nombre</th>
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Sector</th>
+              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Precio</th>
+              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Variación</th>
+              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>RSI</th>
+              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>MACD</th>
             </tr>
           </thead>
           <tbody>
@@ -107,12 +109,14 @@ const ModernCEDEARsView = ({ cedears = [], onRefresh, onViewDetails }) => {
             ) : (
               filtered.map((c) => {
                 const isPositive = c.variacion >= 0;
-                const variacionColor = isPositive ? '#476442' : '#a04a34';
+                const variacionColorClass = isPositive
+                  ? 'text-[#476442] dark:text-[#8fae7f]'
+                  : 'text-[#a04a34] dark:text-[#c26a52]';
                 return (
                   <tr
                     key={c.symbol}
                     onClick={() => onViewDetails && onViewDetails(c)}
-                    className={`group border-b border-[#e7e0cf] transition-colors hover:bg-[#f0ead9] ${onViewDetails ? 'cursor-pointer' : ''}`}
+                    className={`group border-b border-[#e7e0cf] dark:border-[#2e3844] transition-colors hover:bg-[#f0ead9] dark:hover:bg-[#212836] ${onViewDetails ? 'cursor-pointer' : ''}`}
                   >
                     <td className="px-3.5 py-2.5 font-mono text-[12px] font-semibold text-foreground">{c.symbol}</td>
                     <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">{c.nombre}</td>
@@ -124,18 +128,17 @@ const ModernCEDEARsView = ({ cedears = [], onRefresh, onViewDetails }) => {
                     </td>
                     <td className="px-3.5 py-2.5 text-right">
                       <span
-                        className="inline-flex items-center justify-end gap-1 font-mono text-[12px] font-semibold"
-                        style={{ color: variacionColor }}
+                        className={`inline-flex items-center justify-end gap-1 font-mono text-[12px] font-semibold ${variacionColorClass}`}
                       >
                         {isPositive ? <TrendingUp className="h-3.5 w-3.5" /> : <TrendingDown className="h-3.5 w-3.5" />}
                         {isPositive ? '+' : ''}{c.variacion.toFixed(2)}%
                       </span>
                     </td>
-                    <td className="px-3.5 py-2.5 text-right font-mono text-[12px]" style={{ color: rsiColor(c.rsi) }}>
+                    <td className={`px-3.5 py-2.5 text-right font-mono text-[12px] ${rsiColorClass(c.rsi)}`}>
                       {c.rsi ?? '—'}
                     </td>
                     <td className="px-3.5 py-2.5 text-right">
-                      <span className="font-mono text-[11px] font-semibold uppercase" style={{ color: macdColor(c.macd) }}>
+                      <span className={`font-mono text-[11px] font-semibold uppercase ${macdColorClass(c.macd)}`}>
                         {macdLabel(c.macd)}
                       </span>
                     </td>

@@ -19,7 +19,7 @@ const ConfirmModal = ({
   if (!isOpen) return null;
 
   const colors = {
-    danger: { icon: '#a04a34', bg: '#fdf6e3', button: 'bg-[#a04a34] hover:bg-[#8f4230]' },
+    danger: { icon: 'var(--destructive)', bg: 'var(--accent)', button: 'bg-destructive hover:bg-[#8f4230] dark:hover:bg-[#a85a44]' },
     warning: { icon: '#8a6a1f', bg: '#fdf6e3', button: 'bg-[#8a6a1f] hover:bg-[#795b1a]' },
     info: { icon: '#3d5a80', bg: '#f0ead9', button: 'bg-[#3d5a80] hover:bg-[#354e6d]' },
   };
@@ -32,7 +32,7 @@ const ConfirmModal = ({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-lg border border-[#ddd5c2] bg-card"
+        className="w-full max-w-md rounded-lg border border-[#ddd5c2] bg-card dark:border-[#2e3844]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Icon */}
@@ -54,7 +54,7 @@ const ConfirmModal = ({
           <h3 className="mb-2 font-serif text-xl font-semibold text-foreground">
             {title}
           </h3>
-          <p className="text-[13.5px] leading-relaxed text-[#5d6470]">
+          <p className="text-[13.5px] leading-relaxed text-[#5d6470] dark:text-[#93a0af]">
             {message}
           </p>
         </div>
@@ -63,7 +63,7 @@ const ConfirmModal = ({
         <div className="flex gap-3 p-6 pt-0">
           <button
             onClick={onClose}
-            className="flex-1 rounded-sm border border-[#ddd5c2] bg-white px-4 py-[9px] text-[13px] font-medium text-foreground transition-colors duration-150 hover:bg-[#f0ead9]"
+            className="flex-1 rounded-sm border border-[#ddd5c2] bg-white px-4 py-[9px] text-[13px] font-medium text-foreground transition-colors duration-150 hover:bg-[#f0ead9] dark:border-[#2e3844] dark:bg-[#212836] dark:hover:bg-[#2e3844]"
           >
             {cancelText}
           </button>

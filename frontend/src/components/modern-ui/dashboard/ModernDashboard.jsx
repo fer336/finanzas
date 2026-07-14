@@ -27,16 +27,17 @@ const EvolucionMensualChart = ({ data, formatAmount }) => (
           dataKey="mes"
           axisLine={false}
           tickLine={false}
-          tick={{ fontSize: 11, fill: '#8a8677', fontFamily: 'IBM Plex Mono, monospace' }}
+          tick={{ fontSize: 11, fill: 'var(--muted-foreground)', fontFamily: 'IBM Plex Mono, monospace' }}
         />
         <Tooltip
           formatter={(value, name) => [formatAmount(value, { decimals: 0 }), name === 'ingresos' ? 'Ingresos' : 'Gastos']}
-          cursor={{ fill: 'rgba(32,36,44,.04)' }}
+          cursor={{ fill: 'var(--card-hover)' }}
           contentStyle={{
-            background: '#faf7ef',
-            border: '1px solid #ddd5c2',
+            background: 'var(--card)',
+            border: '1px solid var(--border)',
             borderRadius: 6,
             fontSize: 12.5,
+            color: 'var(--foreground)',
           }}
         />
         <Bar dataKey="ingresos" fill="#5a7d52" radius={[3, 3, 0, 0]} maxBarSize={18} />
@@ -64,7 +65,7 @@ EmptyState.propTypes = { children: PropTypes.node };
 const DashboardSkeleton = () => (
   <div className="min-h-screen bg-background">
     <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
-      <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px]">
+      <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px] dark:border-border">
         <div className="space-y-2.5">
           <Skeleton className="h-[11px] w-40" />
           <Skeleton className="h-[42px] w-72" />
@@ -112,7 +113,8 @@ const ModernDashboard = ({
     periodoLabel,
     tituloMes,
     veredicto,
-    balanceNeto,
+    balanceDisponible,
+    apartadoObjetivos,
     usdEquivalent,
     kpis,
     resultadoMes,
@@ -129,6 +131,8 @@ const ModernDashboard = ({
     pendingPayments,
     dollarQuotes,
     balanceNeto: balanceNetoData?.balance_neto,
+    balanceDisponible: balanceNetoData?.balance_disponible,
+    apartadoObjetivos: balanceNetoData?.apartado_objetivos,
     mes: selectedMonth,
   });
 
@@ -147,7 +151,7 @@ const ModernDashboard = ({
 
   const donutData = donutMode === 'gastos' ? categoriasOrdenadas : categoriasIngresosOrdenadas;
   const donutTotal = donutData.reduce((sum, c) => sum + c.monto, 0);
-  const balanceMostrado = balanceMode === 'mensual' ? resultadoMes : balanceNeto;
+  const balanceMostrado = balanceMode === 'mensual' ? resultadoMes : balanceDisponible;
 
   // ── Mobile layout ─────────────────────────────────────────────────────────
   if (isMobile) {
@@ -173,43 +177,43 @@ const ModernDashboard = ({
       <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
 
         {/* ── Cabecera de período ── */}
-        <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px]">
+        <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px] dark:border-border">
           <div>
             <div className="flex items-center gap-2.5">
               <div
-                className="font-mono text-[11px] uppercase text-[#3d5a80]"
+                className="font-mono text-[11px] uppercase text-[#3d5a80] dark:text-muted-foreground"
                 style={{ letterSpacing: '.16em' }}
               >
                 Período {periodoLabel}
               </div>
-              <div className="flex items-center gap-1 rounded-full border border-[#ddd5c2] bg-card px-1.5 py-1">
-                <button onClick={goToPrevMonth} className="p-1 rounded-full hover:bg-black/5 transition-colors" title="Mes anterior">
-                  <ChevronLeft className="w-3.5 h-3.5 text-[#8a8677]" />
+              <div className="flex items-center gap-1 rounded-full border border-[#ddd5c2] bg-card px-1.5 py-1 dark:border-border">
+                <button onClick={goToPrevMonth} className="p-1 rounded-full hover:bg-black/5 transition-colors dark:hover:bg-card-hover" title="Mes anterior">
+                  <ChevronLeft className="w-3.5 h-3.5 text-[#8a8677] dark:text-muted-foreground" />
                 </button>
-                <button onClick={goToToday} className="px-1.5 font-mono text-[11px] text-[#5d6470] hover:text-foreground transition-colors">
+                <button onClick={goToToday} className="px-1.5 font-mono text-[11px] text-[#5d6470] transition-colors hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground">
                   hoy
                 </button>
                 <button
                   onClick={goToNextMonth}
                   disabled={isCurrentMonth}
-                  className="p-1 rounded-full hover:bg-black/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="p-1 rounded-full hover:bg-black/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-card-hover"
                   title="Mes siguiente"
                 >
-                  <ChevronRight className="w-3.5 h-3.5 text-[#8a8677]" />
+                  <ChevronRight className="w-3.5 h-3.5 text-[#8a8677] dark:text-muted-foreground" />
                 </button>
               </div>
             </div>
             <h1 className="mt-1 font-serif text-[42px] font-bold leading-none text-foreground">
               {tituloMes}
             </h1>
-            <p className="mt-2 max-w-[58ch] text-[13.5px] text-[#5d6470]">
+            <p className="mt-2 max-w-[58ch] text-[13.5px] text-[#5d6470] dark:text-muted-foreground">
               {veredicto}
             </p>
           </div>
-          <div className="shrink-0 rounded-md border border-[#ddd5c2] bg-card px-[18px] py-3 text-right">
+          <div className="shrink-0 rounded-md border border-[#ddd5c2] bg-card px-[18px] py-3 text-right dark:border-border">
             <div className="flex items-center justify-end gap-2">
-              <div className="font-mono text-[10px] uppercase tracking-[.1em] text-[#8a8677]">
-                {balanceMode === 'mensual' ? 'Resultado del mes' : 'Balance neto'}
+              <div className="font-mono text-[10px] uppercase tracking-[.1em] text-[#8a8677] dark:text-muted-foreground">
+                {balanceMode === 'mensual' ? 'Resultado del mes' : 'Balance disponible'}
               </div>
               <PillToggle
                 options={[{ value: 'mensual', label: 'Mensual' }, { value: 'acumulado', label: 'Acumulado' }]}
@@ -222,7 +226,12 @@ const ModernDashboard = ({
               {balanceMostrado < 0 ? '− ' : ''}{formatAmount(Math.abs(balanceMostrado), { decimals: 0 })}
             </div>
             {balanceMode === 'acumulado' && (
-              <div className="font-mono text-[11px] text-[#8a8677]">{usdEquivalent}</div>
+              <div className="font-mono text-[11px] text-[#8a8677] dark:text-muted-foreground">{usdEquivalent}</div>
+            )}
+            {balanceMode === 'acumulado' && apartadoObjetivos > 0 && (
+              <div className="font-mono text-[11px] text-[#8a8677] dark:text-muted-foreground">
+                Apartado en objetivos: {formatAmount(apartadoObjetivos, { decimals: 0 })}
+              </div>
             )}
           </div>
         </div>
@@ -245,7 +254,7 @@ const ModernDashboard = ({
         <div className="grid grid-cols-[1.5fr_1fr] gap-4">
 
           {/* Movimientos recientes */}
-          <div className="rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px]">
+          <div className="rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px] dark:border-border">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-serif text-[17px] font-semibold text-foreground">Movimientos recientes</h2>
               <button
@@ -264,11 +273,11 @@ const ModernDashboard = ({
                 {movimientosRecientes.map((m, i) => (
                   <Fragment key={m.id ?? `${m.fechaMMDD}-${m.descripcion}-${i}`}>
                     <span
-                      className={`font-mono text-[11.5px] text-[#8a8677] ${i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px]' : ''}`}
+                      className={`font-mono text-[11.5px] text-[#8a8677] dark:text-muted-foreground ${i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px] dark:border-muted' : ''}`}
                     >
                       {m.fechaMMDD}
                     </span>
-                    <span className={i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px]' : ''}>
+                    <span className={i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px] dark:border-muted' : ''}>
                       {m.descripcion}{' '}
                       <span
                         className="ml-1.5 font-mono text-[10px] uppercase"
@@ -278,7 +287,7 @@ const ModernDashboard = ({
                       </span>
                     </span>
                     <span
-                      className={`text-right font-mono font-semibold ${i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px]' : ''}`}
+                      className={`text-right font-mono font-semibold ${i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px] dark:border-muted' : ''}`}
                       style={{ color: m.esIngreso ? '#476442' : '#a04a34' }}
                     >
                       {m.montoFormatted}
@@ -293,7 +302,7 @@ const ModernDashboard = ({
           <div className="flex flex-col gap-4">
 
             {/* Gastos / Ingresos por categoría */}
-            <div className="rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px]">
+            <div className="rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px] dark:border-border">
               <div className="mb-3 flex items-center justify-between gap-2">
                 <h2 className="font-serif text-[17px] font-semibold text-foreground">
                   {donutMode === 'gastos' ? 'Gastos por categoría' : 'Ingresos por categoría'}
@@ -321,7 +330,7 @@ const ModernDashboard = ({
                           <span className="h-[9px] w-[9px] shrink-0 rounded-sm" style={{ background: c.color }} />
                           {c.nombre}
                         </span>
-                        <span className="font-mono text-[#5d6470]">{c.pct}%</span>
+                        <span className="font-mono text-[#5d6470] dark:text-muted-foreground">{c.pct}%</span>
                       </Fragment>
                     ))}
                   </div>
@@ -333,18 +342,18 @@ const ModernDashboard = ({
             <button
               type="button"
               onClick={() => onNavigate && onNavigate('pending-payments-full')}
-              className="rounded-md border border-[#e0c98a] bg-[#fdf6e3] px-5 py-4 text-left"
+              className="rounded-md border border-[#e0c98a] bg-[#fdf6e3] px-5 py-4 text-left dark:border-[#d8ac5a] dark:bg-[rgba(216,172,90,0.14)]"
             >
               <div className="flex items-baseline justify-between">
                 <span className="font-serif text-[15px] font-semibold text-foreground">Vencimientos</span>
-                <span className="font-mono text-[12px] font-semibold text-[#8a6a1f]">
+                <span className="font-mono text-[12px] font-semibold text-[#8a6a1f] dark:text-[#d8ac5a]">
                   {formatAmount(totalPendiente, { decimals: 0 })}
                 </span>
               </div>
               {pendientesActivos.length === 0 ? (
-                <p className="mt-1.5 text-[12.5px] italic text-[#8a8677]">Sin vencimientos pendientes.</p>
+                <p className="mt-1.5 text-[12.5px] italic text-[#8a8677] dark:text-[#93a0af]">Sin vencimientos pendientes.</p>
               ) : (
-                <p className="mt-1.5 text-[12.5px] text-[#5d6470]">
+                <p className="mt-1.5 text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
                   {pendientesActivos.length} pendiente{pendientesActivos.length === 1 ? '' : 's'}
                   {proximoVencimiento && proximoVencimientoLabel ? (
                     <>
@@ -360,10 +369,10 @@ const ModernDashboard = ({
         </div>
 
         {/* ── Evolución mensual (últimos 6 meses) ── */}
-        <div className="mt-4 rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px]">
+        <div className="mt-4 rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px] dark:border-border">
           <div className="mb-3 flex items-center gap-4">
             <h2 className="font-serif text-[17px] font-semibold text-foreground">Evolución mensual</h2>
-            <div className="flex items-center gap-3 text-[11.5px] text-[#5d6470]">
+            <div className="flex items-center gap-3 text-[11.5px] text-[#5d6470] dark:text-muted-foreground">
               <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[#5a7d52]" />Ingresos</span>
               <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[#b35a42]" />Gastos</span>
             </div>

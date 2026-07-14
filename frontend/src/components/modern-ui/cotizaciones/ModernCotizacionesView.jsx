@@ -52,7 +52,7 @@ const ModernCotizacionesView = ({ cotizaciones = [], onRefresh }) => {
           type="button"
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] dark:hover:bg-[#212836] disabled:opacity-50"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
           {isRefreshing ? 'Actualizando…' : 'Actualizar'}
@@ -60,22 +60,22 @@ const ModernCotizacionesView = ({ cotizaciones = [], onRefresh }) => {
       </div>
 
       {/* Tabla (patrón Movimientos) */}
-      <div className="mb-5 overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] bg-card">
+      <div className="mb-5 overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] dark:border-[#2e3844] bg-card">
         <table className="w-full min-w-[520px]">
           <thead>
-            <tr className="border-b-2 border-[#ddd5c2]">
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Casa</th>
-              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Venta</th>
-              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Variación</th>
-              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Brecha</th>
+            <tr className="border-b-2 border-[#ddd5c2] dark:border-[#2e3844]">
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Casa</th>
+              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Venta</th>
+              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Variación</th>
+              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Brecha</th>
             </tr>
           </thead>
           <tbody>
             {data.map((cot) => {
               const isPositive = cot.variacion >= 0;
-              const variacionColor = isPositive ? '#476442' : '#a04a34';
+              const variacionColor = isPositive ? 'var(--success)' : 'var(--destructive)';
               return (
-                <tr key={cot.casa} className="group border-b border-[#e7e0cf] transition-colors hover:bg-[#f0ead9]">
+                <tr key={cot.casa} className="group border-b border-[#e7e0cf] dark:border-[#2e3844] transition-colors hover:bg-[#f0ead9] dark:hover:bg-[#212836]">
                   <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">Dólar {cot.nombre}</td>
                   <td className="px-3.5 py-2.5 text-right font-mono text-[13px] font-semibold text-foreground">
                     $ {cot.venta.toFixed(2)}
@@ -89,7 +89,7 @@ const ModernCotizacionesView = ({ cotizaciones = [], onRefresh }) => {
                       {isPositive ? '+' : ''}{cot.variacion}%
                     </span>
                   </td>
-                  <td className="px-3.5 py-2.5 text-right font-mono text-[12px] text-[#8a8677]">
+                  <td className="px-3.5 py-2.5 text-right font-mono text-[12px] text-[#8a8677] dark:text-[#93a0af]">
                     {cot.brecha ? `${cot.brecha}%` : '—'}
                   </td>
                 </tr>
@@ -100,25 +100,25 @@ const ModernCotizacionesView = ({ cotizaciones = [], onRefresh }) => {
       </div>
 
       {/* Calculadora */}
-      <div className="rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px]">
+      <div className="rounded-md border border-[#ddd5c2] dark:border-[#2e3844] bg-card px-5 py-[18px]">
         <h2 className="mb-4 flex items-center gap-2 font-serif text-[17px] font-semibold text-foreground">
           <ArrowRightLeft className="h-4 w-4 text-[#3d5a80]" />
           Calculadora de conversión
         </h2>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div>
-            <label className="mb-1.5 block text-[11px] uppercase tracking-[.06em] text-[#8a8677]">Pesos (ARS)</label>
+            <label className="mb-1.5 block text-[11px] uppercase tracking-[.06em] text-[#8a8677] dark:text-[#93a0af]">Pesos (ARS)</label>
             <input
               type="number"
               value={calcARS}
               onChange={(e) => setCalcARS(e.target.value)}
               placeholder="0.00"
-              className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-mono text-[13px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3 py-[7px] font-mono text-[13px] text-foreground placeholder:text-[#8a8677] dark:placeholder:text-[#93a0af] focus:outline-none focus:ring-2 focus:ring-ring"
             />
             <button
               type="button"
               onClick={handleConvertARStoUSD}
-              className="mt-2 w-full rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-sans text-[12.5px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9]"
+              className="mt-2 w-full rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3 py-[7px] font-sans text-[12.5px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] dark:hover:bg-[#212836]"
             >
               Convertir a USD →
             </button>
@@ -127,7 +127,7 @@ const ModernCotizacionesView = ({ cotizaciones = [], onRefresh }) => {
             <select
               value={selectedTipo}
               onChange={(e) => setSelectedTipo(e.target.value)}
-              className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             >
               {data.map((c) => (
                 <option key={c.casa} value={c.casa}>Dólar {c.nombre}</option>
@@ -135,18 +135,18 @@ const ModernCotizacionesView = ({ cotizaciones = [], onRefresh }) => {
             </select>
           </div>
           <div>
-            <label className="mb-1.5 block text-[11px] uppercase tracking-[.06em] text-[#8a8677]">Dólares (USD)</label>
+            <label className="mb-1.5 block text-[11px] uppercase tracking-[.06em] text-[#8a8677] dark:text-[#93a0af]">Dólares (USD)</label>
             <input
               type="number"
               value={calcUSD}
               onChange={(e) => setCalcUSD(e.target.value)}
               placeholder="0.00"
-              className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-mono text-[13px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3 py-[7px] font-mono text-[13px] text-foreground placeholder:text-[#8a8677] dark:placeholder:text-[#93a0af] focus:outline-none focus:ring-2 focus:ring-ring"
             />
             <button
               type="button"
               onClick={handleConvertUSDtoARS}
-              className="mt-2 w-full rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-sans text-[12.5px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9]"
+              className="mt-2 w-full rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3 py-[7px] font-sans text-[12.5px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] dark:hover:bg-[#212836]"
             >
               ← Convertir a ARS
             </button>

@@ -63,7 +63,8 @@ const MobileDashboardHome = ({
     periodoLabel,
     tituloMes,
     veredicto,
-    balanceNeto,
+    balanceDisponible,
+    apartadoObjetivos,
     usdEquivalent,
     kpis,
     resultadoMes,
@@ -79,6 +80,8 @@ const MobileDashboardHome = ({
     pendingPayments,
     dollarQuotes,
     balanceNeto: balanceNetoData?.balance_neto,
+    balanceDisponible: balanceNetoData?.balance_disponible,
+    apartadoObjetivos: balanceNetoData?.apartado_objetivos,
     mes: selectedMonth,
   });
 
@@ -97,7 +100,7 @@ const MobileDashboardHome = ({
 
   const donutData = donutMode === 'gastos' ? categoriasOrdenadas : categoriasIngresosOrdenadas;
   const donutTotal = donutData.reduce((sum, c) => sum + c.monto, 0);
-  const balanceMostrado = balanceMode === 'mensual' ? resultadoMes : balanceNeto;
+  const balanceMostrado = balanceMode === 'mensual' ? resultadoMes : balanceDisponible;
 
   if (loading) {
     return <MobileSkeleton />;
@@ -109,37 +112,37 @@ const MobileDashboardHome = ({
       {/* ── Cabecera de período ── */}
       <div>
         <div className="flex items-center justify-between gap-2">
-          <div className="font-mono text-[10px] uppercase text-[#3d5a80]" style={{ letterSpacing: '.16em' }}>
+          <div className="font-mono text-[10px] uppercase text-[#3d5a80] dark:text-muted-foreground" style={{ letterSpacing: '.16em' }}>
             Período {periodoLabel}
           </div>
-          <div className="flex items-center gap-1 rounded-full border border-[#ddd5c2] bg-card px-1.5 py-1">
-            <button onClick={goToPrevMonth} className="p-1 rounded-full hover:bg-black/5 transition-colors" title="Mes anterior">
-              <ChevronLeft className="w-3.5 h-3.5 text-[#8a8677]" />
+          <div className="flex items-center gap-1 rounded-full border border-[#ddd5c2] bg-card px-1.5 py-1 dark:border-border">
+            <button onClick={goToPrevMonth} className="p-1 rounded-full hover:bg-black/5 transition-colors dark:hover:bg-card-hover" title="Mes anterior">
+              <ChevronLeft className="w-3.5 h-3.5 text-[#8a8677] dark:text-muted-foreground" />
             </button>
-            <button onClick={goToToday} className="px-1.5 font-mono text-[11px] text-[#5d6470] hover:text-foreground transition-colors">
+            <button onClick={goToToday} className="px-1.5 font-mono text-[11px] text-[#5d6470] transition-colors hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground">
               hoy
             </button>
             <button
               onClick={goToNextMonth}
               disabled={isCurrentMonth}
-              className="p-1 rounded-full hover:bg-black/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="p-1 rounded-full hover:bg-black/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-card-hover"
               title="Mes siguiente"
             >
-              <ChevronRight className="w-3.5 h-3.5 text-[#8a8677]" />
+              <ChevronRight className="w-3.5 h-3.5 text-[#8a8677] dark:text-muted-foreground" />
             </button>
           </div>
         </div>
         <h1 className="mt-1 font-serif text-[30px] font-bold leading-tight text-foreground">
           {tituloMes}
         </h1>
-        <p className="mt-1.5 text-[13.5px] text-[#5d6470]">{veredicto}</p>
+        <p className="mt-1.5 text-[13.5px] text-[#5d6470] dark:text-muted-foreground">{veredicto}</p>
       </div>
 
       {/* Sello de saldo */}
-      <div className="rounded-md border border-[#ddd5c2] bg-card px-[18px] py-3">
+      <div className="rounded-md border border-[#ddd5c2] bg-card px-[18px] py-3 dark:border-border">
         <div className="flex items-center justify-between gap-2">
-          <div className="font-mono text-[10px] uppercase tracking-[.1em] text-[#8a8677]">
-            {balanceMode === 'mensual' ? 'Resultado del mes' : 'Balance neto'}
+          <div className="font-mono text-[10px] uppercase tracking-[.1em] text-[#8a8677] dark:text-muted-foreground">
+            {balanceMode === 'mensual' ? 'Resultado del mes' : 'Balance disponible'}
           </div>
           <PillToggle
             options={[{ value: 'mensual', label: 'Mensual' }, { value: 'acumulado', label: 'Acumulado' }]}
@@ -152,7 +155,12 @@ const MobileDashboardHome = ({
           {balanceMostrado < 0 ? '− ' : ''}{formatAmount(Math.abs(balanceMostrado), { decimals: 0 })}
         </div>
         {balanceMode === 'acumulado' && (
-          <div className="font-mono text-[11px] text-[#8a8677]">{usdEquivalent}</div>
+          <div className="font-mono text-[11px] text-[#8a8677] dark:text-muted-foreground">{usdEquivalent}</div>
+        )}
+        {balanceMode === 'acumulado' && apartadoObjetivos > 0 && (
+          <div className="font-mono text-[11px] text-[#8a8677] dark:text-muted-foreground">
+            Apartado en objetivos: {formatAmount(apartadoObjetivos, { decimals: 0 })}
+          </div>
         )}
       </div>
 
@@ -161,20 +169,20 @@ const MobileDashboardHome = ({
         {kpis.map((kpi) => (
           <div
             key={kpi.key}
-            className="rounded-md border border-[#ddd5c2] bg-card px-[18px] py-4"
+            className="rounded-md border border-[#ddd5c2] bg-card px-[18px] py-4 dark:border-border"
             style={{ borderTop: `3px solid ${kpi.borderColor}` }}
           >
-            <div className="text-[11px] uppercase tracking-[.06em] text-[#8a8677]">{kpi.label}</div>
+            <div className="text-[11px] uppercase tracking-[.06em] text-[#8a8677] dark:text-muted-foreground">{kpi.label}</div>
             <div className="mt-1.5 font-mono text-[24px] font-semibold" style={{ color: kpi.valueColor }}>
               {kpi.value}
             </div>
-            <div className="mt-0.5 text-[12px] text-[#8a8677]">{kpi.subtext}</div>
+            <div className="mt-0.5 text-[12px] text-[#8a8677] dark:text-muted-foreground">{kpi.subtext}</div>
           </div>
         ))}
       </div>
 
       {/* ── Movimientos recientes ── */}
-      <div className="rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px]">
+      <div className="rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px] dark:border-border">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-serif text-[17px] font-semibold text-foreground">Movimientos recientes</h2>
           <button
@@ -193,11 +201,11 @@ const MobileDashboardHome = ({
             {movimientosRecientes.map((m, i) => (
               <Fragment key={m.id ?? `${m.fechaMMDD}-${m.descripcion}-${i}`}>
                 <span
-                  className={`font-mono text-[11px] text-[#8a8677] ${i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px]' : ''}`}
+                  className={`font-mono text-[11px] text-[#8a8677] dark:text-muted-foreground ${i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px] dark:border-muted' : ''}`}
                 >
                   {m.fechaMMDD}
                 </span>
-                <span className={i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px]' : ''}>
+                <span className={i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px] dark:border-muted' : ''}>
                   {m.descripcion}
                   <span
                     className="ml-1.5 block font-mono text-[10px] uppercase"
@@ -207,7 +215,7 @@ const MobileDashboardHome = ({
                   </span>
                 </span>
                 <span
-                  className={`text-right font-mono font-semibold ${i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px]' : ''}`}
+                  className={`text-right font-mono font-semibold ${i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px] dark:border-muted' : ''}`}
                   style={{ color: m.esIngreso ? '#476442' : '#a04a34' }}
                 >
                   {m.montoFormatted}
@@ -219,7 +227,7 @@ const MobileDashboardHome = ({
       </div>
 
       {/* ── Gastos / Ingresos por categoría ── */}
-      <div className="rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px]">
+      <div className="rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px] dark:border-border">
         <div className="mb-3 flex items-center justify-between gap-2">
           <h2 className="font-serif text-[17px] font-semibold text-foreground">
             {donutMode === 'gastos' ? 'Gastos por categoría' : 'Ingresos por categoría'}
@@ -248,7 +256,7 @@ const MobileDashboardHome = ({
                     <span className="h-[9px] w-[9px] shrink-0 rounded-sm" style={{ background: c.color }} />
                     {c.nombre}
                   </span>
-                  <span className="font-mono text-[#5d6470]">{c.pct}%</span>
+                  <span className="font-mono text-[#5d6470] dark:text-muted-foreground">{c.pct}%</span>
                 </Fragment>
               ))}
             </div>
@@ -260,18 +268,18 @@ const MobileDashboardHome = ({
       <button
         type="button"
         onClick={() => onNavigate && onNavigate('pending-payments-full')}
-        className="w-full rounded-md border border-[#e0c98a] bg-[#fdf6e3] px-5 py-4 text-left"
+        className="w-full rounded-md border border-[#e0c98a] bg-[#fdf6e3] px-5 py-4 text-left dark:border-[#d8ac5a] dark:bg-[rgba(216,172,90,0.14)]"
       >
         <div className="flex items-baseline justify-between">
           <span className="font-serif text-[15px] font-semibold text-foreground">Vencimientos</span>
-          <span className="font-mono text-[12px] font-semibold text-[#8a6a1f]">
+          <span className="font-mono text-[12px] font-semibold text-[#8a6a1f] dark:text-[#d8ac5a]">
             {formatAmount(totalPendiente, { decimals: 0 })}
           </span>
         </div>
         {pendientesActivos.length === 0 ? (
-          <p className="mt-1.5 text-[12.5px] italic text-[#8a8677]">Sin vencimientos pendientes.</p>
+          <p className="mt-1.5 text-[12.5px] italic text-[#8a8677] dark:text-muted-foreground">Sin vencimientos pendientes.</p>
         ) : (
-          <p className="mt-1.5 text-[12.5px] text-[#5d6470]">
+          <p className="mt-1.5 text-[12.5px] text-[#5d6470] dark:text-muted-foreground">
             {pendientesActivos.length} pendiente{pendientesActivos.length === 1 ? '' : 's'}
             {proximoVencimiento && proximoVencimientoLabel ? (
               <>

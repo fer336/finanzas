@@ -28,9 +28,9 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
   if (error) {
     return (
       <div className="flex flex-col items-center gap-2 py-10 text-center">
-        <AlertCircle className="h-8 w-8 text-[#a04a34]" />
+        <AlertCircle className="h-8 w-8 text-[#a04a34] dark:text-[#c26a52]" />
         <p className="font-serif text-[15px] font-semibold text-foreground">Error al cargar categorías</p>
-        <p className="text-[12.5px] text-[#8a8677]">{error.message}</p>
+        <p className="text-[12.5px] text-[#8a8677] dark:text-[#93a0af]">{error.message}</p>
       </div>
     );
   }
@@ -53,13 +53,13 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
   return (
     <div>
       <div className="mb-4 flex items-start justify-between gap-3">
-        <p className="text-[12.5px] text-[#8a8677]">Dale orden visual a tus gastos e ingresos.</p>
+        <p className="text-[12.5px] text-[#8a8677] dark:text-[#93a0af]">Dale orden visual a tus gastos e ingresos.</p>
         <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={refresh}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50 dark:border-[#2e3844] dark:bg-[#212836] dark:hover:bg-[#2e3844]"
             title="Actualizar categorías"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -68,7 +68,7 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
           <button
             type="button"
             onClick={onNewCategory}
-            className="flex items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047]"
+            className="flex items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] dark:hover:bg-[#7d9970]"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>Nueva</span>
@@ -77,33 +77,33 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
       </div>
 
       <div className="mb-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-        <div className="rounded-sm border border-[#ddd5c2] bg-white p-3">
-          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#8a8677]">Total</p>
+        <div className="rounded-sm border border-[#ddd5c2] bg-white p-3 dark:border-[#2e3844] dark:bg-[#212836]">
+          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#8a8677] dark:text-[#93a0af]">Total</p>
           <p className="mt-1 font-mono text-[20px] font-semibold text-foreground">{total}</p>
         </div>
-        <div className="rounded-sm border border-[#ddd5c2] bg-white p-3">
-          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#8a8677]">Gastos</p>
-          <p className="mt-1 font-mono text-[20px] font-semibold text-[#a04a34]">{gastos}</p>
+        <div className="rounded-sm border border-[#ddd5c2] bg-white p-3 dark:border-[#2e3844] dark:bg-[#212836]">
+          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#8a8677] dark:text-[#93a0af]">Gastos</p>
+          <p className="mt-1 font-mono text-[20px] font-semibold text-[#a04a34] dark:text-[#c26a52]">{gastos}</p>
         </div>
-        <div className="rounded-sm border border-[#ddd5c2] bg-white p-3">
-          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#8a8677]">Ingresos</p>
-          <p className="mt-1 font-mono text-[20px] font-semibold text-[#476442]">{ingresos}</p>
+        <div className="rounded-sm border border-[#ddd5c2] bg-white p-3 dark:border-[#2e3844] dark:bg-[#212836]">
+          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#8a8677] dark:text-[#93a0af]">Ingresos</p>
+          <p className="mt-1 font-mono text-[20px] font-semibold text-[#476442] dark:text-[#8fae7f]">{ingresos}</p>
         </div>
-        <div className="rounded-sm border border-[#ddd5c2] bg-white p-3">
-          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#8a8677]">Activas</p>
+        <div className="rounded-sm border border-[#ddd5c2] bg-white p-3 dark:border-[#2e3844] dark:bg-[#212836]">
+          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#8a8677] dark:text-[#93a0af]">Activas</p>
           <p className="mt-1 font-mono text-[20px] font-semibold text-primary">{activas}</p>
         </div>
       </div>
 
-      <div className="overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] bg-card">
+      <div className="overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] bg-card dark:border-[#2e3844]">
         <table className="w-full min-w-[640px]">
           <thead>
-            <tr className="border-b-2 border-[#ddd5c2]">
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Categoría</th>
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Tipo</th>
-              <th className="hidden px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] sm:table-cell" style={{ letterSpacing: '.08em' }}>Descripción</th>
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Estado</th>
-              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Acciones</th>
+            <tr className="border-b-2 border-[#ddd5c2] dark:border-[#2e3844]">
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Categoría</th>
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Tipo</th>
+              <th className="hidden px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] sm:table-cell dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Descripción</th>
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Estado</th>
+              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -118,7 +118,7 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
                 const Icon = getCategoryIcon(cat.icono);
                 const isIngreso = cat.tipo === 'ingreso';
                 return (
-                  <tr key={cat.id} className="group border-b border-[#e7e0cf] transition-colors hover:bg-[#f0ead9]">
+                  <tr key={cat.id} className="group border-b border-[#e7e0cf] transition-colors hover:bg-[#f0ead9] dark:border-[#2e3844] dark:hover:bg-[#212836]">
                     <td className="px-3.5 py-2.5">
                       <div className="flex min-w-0 items-center gap-2.5">
                         <div
@@ -134,20 +134,20 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
                       <span
                         className="inline-flex rounded-full border px-2 py-[2px] font-mono text-[10.5px] uppercase tracking-[.04em]"
                         style={{
-                          borderColor: isIngreso ? '#5a7d52' : '#b35a42',
+                          borderColor: isIngreso ? 'var(--primary)' : 'var(--destructive)',
                           color: isIngreso ? '#476442' : '#a04a34',
                         }}
                       >
                         {cat.tipo}
                       </span>
                     </td>
-                    <td className="hidden max-w-[240px] px-3.5 py-2.5 text-[12.5px] text-[#8a8677] sm:table-cell">
+                    <td className="hidden max-w-[240px] px-3.5 py-2.5 text-[12.5px] text-[#8a8677] sm:table-cell dark:text-[#93a0af]">
                       <span className="line-clamp-1">{cat.descripcion || '—'}</span>
                     </td>
                     <td className="px-3.5 py-2.5">
                       <span
                         className={`inline-flex rounded-full border px-2 py-[2px] font-mono text-[10.5px] uppercase tracking-[.04em] ${
-                          cat.activa ? 'border-[#5a7d52] text-[#476442]' : 'border-[#ddd5c2] text-[#8a8677]'
+                          cat.activa ? 'border-[#5a7d52] text-[#476442] dark:border-[#8fae7f] dark:text-[#8fae7f]' : 'border-[#ddd5c2] text-[#8a8677] dark:border-[#2e3844] dark:text-[#93a0af]'
                         }`}
                       >
                         {cat.activa ? 'Activa' : 'Inactiva'}
@@ -158,7 +158,7 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
                         <button
                           type="button"
                           onClick={() => onEditCategory && onEditCategory(cat)}
-                          className="rounded-sm p-1.5 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-foreground"
+                          className="rounded-sm p-1.5 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-foreground dark:text-[#93a0af] dark:hover:bg-white/5"
                           title="Editar categoría"
                         >
                           <Pencil className="h-3.5 w-3.5" />
@@ -166,7 +166,7 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
                         <button
                           type="button"
                           onClick={() => onDeleteCategory && onDeleteCategory(cat.id)}
-                          className="rounded-sm p-1.5 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-[#a04a34]"
+                          className="rounded-sm p-1.5 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-[#a04a34] dark:text-[#93a0af] dark:hover:bg-white/5 dark:hover:text-[#c26a52]"
                           title="Eliminar categoría"
                         >
                           <Trash2 className="h-3.5 w-3.5" />

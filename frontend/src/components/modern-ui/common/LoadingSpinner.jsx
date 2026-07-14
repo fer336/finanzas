@@ -11,8 +11,8 @@ import PropTypes from 'prop-types';
 const LoadingSpinner = ({ message = 'Cargando…', fullScreen = true }) => {
   const content = (
     <div className="text-center">
-      <div className="mx-auto mb-3 h-9 w-9 animate-spin rounded-full border-[3px] border-[#e7e0cf] border-t-[#3d5a80]" />
-      <p className="font-mono text-[11px] uppercase text-[#8a8677]" style={{ letterSpacing: '.14em' }}>
+      <div className="mx-auto mb-3 h-9 w-9 animate-spin rounded-full border-[3px] border-[#e7e0cf] dark:border-[#2e3844] border-t-[#3d5a80] dark:border-t-[#7c9cc9]" />
+      <p className="font-mono text-[11px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.14em' }}>
         {message}
       </p>
     </div>

@@ -145,22 +145,22 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
     <div className="space-y-3">
       {/* Label */}
       <div className="flex flex-col gap-0.5">
-        <label className="flex items-center gap-1.5 text-[12.5px] font-medium text-[#5d6470]">
+        <label className="flex items-center gap-1.5 text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">
           <FileText className="h-3.5 w-3.5" style={{ color: accentColor }} />
           {label}
         </label>
-        {hint && <span className="text-[11.5px] text-[#8a8677]">{hint}</span>}
+        {hint && <span className="text-[11.5px] text-[#8a8677] dark:text-[#93a0af]">{hint}</span>}
       </div>
 
       {/* ── Ya hay archivo subido → preview ── */}
       {hasFile && !showUrlInput && (
         <div className="space-y-2">
-          <div className="overflow-hidden rounded-md border border-[#ddd5c2] bg-white">
+          <div className="overflow-hidden rounded-md border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836]">
             {isImage ? (
               <div className="relative">
                 <img src={value} alt={previewTitle} className="max-h-56 w-full bg-[#f4f0e6] object-contain" />
                 <a href={value} target="_blank" rel="noopener noreferrer"
-                   className="absolute right-2 top-2 flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-[#faf7ef] px-3 py-1.5 text-[11.5px] font-medium text-foreground transition-colors hover:bg-[#f0ead9]">
+                   className="absolute right-2 top-2 flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-[#faf7ef] px-3 py-1.5 text-[11.5px] font-medium text-foreground transition-colors hover:bg-[#f0ead9]">
                   <ExternalLink className="h-3 w-3" /> Ver completo
                 </a>
               </div>
@@ -168,7 +168,7 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
               <div className="relative h-64">
                 <iframe src={value} title={previewTitle} className="h-full w-full border-0" />
                 <a href={value} target="_blank" rel="noopener noreferrer"
-                   className="absolute right-2 top-2 flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-[#faf7ef] px-3 py-1.5 text-[11.5px] font-medium text-foreground transition-colors hover:bg-[#f0ead9]">
+                   className="absolute right-2 top-2 flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-[#faf7ef] px-3 py-1.5 text-[11.5px] font-medium text-foreground transition-colors hover:bg-[#f0ead9]">
                   <ExternalLink className="h-3 w-3" /> Abrir PDF
                 </a>
               </div>
@@ -177,7 +177,7 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
                 <div className="rounded-sm p-2.5" style={{ backgroundColor: `${accentColor}1a` }}>
                   <FileText className="h-5 w-5" style={{ color: accentColor }} />
                 </div>
-                <p className="flex-1 truncate text-[12px] text-[#8a8677]">{value}</p>
+                <p className="flex-1 truncate text-[12px] text-[#8a8677] dark:text-[#93a0af]">{value}</p>
                 <a href={value} target="_blank" rel="noopener noreferrer"
                    className="flex shrink-0 items-center gap-1.5 rounded-sm px-3 py-1.5 text-[11.5px] font-medium transition-colors"
                    style={{ backgroundColor: `${accentColor}1a`, color: accentColor, border: `1px solid ${accentColor}40` }}>
@@ -195,11 +195,11 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
               <Upload className="h-3 w-3" /> Reemplazar archivo
             </button>
             <button type="button" onClick={() => onChange('')}
-                    className="flex items-center gap-1.5 rounded-sm border border-[#b35a42]/30 px-3 py-1.5 text-[11.5px] font-medium text-[#a04a34] transition-colors hover:bg-[#a04a34]/10">
+                    className="flex items-center gap-1.5 rounded-sm border border-[#b35a42]/30 dark:border-[#c26a52]/30 px-3 py-1.5 text-[11.5px] font-medium text-[#a04a34] dark:text-[#c26a52] transition-colors hover:bg-[#a04a34]/10 dark:hover:bg-[#c26a52]/10">
               <Trash2 className="h-3 w-3" /> Quitar
             </button>
             <button type="button" onClick={() => setShowUrlInput(true)}
-                    className="ml-auto flex items-center gap-1.5 text-[11.5px] font-medium text-[#8a8677] transition-colors hover:text-foreground">
+                    className="ml-auto flex items-center gap-1.5 text-[11.5px] font-medium text-[#8a8677] dark:text-[#93a0af] transition-colors hover:text-foreground">
               <Link className="h-3 w-3" /> Editar URL
             </button>
           </div>
@@ -220,16 +220,16 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
                 flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed p-6 cursor-pointer transition-all
                 ${isDragging
                   ? 'border-primary bg-[#f0ead9]'
-                  : 'border-[#ddd5c2] bg-white hover:border-[#8a8677] hover:bg-[#f0ead9]/50'
+                  : 'border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] hover:border-[#8a8677] hover:bg-[#f0ead9]/50'
                 }
               `}
             >
               <Upload className="h-8 w-8" style={{ color: `${accentColor}99` }} />
               <p className="text-[13.5px] font-medium text-foreground">Subir archivo</p>
-              <p className="text-center text-[11.5px] text-[#8a8677]">
+              <p className="text-center text-[11.5px] text-[#8a8677] dark:text-[#93a0af]">
                 Arrastrá un archivo o hace clic para seleccionar
               </p>
-              <p className="text-[11px] text-[#8a8677]">
+              <p className="text-[11px] text-[#8a8677] dark:text-[#93a0af]">
                 JPG, PNG, PDF — máx. 10MB
               </p>
             </div>
@@ -241,12 +241,12 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
               type="url"
               value={value || ''}
               onChange={(e) => onChange(e.target.value)}
-              className="flex-1 rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
+              className="flex-1 rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] dark:placeholder:text-[#93a0af] focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="https://..."
             />
             {value && (
               <button type="button" onClick={() => onChange('')}
-                      className="rounded-sm border border-[#b35a42]/30 p-3 text-[#a04a34] transition-colors hover:bg-[#a04a34]/10"
+                      className="rounded-sm border border-[#b35a42]/30 dark:border-[#c26a52]/30 p-3 text-[#a04a34] dark:text-[#c26a52] transition-colors hover:bg-[#a04a34]/10 dark:hover:bg-[#c26a52]/10"
                       title={`Quitar ${label.toLowerCase()}`}>
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -256,14 +256,14 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
           {/* Toggle: URL manual ⇄ upload */}
           {!hasFile && (
             <button type="button" onClick={() => setShowUrlInput(!showUrlInput)}
-                    className="flex items-center gap-1 text-[11.5px] text-[#8a8677] transition-colors hover:text-foreground">
+                    className="flex items-center gap-1 text-[11.5px] text-[#8a8677] dark:text-[#93a0af] transition-colors hover:text-foreground">
               <Link className="h-3 w-3" />
               {showUrlInput ? 'Subir archivo en su lugar' : 'O pegar URL manualmente'}
             </button>
           )}
           {hasFile && showUrlInput && (
             <button type="button" onClick={() => setShowUrlInput(false)}
-                    className="flex items-center gap-1 text-[11.5px] text-[#8a8677] transition-colors hover:text-foreground">
+                    className="flex items-center gap-1 text-[11.5px] text-[#8a8677] dark:text-[#93a0af] transition-colors hover:text-foreground">
               <FileText className="h-3 w-3" />
               Volver a vista de archivo
             </button>
@@ -273,10 +273,10 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
 
       {/* ── Progress bar ── */}
       {uploading && (
-        <div className="space-y-2 rounded-md border border-[#ddd5c2] bg-white p-4">
+        <div className="space-y-2 rounded-md border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] p-4">
           <div className="flex items-center justify-between">
-            <span className="text-[13px] font-medium text-[#5d6470]">Subiendo archivo...</span>
-            <span className="text-[13px] text-[#8a8677]">{uploadProgress}%</span>
+            <span className="text-[13px] font-medium text-[#5d6470] dark:text-[#93a0af]">Subiendo archivo...</span>
+            <span className="text-[13px] text-[#8a8677] dark:text-[#93a0af]">{uploadProgress}%</span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-[#e7e0cf]">
             <div className="h-full rounded-full transition-all duration-300"
@@ -287,12 +287,12 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
 
       {/* ── Error ── */}
       {error && (
-        <div className="flex items-center gap-2 rounded-sm border border-[#a04a34]/30 bg-[#a04a34]/10 p-3">
-          <AlertCircle className="h-4 w-4 shrink-0 text-[#a04a34]" />
-          <span className="flex-1 text-[13px] text-[#a04a34]">{error}</span>
+        <div className="flex items-center gap-2 rounded-sm border border-[#a04a34]/30 bg-[#a04a34]/10 p-3 dark:border-[#c26a52]/30 dark:bg-[#c26a52]/10">
+          <AlertCircle className="h-4 w-4 shrink-0 text-[#a04a34] dark:text-[#c26a52]" />
+          <span className="flex-1 text-[13px] text-[#a04a34] dark:text-[#c26a52]">{error}</span>
           <button type="button" onClick={() => setError(null)}
-                  className="rounded-sm p-1 transition-colors hover:bg-[#a04a34]/10">
-            <X className="h-3.5 w-3.5 text-[#a04a34]" />
+                  className="rounded-sm p-1 transition-colors hover:bg-[#a04a34]/10 dark:hover:bg-[#c26a52]/10">
+            <X className="h-3.5 w-3.5 text-[#a04a34] dark:text-[#c26a52]" />
           </button>
         </div>
       )}
@@ -432,10 +432,10 @@ const StitchPendingPaymentModal = ({
 
       {/* Modal */}
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-[#ddd5c2] bg-[#faf7ef]">
+        <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-[#ddd5c2] dark:border-[#2e3844] bg-[#faf7ef]">
 
           {/* Header (Sticky) */}
-          <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#ddd5c2] bg-[#faf7ef] px-6 py-5 sm:px-8">
+          <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#ddd5c2] dark:border-[#2e3844] bg-[#faf7ef] px-6 py-5 sm:px-8">
             <div className="flex items-center gap-3">
               <div className="rounded-sm bg-[#f0ead9] p-2">
                 <Calendar className="h-5 w-5 text-primary" />
@@ -447,7 +447,7 @@ const StitchPendingPaymentModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-sm p-2 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-foreground"
+              className="rounded-sm p-2 text-[#8a8677] dark:text-[#93a0af] transition-colors hover:bg-black/5 hover:text-foreground"
             >
               <X className="h-5 w-5" />
             </button>
@@ -465,35 +465,35 @@ const StitchPendingPaymentModal = ({
 
               <div className="space-y-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[12.5px] font-medium text-[#5d6470]">Nombre del pago</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Nombre del pago</label>
                   <input
                     type="text"
                     value={formData.Nombre}
                     onChange={(e) => setFormData({...formData, Nombre: e.target.value})}
-                    className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] dark:placeholder:text-[#93a0af] focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Ej: Netflix, Alquiler, Luz..."
                     required
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[12.5px] font-medium text-[#5d6470]">Descripción</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Descripción</label>
                   <textarea
                     value={formData.Descripcion}
                     onChange={(e) => setFormData({...formData, Descripcion: e.target.value})}
-                    className="resize-none rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="resize-none rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] dark:placeholder:text-[#93a0af] focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Añadir una nota o descripción..."
                     rows={3}
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[12.5px] font-medium text-[#5d6470]">Número de factura</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Número de factura</label>
                   <input
                     type="text"
                     value={formData.num_factura}
                     onChange={(e) => setFormData({...formData, num_factura: e.target.value})}
-                    className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] dark:placeholder:text-[#93a0af] focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="Ej: 001-00123456"
                   />
                 </div>
@@ -510,13 +510,13 @@ const StitchPendingPaymentModal = ({
               <div className="space-y-4">
                 {/* Monto */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[12.5px] font-medium text-[#5d6470]">Monto</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Monto</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.Monto}
                     onChange={(e) => setFormData({...formData, Monto: e.target.value})}
-                    className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 font-mono text-[13.5px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3.5 py-2.5 font-mono text-[13.5px] text-foreground placeholder:text-[#8a8677] dark:placeholder:text-[#93a0af] focus:outline-none focus:ring-2 focus:ring-ring"
                     placeholder="0.00"
                     required
                   />
@@ -524,11 +524,11 @@ const StitchPendingPaymentModal = ({
 
                 {/* Moneda */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[12.5px] font-medium text-[#5d6470]">Moneda</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Moneda</label>
                   <select
                     value={formData.Moneda}
                     onChange={(e) => setFormData({...formData, Moneda: e.target.value})}
-                    className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="ARS">ARS - Pesos Argentinos</option>
                     <option value="USD">USD - Dólares</option>
@@ -538,12 +538,12 @@ const StitchPendingPaymentModal = ({
 
                 {/* Fecha de Vencimiento */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[12.5px] font-medium text-[#5d6470]">Fecha de vencimiento</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Fecha de vencimiento</label>
                   <input
                     type="date"
                     value={formData.Fechavencimiento}
                     onChange={(e) => setFormData({...formData, Fechavencimiento: e.target.value})}
-                    className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 font-mono text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3.5 py-2.5 font-mono text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     required
                   />
                 </div>
@@ -559,11 +559,11 @@ const StitchPendingPaymentModal = ({
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[12.5px] font-medium text-[#5d6470]">Categoría</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Categoría</label>
                   <select
                     value={formData.categorias_id}
                     onChange={(e) => setFormData({...formData, categorias_id: e.target.value})}
-                    className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="">Sin categoría</option>
                     {categories.map(cat => (
@@ -575,11 +575,11 @@ const StitchPendingPaymentModal = ({
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[12.5px] font-medium text-[#5d6470]">Método de pago</label>
+                  <label className="text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Método de pago</label>
                   <select
                     value={formData.metodos_pago_id}
                     onChange={(e) => setFormData({...formData, metodos_pago_id: e.target.value})}
-                    className="rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="">Sin método</option>
                     {paymentMethods.map(pm => (
@@ -593,7 +593,7 @@ const StitchPendingPaymentModal = ({
 
               {/* Tipo de Gasto (Radio Buttons Pills) */}
               <div className="space-y-3">
-                <label className="text-[12.5px] font-medium text-[#5d6470]">Tipo de gasto</label>
+                <label className="text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Tipo de gasto</label>
                 <div className="flex flex-wrap gap-2">
                   {['Servicio', 'Factura', 'Alquiler', 'Otro'].map((tipo) => (
                     <label
@@ -601,7 +601,7 @@ const StitchPendingPaymentModal = ({
                       className={`flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-1.5 transition-colors ${
                         formData.Tipo.toLowerCase() === tipo.toLowerCase()
                           ? 'border-[#20242c] bg-[#f0ead9] text-[#20242c]'
-                          : 'border-[#ddd5c2] bg-white text-[#8a8677] hover:bg-[#f0ead9]/50'
+                          : 'border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] text-[#8a8677] dark:text-[#93a0af] hover:bg-[#f0ead9]/50'
                       }`}
                     >
                       <input
@@ -619,8 +619,8 @@ const StitchPendingPaymentModal = ({
 
               {/* Prioridad (Toggle Pills) */}
               <div className="space-y-3">
-                <label className="text-[12.5px] font-medium text-[#5d6470]">Prioridad</label>
-                <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] bg-card p-[3px]">
+                <label className="text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Prioridad</label>
+                <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] dark:border-[#2e3844] bg-card p-[3px]">
                   {[
                     { value: 'baja', label: 'Baja', bg: '#3d5a80', text: '#faf7ef' },
                     { value: 'media', label: 'Media', bg: '#e9c46a', text: '#20242c' },
@@ -653,8 +653,8 @@ const StitchPendingPaymentModal = ({
 
               {/* Estado (Toggle Buttons) */}
               <div className="flex flex-col gap-3">
-                <label className="text-[12.5px] font-medium text-[#5d6470]">Estado actual</label>
-                <div className="flex rounded-full border border-[#ddd5c2] bg-card p-[3px]">
+                <label className="text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Estado actual</label>
+                <div className="flex rounded-full border border-[#ddd5c2] dark:border-[#2e3844] bg-card p-[3px]">
                   {[
                     { value: 'pendiente', label: 'Pendiente', bg: '#e9c46a', text: '#20242c' },
                     { value: 'pagado', label: 'Pagado', bg: '#5a7d52', text: '#faf7ef' },
@@ -678,10 +678,10 @@ const StitchPendingPaymentModal = ({
               </div>
 
               {/* Recurrente (Toggle Switch) */}
-              <div className="flex items-center justify-between rounded-md border border-[#ddd5c2] bg-white p-4">
+              <div className="flex items-center justify-between rounded-md border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] p-4">
                 <div className="flex flex-col">
                   <span className="text-[13.5px] font-medium text-foreground">Pago recurrente</span>
-                  <span className="text-[11.5px] text-[#8a8677]">Se generará automáticamente cada período</span>
+                  <span className="text-[11.5px] text-[#8a8677] dark:text-[#93a0af]">Se generará automáticamente cada período</span>
                 </div>
                 <button
                   type="button"
@@ -692,7 +692,7 @@ const StitchPendingPaymentModal = ({
                   style={{ background: formData.Recurrente ? '#5a7d52' : '#d8d6cf' }}
                 >
                   <span
-                    className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all duration-150"
+                    className="absolute top-0.5 h-4 w-4 rounded-full bg-white dark:bg-[#212836] transition-all duration-150"
                     style={{ left: formData.Recurrente ? '18px' : '2px' }}
                   />
                 </button>
@@ -709,7 +709,7 @@ const StitchPendingPaymentModal = ({
                       className={`flex items-center justify-center gap-1.5 rounded-sm border py-2.5 text-[12.5px] font-medium transition-all ${
                         formData.FrecuenciaRecurrencia === freq.toLowerCase()
                           ? 'border-primary bg-[#f0ead9] font-semibold text-primary'
-                          : 'border-[#ddd5c2] bg-white text-[#8a8677] hover:bg-[#f0ead9]/50'
+                          : 'border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] text-[#8a8677] dark:text-[#93a0af] hover:bg-[#f0ead9]/50'
                       }`}
                     >
                       {formData.FrecuenciaRecurrencia === freq.toLowerCase() && (
@@ -754,12 +754,12 @@ const StitchPendingPaymentModal = ({
           </form>
 
           {/* Footer (Sticky) */}
-          <div className="sticky bottom-0 z-20 flex items-center justify-end gap-3 border-t border-[#ddd5c2] bg-[#faf7ef] px-6 py-5 sm:px-8">
+          <div className="sticky bottom-0 z-20 flex items-center justify-end gap-3 border-t border-[#ddd5c2] dark:border-[#2e3844] bg-[#faf7ef] px-6 py-5 sm:px-8">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="rounded-sm border border-[#ddd5c2] bg-white px-5 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50"
+              className="rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-5 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50"
             >
               Cancelar
             </button>

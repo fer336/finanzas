@@ -20,10 +20,11 @@ const EmptyState = ({ children }) => (
 EmptyState.propTypes = { children: PropTypes.node };
 
 const EstadoPill = ({ isPaid }) => {
-  const color = isPaid ? '#476442' : '#8a6a1f';
-  const borderColor = isPaid ? '#476442' : '#e0c98a';
+  const pillClassName = isPaid
+    ? 'border-[#476442] text-[#476442] dark:border-[#8fae7f] dark:text-[#8fae7f]'
+    : 'border-[#e0c98a] text-[#8a6a1f] dark:border-[#d8ac5a] dark:text-[#d8ac5a]';
   return (
-    <Badge variant="outline" style={{ borderColor, color }}>
+    <Badge variant="outline" className={pillClassName}>
       {isPaid ? 'pagado' : 'pendiente'}
     </Badge>
   );
@@ -81,8 +82,8 @@ const ModernPrestamosSection = ({
 
   const renderFecha = (fecha) => {
     const parsed = parseDateSafe(fecha);
-    if (!parsed) return <span className="font-mono text-[12px] italic text-[#8a8677]">sin fecha</span>;
-    return <span className="font-mono text-[12px] text-[#5d6470]">{parsed.toLocaleDateString('es-AR')}</span>;
+    if (!parsed) return <span className="font-mono text-[12px] italic text-[#8a8677] dark:text-[#93a0af]">sin fecha</span>;
+    return <span className="font-mono text-[12px] text-[#5d6470] dark:text-[#93a0af]">{parsed.toLocaleDateString('es-AR')}</span>;
   };
 
   const handleDeleteConfirm = () => {
@@ -90,11 +91,11 @@ const ModernPrestamosSection = ({
   };
 
   if (isLoading) {
-    return <div className="mt-4 h-64 w-full animate-pulse rounded-md bg-[#e7e0cf]" />;
+    return <div className="mt-4 h-64 w-full animate-pulse rounded-md bg-[#e7e0cf] dark:bg-[#2e3844]" />;
   }
 
   if (error) {
-    return <p className="text-[13.5px] text-[#a04a34]">Error al cargar préstamos: {error.message}</p>;
+    return <p className="text-[13.5px] text-[#a04a34] dark:text-[#c26a52]">Error al cargar préstamos: {error.message}</p>;
   }
 
   return (
@@ -112,7 +113,7 @@ const ModernPrestamosSection = ({
             value={formatAmount(totalADevolver, { decimals: 0 })}
             subtext={`${pendientes.length} préstamo${pendientes.length !== 1 ? 's' : ''}`}
             borderColor="#e9c46a"
-            valueColor="#8a6a1f"
+            valueColor="var(--accent-foreground)"
           />
         </div>
         <div className="flex items-center gap-2">
@@ -120,7 +121,7 @@ const ModernPrestamosSection = ({
             type="button"
             onClick={refresh}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] dark:hover:bg-[#212836] disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">{isRefreshing ? 'Actualizando…' : 'Actualizar'}</span>
@@ -128,7 +129,7 @@ const ModernPrestamosSection = ({
           <button
             type="button"
             onClick={() => onNewPrestamo && onNewPrestamo()}
-            className="flex items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047]"
+            className="flex items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] dark:hover:bg-[#7d9970]"
           >
             <Plus className="h-3.5 w-3.5" />
             Nuevo
@@ -137,25 +138,25 @@ const ModernPrestamosSection = ({
       </div>
 
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8a8677]" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8a8677] dark:text-[#93a0af]" />
         <input
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Buscar por fuente…"
-          className="w-full max-w-sm rounded-sm border border-[#ddd5c2] bg-white py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-full max-w-sm rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-[#8a8677] dark:placeholder:text-[#93a0af] focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
 
-      <div className="overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] bg-card">
+      <div className="overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] dark:border-[#2e3844] bg-card">
         <table className="w-full min-w-[720px]">
           <thead>
-            <tr className="border-b-2 border-[#ddd5c2]">
-              <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Fuente</th>
-              <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Prestado</th>
-              <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>A devolver</th>
-              <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Vence</th>
-              <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Estado</th>
-              <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677]" style={{ letterSpacing: '.08em' }}>Acciones</th>
+            <tr className="border-b-2 border-[#ddd5c2] dark:border-[#2e3844]">
+              <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Fuente</th>
+              <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Prestado</th>
+              <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>A devolver</th>
+              <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Vence</th>
+              <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Estado</th>
+              <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -171,9 +172,9 @@ const ModernPrestamosSection = ({
               sortedData.map((p) => {
                 const paid = isPaid(p);
                 return (
-                  <tr key={p.id} className="group border-b border-[#e7e0cf] hover:bg-[#f0ead9] transition-colors">
+                  <tr key={p.id} className="group border-b border-[#e7e0cf] dark:border-[#2e3844] hover:bg-[#f0ead9] dark:hover:bg-[#212836] transition-colors">
                     <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">{p.nombre_fuente}</td>
-                    <td className="px-3.5 py-2.5 text-right font-mono text-[#5d6470]">
+                    <td className="px-3.5 py-2.5 text-right font-mono text-[#5d6470] dark:text-[#93a0af]">
                       {formatAmount(p.monto_prestado, { decimals: 0 })}
                     </td>
                     <td className="px-3.5 py-2.5 text-right font-mono font-semibold text-foreground">
@@ -188,7 +189,7 @@ const ModernPrestamosSection = ({
                         {!paid && (
                           <button
                             onClick={() => onMarcarPagado && onMarcarPagado(p)}
-                            className="flex items-center gap-1.5 rounded-sm bg-primary px-2.5 py-1.5 font-sans text-[12px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047]"
+                            className="flex items-center gap-1.5 rounded-sm bg-primary px-2.5 py-1.5 font-sans text-[12px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] dark:hover:bg-[#7d9970]"
                           >
                             <Check className="h-3.5 w-3.5" />
                             Marcar pagado
@@ -197,17 +198,17 @@ const ModernPrestamosSection = ({
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => onEditPrestamo && onEditPrestamo(p)}
-                            className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
+                            className="p-1.5 rounded-sm hover:bg-black/5 transition-colors dark:hover:bg-card-hover"
                             title="Editar"
                           >
-                            <Edit className="h-4 w-4 text-[#8a8677]" />
+                            <Edit className="h-4 w-4 text-[#8a8677] dark:text-[#93a0af]" />
                           </button>
                           <button
                             onClick={() => { setPrestamoToDelete(p); setShowDeleteConfirm(true); }}
-                            className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
+                            className="p-1.5 rounded-sm hover:bg-black/5 transition-colors dark:hover:bg-card-hover"
                             title="Eliminar"
                           >
-                            <Trash2 className="h-4 w-4 text-[#8a8677] hover:text-[#a04a34]" />
+                            <Trash2 className="h-4 w-4 text-[#8a8677] dark:text-[#93a0af] hover:text-[#a04a34] dark:hover:text-[#c26a52]" />
                           </button>
                         </div>
                       </div>

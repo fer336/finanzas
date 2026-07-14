@@ -86,7 +86,7 @@ jobs:
 
       # ── 5. Build & Push Backend ──────────────────────────────────────────
       - name: 🐍 Build & Push Backend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: ./backend
           push: true
@@ -102,7 +102,7 @@ jobs:
 
       # ── 6. Build & Push Frontend ─────────────────────────────────────────
       - name: 🎨 Build & Push Frontend
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: ./frontend
           push: true

@@ -113,30 +113,6 @@ class Settings:
     )
     MINIO_REGION: str = os.getenv("MINIO_REGION", "us-east-1")
 
-    # Redis / LangGraph persistence
-    REDIS_HOST: str = os.getenv("REDIS_HOST", "91.99.162.240")
-    REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
-    REDIS_DB: int = int(os.getenv("REDIS_DB", "1"))
-    REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD", "")
-    AGENT_ENGINE: str = os.getenv("AGENT_ENGINE", "langgraph")
-
-    @property
-    def REDIS_URL(self) -> str:
-        auth = f":{self.REDIS_PASSWORD}@" if self.REDIS_PASSWORD else ""
-        return f"redis://{auth}{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
-
-    @property
-    def REDIS_URL_MASKED(self) -> str:
-        return f"redis://***@{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}"
-
-    @property
-    def LANGGRAPH_POSTGRES_URL(self) -> str:
-        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-
-    @property
-    def LANGGRAPH_POSTGRES_URL_MASKED(self) -> str:
-        return f"postgresql://***@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-
     # Configuración de archivos
     MAX_FILE_SIZE_MB: int = 10
     ALLOWED_FILE_EXTENSIONS: List[str] = [

@@ -16,11 +16,6 @@ itsdangerous>=2.1.2
 httpx>=0.25.2
 requests>=2.31.0
 
-# IA y orquestacion
-langgraph>=1.0.8
-langgraph-checkpoint-redis>=0.3.6
-langgraph-checkpoint-postgres>=3.0.4
-
 # Finanzas y mercado
 yfinance>=0.2.32
 pandas>=2.1.0

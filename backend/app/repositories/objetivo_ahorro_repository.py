@@ -42,6 +42,29 @@ class ObjetivoAhorroRepository:
     def get_active(self, usuario_id: Optional[UUID] = None) -> List[ObjetivoAhorro]:
         """Get only active savings goals (en_progreso)"""
         return self.get_all(usuario_id=usuario_id, estado='en_progreso')
+
+    def get_total_apartado_disponible(self, usuario_id: UUID, moneda: str = "ARS") -> Decimal:
+        """Total saved in open goals that still needs to be removed from availability.
+
+        Transaction-backed goal contributions already affect ``balance_neto`` as
+        expenses, so subtracting them again would double-count the reservation.
+        Only positive, non-transaction contributions represent money moved out of
+        available balance without an accounting transaction.
+
+        No currency conversion is performed: only contributions in the requested
+        currency are summed.
+        """
+        total = self.db.query(func.sum(AporteObjetivo.monto)).join(
+            ObjetivoAhorro,
+            AporteObjetivo.objetivo_id == ObjetivoAhorro.id,
+        ).filter(
+            ObjetivoAhorro.usuario_id == usuario_id,
+            ObjetivoAhorro.estado.in_(("pendiente", "en_progreso")),
+            func.upper(AporteObjetivo.moneda) == moneda.upper(),
+            AporteObjetivo.monto > 0,
+            AporteObjetivo.tipo_referencia.is_(None),
+        ).scalar()
+        return total or Decimal('0')
     
     def update(self, objetivo_id: UUID, objetivo_data: Dict[str, Any]) -> Optional[ObjetivoAhorro]:
         """Update a savings goal"""
@@ -186,4 +209,3 @@ class ObjetivoAhorroRepository:
             'created_at': objetivo.created_at.isoformat() if objetivo.created_at else None,
             'updated_at': objetivo.updated_at.isoformat() if objetivo.updated_at else None
         }
-

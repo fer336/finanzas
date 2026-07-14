@@ -11,6 +11,7 @@ from decimal import Decimal
 import calendar
 
 from app.models.db_models import BalanceInicial, Transaccion
+from app.repositories.objetivo_ahorro_repository import ObjetivoAhorroRepository
 from app.schemas.balance_inicial import BalanceInicialCreate, BalanceInicialUpdate
 
 
@@ -294,6 +295,13 @@ class BalanceInicialRepository:
         hasta el fin del mes objetivo. Si no hay ancla configurada, arranca
         en 0 desde la primera transacción registrada — así se comporta
         correctamente para una cuenta recién reseteada.
+
+        También expone "apartado_objetivos" (aportes positivos a objetivos
+        abiertos que no vienen de una transacción) y "balance_disponible"
+        (balance_neto menos lo apartado): esa plata ya fue asignada a un
+        objetivo aunque no haya generado un gasto real, así que no debería
+        contarse como disponible. Los aportes generados por transacciones no se
+        restan acá porque ya impactaron en ingresos/gastos.
         """
         ancla = (
             self.db.query(BalanceInicial)
@@ -336,6 +344,11 @@ class BalanceInicialRepository:
         gastos = Decimal(gastos)
         balance_neto = saldo_inicial + ingresos - gastos
 
+        apartado_objetivos = ObjetivoAhorroRepository(self.db).get_total_apartado_disponible(
+            usuario_id=usuario_id, moneda=moneda
+        )
+        balance_disponible = balance_neto - apartado_objetivos
+
         return {
             "mes": mes,
             "moneda": moneda,
@@ -344,5 +357,6 @@ class BalanceInicialRepository:
             "ingresos": float(ingresos),
             "gastos": float(gastos),
             "balance_neto": float(balance_neto),
+            "apartado_objetivos": float(apartado_objetivos),
+            "balance_disponible": float(balance_disponible),
         }
-

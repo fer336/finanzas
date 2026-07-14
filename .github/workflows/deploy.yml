@@ -8,9 +8,13 @@
 #   2. gh release create vX.Y.Z --generate-notes   (o desde la UI)
 #   3. Esto publica el release → dispara este workflow automáticamente
 #
-# El job `ci` invoca ci.yml (backend import + frontend lint/build +
-# docker build) como workflow reusable. build-and-deploy depende de
-# `ci` vía `needs` — si el CI falla, el deploy no se ejecuta.
+# Los jobs `ci` y `codeql` invocan ci.yml y codeql.yml como workflows
+# reusables. build-and-deploy depende de ambos vía `needs` — si
+# cualquiera falla, el deploy no se ejecuta.
+#
+# OJO: el job de CodeQL solo falla si el análisis en sí se rompe, no
+# por encontrar vulnerabilidades (esas quedan en la pestaña Security,
+# no bloquean el deploy).
 #
 # Secrets requeridos en GitHub (GITHUB_TOKEN es automático, no hace falta cargarlo):
 #   GOOGLE_CLIENT_ID       - Client ID de OAuth Google
@@ -44,9 +48,13 @@ jobs:
     name: 🔍 CI (gate)
     uses: ./.github/workflows/ci.yml
 
+  codeql:
+    name: 🔐 CodeQL (gate)
+    uses: ./.github/workflows/codeql.yml
+
   build-and-deploy:
     name: Build & Deploy
-    needs: ci
+    needs: [ci, codeql]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production

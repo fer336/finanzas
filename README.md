@@ -33,7 +33,19 @@ Internet (HTTPS)
 
 | Inicio | Movimientos |
 |---|---|
-| ![Dashboard](./docs/screenshots/dashboard.png) | ![Movimientos](./docs/screenshots/movimientos.png) |
+| ![Inicio](./docs/screenshots/inicio.png) | ![Movimientos](./docs/screenshots/movimientos.png) |
+
+| Vencimientos | Préstamos |
+|---|---|
+| ![Vencimientos](./docs/screenshots/vencimientos.png) | ![Préstamos](./docs/screenshots/prestamos.png) |
+
+| Objetivos | Inversiones |
+|---|---|
+| ![Objetivos](./docs/screenshots/objetivos.png) | ![Inversiones](./docs/screenshots/inversiones.png) |
+
+| Categorías | Métodos de pago |
+|---|---|
+| ![Categorías](./docs/screenshots/categorias.png) | ![Métodos de pago](./docs/screenshots/metodospago.png) |
 
 ---
 

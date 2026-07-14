@@ -37,7 +37,7 @@
     "react-day-picker": "8.10.1",
     "react-dom": "18.2.0",
     "react-markdown": "8.0.7",
-    "recharts": "^2.15.4",
+    "recharts": "^3.9.2",
     "reicon-react": "^1.1.2",
     "remark-gfm": "3.0.1",
     "sonner": "^2.0.7",

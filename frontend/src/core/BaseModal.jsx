@@ -245,7 +245,6 @@ export function withBaseModal(ModalClass) {
     // Force re-render cuando cambia el estado interno
     const triggerUpdate = () => forceUpdate({});
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
       modalInstance.initialize(props.isOpen, props.initialData);
       triggerUpdate();

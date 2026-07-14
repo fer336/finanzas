@@ -1,12 +1,16 @@
 # ====================================================================
 # 🚀 DEPLOY A PRODUCCIÓN - FINANZAS APP
-#   Release (tag) → Build → Push a GitHub Container Registry (ghcr.io) →
-#   Portainer Webhook Redeploy
+#   Release (tag) → CI (gate) → Build → Push a GitHub Container Registry
+#   (ghcr.io) → Portainer Webhook Redeploy
 #
 # Se dispara al publicar un Release en GitHub (no en cada push a main):
 #   1. git tag vX.Y.Z && git push origin vX.Y.Z
 #   2. gh release create vX.Y.Z --generate-notes   (o desde la UI)
 #   3. Esto publica el release → dispara este workflow automáticamente
+#
+# El job `ci` invoca ci.yml (backend import + frontend lint/build +
+# docker build) como workflow reusable. build-and-deploy depende de
+# `ci` vía `needs` — si el CI falla, el deploy no se ejecuta.
 #
 # Secrets requeridos en GitHub (GITHUB_TOKEN es automático, no hace falta cargarlo):
 #   GOOGLE_CLIENT_ID       - Client ID de OAuth Google
@@ -36,8 +40,13 @@ env:
   IMAGE_OWNER: ${{ github.repository_owner }}
 
 jobs:
+  ci:
+    name: 🔍 CI (gate)
+    uses: ./.github/workflows/ci.yml
+
   build-and-deploy:
     name: Build & Deploy
+    needs: ci
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production

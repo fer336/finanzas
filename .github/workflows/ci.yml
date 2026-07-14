@@ -1,9 +1,10 @@
 # ====================================================================
 # 🔍 CI - Lint, Build y Chequeos en cada Pull Request
 #
-# A diferencia de deploy.yml (que solo corre al publicar un Release),
-# este workflow corre en cada push/PR contra main para detectar errores
-# antes de que lleguen a producción.
+# Corre en cada push/PR contra main para detectar errores antes de que
+# lleguen a producción. También se expone como workflow reusable
+# (workflow_call) para que deploy.yml lo invoque como gate: el deploy
+# solo continúa si este CI pasó.
 #
 # NOTA: el backend hoy no tiene suite de tests (no hay carpeta tests/).
 # Cuando se agregue, sumar un step de pytest en el job `backend`.
@@ -15,6 +16,7 @@ on:
     branches: [main]
   push:
     branches: [main]
+  workflow_call:
 
 concurrency:
   group: ci-${{ github.ref }}

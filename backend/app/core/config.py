@@ -23,7 +23,7 @@ class Settings:
     environment: str = os.getenv("ENVIRONMENT", "development")
 
     # PostgreSQL Database Configuration
-    POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "91.99.162.240")
+    POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "localhost")
     POSTGRES_PORT: int = int(os.getenv("POSTGRES_PORT", "5432"))
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "")

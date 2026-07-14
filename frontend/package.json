@@ -33,7 +33,7 @@
     "lucide-react": "^0.540.0",
     "next-themes": "^0.4.6",
     "postcss": "^8.5.6",
-    "react": "18.2.0",
+    "react": "19.2.7",
     "react-day-picker": "8.10.1",
     "react-dom": "18.2.0",
     "react-markdown": "8.0.7",
@@ -54,7 +54,7 @@
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 130"
   },
   "devDependencies": {
-    "@types/react": "^18.2.0",
+    "@types/react": "^19.2.17",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.2.0",
     "eslint": "^8.53.0",

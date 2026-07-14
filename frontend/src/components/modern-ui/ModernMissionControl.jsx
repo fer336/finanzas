@@ -14,6 +14,7 @@ import {
   usePaymentMethods,
   useTransactions,
   usePendingPayments,
+  usePrestamos,
   useObjetivos,
   usePresupuestos,
   useMonedas,
@@ -86,6 +87,7 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   const { data: paymentMethodsData } = usePaymentMethods(); // Para modales
   const { data: transactionsData = [], isLoading: loadingTx, error: txError } = useTransactions({ limit: 1000 });
   const { data: pendingPaymentsData = [] } = usePendingPayments();
+  const { data: prestamosData = [] } = usePrestamos();
   const { data: objetivosData = [] } = useObjetivos();
   const { data: presupuestosData = [] } = usePresupuestos();
   const { data: monedasData = [] } = useMonedas();
@@ -348,6 +350,10 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   const pendingPayments = useMemo(
     () => Array.isArray(pendingPaymentsData) ? pendingPaymentsData : [],
     [pendingPaymentsData]
+  );
+  const prestamos = useMemo(
+    () => Array.isArray(prestamosData) ? prestamosData : [],
+    [prestamosData]
   );
   // Contador para el badge dorado de "Vencimientos" en ModernTopNav (ver
   // DESIGN.md "Nav pills" — se muestra solo si hay pendientes).
@@ -825,8 +831,12 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
         comprobante: paymentPayload.comprobante
       });
 
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.prestamos] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.transactions] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.prestamos] }),
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.transactions] }),
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.dashboardStats] }),
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.balanceNeto] }),
+      ]);
       setShowPayPrestamoModal(false);
       setPrestamoToPay(null);
       console.log('✅ Devolución de préstamo registrada correctamente');
@@ -1021,6 +1031,7 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
             user={user}
             transactions={transactions}
             pendingPayments={pendingPayments}
+            prestamos={prestamos}
             dollarQuotes={dollarQuotes}
             loading={loadingTx}
             onNavigate={handleNavigate}
@@ -1206,7 +1217,12 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
             onDeletePrestamo={async (id) => {
               try {
                 await apiServices.prestamosApi.delete(id);
-                queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.prestamos] });
+                await Promise.all([
+                  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.prestamos] }),
+                  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.transactions] }),
+                  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.dashboardStats] }),
+                  queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.balanceNeto] }),
+                ]);
               } catch (error) {
                 console.error('Error:', error);
                 alert('Error: ' + error.message);
@@ -1426,6 +1442,7 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
             user={user}
             transactions={transactions}
             pendingPayments={pendingPayments}
+            prestamos={prestamos}
             dollarQuotes={dollarQuotes}
             loading={loadingTx}
             onNavigate={handleNavigate}
@@ -1720,7 +1737,12 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
                   console.log('✅ Préstamo creado');
                 }
 
-                await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.prestamos] });
+                await Promise.all([
+                  queryClient.refetchQueries({ queryKey: [QUERY_KEYS.prestamos] }),
+                  queryClient.refetchQueries({ queryKey: [QUERY_KEYS.transactions] }),
+                  queryClient.refetchQueries({ queryKey: [QUERY_KEYS.dashboardStats] }),
+                  queryClient.refetchQueries({ queryKey: [QUERY_KEYS.balanceNeto] }),
+                ]);
                 setShowPrestamoModal(false);
                 setEditingPrestamo(null);
               } catch (error) {

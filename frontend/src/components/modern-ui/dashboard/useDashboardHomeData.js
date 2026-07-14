@@ -42,6 +42,13 @@ function getTransactionDate(t) {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+function getPrestamoDate(p) {
+  const raw = p.fecha_vencimiento || p.FechaVencimiento || p.fechavencimiento || p.Fechavencimiento;
+  if (!raw) return null;
+  const d = new Date(raw);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 function mesActualStr() {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -50,6 +57,7 @@ function mesActualStr() {
 export function useDashboardHomeData({
   transactions = [],
   pendingPayments = [],
+  prestamos = [],
   dollarQuotes,
   balanceNeto: balanceNetoOverride = null,
   balanceDisponible: balanceDisponibleOverride = null,
@@ -228,6 +236,33 @@ export function useDashboardHomeData({
     ? proximoVencimiento.fechaObj.toLocaleDateString('es-AR', { day: 'numeric', month: 'long' })
     : null;
 
+  // ── Aviso préstamos ───────────────────────────────────────────────────────
+  const prestamosActivos = prestamos
+    .map((p) => {
+      const estado = (p.estado ?? p.Estado ?? 'pendiente').toString().toLowerCase();
+      const fechaObj = getPrestamoDate(p);
+      return {
+        id: p.id ?? p.Id,
+        nombre: p.nombre_fuente || p.NombreFuente || p.fuente || 'Sin nombre',
+        montoPrestado: parseFloat(p.monto_prestado ?? p.MontoPrestado ?? 0),
+        montoADevolver: parseFloat(p.monto_a_devolver ?? p.MontoADevolver ?? p.monto_prestado ?? p.MontoPrestado ?? 0),
+        fechaVencimiento: p.fecha_vencimiento || p.FechaVencimiento || p.fechavencimiento || p.Fechavencimiento || null,
+        fechaObj,
+        pagado: estado === 'pagado' || estado === 'true' || p.pagado === true,
+      };
+    })
+    .filter((p) => !p.pagado);
+
+  const totalPrestamosADevolver = prestamosActivos.reduce((sum, p) => sum + p.montoADevolver, 0);
+
+  const proximoPrestamo = prestamosActivos
+    .filter((p) => p.fechaObj)
+    .sort((a, b) => a.fechaObj - b.fechaObj)[0];
+
+  const proximoPrestamoLabel = proximoPrestamo
+    ? proximoPrestamo.fechaObj.toLocaleDateString('es-AR', { day: 'numeric', month: 'long' })
+    : null;
+
   return {
     formatAmount,
     periodoLabel,
@@ -247,6 +282,10 @@ export function useDashboardHomeData({
     pendientesActivos,
     proximoVencimiento,
     proximoVencimientoLabel,
+    prestamosActivos,
+    totalPrestamosADevolver,
+    proximoPrestamo,
+    proximoPrestamoLabel,
   };
 }
 

@@ -97,6 +97,7 @@ const ModernDashboard = ({
   user,
   transactions = [],
   pendingPayments = [],
+  prestamos = [],
   dollarQuotes,
   loading = false,
   onNavigate,
@@ -126,9 +127,14 @@ const ModernDashboard = ({
     pendientesActivos,
     proximoVencimiento,
     proximoVencimientoLabel,
+    prestamosActivos,
+    totalPrestamosADevolver,
+    proximoPrestamo,
+    proximoPrestamoLabel,
   } = useDashboardHomeData({
     transactions,
     pendingPayments,
+    prestamos,
     dollarQuotes,
     balanceNeto: balanceNetoData?.balance_neto,
     balanceDisponible: balanceNetoData?.balance_disponible,
@@ -152,6 +158,14 @@ const ModernDashboard = ({
   const donutData = donutMode === 'gastos' ? categoriasOrdenadas : categoriasIngresosOrdenadas;
   const donutTotal = donutData.reduce((sum, c) => sum + c.monto, 0);
   const balanceMostrado = balanceMode === 'mensual' ? resultadoMes : balanceDisponible;
+  const goToVencimientos = () => {
+    try { localStorage.setItem('vencimientos_section', 'vencimientos'); } catch { /* ignore */ }
+    onNavigate && onNavigate('pending-payments-full');
+  };
+  const goToPrestamos = () => {
+    try { localStorage.setItem('vencimientos_section', 'prestamos'); } catch { /* ignore */ }
+    onNavigate && onNavigate('pending-payments-full');
+  };
 
   // ── Mobile layout ─────────────────────────────────────────────────────────
   if (isMobile) {
@@ -160,6 +174,7 @@ const ModernDashboard = ({
         user={user}
         transactions={transactions}
         pendingPayments={pendingPayments}
+        prestamos={prestamos}
         dollarQuotes={dollarQuotes}
         loading={loading}
         onNavigate={onNavigate}
@@ -341,7 +356,7 @@ const ModernDashboard = ({
             {/* Aviso vencimientos */}
             <button
               type="button"
-              onClick={() => onNavigate && onNavigate('pending-payments-full')}
+              onClick={goToVencimientos}
               className="rounded-md border border-[#e0c98a] bg-[#fdf6e3] px-5 py-4 text-left dark:border-[#d8ac5a] dark:bg-[rgba(216,172,90,0.14)]"
             >
               <div className="flex items-baseline justify-between">
@@ -358,6 +373,34 @@ const ModernDashboard = ({
                   {proximoVencimiento && proximoVencimientoLabel ? (
                     <>
                       {' '}· el más próximo vence el <strong>{proximoVencimientoLabel}</strong> ({proximoVencimiento.nombre}, {formatAmount(proximoVencimiento.monto, { decimals: 0 })})
+                    </>
+                  ) : (
+                    ' · sin fecha confirmada para el más próximo'
+                  )}
+                </p>
+              )}
+            </button>
+
+            {/* Aviso préstamos */}
+            <button
+              type="button"
+              onClick={goToPrestamos}
+              className="rounded-md border border-[#b7c7d8] bg-[#eef5fb] px-5 py-4 text-left dark:border-[#6f8baa] dark:bg-[rgba(111,139,170,0.16)]"
+            >
+              <div className="flex items-baseline justify-between">
+                <span className="font-serif text-[15px] font-semibold text-foreground">Préstamos</span>
+                <span className="font-mono text-[12px] font-semibold text-[#3d5a80] dark:text-[#9eb7d0]">
+                  {formatAmount(totalPrestamosADevolver, { decimals: 0 })}
+                </span>
+              </div>
+              {prestamosActivos.length === 0 ? (
+                <p className="mt-1.5 text-[12.5px] italic text-[#8a8677] dark:text-[#93a0af]">Sin préstamos pendientes.</p>
+              ) : (
+                <p className="mt-1.5 text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
+                  {prestamosActivos.length} préstamo{prestamosActivos.length === 1 ? '' : 's'} activo{prestamosActivos.length === 1 ? '' : 's'}
+                  {proximoPrestamo && proximoPrestamoLabel ? (
+                    <>
+                      {' '}· el más próximo vence el <strong>{proximoPrestamoLabel}</strong> ({proximoPrestamo.nombre}, {formatAmount(proximoPrestamo.montoADevolver, { decimals: 0 })})
                     </>
                   ) : (
                     ' · sin fecha confirmada para el más próximo'
@@ -388,6 +431,7 @@ ModernDashboard.propTypes = {
   user: PropTypes.object,
   transactions: PropTypes.array,
   pendingPayments: PropTypes.array,
+  prestamos: PropTypes.array,
   dollarQuotes: PropTypes.array,
   loading: PropTypes.bool,
   onNavigate: PropTypes.func,

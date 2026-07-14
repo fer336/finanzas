@@ -53,6 +53,8 @@ const PrestamoPayModal = ({
 
   if (!isOpen || !prestamo) return null;
 
+  const fieldClassName = 'w-full rounded-sm border border-[#ddd5c2] bg-white px-3 py-2.5 text-[13px] text-foreground transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#2e3844] dark:bg-[#212836] dark:text-foreground dark:placeholder:text-[#93a0af]';
+
   const uploadToMinIO = async () => {
     if (!selectedFile) return formData.comprobante;
 
@@ -136,7 +138,7 @@ const PrestamoPayModal = ({
           </div>
           <button
             onClick={onClose}
-            className="rounded-sm p-2 transition-colors duration-150 hover:bg-black/5"
+            className="rounded-sm p-2 transition-colors duration-150 hover:bg-black/5 dark:hover:bg-white/5"
             type="button"
           >
             <X className="w-5 h-5 text-[#8a8677] dark:text-[#93a0af]" />
@@ -145,25 +147,25 @@ const PrestamoPayModal = ({
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label className="text-[12.5px] text-[#5d6470]">
+            <label className="text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
               <span className="block mb-1">Fecha de devolución</span>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a8677]" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8a8677] dark:text-[#93a0af]" />
                 <input
                   type="date"
                   value={formData.fecha_pago}
                   onChange={(e) => setFormData((prev) => ({ ...prev, fecha_pago: e.target.value }))}
-                  className="w-full pl-10 pr-3 py-2.5 bg-white border border-[#ddd5c2] rounded-sm text-foreground font-mono text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
+                  className={`${fieldClassName} pl-10 font-mono`}
                 />
               </div>
             </label>
 
-            <label className="text-[12.5px] text-[#5d6470]">
+            <label className="text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
               <span className="block mb-1">Método de pago</span>
               <select
                 value={formData.metodo_pago_id}
                 onChange={(e) => setFormData((prev) => ({ ...prev, metodo_pago_id: e.target.value }))}
-                className="w-full px-3 py-2.5 bg-white border border-[#ddd5c2] rounded-sm text-foreground text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
+                className={fieldClassName}
               >
                 <option value="">Seleccionar...</option>
                 {paymentMethods.map((method) => (
@@ -175,12 +177,12 @@ const PrestamoPayModal = ({
             </label>
           </div>
 
-          <label className="text-[12.5px] text-[#5d6470] block">
+          <label className="text-[12.5px] text-[#5d6470] dark:text-[#93a0af] block">
             <span className="block mb-1">Categoría</span>
             <select
               value={formData.categoria_id}
               onChange={(e) => setFormData((prev) => ({ ...prev, categoria_id: e.target.value }))}
-              className="w-full px-3 py-2.5 bg-white border border-[#ddd5c2] rounded-sm text-foreground text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
+              className={fieldClassName}
             >
               <option value="">Seleccionar...</option>
               {categories.map((category) => (
@@ -191,10 +193,10 @@ const PrestamoPayModal = ({
             </select>
           </label>
 
-          <label className="text-[12.5px] text-[#5d6470] block">
+          <label className="text-[12.5px] text-[#5d6470] dark:text-[#93a0af] block">
             <span className="block mb-1">Comprobante (se sube a MinIO)</span>
             <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#ddd5c2] rounded-sm cursor-pointer transition-colors duration-150 hover:bg-[#f0ead9]">
+              <label className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#ddd5c2] rounded-sm cursor-pointer transition-colors duration-150 hover:bg-[#f0ead9] dark:border-[#2e3844] dark:bg-[#212836] dark:hover:bg-[#2e3844]">
                 <Upload className="w-4 h-4 text-[#5a7d52]" />
                 <span className="text-[13px] text-foreground">Seleccionar archivo</span>
                 <input
@@ -205,23 +207,23 @@ const PrestamoPayModal = ({
                 />
               </label>
               {selectedFile && (
-                <span className="text-[12px] text-[#8a8677] truncate max-w-xs">{selectedFile.name}</span>
+                <span className="text-[12px] text-[#8a8677] dark:text-[#93a0af] truncate max-w-xs">{selectedFile.name}</span>
               )}
             </div>
           </label>
 
-          <label className="text-[12.5px] text-[#5d6470] block">
+          <label className="text-[12.5px] text-[#5d6470] dark:text-[#93a0af] block">
             <span className="block mb-1">Notas</span>
             <textarea
               value={formData.notas}
               onChange={(e) => setFormData((prev) => ({ ...prev, notas: e.target.value }))}
               rows={3}
-              className="w-full px-3 py-2.5 bg-white border border-[#ddd5c2] rounded-sm text-foreground text-[13.5px] focus:outline-none focus:ring-2 focus:ring-ring"
+              className={`${fieldClassName} text-[13.5px]`}
             />
           </label>
 
           {error && (
-            <div className="text-[12.5px] text-[#a04a34] bg-[#fdf6e3] border border-[#e0c98a] rounded-sm px-3 py-2">
+            <div className="text-[12.5px] text-[#a04a34] bg-[#fdf6e3] border border-[#e0c98a] rounded-sm px-3 py-2 dark:border-[#d8ac5a] dark:bg-[rgba(216,172,90,0.14)] dark:text-[#c26a52]">
               {error}
             </div>
           )}
@@ -230,7 +232,7 @@ const PrestamoPayModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-sm border border-[#ddd5c2] bg-white px-[15px] py-[8px] text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50"
+              className="rounded-sm border border-[#ddd5c2] bg-white px-[15px] py-[8px] text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50 dark:border-[#2e3844] dark:bg-[#212836] dark:hover:bg-[#2e3844]"
               disabled={saving || uploadingProof}
             >
               Cancelar
@@ -238,7 +240,7 @@ const PrestamoPayModal = ({
             <button
               type="submit"
               disabled={saving || uploadingProof}
-              className="flex items-center gap-2 rounded-sm bg-primary px-[15px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:opacity-50"
+              className="flex items-center gap-2 rounded-sm bg-primary px-[15px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:opacity-50 dark:hover:bg-[#7d9970]"
             >
               {(saving || uploadingProof) ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
               {uploadingProof ? 'Subiendo comprobante a MinIO...' : saving ? 'Guardando...' : 'Confirmar devolución'}

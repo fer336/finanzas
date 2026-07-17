@@ -245,12 +245,12 @@ const FileUpload = ({
   };
 
   const getFileIcon = (fileName) => {
-    if (!fileName) return <FileText className="w-5 h-5 text-[#8a8677]" />;
+    if (!fileName) return <FileText className="w-5 h-5 text-muted-foreground" />;
     const ext = fileName.split('.').pop()?.toLowerCase();
     if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
-      return <FileText className="w-5 h-5 text-[#5a7d52]" />;
+      return <FileText className="w-5 h-5 text-primary" />;
     }
-    return <FileText className="w-5 h-5 text-[#8a8677]" />;
+    return <FileText className="w-5 h-5 text-muted-foreground" />;
   };
 
   return (
@@ -260,8 +260,8 @@ const FileUpload = ({
         <div
           className={`relative rounded-md border-2 border-dashed p-6 transition-colors ${
             dragActive
-              ? 'border-[#5a7d52] bg-[#5a7d52]/10'
-              : 'border-[#ddd5c2] hover:border-[#c7bda3] bg-[#f6f1e4]'
+              ? 'border-primary bg-[#5a7d52]/10 dark:bg-[#8fae7f]/10'
+              : 'border-border bg-muted hover:border-muted-foreground'
           }`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -279,23 +279,23 @@ const FileUpload = ({
           <div className="flex flex-col items-center gap-3 text-center">
             {compressing ? (
               <>
-                <Loader className="w-7 h-7 text-[#5a7d52] animate-spin" />
+                <Loader className="w-7 h-7 text-primary animate-spin" />
                 <div>
-                  <p className="text-[13.5px] font-medium text-[#20242c]">Comprimiendo imagen…</p>
-                  <p className="text-[12px] text-[#8a8677] mt-1">Reduciendo tamaño a menos de 2MB</p>
+                  <p className="text-[13.5px] font-medium text-foreground">Comprimiendo imagen…</p>
+                  <p className="text-[12px] text-muted-foreground mt-1">Reduciendo tamaño a menos de 2MB</p>
                 </div>
               </>
             ) : (
               <>
-                <Upload className={`w-7 h-7 ${dragActive ? 'text-[#5a7d52]' : 'text-[#8a8677]'}`} />
+                <Upload className={`w-7 h-7 ${dragActive ? 'text-primary' : 'text-muted-foreground'}`} />
                 <div>
-                  <p className="text-[13.5px] font-medium text-[#20242c]">
+                  <p className="text-[13.5px] font-medium text-foreground">
                     {dragActive ? 'Soltá el archivo aquí' : 'Click para subir o arrastrá y soltá'}
                   </p>
-                  <p className="text-[12px] text-[#8a8677] mt-1">
+                  <p className="text-[12px] text-muted-foreground mt-1">
                     Máximo {maxSizeMB}MB • JPG, PNG, PDF, WEBP
                   </p>
-                  <p className="text-[11px] text-[#a39a80] mt-1">
+                  <p className="text-[11px] text-muted-foreground mt-1">
                     Imágenes mayores a 2MB se comprimen automáticamente
                   </p>
                 </div>
@@ -307,23 +307,23 @@ const FileUpload = ({
 
       {/* Selected File Preview */}
       {selectedFile && !uploadedFileUrl && (
-        <div className="rounded-md border border-[#ddd5c2] bg-[#faf7ef] p-4">
+        <div className="rounded-md border border-border bg-card p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 flex-1 min-w-0">
               {getFileIcon(selectedFile.name)}
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-[#20242c] truncate">{selectedFile.name}</p>
-                <p className="text-[11.5px] text-[#8a8677]">
+                <p className="text-[13px] font-medium text-foreground truncate">{selectedFile.name}</p>
+                <p className="text-[11.5px] text-muted-foreground">
                   {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                 </p>
               </div>
             </div>
             <button
               onClick={() => setSelectedFile(null)}
-              className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
+              className="p-1.5 rounded-sm hover:bg-card-hover transition-colors"
               disabled={uploading}
             >
-              <X className="w-4 h-4 text-[#8a8677]" />
+              <X className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
 
@@ -331,7 +331,7 @@ const FileUpload = ({
           {!uploading && (
             <button
               onClick={uploadFile}
-              className="w-full mt-3 px-4 py-[7px] bg-[#5a7d52] hover:bg-[#4f7047] rounded-sm text-[#faf7ef] text-[13px] font-semibold transition-colors duration-150 flex items-center justify-center gap-2"
+              className="w-full mt-3 px-4 py-[7px] bg-primary hover:bg-[#4f7047] rounded-sm text-primary-foreground text-[13px] font-semibold transition-colors duration-150 flex items-center justify-center gap-2 dark:hover:bg-[#7d9970]"
             >
               <Upload className="w-3.5 h-3.5" />
               Subir archivo
@@ -342,12 +342,12 @@ const FileUpload = ({
           {uploading && (
             <div className="mt-3">
               <div className="flex items-center gap-2 mb-2">
-                <Loader className="w-4 h-4 text-[#5a7d52] animate-spin" />
-                <span className="text-[12px] text-[#5d6470]">Subiendo… {uploadProgress}%</span>
+                <Loader className="w-4 h-4 text-primary animate-spin" />
+                <span className="text-[12px] text-muted-foreground">Subiendo… {uploadProgress}%</span>
               </div>
-              <div className="w-full bg-[#e7e0cf] rounded-full h-1.5">
+              <div className="w-full bg-muted rounded-full h-1.5">
                 <div
-                  className="bg-[#5a7d52] h-1.5 rounded-full transition-all duration-300"
+                  className="bg-primary h-1.5 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -358,18 +358,18 @@ const FileUpload = ({
 
       {/* Uploaded File Display */}
       {uploadedFileUrl && (
-        <div className="rounded-md border border-[#5a7d52] bg-[#5a7d52]/10 p-4">
+        <div className="rounded-md border border-primary bg-[#5a7d52]/10 p-4 dark:bg-[#8fae7f]/10">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3 flex-1 min-w-0">
-              <CheckCircle className="w-5 h-5 text-[#5a7d52] flex-shrink-0 mt-0.5" />
+              <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-[#476442] mb-1">Archivo subido correctamente</p>
+                <p className="text-[13px] font-medium text-primary mb-1">Archivo subido correctamente</p>
                 {showPreview && uploadedFileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
                   <div className="mt-2">
                     <img
                       src={uploadedFileUrl}
                       alt="Preview"
-                      className="max-w-full h-auto rounded-md border border-[#ddd5c2] max-h-48 object-contain"
+                      className="max-w-full h-auto rounded-md border border-border max-h-48 object-contain"
                       onError={(e) => {
                         e.target.style.display = 'none';
                       }}
@@ -380,7 +380,7 @@ const FileUpload = ({
                     href={uploadedFileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[12px] text-[#5d6470] hover:text-[#20242c] transition-colors break-all"
+                    className="text-[12px] text-muted-foreground hover:text-foreground transition-colors break-all"
                   >
                     {uploadedFileUrl}
                   </a>
@@ -389,9 +389,9 @@ const FileUpload = ({
             </div>
             <button
               onClick={handleRemoveFile}
-              className="p-1.5 rounded-sm hover:bg-black/5 transition-colors flex-shrink-0"
+              className="p-1.5 rounded-sm hover:bg-card-hover transition-colors flex-shrink-0"
             >
-              <X className="w-4 h-4 text-[#8a8677]" />
+              <X className="w-4 h-4 text-muted-foreground" />
             </button>
           </div>
         </div>
@@ -399,10 +399,10 @@ const FileUpload = ({
 
       {/* Error Message */}
       {error && (
-        <div className="rounded-md border border-[#a04a34] bg-[#a04a34]/5 p-4">
+        <div className="rounded-md border border-destructive bg-[#a04a34]/5 p-4 dark:bg-[#c26a52]/10">
           <div className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-[#a04a34] flex-shrink-0" />
-            <p className="text-[12.5px] text-[#a04a34]">{error}</p>
+            <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
+            <p className="text-[12.5px] text-destructive">{error}</p>
           </div>
         </div>
       )}

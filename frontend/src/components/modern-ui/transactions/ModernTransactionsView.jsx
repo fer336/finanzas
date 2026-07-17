@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Plus, Search, Download, Upload, Edit, Trash2, Eye,
+  Plus, Search, Download, Upload, Edit, Trash2, Eye, EyeOff,
   ChevronLeft, ChevronRight, CalendarDays,
   ChevronDown, Check, RefreshCw,
 } from 'lucide-react';
@@ -99,7 +99,7 @@ const ModernTransactionsView = ({
 }) => {
   const { refresh, isRefreshing } = useRefresh([QUERY_KEYS.transactions, QUERY_KEYS.dashboardStats]);
   const isMobile = useIsMobile();
-  const { formatAmount } = useAmountVisibility();
+  const { isAmountVisible, toggleAmountVisibility, formatAmount } = useAmountVisibility();
 
   const [searchQuery, setSearchQuery]     = useState('');
   const [selectedType, setSelectedType]   = useState('all');
@@ -334,6 +334,18 @@ const ModernTransactionsView = ({
       {onExportCSV && (
         <Button type="button" variant="outline" size="sm" onClick={onExportCSV} title="Exportar CSV">
           <Download className="h-3.5 w-3.5" />
+        </Button>
+      )}
+      {compact && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={toggleAmountVisibility}
+          title={isAmountVisible ? 'Ocultar montos' : 'Mostrar montos'}
+          aria-label={isAmountVisible ? 'Ocultar montos' : 'Mostrar montos'}
+        >
+          {isAmountVisible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
         </Button>
       )}
       {onNewTransaction && (

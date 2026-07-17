@@ -64,8 +64,8 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
   const [loadingCotizaciones, setLoadingCotizaciones] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fieldClassName = 'w-full px-3.5 py-2.5 bg-white border border-[#cfc6ae] rounded-sm text-[13.5px] text-[#20242c] placeholder:text-[#8a8677]/70 focus:outline-none focus:border-[#5a7d52] focus:ring-2 focus:ring-[#5a7d52]/20 transition-colors duration-150';
-  const selectClassName = 'w-full px-3.5 py-2.5 pr-9 bg-white border border-[#cfc6ae] rounded-sm text-[13.5px] text-[#20242c] appearance-none cursor-pointer focus:outline-none focus:border-[#5a7d52] focus:ring-2 focus:ring-[#5a7d52]/20 transition-colors duration-150';
+  const fieldClassName = 'w-full px-3.5 py-2.5 bg-secondary border border-border rounded-sm text-[13.5px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-[#5a7d52]/20 transition-colors duration-150 dark:focus:ring-[#8fae7f]/25';
+  const selectClassName = 'w-full px-3.5 py-2.5 pr-9 bg-secondary border border-border rounded-sm text-[13.5px] text-foreground appearance-none cursor-pointer focus:outline-none focus:border-primary focus:ring-2 focus:ring-[#5a7d52]/20 transition-colors duration-150 dark:focus:ring-[#8fae7f]/25';
 
   // Load data when form opens
   useEffect(() => {
@@ -331,29 +331,29 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
       style={{ background: 'rgba(32,36,44,.56)' }}
       onClick={(event) => event.target === event.currentTarget && handleCancel()}
     >
-      <div className="relative flex h-[92dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-[12px] border border-[#cfc6ae] bg-[#faf7ef] text-[#20242c] md:h-auto md:max-h-[90vh] md:rounded-[12px]">
-        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#ddd5c2] bg-[#faf7ef] px-8 py-5">
+      <div className="relative flex h-[92dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-[12px] border border-border bg-popover text-popover-foreground md:h-auto md:max-h-[90vh] md:rounded-[12px]">
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-popover px-8 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-sm border border-[#ddd5c2] bg-[#f0ead9]">
-              {editingTransaction ? <FileText className="h-5 w-5 text-[#5a7d52]" /> : <Plus className="h-5 w-5 text-[#5a7d52]" />}
+            <div className="flex h-10 w-10 items-center justify-center rounded-sm border border-border bg-muted">
+              {editingTransaction ? <FileText className="h-5 w-5 text-primary" /> : <Plus className="h-5 w-5 text-primary" />}
             </div>
-            <h2 className="font-serif text-[20px] font-bold text-[#20242c]">
+            <h2 className="font-serif text-[20px] font-bold text-foreground">
               {editingTransaction ? 'Editar transacción' : 'Nueva transacción'}
             </h2>
           </div>
           <button
             onClick={handleCancel}
-            className="rounded-sm p-2 text-[#5d6470] transition-colors duration-150 hover:bg-[#f0ead9] hover:text-[#20242c]"
+            className="rounded-sm p-2 text-muted-foreground transition-colors duration-150 hover:bg-card-hover hover:text-foreground"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="flex-1 space-y-8 overflow-y-auto bg-[#faf7ef] px-8 py-7 text-[#20242c]">
+        <div className="flex-1 space-y-8 overflow-y-auto bg-popover px-8 py-7 text-popover-foreground">
           <section className="space-y-4">
             <div className="mb-2 flex items-center gap-2">
-              <FileText className="h-4 w-4 text-[#5a7d52]" />
-              <h3 className="font-serif text-[17px] font-semibold text-[#20242c]">Información básica</h3>
+              <FileText className="h-4 w-4 text-primary" />
+              <h3 className="font-serif text-[17px] font-semibold text-foreground">Información básica</h3>
             </div>
 
             <div className="flex w-fit gap-2.5">
@@ -362,8 +362,8 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                 onClick={() => setTransactionType('ingreso')}
                 className={`rounded-sm border px-4 py-2 text-[13px] font-medium transition-colors duration-150 ${
                   transactionType === 'ingreso'
-                    ? 'border-[#5a7d52] bg-[#edf3e8] font-semibold text-[#476442]'
-                    : 'border-[#ddd5c2] bg-white text-[#5d6470] hover:bg-[#f0ead9]'
+                    ? 'border-primary bg-[#edf3e8] font-semibold text-primary dark:bg-[#263226]'
+                    : 'border-border bg-secondary text-muted-foreground hover:bg-card-hover'
                 }`}
               >
                 Ingreso
@@ -373,8 +373,8 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                 onClick={() => setTransactionType('gasto')}
                 className={`rounded-sm border px-4 py-2 text-[13px] font-medium transition-colors duration-150 ${
                   transactionType === 'gasto'
-                    ? 'border-[#a04a34] bg-[#fdf6e3] font-semibold text-[#a04a34]'
-                    : 'border-[#ddd5c2] bg-white text-[#5d6470] hover:bg-[#f0ead9]'
+                    ? 'border-destructive bg-accent font-semibold text-destructive'
+                    : 'border-border bg-secondary text-muted-foreground hover:bg-card-hover'
                 }`}
               >
                 Gasto
@@ -382,7 +382,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
             </div>
 
             <div className="grid gap-4">
-              <label className="block text-[12.5px] font-medium text-[#5d6470]">
+              <label className="block text-[12.5px] font-medium text-muted-foreground">
                 <span className="mb-1.5 block">Descripción</span>
                 <input
                   type="text"
@@ -394,7 +394,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                 />
               </label>
 
-              <label className="block text-[12.5px] font-medium text-[#5d6470]">
+              <label className="block text-[12.5px] font-medium text-muted-foreground">
                 <span className="mb-1.5 block">Notas</span>
                 <textarea
                   name="notes"
@@ -410,16 +410,16 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
 
           <section className="space-y-4">
             <div className="mb-2 flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-[#5a7d52]" />
-              <h3 className="font-serif text-[17px] font-semibold text-[#20242c]">Montos y fechas</h3>
+              <DollarSign className="h-4 w-4 text-primary" />
+              <h3 className="font-serif text-[17px] font-semibold text-foreground">Montos y fechas</h3>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[12.5px] font-medium text-[#5d6470]">Monto y moneda</label>
+                <label className="text-[12.5px] font-medium text-muted-foreground">Monto y moneda</label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <span className={`pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[13.5px] font-semibold ${transactionType === 'gasto' ? 'text-[#a04a34]' : 'text-[#476442]'}`}>$</span>
+                    <span className={`pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[13.5px] font-semibold ${transactionType === 'gasto' ? 'text-destructive' : 'text-primary'}`}>$</span>
                     <input
                       type="number"
                       name="amount"
@@ -444,15 +444,15 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                         </option>
                       ))}
                     </select>
-                    <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8a8677]" />
+                    <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   </div>
                 </div>
                 {formData.amount && parseFloat(formData.amount) <= 0 && (
-                  <p className="ml-1 text-[12px] text-[#a04a34]">El monto debe ser mayor que 0</p>
+                  <p className="ml-1 text-[12px] text-destructive">El monto debe ser mayor que 0</p>
                 )}
               </div>
 
-              <label className="block text-[12.5px] font-medium text-[#5d6470]">
+              <label className="block text-[12.5px] font-medium text-muted-foreground">
                 <span className="mb-1.5 block">Fecha</span>
                 <input
                   type="date"
@@ -465,9 +465,9 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
             </div>
 
             {formData.currency === 'USD' && (
-              <div className="space-y-3 rounded-sm border border-[#ddd5c2] bg-white p-4">
-                <div className="flex items-center gap-2 text-[#20242c]">
-                  <DollarSign className="h-4 w-4 text-[#5a7d52]" />
+              <div className="space-y-3 rounded-sm border border-border bg-secondary p-4">
+                <div className="flex items-center gap-2 text-foreground">
+                  <DollarSign className="h-4 w-4 text-primary" />
                   <span className="text-[13px] font-semibold">Conversión USD</span>
                 </div>
                 <div className="relative">
@@ -480,11 +480,11 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                       <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>
                     ))}
                   </select>
-                  <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8a8677]" />
+                  <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 </div>
-                <div className="flex justify-between border-t border-[#e7e0cf] pt-3 font-mono text-[12.5px]">
-                  <span className="text-[#8a8677]">Cotización: ${formData.cotizacionDolar}</span>
-                  <span className="font-semibold text-[#20242c]">ARS: ${parseFloat(formData.montoArs || 0).toLocaleString('es-AR')}</span>
+                <div className="flex justify-between border-t border-muted pt-3 font-mono text-[12.5px]">
+                  <span className="text-muted-foreground">Cotización: ${formData.cotizacionDolar}</span>
+                  <span className="font-semibold text-foreground">ARS: ${parseFloat(formData.montoArs || 0).toLocaleString('es-AR')}</span>
                 </div>
               </div>
             )}
@@ -492,12 +492,12 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
 
           <section className="space-y-4">
             <div className="mb-2 flex items-center gap-2">
-              <Tag className="h-4 w-4 text-[#5a7d52]" />
-              <h3 className="font-serif text-[17px] font-semibold text-[#20242c]">Categorización</h3>
+              <Tag className="h-4 w-4 text-primary" />
+              <h3 className="font-serif text-[17px] font-semibold text-foreground">Categorización</h3>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <label className="block text-[12.5px] font-medium text-[#5d6470]">
+              <label className="block text-[12.5px] font-medium text-muted-foreground">
                 <span className="mb-1.5 block">Categoría</span>
                 <div className="relative">
                   <select
@@ -512,11 +512,11 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                     {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
                     <option value="new">+ Nueva</option>
                   </select>
-                  <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8a8677]" />
+                  <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 </div>
               </label>
 
-              <label className="block text-[12.5px] font-medium text-[#5d6470]">
+              <label className="block text-[12.5px] font-medium text-muted-foreground">
                 <span className="mb-1.5 block">Método de pago</span>
                 <div className="relative">
                   <select
@@ -527,13 +527,13 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                     <option value="">Método</option>
                     {metodosPago.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
                   </select>
-                  <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8a8677]" />
+                  <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 </div>
               </label>
             </div>
 
             {showCreateCategory && (
-              <div className="rounded-sm border border-[#ddd5c2] bg-white p-4">
+              <div className="rounded-sm border border-border bg-secondary p-4">
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -546,14 +546,14 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                   <button
                     type="button"
                     onClick={createQuickCategory}
-                    className="rounded-sm bg-[#5a7d52] px-4 py-2.5 text-[13px] font-semibold text-[#faf7ef] transition-colors duration-150 hover:bg-[#4f7047]"
+                    className="rounded-sm bg-primary px-4 py-2.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] dark:hover:bg-[#7d9970]"
                   >
                     Guardar
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowCreateCategory(false)}
-                    className="rounded-sm border border-[#ddd5c2] bg-white px-4 py-2.5 text-[13px] text-[#20242c] transition-colors duration-150 hover:bg-[#f0ead9]"
+                    className="rounded-sm border border-border bg-secondary px-4 py-2.5 text-[13px] text-foreground transition-colors duration-150 hover:bg-card-hover"
                   >
                     Cancelar
                   </button>
@@ -561,7 +561,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
               </div>
             )}
 
-            <label className="block text-[12.5px] font-medium text-[#5d6470]">
+            <label className="block text-[12.5px] font-medium text-muted-foreground">
               <span className="mb-1.5 block">Objetivo de ahorro (opcional)</span>
               <div className="relative">
                 <select
@@ -576,25 +576,25 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                     </option>
                   ))}
                 </select>
-                <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[#8a8677]" />
+                <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               </div>
             </label>
 
             {formData.objetivo && (
               <div className="space-y-2">
-                <label className="text-[12.5px] font-medium text-[#5d6470]">Cómo afecta al objetivo</label>
+                <label className="text-[12.5px] font-medium text-muted-foreground">Cómo afecta al objetivo</label>
                 <div className="flex w-fit gap-2">
                   <button
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, esAporteObjetivo: true }))}
-                    className={`rounded-sm border px-4 py-1.5 text-[13px] font-medium transition-colors duration-150 ${formData.esAporteObjetivo ? 'border-[#5a7d52] bg-[#edf3e8] font-semibold text-[#476442]' : 'border-[#ddd5c2] bg-white text-[#5d6470] hover:bg-[#f0ead9]'}`}
+                    className={`rounded-sm border px-4 py-1.5 text-[13px] font-medium transition-colors duration-150 ${formData.esAporteObjetivo ? 'border-primary bg-[#edf3e8] font-semibold text-primary dark:bg-[#263226]' : 'border-border bg-secondary text-muted-foreground hover:bg-card-hover'}`}
                   >
                     Aporte
                   </button>
                   <button
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, esAporteObjetivo: false }))}
-                    className={`rounded-sm border px-4 py-1.5 text-[13px] font-medium transition-colors duration-150 ${!formData.esAporteObjetivo ? 'border-[#5a7d52] bg-[#edf3e8] font-semibold text-[#476442]' : 'border-[#ddd5c2] bg-white text-[#5d6470] hover:bg-[#f0ead9]'}`}
+                    className={`rounded-sm border px-4 py-1.5 text-[13px] font-medium transition-colors duration-150 ${!formData.esAporteObjetivo ? 'border-primary bg-[#edf3e8] font-semibold text-primary dark:bg-[#263226]' : 'border-border bg-secondary text-muted-foreground hover:bg-card-hover'}`}
                   >
                     Uso
                   </button>
@@ -603,10 +603,10 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
             )}
 
             {transactionType === 'gasto' && (
-              <div className="flex items-center justify-between rounded-sm border border-[#ddd5c2] bg-white p-4">
+              <div className="flex items-center justify-between rounded-sm border border-border bg-secondary p-4">
                 <div className="flex flex-col">
-                  <span className="text-[13.5px] font-medium text-[#20242c]">Gasto con tarjeta de crédito</span>
-                  <span className="text-[12px] text-[#8a8677]">No descuenta balance hasta pagar el resumen</span>
+                  <span className="text-[13.5px] font-medium text-foreground">Gasto con tarjeta de crédito</span>
+                  <span className="text-[12px] text-muted-foreground">No descuenta balance hasta pagar el resumen</span>
                 </div>
                 <label className="relative inline-flex cursor-pointer items-center">
                   <input
@@ -615,17 +615,17 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                     onChange={(e) => setFormData(prev => ({ ...prev, esCredito: e.target.checked }))}
                     className="peer sr-only"
                   />
-                  <div className="h-6 w-11 rounded-full bg-[#ddd5c2] transition-colors duration-150 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-[#5a7d52] peer-checked:after:translate-x-full" />
+                  <div className="h-6 w-11 rounded-full bg-muted transition-colors duration-150 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-secondary after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full" />
                 </label>
               </div>
             )}
 
             {transactionType === 'gasto' && (
-              <div className="rounded-sm border border-[#ddd5c2] bg-white p-4">
+              <div className="rounded-sm border border-border bg-secondary p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className="text-[13.5px] font-medium text-[#20242c]">Gasto fijo / recurrente</span>
-                    <span className="text-[12px] text-[#8a8677]">Crea el próximo vencimiento en Pagos Pendientes (ej: alquiler, luz, streaming)</span>
+                    <span className="text-[13.5px] font-medium text-foreground">Gasto fijo / recurrente</span>
+                    <span className="text-[12px] text-muted-foreground">Crea el próximo vencimiento en Pagos Pendientes (ej: alquiler, luz, streaming)</span>
                   </div>
                   <label className="relative inline-flex shrink-0 cursor-pointer items-center">
                     <input
@@ -634,13 +634,13 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                       onChange={(e) => setFormData(prev => ({ ...prev, esRecurrente: e.target.checked }))}
                       className="peer sr-only"
                     />
-                    <div className="h-6 w-11 rounded-full bg-[#ddd5c2] transition-colors duration-150 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-[#5a7d52] peer-checked:after:translate-x-full" />
+                    <div className="h-6 w-11 rounded-full bg-muted transition-colors duration-150 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-secondary after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full" />
                   </label>
                 </div>
 
                 {formData.esRecurrente && (
-                  <div className="mt-3 flex items-center gap-2 border-t border-[#e7e0cf] pt-3">
-                    <span className="text-[12.5px] text-[#5d6470]">Frecuencia</span>
+                  <div className="mt-3 flex items-center gap-2 border-t border-muted pt-3">
+                    <span className="text-[12.5px] text-muted-foreground">Frecuencia</span>
                     <div className="flex gap-1.5">
                       {FRECUENCIAS_RECURRENCIA.map((freq) => (
                         <button
@@ -649,8 +649,8 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                           onClick={() => setFormData(prev => ({ ...prev, frecuenciaRecurrente: freq }))}
                           className={`rounded-sm border px-3 py-1 text-[12.5px] font-medium capitalize transition-colors duration-150 ${
                             formData.frecuenciaRecurrente === freq
-                              ? 'border-[#5a7d52] bg-[#edf3e8] font-semibold text-[#476442]'
-                              : 'border-[#ddd5c2] bg-white text-[#5d6470] hover:bg-[#f0ead9]'
+                              ? 'border-primary bg-[#edf3e8] font-semibold text-primary dark:bg-[#263226]'
+                              : 'border-border bg-secondary text-muted-foreground hover:bg-card-hover'
                           }`}
                         >
                           {freq}
@@ -665,8 +665,8 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
 
           <section className="space-y-4 pb-4">
             <div className="mb-2 flex items-center gap-2">
-              <Paperclip className="h-4 w-4 text-[#5a7d52]" />
-              <h3 className="font-serif text-[17px] font-semibold text-[#20242c]">Documentos</h3>
+              <Paperclip className="h-4 w-4 text-primary" />
+              <h3 className="font-serif text-[17px] font-semibold text-foreground">Documentos</h3>
             </div>
 
             <FileUpload
@@ -679,13 +679,13 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
             />
 
             {formData.archivoAdjunto && (
-              <div className="space-y-3 rounded-sm border border-[#ddd5c2] bg-white p-4">
+              <div className="space-y-3 rounded-sm border border-border bg-secondary p-4">
                 <div className="flex items-center gap-4">
                   <a
                     href={formData.archivoAdjunto}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 rounded-sm border border-[#ddd5c2] bg-white px-4 py-2 text-[13px] font-medium text-[#20242c] transition-colors duration-150 hover:bg-[#f0ead9]"
+                    className="flex items-center gap-2 rounded-sm border border-border bg-secondary px-4 py-2 text-[13px] font-medium text-foreground transition-colors duration-150 hover:bg-card-hover"
                   >
                     <Eye size={16} />
                     Ver comprobante
@@ -693,7 +693,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                 </div>
 
                 {(formData.archivoAdjunto.match(/\.(jpg|jpeg|png|gif|webp)$/i)) && (
-                  <div className="relative aspect-video w-full overflow-hidden rounded-sm bg-[#f4f0e6]">
+                  <div className="relative aspect-video w-full overflow-hidden rounded-sm bg-background">
                     <img
                       src={formData.archivoAdjunto}
                       alt="Comprobante"
@@ -703,7 +703,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                         e.target.nextSibling.style.display = 'flex';
                       }}
                     />
-                    <div className="hidden h-full w-full items-center justify-center text-[#8a8677]">
+                    <div className="hidden h-full w-full items-center justify-center text-muted-foreground">
                       <FileText size={28} />
                     </div>
                   </div>
@@ -714,7 +714,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                     href={formData.archivoAdjunto}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-[13px] font-medium text-[#476442] transition-colors duration-150 hover:text-[#4f7047]"
+                    className="flex items-center gap-2 text-[13px] font-medium text-primary transition-colors duration-150 hover:opacity-80"
                   >
                     <ExternalLink size={16} />
                     Ver PDF adjunto
@@ -725,17 +725,17 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
           </section>
         </div>
 
-        <div className="sticky bottom-0 z-20 flex items-center justify-end gap-3 border-t border-[#ddd5c2] bg-[#f4f0e6] px-8 py-5">
+        <div className="sticky bottom-0 z-20 flex items-center justify-end gap-3 border-t border-border bg-background px-8 py-5">
           <button
             onClick={handleCancel}
-            className="rounded-sm border border-[#cfc6ae] bg-white px-[15px] py-[8px] text-[13px] font-medium text-[#5d6470] transition-colors duration-150 hover:bg-[#f0ead9] hover:text-[#20242c]"
+            className="rounded-sm border border-border bg-secondary px-[15px] py-[8px] text-[13px] font-medium text-muted-foreground transition-colors duration-150 hover:bg-card-hover hover:text-foreground"
           >
             Cancelar
           </button>
           <button
             onClick={handleSubmit}
             disabled={loading || isSubmitting || !formData.description.trim() || !formData.amount}
-            className="flex items-center gap-2 rounded-sm bg-[#5a7d52] px-[18px] py-[8px] text-[13px] font-semibold text-[#faf7ef] transition-colors duration-150 hover:bg-[#4f7047] disabled:cursor-not-allowed disabled:bg-[#b8c4ad] disabled:text-[#f4f0e6]"
+            className="flex items-center gap-2 rounded-sm bg-primary px-[18px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-[#7d9970]"
           >
             {loading || isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save size={16} />}
             {editingTransaction ? 'Guardar cambios' : 'Registrar'}

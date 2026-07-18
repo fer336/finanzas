@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildDocumentUrlPolicy,
+  extractDocumentUrlCandidates,
   getDocumentFileType,
   normalizeDocumentPreviewUrl,
+  normalizePaymentDocument,
 } from './documentPreviewUrl';
 
 const productionPolicy = buildDocumentUrlPolicy({
@@ -105,5 +107,103 @@ describe('getDocumentFileType', () => {
     expect(getDocumentFileType('https://s3.qeva.xyz/facturas/invoice.pdf')).toBe('pdf');
     expect(getDocumentFileType('https://s3.qeva.xyz/facturas/receipt.png?download=1')).toBe('image');
     expect(getDocumentFileType('https://s3.qeva.xyz/facturas/archive.zip')).toBe('unsupported');
+  });
+});
+
+describe('pending payment document extraction', () => {
+  it('uses the first valid candidate instead of letting invalid url_pdf mask comprobante', () => {
+    const result = normalizePaymentDocument({
+      url_pdf: 'https://evil.example/invoice.pdf',
+      comprobante: 'https://s3.qeva.xyz/facturas/comprobantes/receipt.pdf',
+    }, productionPolicy);
+
+    expect(result).toMatchObject({
+      isValid: true,
+      href: 'https://s3.qeva.xyz/facturas/comprobantes/receipt.pdf',
+      sourceField: 'comprobante',
+    });
+  });
+
+  it('skips empty url_pdf and opens a later valid comprobante', () => {
+    expect(normalizePaymentDocument({
+      url_pdf: '',
+      comprobante: 'https://s3.qeva.xyz/facturas/comprobantes/receipt.webp',
+    }, productionPolicy)).toMatchObject({
+      isValid: true,
+      href: 'https://s3.qeva.xyz/facturas/comprobantes/receipt.webp',
+      sourceField: 'comprobante',
+    });
+  });
+
+  it('supports the urlPdf alias', () => {
+    expect(normalizePaymentDocument({
+      urlPdf: 'https://s3.qeva.xyz/facturas/invoice.pdf',
+    }, productionPolicy)).toMatchObject({
+      isValid: true,
+      href: 'https://s3.qeva.xyz/facturas/invoice.pdf',
+      sourceField: 'urlPdf',
+    });
+  });
+
+  it.each([
+    ['top-level file_url wrapper', { url_pdf: { file_url: 'https://s3.qeva.xyz/facturas/wrapped.pdf' } }],
+    ['top-level url wrapper', { url_pdf: { url: 'https://s3.qeva.xyz/facturas/wrapped.pdf' } }],
+    ['data.file_url wrapper', { url_pdf: { data: { file_url: 'https://s3.qeva.xyz/facturas/wrapped.pdf' } } }],
+    ['data.url wrapper', { url_pdf: { data: { url: 'https://s3.qeva.xyz/facturas/wrapped.pdf' } } }],
+    ['JSON-encoded wrapper', { url_pdf: JSON.stringify({ data: { file_url: 'https://s3.qeva.xyz/facturas/wrapped.pdf' } }) }],
+    ['JSON-encoded string', { url_pdf: JSON.stringify('https://s3.qeva.xyz/facturas/wrapped.pdf') }],
+  ])('extracts safe known wrapper shape: %s', (_label, payment) => {
+    expect(normalizePaymentDocument(payment, productionPolicy)).toMatchObject({
+      isValid: true,
+      href: 'https://s3.qeva.xyz/facturas/wrapped.pdf',
+    });
+  });
+
+  it('rejects malicious URLs inside otherwise known wrappers', () => {
+    expect(normalizePaymentDocument({
+      comprobante: { file_url: 'javascript:alert(1)' },
+    }, productionPolicy)).toMatchObject({
+      isValid: false,
+      reason: 'unsafe-protocol',
+      sourceField: 'comprobante',
+    });
+  });
+
+  it('does not accept arbitrary object keys or arrays as document URL sources', () => {
+    expect(extractDocumentUrlCandidates({ url_pdf: { href: 'https://s3.qeva.xyz/facturas/hidden.pdf' } })).toEqual([]);
+    expect(extractDocumentUrlCandidates({ comprobante: ['https://s3.qeva.xyz/facturas/hidden.pdf'] })).toEqual([]);
+  });
+
+  it('bounds JSON parsing and falls back to the next valid candidate', () => {
+    const oversizedJson = `${JSON.stringify({ file_url: 'https://s3.qeva.xyz/facturas/oversized.pdf' })}${'x'.repeat(5000)}`;
+
+    expect(normalizePaymentDocument({
+      url_pdf: oversizedJson,
+      comprobante: 'https://s3.qeva.xyz/facturas/fallback.pdf',
+    }, productionPolicy)).toMatchObject({
+      isValid: true,
+      href: 'https://s3.qeva.xyz/facturas/fallback.pdf',
+      sourceField: 'comprobante',
+    });
+  });
+
+  it('returns the first meaningful invalid result when all candidates are invalid', () => {
+    expect(normalizePaymentDocument({
+      url_pdf: 'https://evil.example/invoice.pdf',
+      comprobante: 'javascript:alert(1)',
+    }, productionPolicy)).toMatchObject({
+      isValid: false,
+      reason: 'origin-not-allowed',
+      rawUrl: 'https://evil.example/invoice.pdf',
+      sourceField: 'url_pdf',
+    });
+  });
+
+  it('returns the standard empty result when there are no meaningful candidates', () => {
+    expect(normalizePaymentDocument({ url_pdf: '', comprobante: null }, productionPolicy)).toMatchObject({
+      isValid: false,
+      reason: 'empty',
+      rawUrl: '',
+    });
   });
 });

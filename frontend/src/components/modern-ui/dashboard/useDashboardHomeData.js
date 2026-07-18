@@ -1,4 +1,13 @@
 import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
+import {
+  PENDING_PAYMENT_STATUS,
+  compareLocalDateOnly,
+  derivePendingPaymentStatus,
+  formatLocalDateDisplay,
+  getSecondDueDateValue,
+  normalizePendingPaymentDueDates,
+  parseLocalDateOnly,
+} from '../../../utils/pendingPaymentStatus';
 
 /**
  * Derivación de datos para la vista "Inicio" (tema Kanagawa), compartida entre
@@ -232,11 +241,24 @@ export function useDashboardHomeData({
     .map((p) => {
       const estado = (p.estado ?? p.Estado ?? 'pendiente').toString().toLowerCase();
       const fechaVencimiento = p.fecha_vencimiento ?? p.FechaVencimiento ?? p.fechavencimiento ?? p.Fechavencimiento ?? null;
+      const { firstDueDate, secondDueDate } = normalizePendingPaymentDueDates({
+        ...p,
+        fechavencimiento: fechaVencimiento,
+        segunda_fecha_vencimiento: getSecondDueDateValue(p),
+      });
+      const temporalStatus = derivePendingPaymentStatus({
+        ...p,
+        estado,
+        fechavencimiento: firstDueDate,
+        segunda_fecha_vencimiento: secondDueDate,
+      });
       return {
         id: p.id ?? p.Id,
         nombre: p.nombre || p.Nombre || p.descripcion || p.Descripcion || 'Sin nombre',
         monto: parseFloat(p.monto ?? p.Monto ?? 0),
-        fechaVencimiento,
+        fechaVencimiento: firstDueDate,
+        segundaFechaVencimiento: secondDueDate,
+        temporalStatus,
         pagado: estado === 'pagado' || estado === 'true' || p.pagada === true,
       };
     })
@@ -245,13 +267,14 @@ export function useDashboardHomeData({
   const totalPendiente = pendientesActivos.reduce((sum, p) => sum + p.monto, 0);
 
   const proximoVencimiento = pendientesActivos
+    .filter((p) => p.temporalStatus === PENDING_PAYMENT_STATUS.PENDING)
     .filter((p) => p.fechaVencimiento && p.fechaVencimiento !== 'a confirmar')
-    .map((p) => ({ ...p, fechaObj: new Date(p.fechaVencimiento) }))
-    .filter((p) => !Number.isNaN(p.fechaObj.getTime()))
-    .sort((a, b) => a.fechaObj - b.fechaObj)[0];
+    .map((p) => ({ ...p, fechaObj: parseLocalDateOnly(p.fechaVencimiento) }))
+    .filter((p) => p.fechaObj)
+    .sort((a, b) => compareLocalDateOnly(a.fechaVencimiento, b.fechaVencimiento))[0];
 
   const proximoVencimientoLabel = proximoVencimiento
-    ? proximoVencimiento.fechaObj.toLocaleDateString('es-AR', { day: 'numeric', month: 'long' })
+    ? formatLocalDateDisplay(proximoVencimiento.fechaVencimiento, 'es-AR', { day: 'numeric', month: 'long' })
     : null;
 
   // ── Aviso préstamos ───────────────────────────────────────────────────────

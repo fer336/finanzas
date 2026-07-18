@@ -17,7 +17,17 @@ import {
   AlertCircle,
   File
 } from 'lucide-react';
-import { normalizeDocumentPreviewUrl } from '../../../utils/documentPreviewUrl';
+import {
+  normalizeDocumentFromFields,
+  normalizeDocumentPreviewUrl,
+  PENDING_PAYMENT_INVOICE_FIELDS,
+  PENDING_PAYMENT_RECEIPT_FIELDS,
+} from '../../../utils/documentPreviewUrl';
+import {
+  formatLocalDateOnly,
+  getSecondDueDateValue,
+  validateSecondDueDateAfterFirst,
+} from '../../../utils/pendingPaymentStatus';
 
 const labelClassName = 'text-[12.5px] font-medium text-foreground';
 const helperClassName = 'text-[11.5px] text-muted-foreground';
@@ -26,6 +36,14 @@ const selectedPillClassName = 'border-primary bg-primary-surface font-semibold t
 const inactivePillClassName = 'border-border bg-secondary text-muted-foreground hover:bg-card-hover hover:text-foreground';
 const secondaryButtonClassName = 'rounded-sm border border-border bg-secondary text-foreground transition-colors duration-150 hover:bg-card-hover hover:text-foreground disabled:opacity-50';
 const primaryButtonClassName = 'bg-primary text-primary-foreground hover:bg-primary-hover active:bg-primary-active disabled:opacity-50';
+
+const getDocumentFieldValue = (payment, fields) => {
+  const normalized = normalizeDocumentFromFields(payment, fields);
+  if (normalized.isValid) return normalized.href;
+  return normalized.rawUrl || '';
+};
+
+const getTodayInputValue = () => formatLocalDateOnly(new Date());
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FileUploadField — upload de archivos a MinIO con preview + URL manual
@@ -351,7 +369,8 @@ const StitchPendingPaymentModal = ({
     Descripcion: '',
     Monto: '',
     Moneda: 'ARS',
-    Fechavencimiento: new Date().toISOString().split('T')[0],
+    Fechavencimiento: getTodayInputValue(),
+    segunda_fecha_vencimiento: '',
     fecha_emision: '',
     Estado: 'pendiente',
     Tipo: 'factura',
@@ -372,23 +391,31 @@ const StitchPendingPaymentModal = ({
     monto: 'pending-payment-amount',
     moneda: 'pending-payment-currency',
     vencimiento: 'pending-payment-due-date',
+    segundoVencimiento: 'pending-payment-second-due-date',
+    segundoVencimientoError: 'pending-payment-second-due-date-error',
     categoria: 'pending-payment-category',
     metodoPago: 'pending-payment-method',
   };
 
   const [saving, setSaving] = useState(false);
+  const [dateError, setDateError] = useState('');
 
   // Cargar datos si es edición
   useEffect(() => {
     if (payment && isOpen) {
       console.log('📝 Cargando pago para editar:', payment);
 
+      const invoiceUrl = getDocumentFieldValue(payment, PENDING_PAYMENT_INVOICE_FIELDS);
+      const receiptUrl = getDocumentFieldValue(payment, PENDING_PAYMENT_RECEIPT_FIELDS);
+      const secondDueDate = getSecondDueDateValue(payment);
+
       setFormData({
         Nombre: payment.Nombre || payment.nombre || '',
         Descripcion: payment.Descripcion || payment.descripcion || '',
         Monto: payment.Monto || payment.monto || '',
         Moneda: payment.Moneda || payment.moneda || 'ARS',
-        Fechavencimiento: (payment.Fechavencimiento || payment.fechavencimiento || payment.fechaVencimiento || payment.fecha_vencimiento || '').split('T')[0] || new Date().toISOString().split('T')[0],
+        Fechavencimiento: formatLocalDateOnly(payment.Fechavencimiento || payment.fechavencimiento || payment.fechaVencimiento || payment.fecha_vencimiento) || getTodayInputValue(),
+        segunda_fecha_vencimiento: formatLocalDateOnly(secondDueDate),
         fecha_emision: (payment.fecha_emision || '').split('T')[0] || '',
         Estado: payment.Estado || payment.estado || 'pendiente',
         Tipo: payment.Tipo || payment.tipo || 'factura',
@@ -396,12 +423,35 @@ const StitchPendingPaymentModal = ({
         Recurrente: payment.Recurrente || payment.recurrente || false,
         FrecuenciaRecurrencia: payment.FrecuenciaRecurrencia || payment.frecuencia_recurrencia || '',
         num_factura: payment.num_factura || payment.NumFactura || '',
-        url_pdf: payment.url_pdf || payment.UrlPdf || '',
-        comprobante: payment.comprobante || payment.Comprobante || '',
+        url_pdf: invoiceUrl,
+        comprobante: receiptUrl,
         categorias_id: payment.categorias_id || payment.categoria_id || '',
         metodos_pago_id: payment.metodos_pago_id || payment.metodo_pago_id || '',
         Notas: payment.Notas || payment.notas || ''
       });
+      setDateError('');
+    } else if (isOpen) {
+      setFormData({
+        Nombre: '',
+        Descripcion: '',
+        Monto: '',
+        Moneda: 'ARS',
+        Fechavencimiento: getTodayInputValue(),
+        segunda_fecha_vencimiento: '',
+        fecha_emision: '',
+        Estado: 'pendiente',
+        Tipo: 'factura',
+        Prioridad: 'media',
+        Recurrente: false,
+        FrecuenciaRecurrencia: '',
+        num_factura: '',
+        url_pdf: '',
+        comprobante: '',
+        categorias_id: '',
+        metodos_pago_id: '',
+        Notas: ''
+      });
+      setDateError('');
     }
   }, [payment, isOpen]);
 
@@ -419,6 +469,13 @@ const StitchPendingPaymentModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateSecondDueDateAfterFirst(formData.Fechavencimiento, formData.segunda_fecha_vencimiento)) {
+      setDateError('El segundo vencimiento debe ser posterior al primer vencimiento.');
+      return;
+    }
+
+    setDateError('');
     setSaving(true);
 
     try {
@@ -440,6 +497,10 @@ const StitchPendingPaymentModal = ({
           cleanedData[field] = null;
         }
       });
+
+      if (cleanedData.segunda_fecha_vencimiento === '' || cleanedData.segunda_fecha_vencimiento === undefined) {
+        cleanedData.segunda_fecha_vencimiento = null;
+      }
 
       // Campos numéricos
       if (cleanedData.interes === '' || cleanedData.interes === undefined) {
@@ -586,18 +647,49 @@ const StitchPendingPaymentModal = ({
                   </select>
                 </div>
 
-                {/* Fecha de Vencimiento */}
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor={formIds.vencimiento} className={labelClassName}>Fecha de vencimiento</label>
-                  <input
-                    id={formIds.vencimiento}
-                    type="date"
-                    value={formData.Fechavencimiento}
-                    onChange={(e) => setFormData({...formData, Fechavencimiento: e.target.value})}
-                    className={`${inputClassName} font-mono text-[13px]`}
-                    required
-                  />
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor={formIds.vencimiento} className={labelClassName}>Primer vencimiento</label>
+                    <input
+                      id={formIds.vencimiento}
+                      type="date"
+                      value={formData.Fechavencimiento}
+                      onChange={(e) => {
+                        const next = { ...formData, Fechavencimiento: e.target.value };
+                        setFormData(next);
+                        if (validateSecondDueDateAfterFirst(e.target.value, next.segunda_fecha_vencimiento)) setDateError('');
+                      }}
+                      className={`${inputClassName} font-mono text-[13px]`}
+                      required
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor={formIds.segundoVencimiento} className={labelClassName}>Segundo vencimiento</label>
+                    <input
+                      id={formIds.segundoVencimiento}
+                      type="date"
+                      value={formData.segunda_fecha_vencimiento}
+                      onChange={(e) => {
+                        const nextValue = e.target.value;
+                        setFormData({ ...formData, segunda_fecha_vencimiento: nextValue });
+                        setDateError(validateSecondDueDateAfterFirst(formData.Fechavencimiento, nextValue)
+                          ? ''
+                          : 'El segundo vencimiento debe ser posterior al primer vencimiento.');
+                      }}
+                      aria-invalid={Boolean(dateError)}
+                      aria-describedby={dateError ? formIds.segundoVencimientoError : undefined}
+                      className={`${inputClassName} font-mono text-[13px] ${dateError ? 'border-destructive focus:border-destructive focus:ring-destructive/30' : ''}`}
+                    />
+                    <span className={helperClassName}>Opcional. Marca el límite antes de pasar a vencido.</span>
+                  </div>
                 </div>
+                {dateError && (
+                  <p id={formIds.segundoVencimientoError} className="flex items-center gap-1.5 text-[12px] text-destructive" role="alert">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    {dateError}
+                  </p>
+                )}
               </div>
             </section>
 
@@ -835,7 +927,7 @@ const StitchPendingPaymentModal = ({
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={saving}
+              disabled={saving || Boolean(dateError)}
               className={`flex items-center gap-2 rounded-sm px-5 py-2.5 text-[13.5px] font-semibold transition-colors duration-150 ${primaryButtonClassName}`}
             >
               <Save className="h-4 w-4" />
@@ -846,7 +938,7 @@ const StitchPendingPaymentModal = ({
       </div>
 
       {/* Custom Scrollbar Styles */}
-      <style jsx>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }

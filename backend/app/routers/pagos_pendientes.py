@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from sqlalchemy.orm import Session
 from typing import Optional, Dict, Any
 from uuid import UUID
+from datetime import date, datetime
 import logging
 
 from app.database import get_db
@@ -13,6 +14,66 @@ from app.core.dependencies import CurrentUser
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+FIRST_DUE_DATE_ALIASES = (
+    'Fechavencimiento',
+    'FechaVencimiento',
+    'fecha_vencimiento',
+    'fechaVencimiento',
+)
+SECOND_DUE_DATE_ALIASES = (
+    'segunda_fecha_vencimiento',
+    'segundaFechaVencimiento',
+    'SegundaFechaVencimiento',
+    'fecha_segundo_vencimiento',
+    'fechasegundovencimiento',
+)
+
+
+def _parse_date_only(value: Any, field_name: str) -> Optional[date]:
+    if value in (None, ''):
+        return None
+    if isinstance(value, date) and not isinstance(value, datetime):
+        return value
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, str):
+        try:
+            return date.fromisoformat(value[:10])
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=f"{field_name} debe tener formato YYYY-MM-DD") from exc
+    raise HTTPException(status_code=400, detail=f"{field_name} debe tener formato YYYY-MM-DD")
+
+
+def _normalize_due_date_aliases(pago_data: Dict[str, Any]) -> None:
+    for alias in FIRST_DUE_DATE_ALIASES:
+        if alias in pago_data and 'fechavencimiento' not in pago_data:
+            pago_data['fechavencimiento'] = pago_data.pop(alias)
+        else:
+            pago_data.pop(alias, None)
+
+    for alias in SECOND_DUE_DATE_ALIASES:
+        if alias in pago_data and alias != 'segunda_fecha_vencimiento':
+            if 'segunda_fecha_vencimiento' not in pago_data:
+                pago_data['segunda_fecha_vencimiento'] = pago_data.pop(alias)
+            else:
+                pago_data.pop(alias, None)
+
+    if 'fechavencimiento' in pago_data:
+        pago_data['fechavencimiento'] = _parse_date_only(pago_data['fechavencimiento'], 'fechavencimiento')
+    if 'segunda_fecha_vencimiento' in pago_data:
+        pago_data['segunda_fecha_vencimiento'] = _parse_date_only(
+            pago_data['segunda_fecha_vencimiento'],
+            'segunda_fecha_vencimiento',
+        )
+
+
+def _validate_second_due_date_after_first(first_due_date: Optional[date], second_due_date: Optional[date]) -> None:
+    if first_due_date and second_due_date and second_due_date <= first_due_date:
+        raise HTTPException(
+            status_code=400,
+            detail='segunda_fecha_vencimiento debe ser posterior a fechavencimiento',
+        )
 
 
 @router.get("/")
@@ -79,11 +140,14 @@ async def create_pending_payment(
             "paid": "pagado",
             "pending": "pendiente",
             "overdue": "vencido",
+            "in_arrears": "en_mora",
             "cancelled": "cancelado",
             "Pendiente": "pendiente",
             "Pagado": "pagado",
-            "Vencido": "vencido"
+            "Vencido": "vencido",
+            "En mora": "en_mora"
         }
+        _normalize_due_date_aliases(pago_data)
         
         # Remove invalid fields (capitalized versions)
         invalid_fields = ['Estado', 'Nombre', 'Descripcion', 'Monto', 'Moneda', 'Fechavencimiento',
@@ -98,6 +162,9 @@ async def create_pending_payment(
             pago_data['recurrente'] = pago_data.pop('Recurrente')
         if 'FrecuenciaRecurrencia' in pago_data:
             pago_data['frecuencia_recurrencia'] = pago_data.pop('FrecuenciaRecurrencia') or None
+
+        if 'frecuenciarecurrencia' in pago_data and 'frecuencia_recurrencia' not in pago_data:
+            pago_data['frecuencia_recurrencia'] = pago_data.pop('frecuenciarecurrencia') or None
 
         # Si viene 'estado' en español con mayúscula, normalizarlo
         if 'estado' in pago_data:
@@ -114,10 +181,16 @@ async def create_pending_payment(
         # Forzar el usuario_id del token
         pago_data['usuario_id'] = current_user.id
 
+        _validate_second_due_date_after_first(
+            pago_data.get('fechavencimiento'),
+            pago_data.get('segunda_fecha_vencimiento'),
+        )
+
         logger.info(f"📝 Creating pago pendiente for user {current_user.id}")
         nuevo_pago = repo.create(pago_data)
         return nuevo_pago
-        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"❌ Error creating pago pendiente: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error creando pago pendiente: {str(e)}")
@@ -144,8 +217,10 @@ async def update_pending_payment(
             "paid": "pagado",
             "pending": "pendiente",
             "overdue": "vencido",
+            "in_arrears": "en_mora",
             "cancelled": "cancelado"
         }
+        _normalize_due_date_aliases(pago_data)
         
         # Si viene 'status' en inglés, convertir a 'estado' en español
         if 'status' in pago_data:
@@ -163,6 +238,9 @@ async def update_pending_payment(
         if 'FrecuenciaRecurrencia' in pago_data:
             pago_data['frecuencia_recurrencia'] = pago_data.pop('FrecuenciaRecurrencia') or None
 
+        if 'frecuenciarecurrencia' in pago_data and 'frecuencia_recurrencia' not in pago_data:
+            pago_data['frecuencia_recurrencia'] = pago_data.pop('frecuenciarecurrencia') or None
+
         # Convert string IDs to UUID
         if pago_data.get('categorias_id'):
             pago_data['categorias_id'] = UUID(pago_data['categorias_id'])
@@ -171,6 +249,10 @@ async def update_pending_payment(
 
         # No permitir cambiar el usuario_id
         pago_data.pop('usuario_id', None)
+
+        first_due_date = pago_data['fechavencimiento'] if 'fechavencimiento' in pago_data else _parse_date_only(pago_existente.get('fechavencimiento'), 'fechavencimiento')
+        second_due_date = pago_data['segunda_fecha_vencimiento'] if 'segunda_fecha_vencimiento' in pago_data else _parse_date_only(pago_existente.get('segunda_fecha_vencimiento'), 'segunda_fecha_vencimiento')
+        _validate_second_due_date_after_first(first_due_date, second_due_date)
         
         logger.info(f"📝 Updating payment {pago_id} for user {current_user.id}")
         pago_actualizado = repo.update(UUID(pago_id), pago_data)

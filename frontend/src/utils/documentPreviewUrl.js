@@ -5,6 +5,31 @@ const REJECTED_PROTOCOLS = new Set(['javascript:', 'data:', 'blob:', 'file:']);
 const KNOWN_S3_ORIGIN = 'https://s3.qeva.xyz';
 const KNOWN_S3_HOSTNAME = 's3.qeva.xyz';
 const KNOWN_S3_BUCKET_PREFIX = '/facturas/';
+const MAX_WRAPPED_DOCUMENT_JSON_LENGTH = 4096;
+const MAX_WRAPPED_DOCUMENT_PARSE_DEPTH = 3;
+
+export const PENDING_PAYMENT_DOCUMENT_FIELDS = [
+  'url_pdf',
+  'UrlPdf',
+  'urlPdf',
+  'comprobante',
+  'Comprobante',
+  'archivo_adjunto',
+  'ArchivoAdjunto',
+];
+
+export const PENDING_PAYMENT_INVOICE_FIELDS = [
+  'url_pdf',
+  'UrlPdf',
+  'urlPdf',
+  'archivo_adjunto',
+  'ArchivoAdjunto',
+];
+
+export const PENDING_PAYMENT_RECEIPT_FIELDS = [
+  'comprobante',
+  'Comprobante',
+];
 
 const getEnv = () => {
   try {
@@ -322,9 +347,89 @@ export const normalizeDocumentPreviewUrl = (rawUrl, policy = buildDocumentUrlPol
   };
 };
 
+const isPlainObject = (value) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+};
+
+const parseBoundedDocumentJson = (value) => {
+  if (typeof value !== 'string') return { parsed: false };
+  const input = value.trim();
+  if (!input || input.length > MAX_WRAPPED_DOCUMENT_JSON_LENGTH) return { parsed: false };
+  if (!['{', '"'].includes(input[0])) return { parsed: false };
+
+  try {
+    return { parsed: true, value: JSON.parse(input) };
+  } catch {
+    return { parsed: false };
+  }
+};
+
+const extractDocumentUrlStringsFromKnownShape = (value, depth = 0) => {
+  if (depth > MAX_WRAPPED_DOCUMENT_PARSE_DEPTH) return [];
+
+  if (typeof value === 'string') {
+    const input = value.trim();
+    if (!input) return [];
+
+    const parsedJson = parseBoundedDocumentJson(input);
+    if (!parsedJson.parsed) return [input];
+
+    return extractDocumentUrlStringsFromKnownShape(parsedJson.value, depth + 1);
+  }
+
+  if (!isPlainObject(value)) return [];
+
+  const candidates = [];
+  if (typeof value.file_url === 'string') candidates.push(value.file_url);
+  if (typeof value.url === 'string') candidates.push(value.url);
+
+  if (isPlainObject(value.data)) {
+    if (typeof value.data.file_url === 'string') candidates.push(value.data.file_url);
+    if (typeof value.data.url === 'string') candidates.push(value.data.url);
+  }
+
+  return candidates.flatMap((candidate) => extractDocumentUrlStringsFromKnownShape(candidate, depth + 1));
+};
+
+export const extractDocumentUrlCandidates = (source, fields = PENDING_PAYMENT_DOCUMENT_FIELDS) => {
+  if (!source || typeof source !== 'object') return [];
+
+  const candidates = [];
+  for (const field of fields) {
+    if (!Object.prototype.hasOwnProperty.call(source, field)) continue;
+
+    const extracted = extractDocumentUrlStringsFromKnownShape(source[field]);
+    for (const url of extracted) {
+      const trimmed = typeof url === 'string' ? url.trim() : '';
+      if (trimmed) candidates.push({ url: trimmed, sourceField: field });
+    }
+  }
+
+  return candidates;
+};
+
+export const normalizeDocumentFromFields = (
+  source,
+  fields = PENDING_PAYMENT_DOCUMENT_FIELDS,
+  policy = buildDocumentUrlPolicy(),
+) => {
+  const candidates = extractDocumentUrlCandidates(source, fields);
+  let firstInvalid = null;
+
+  for (const candidate of candidates) {
+    const normalized = normalizeDocumentPreviewUrl(candidate.url, policy);
+    const result = { ...normalized, sourceField: candidate.sourceField };
+    if (result.isValid) return result;
+    if (!firstInvalid) firstInvalid = result;
+  }
+
+  return firstInvalid || normalizeDocumentPreviewUrl('', policy);
+};
+
 export const normalizePaymentDocument = (payment, policy) => {
-  const candidate = payment?.url_pdf ?? payment?.UrlPdf ?? payment?.comprobante ?? payment?.Comprobante ?? '';
-  return normalizeDocumentPreviewUrl(candidate, policy);
+  return normalizeDocumentFromFields(payment, PENDING_PAYMENT_DOCUMENT_FIELDS, policy);
 };
 
 export { IMAGE_EXTENSION_PATTERN, PDF_EXTENSION_PATTERN };

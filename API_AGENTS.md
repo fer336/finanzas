@@ -2,12 +2,14 @@
 
 Este documento es para un agente/script externo que quiere leer o cargar datos en Sistema de Gastos vía API — no para agentes que desarrollan sobre este repo.
 
+> La URL real de tu instancia (`<tu-dominio>` en todos los ejemplos de abajo) es información de despliegue, no de este repo — no la commitees acá. Reemplazala a mano en tu copia local o pasásela al agente por variable de entorno.
+
 ## Lo más confiable: pasale el schema, no el navegador
 
 Un agente no puede "ver" Swagger UI (`/docs`) — es una página que renderiza con JavaScript. Dale directamente el schema OpenAPI crudo:
 
 ```
-https://finanzas.qeva.xyz/openapi.json
+https://<tu-dominio>/openapi.json
 ```
 
 Eso solo alcanza para saber qué endpoints existen y qué forma tienen. Lo que sigue acá abajo son las reglas de negocio que el schema *no* explica.
@@ -15,14 +17,14 @@ Eso solo alcanza para saber qué endpoints existen y qué forma tienen. Lo que s
 ## Autenticación
 
 ```bash
-curl https://finanzas.qeva.xyz/api/v1/categories/ -H "Authorization: Bearer fk_live_..."
+curl https://<tu-dominio>/api/v1/categories/ -H "Authorization: Bearer fk_live_..."
 ```
 
 La API key (`fk_live_...`) se genera desde la web: Ajustes → General → "Acceso API externo". No expira salvo que se revoque. No hay forma de generarla por API — requiere un JWT humano ya logueado.
 
 ## Base URL y convenciones
 
-- Base: `https://finanzas.qeva.xyz/api/v1`
+- Base: `https://<tu-dominio>/api/v1`
 - Todas las rutas CRUD siguen `GET /`, `GET /{id}`, `POST /`, `PATCH /{id}`, `DELETE /{id}`.
 - IDs son UUID.
 - Rutas sin trailing slash devuelven un 307 redirect al mismo path con `/` — mandá el trailing slash directamente para evitar el round-trip extra (ej. `/api/v1/categories/`, no `/api/v1/categories`).

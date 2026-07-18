@@ -1,10 +1,10 @@
 """
 DTOs para Pagos Pendientes
 """
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional, Dict, Any
 from uuid import UUID
-from pydantic import Field, field_validator
+from pydantic import AliasChoices, Field, field_validator
 from enum import Enum
 
 from .base import BaseDTO, TimestampMixin, ActiveMixin
@@ -14,6 +14,7 @@ class EstadoPago(str, Enum):
     """Estados posibles de un pago"""
     PENDIENTE = "pendiente"
     PAGADO = "pagado"
+    EN_MORA = "en_mora"
     VENCIDO = "vencido"
     CANCELADO = "cancelado"
 
@@ -77,12 +78,22 @@ class PagoPendienteCreateDTO(BaseDTO, TimestampMixin, ActiveMixin):
     descripcion: Optional[str] = Field(None, alias="Descripcion")
     monto: float = Field(..., gt=0, alias="Monto")
     moneda: MonedaType = Field(MonedaType.ARS, alias="Moneda")
-    fechavencimiento: datetime = Field(..., alias="Fechavencimiento")
+    fechavencimiento: date = Field(..., alias="Fechavencimiento")
+    segunda_fecha_vencimiento: Optional[date] = Field(
+        None,
+        validation_alias=AliasChoices(
+            "segunda_fecha_vencimiento",
+            "segundaFechaVencimiento",
+            "SegundaFechaVencimiento",
+            "fecha_segundo_vencimiento",
+            "fechasegundovencimiento",
+        ),
+    )
     estado: EstadoPago = Field(EstadoPago.PENDIENTE, alias="Estado")
     prioridad: PrioridadPago = Field(PrioridadPago.MEDIA, alias="Prioridad")
     tipo: TipoPago = Field(TipoPago.UNICO, alias="Tipo")
     frecuenciarecurrencia: Optional[int] = Field(None, alias="Frecuenciarecurrencia")
-    proximovencimiento: Optional[datetime] = Field(None, alias="Proximovencimiento")
+    proximovencimiento: Optional[date] = Field(None, alias="Proximovencimiento")
     notas: Optional[str] = Field(None, alias="Notas")
     interes: float = Field(0.0, alias="Interes")
     recargo: float = Field(0.0, alias="Recargo")
@@ -107,13 +118,23 @@ class PagoPendienteUpdateDTO(BaseDTO, TimestampMixin):
     descripcion: Optional[str] = Field(None, alias="Descripcion")
     monto: Optional[float] = Field(None, gt=0, alias="Monto")
     moneda: Optional[MonedaType] = Field(None, alias="Moneda")
-    fechavencimiento: Optional[datetime] = Field(None, alias="Fechavencimiento")
-    fechapago: Optional[datetime] = Field(None, alias="Fechapago")
+    fechavencimiento: Optional[date] = Field(None, alias="Fechavencimiento")
+    segunda_fecha_vencimiento: Optional[date] = Field(
+        None,
+        validation_alias=AliasChoices(
+            "segunda_fecha_vencimiento",
+            "segundaFechaVencimiento",
+            "SegundaFechaVencimiento",
+            "fecha_segundo_vencimiento",
+            "fechasegundovencimiento",
+        ),
+    )
+    fechapago: Optional[date] = Field(None, alias="Fechapago")
     estado: Optional[EstadoPago] = Field(None, alias="Estado")
     prioridad: Optional[PrioridadPago] = Field(None, alias="Prioridad")
     tipo: Optional[TipoPago] = Field(None, alias="Tipo")
     frecuenciarecurrencia: Optional[int] = Field(None, alias="Frecuenciarecurrencia")
-    proximovencimiento: Optional[datetime] = Field(None, alias="Proximovencimiento")
+    proximovencimiento: Optional[date] = Field(None, alias="Proximovencimiento")
     notas: Optional[str] = Field(None, alias="Notas")
     interes: Optional[float] = Field(None, alias="Interes")
     recargo: Optional[float] = Field(None, alias="Recargo")
@@ -139,13 +160,23 @@ class PagoPendienteResponseDTO(BaseDTO, TimestampMixin, ActiveMixin):
     descripcion: Optional[str] = Field(None, alias="Descripcion")
     monto: float = Field(..., alias="Monto")
     moneda: MonedaType = Field(..., alias="Moneda")
-    fechavencimiento: datetime = Field(..., alias="Fechavencimiento")
-    fechapago: Optional[datetime] = Field(None, alias="Fechapago")
+    fechavencimiento: date = Field(..., alias="Fechavencimiento")
+    segunda_fecha_vencimiento: Optional[date] = Field(
+        None,
+        validation_alias=AliasChoices(
+            "segunda_fecha_vencimiento",
+            "segundaFechaVencimiento",
+            "SegundaFechaVencimiento",
+            "fecha_segundo_vencimiento",
+            "fechasegundovencimiento",
+        ),
+    )
+    fechapago: Optional[date] = Field(None, alias="Fechapago")
     estado: EstadoPago = Field(..., alias="Estado")
     prioridad: PrioridadPago = Field(..., alias="Prioridad")
     tipo: TipoPago = Field(..., alias="Tipo")
     frecuenciarecurrencia: Optional[int] = Field(None, alias="Frecuenciarecurrencia")
-    proximovencimiento: Optional[datetime] = Field(None, alias="Proximovencimiento")
+    proximovencimiento: Optional[date] = Field(None, alias="Proximovencimiento")
     notas: Optional[str] = Field(None, alias="Notas")
     interes: float = Field(0.0, alias="Interes")
     recargo: float = Field(0.0, alias="Recargo")

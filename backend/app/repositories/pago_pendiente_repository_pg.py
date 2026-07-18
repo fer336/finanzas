@@ -12,6 +12,8 @@ from app.models.db_models import PagoPendiente, Categoria, MetodoPago
 
 logger = logging.getLogger(__name__)
 
+NULLABLE_CLEAR_FIELDS = {"url_pdf", "comprobante", "segunda_fecha_vencimiento"}
+
 
 class PagoPendienteRepositoryPG:
     """Repository for PagoPendiente using PostgreSQL"""
@@ -90,7 +92,7 @@ class PagoPendienteRepositoryPG:
         
         # Update fields
         for key, value in data.items():
-            if hasattr(pago, key) and value is not None:
+            if hasattr(pago, key) and (value is not None or key in NULLABLE_CLEAR_FIELDS):
                 setattr(pago, key, value)
         
         pago.fechaactualizacion = datetime.utcnow()
@@ -125,6 +127,7 @@ class PagoPendienteRepositoryPG:
             "monto": float(pago.monto) if pago.monto else 0,
             "moneda": pago.moneda,
             "fechavencimiento": pago.fechavencimiento.isoformat() if pago.fechavencimiento else None,
+            "segunda_fecha_vencimiento": pago.segunda_fecha_vencimiento.isoformat() if pago.segunda_fecha_vencimiento else None,
             "fechacreacion": pago.fechacreacion.isoformat() if pago.fechacreacion else None,
             "fechaactualizacion": pago.fechaactualizacion.isoformat() if pago.fechaactualizacion else None,
             "prioridad": pago.prioridad,
@@ -180,4 +183,3 @@ class PagoPendienteRepositoryPG:
             "color": metodo.color,
             "icono": metodo.icono,
         }
-

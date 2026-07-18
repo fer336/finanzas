@@ -24,6 +24,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import apiServices from '../../services/api';
 import yfinanceService from '../../services/yfinanceService';
+import { getSecondDueDateValue } from '../../utils/pendingPaymentStatus';
 
 // Modern UI Components
 import ModernLayout from './layout/ModernLayout';
@@ -1660,6 +1661,7 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
                   monto: parseFloat(paymentData.Monto ?? paymentData.monto ?? 0) || 0,
                   moneda: paymentData.Moneda ?? paymentData.moneda ?? 'ARS',
                   fechavencimiento: paymentData.Fechavencimiento ?? paymentData.fechavencimiento ?? paymentData.fecha_vencimiento ?? null,
+                  segunda_fecha_vencimiento: paymentData.segunda_fecha_vencimiento ?? getSecondDueDateValue(paymentData) ?? null,
                   fecha_emision: paymentData.fecha_emision ?? null,
                   estado: (paymentData.Estado ?? paymentData.estado ?? 'pendiente').toString().toLowerCase(),
                   tipo: paymentData.Tipo ?? paymentData.tipo ?? 'factura',

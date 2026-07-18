@@ -9,7 +9,9 @@ class PagoPendienteBase(BaseModel):
     Monto: float = Field(..., description="Monto del pago")
     Moneda: str = Field(default="ARS", description="Moneda del pago (ARS, USD, etc.)")
     FechaVencimiento: str = Field(..., description="Fecha de vencimiento del pago")
-    Estado: str = Field(default="pendiente", description="Estado del pago (pendiente, pagado, vencido, cancelado)")
+    SegundaFechaVencimiento: Optional[date] = Field(None, description="Segundo vencimiento opcional")
+    segunda_fecha_vencimiento: Optional[date] = Field(None, description="Segundo vencimiento opcional")
+    Estado: str = Field(default="pendiente", description="Estado del pago (pendiente, en_mora, pagado, vencido, cancelado)")
     Tipo: str = Field(..., description="Tipo de pago (factura, servicio, prestamo, impuesto, etc.)")
     Prioridad: str = Field(default="media", description="Prioridad del pago (baja, media, alta, critica)")
     Notas: Optional[str] = Field(None, description="Notas adicionales sobre el pago")
@@ -31,6 +33,7 @@ class PagoPendienteCreateRequest(BaseModel):
     monto: float = Field(..., description="Monto del pago")
     moneda: str = Field(default="ARS", description="Moneda del pago")
     fecha_vencimiento: str = Field(..., description="Fecha de vencimiento (YYYY-MM-DD)")
+    segunda_fecha_vencimiento: Optional[date] = Field(None, description="Segundo vencimiento opcional")
     estado: str = Field(default="pendiente", description="Estado del pago")
     tipo: str = Field(..., description="Tipo de pago")
     prioridad: str = Field(default="media", description="Prioridad del pago")
@@ -49,6 +52,8 @@ class PagoPendienteUpdate(BaseModel):
     Monto: Optional[float] = Field(None, description="Monto del pago")
     Moneda: Optional[str] = Field(None, description="Moneda del pago")
     FechaVencimiento: Optional[str] = Field(None, description="Fecha de vencimiento")
+    SegundaFechaVencimiento: Optional[date] = Field(None, description="Segundo vencimiento opcional")
+    segunda_fecha_vencimiento: Optional[date] = Field(None, description="Segundo vencimiento opcional")
     Estado: Optional[str] = Field(None, description="Estado del pago")
     Tipo: Optional[str] = Field(None, description="Tipo de pago")
     Prioridad: Optional[str] = Field(None, description="Prioridad del pago")
@@ -74,6 +79,7 @@ class PagoPendienteSimple(BaseModel):
     monto: float = Field(..., description="Monto del pago")
     moneda: str = Field(..., description="Moneda del pago")
     fecha_vencimiento: str = Field(..., description="Fecha de vencimiento")
+    segunda_fecha_vencimiento: Optional[date] = Field(None, description="Segundo vencimiento opcional")
     dias_para_vencimiento: int = Field(..., description="Días para el vencimiento")
     estado: str = Field(..., description="Estado del pago")
     tipo: str = Field(..., description="Tipo de pago")
@@ -114,6 +120,7 @@ class EstadoPago(str):
     PENDIENTE = "pendiente"
     PAGADO = "pagado"
     VENCIDO = "vencido"
+    EN_MORA = "en_mora"
     CANCELADO = "cancelado"
     PARCIAL = "parcial"
 

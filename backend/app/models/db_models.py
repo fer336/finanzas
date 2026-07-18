@@ -220,6 +220,7 @@ class PagoPendiente(Base):
     monto = Column(Numeric, nullable=True)
     moneda = Column(String(50), nullable=True)
     fechavencimiento = Column(Date, nullable=True)
+    segunda_fecha_vencimiento = Column(Date, nullable=True)
     fechacreacion = Column(DateTime, default=datetime.utcnow)
     fechaactualizacion = Column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow

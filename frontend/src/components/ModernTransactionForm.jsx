@@ -16,18 +16,14 @@ import apiServices from '../services/api';
 import dolarService, { TIPOS_DOLAR } from '../services/dolarService';
 import FileUpload from './FileUpload/FileUpload';
 import { normalizeDocumentPreviewUrl } from '../utils/documentPreviewUrl';
+import { buildRecurringPendingPaymentDates } from '../utils/pendingPaymentStatus';
 
 const { transaccionesApi, categoriasApi, metodosPagoApi, objetivosApi, monedasApi, pagosPendientesApi } = apiServices;
 
 const FRECUENCIAS_RECURRENCIA = ['semanal', 'mensual', 'anual'];
 
 function proximaFechaVencimiento(fechaBase, frecuencia) {
-  const [y, m, d] = fechaBase.split('-').map(Number);
-  const fecha = new Date(y, m - 1, d);
-  if (frecuencia === 'semanal') fecha.setDate(fecha.getDate() + 7);
-  else if (frecuencia === 'anual') fecha.setFullYear(fecha.getFullYear() + 1);
-  else fecha.setMonth(fecha.getMonth() + 1); // mensual (default)
-  return fecha.toISOString().split('T')[0];
+  return buildRecurringPendingPaymentDates(fechaBase, null, frecuencia).fechavencimiento;
 }
 
 const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction }) => {

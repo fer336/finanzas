@@ -11,6 +11,16 @@ import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
 import { useRefresh } from '../../../hooks/useRefresh';
 import { useIsMobile } from '../../../hooks/use-mobile';
 import { normalizePaymentDocument } from '../../../utils/documentPreviewUrl';
+import {
+  PENDING_PAYMENT_STATUS,
+  compareLocalDateOnly,
+  derivePendingPaymentStatus,
+  formatLocalDateDisplay,
+  getSecondDueDateValue,
+  isPagoPaid,
+  normalizePendingPaymentDueDates,
+  parseLocalDateOnly,
+} from '../../../utils/pendingPaymentStatus';
 
 const SECTION_KEY = 'vencimientos_section'; // 'vencimientos' | 'prestamos'
 const loadSection = () => {
@@ -21,25 +31,9 @@ const loadSection = () => {
   }
 };
 
-// ─── Helpers de fecha ────────────────────────────────────────────────────────
-const parseDateSafe = (value) => {
-  if (!value) return null;
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-};
-
 const getCurrentMonthValue = () => {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-};
-
-const calcularDiasRestantes = (fechaVencimiento) => {
-  const fecha = parseDateSafe(fechaVencimiento);
-  if (!fecha) return 999;
-  const hoy = new Date();
-  hoy.setHours(0, 0, 0, 0);
-  fecha.setHours(0, 0, 0, 0);
-  return Math.ceil((fecha - hoy) / (1000 * 60 * 60 * 24));
 };
 
 // ─── Piezas de UI compartidas con el patrón Kanagawa (ver ModernTransactionsView) ──
@@ -108,7 +102,7 @@ const ModernPendingPaymentsView = ({
   }, [section]);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('pending'); // all | pending | overdue | paid
+  const [selectedStatus, setSelectedStatus] = useState(PENDING_PAYMENT_STATUS.PENDING);
   const [viewMode, setViewMode] = useState('monthly'); // 'monthly' | 'accumulated'
   const [selectedMonthFilter, setSelectedMonthFilter] = useState(getCurrentMonthValue());
   const [currentPage, setCurrentPage] = useState(1);
@@ -133,6 +127,14 @@ const ModernPendingPaymentsView = ({
     const categoriaObj = p.Categorias || p.categorias1 || p.categoria || null;
     const categoriaNombre = categoriaObj?.nombre || categoriaObj?.Nombre || 'Sin categoría';
     const fechaVencimiento = p.fecha_vencimiento || p.FechaVencimiento || p.fechavencimiento || p.Fechavencimiento;
+    const segundaFechaVencimiento = getSecondDueDateValue(p);
+    const normalizedDates = normalizePendingPaymentDueDates({ ...p, fechaVencimiento, segunda_fecha_vencimiento: segundaFechaVencimiento });
+    const normalizedPayment = {
+      ...p,
+      fechavencimiento: normalizedDates.firstDueDate,
+      segunda_fecha_vencimiento: normalizedDates.secondDueDate,
+    };
+    const temporalStatus = derivePendingPaymentStatus(normalizedPayment);
 
     return {
       ...p,
@@ -141,8 +143,10 @@ const ModernPendingPaymentsView = ({
       descripcion: p.descripcion || p.Descripcion || '',
       monto: parseFloat(p.monto || p.Monto || 0),
       moneda: p.moneda || p.Moneda || 'ARS',
-      fechaVencimiento,
+      fechaVencimiento: normalizedDates.firstDueDate,
+      segundaFechaVencimiento: normalizedDates.secondDueDate,
       estado: (p.estado || p.Estado || 'pendiente').toString().toLowerCase(),
+      temporalStatus,
       categoria: categoriaNombre,
       document: normalizePaymentDocument(p),
     };
@@ -150,15 +154,13 @@ const ModernPendingPaymentsView = ({
 
   useEffect(() => { setCurrentPage(1); }, [searchQuery, selectedStatus, viewMode, selectedMonthFilter]);
 
-  const isPagoPaid = (p) => p.estado === 'pagado' || p.estado === 'true' || p.pagada === true;
-
   // ── Filtros ──────────────────────────────────────────────────────────────
-  let filteredData = pagos;
+  let baseFilteredData = pagos;
 
   if (viewMode === 'monthly') {
     const [selYear, selMonth] = selectedMonthFilter.split('-').map(Number);
-    filteredData = filteredData.filter((p) => {
-      const fecha = parseDateSafe(p.fechaVencimiento);
+    baseFilteredData = baseFilteredData.filter((p) => {
+      const fecha = parseLocalDateOnly(p.fechaVencimiento);
       if (!fecha) return false;
       return fecha.getMonth() === selMonth - 1 && fecha.getFullYear() === selYear;
     });
@@ -166,57 +168,96 @@ const ModernPendingPaymentsView = ({
 
   if (searchQuery) {
     const query = searchQuery.toLowerCase();
-    filteredData = filteredData.filter((p) =>
+    baseFilteredData = baseFilteredData.filter((p) =>
       p.nombre.toLowerCase().includes(query)
       || p.descripcion.toLowerCase().includes(query)
       || p.categoria.toLowerCase().includes(query)
     );
   }
 
+  const pendientes = baseFilteredData.filter((p) => !isPagoPaid(p));
+  const vencidos = pendientes.filter((p) => p.temporalStatus === PENDING_PAYMENT_STATUS.OVERDUE);
+  const enMora = pendientes.filter((p) => p.temporalStatus === PENDING_PAYMENT_STATUS.IN_ARREARS);
+  const totalPendiente = pendientes.reduce((sum, p) => sum + p.monto, 0);
+  const totalVencido = vencidos.reduce((sum, p) => sum + p.monto, 0);
+
+  let filteredData = baseFilteredData;
+
   if (selectedStatus !== 'all') {
-    filteredData = filteredData.filter((p) => {
-      const isPaid = isPagoPaid(p);
-      const dias = calcularDiasRestantes(p.fechaVencimiento);
-      const isOverdue = !isPaid && dias < 0;
-      if (selectedStatus === 'paid') return isPaid;
-      if (selectedStatus === 'overdue') return isOverdue;
-      if (selectedStatus === 'pending') return !isPaid && !isOverdue;
-      return true;
-    });
+    filteredData = filteredData.filter((p) => p.temporalStatus === selectedStatus);
   }
 
   const sortedData = [...filteredData].sort(
-    (a, b) => calcularDiasRestantes(a.fechaVencimiento) - calcularDiasRestantes(b.fechaVencimiento)
+    (a, b) => compareLocalDateOnly(a.fechaVencimiento, b.fechaVencimiento)
   );
 
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const paginatedData = sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  // ── KPI: total pendiente ─────────────────────────────────────────────────
-  const pendientes = filteredData.filter((p) => !isPagoPaid(p));
-  const vencidos = pendientes.filter((p) => calcularDiasRestantes(p.fechaVencimiento) < 0);
-  const totalPendiente = pendientes.reduce((sum, p) => sum + p.monto, 0);
-
   // ── Render de celda de fecha ("a confirmar" en itálica si no hay fecha) ──
-  const renderFecha = (fechaVencimiento) => {
-    const fecha = parseDateSafe(fechaVencimiento);
-    if (!fecha) {
+  const renderFecha = (fechaVencimiento, segundaFechaVencimiento) => {
+    const firstDisplay = formatLocalDateDisplay(fechaVencimiento);
+    const secondDisplay = formatLocalDateDisplay(segundaFechaVencimiento);
+    if (!firstDisplay) {
       return <span className="font-mono text-[12px] italic text-muted-foreground">a confirmar</span>;
     }
-    return <span className="font-mono text-[12px] text-muted-foreground">{fecha.toLocaleDateString('es-AR')}</span>;
+    return (
+      <span className="inline-flex flex-col gap-0.5 font-mono text-[12px] text-muted-foreground" aria-label={secondDisplay ? `Primer vencimiento ${firstDisplay}. Segundo vencimiento ${secondDisplay}.` : `Primer vencimiento ${firstDisplay}.`}>
+        <span>1° {firstDisplay}</span>
+        {secondDisplay && <span className="text-[11px] text-[#6b572f] dark:text-[#e6c384]">2° {secondDisplay}</span>}
+      </span>
+    );
   };
 
-  const EstadoPill = ({ isPaid }) => {
-    const pillClassName = isPaid
-      ? 'border-[#526a3a] text-[#526a3a] dark:border-[#98bb6c] dark:text-[#98bb6c]'
-      : 'border-[#de9800] text-[#6b572f] dark:border-[#e6c384] dark:text-[#e6c384]';
+  const EstadoPill = ({ status }) => {
+    const config = {
+      [PENDING_PAYMENT_STATUS.PAID]: {
+        label: 'Pagado',
+        className: 'border-[#526a3a] text-[#526a3a] dark:border-[#98bb6c] dark:text-[#98bb6c]',
+      },
+      [PENDING_PAYMENT_STATUS.IN_ARREARS]: {
+        label: 'En mora',
+        className: 'border-[#a36a00] bg-[#efe1ba] text-[#5e441a] dark:border-[#e6c384] dark:bg-[#3f3544] dark:text-[#e6c384]',
+      },
+      [PENDING_PAYMENT_STATUS.OVERDUE]: {
+        label: 'Vencido',
+        className: 'border-[#822d33] bg-[#f5d0d3] text-[#822d33] dark:border-[#d33e48] dark:bg-[#351417] dark:text-[#ff9aa2]',
+      },
+      [PENDING_PAYMENT_STATUS.PENDING]: {
+        label: 'Pendiente',
+        className: 'border-[#de9800] text-[#6b572f] dark:border-[#e6c384] dark:text-[#e6c384]',
+      },
+    }[status] || {
+      label: 'Pendiente',
+      className: 'border-[#de9800] text-[#6b572f] dark:border-[#e6c384] dark:text-[#e6c384]',
+    };
     return (
-      <Badge variant="outline" className={pillClassName}>
-        {isPaid ? 'pagado' : 'pendiente'}
+      <Badge variant="outline" className={config.className}>
+        {config.label}
       </Badge>
     );
   };
-  EstadoPill.propTypes = { isPaid: PropTypes.bool.isRequired };
+  EstadoPill.propTypes = { status: PropTypes.string.isRequired };
+
+  const rowToneClassName = (status) => {
+    if (status === PENDING_PAYMENT_STATUS.OVERDUE) {
+      return 'border-[#b83245] bg-[#f9e1e3] text-foreground dark:border-[#d33e48] dark:bg-[#2a1014]';
+    }
+    if (status === PENDING_PAYMENT_STATUS.IN_ARREARS) {
+      return 'border-[#d6a546] bg-[#f5ebcf] text-foreground dark:border-[#e6c384] dark:bg-[#231d24]';
+    }
+    return 'border-border bg-card';
+  };
+
+  const tableRowToneClassName = (status) => {
+    if (status === PENDING_PAYMENT_STATUS.OVERDUE) {
+      return 'border-[#b83245] bg-[#f9e1e3] hover:bg-[#f4cdd1] dark:border-[#d33e48] dark:bg-[#2a1014] dark:hover:bg-[#351417]';
+    }
+    if (status === PENDING_PAYMENT_STATUS.IN_ARREARS) {
+      return 'border-[#d6a546] bg-[#f5ebcf] hover:bg-[#efe1ba] dark:border-[#e6c384] dark:bg-[#231d24] dark:hover:bg-[#2f2731]';
+    }
+    return 'border-muted hover:bg-card-hover';
+  };
 
   const RefreshButton = () => (
     <button
@@ -325,13 +366,22 @@ const ModernPendingPaymentsView = ({
           </div>
 
           <div className="mb-3">
-            <KpiCard
-              label="Total pendiente"
-              value={formatAmount(totalPendiente, { decimals: 0 })}
-              subtext={`${pendientes.length} pendiente${pendientes.length !== 1 ? 's' : ''}${vencidos.length ? ` · ${vencidos.length} vencido${vencidos.length !== 1 ? 's' : ''}` : ''}`}
-              borderColor="#f9d791"
-              valueColor="var(--warning)"
-            />
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              <KpiCard
+                label="Total pendiente"
+                value={formatAmount(totalPendiente, { decimals: 0 })}
+                subtext={`${pendientes.length} sin pagar · ${enMora.length} en mora`}
+                borderColor="#f9d791"
+                valueColor="var(--warning)"
+              />
+              <KpiCard
+                label="Vencidos"
+                value={formatAmount(totalVencido, { decimals: 0 })}
+                subtext={`${vencidos.length} vencido${vencidos.length !== 1 ? 's' : ''}`}
+                borderColor="var(--destructive)"
+                valueColor="var(--destructive)"
+              />
+            </div>
           </div>
 
           <div className="mb-2.5 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2">
@@ -377,9 +427,10 @@ const ModernPendingPaymentsView = ({
             className="w-full py-2"
           >
             <option value="all">Todos los estados</option>
-            <option value="pending">Pendientes</option>
-            <option value="overdue">Vencidos</option>
-            <option value="paid">Pagados</option>
+            <option value={PENDING_PAYMENT_STATUS.PENDING}>Pendientes</option>
+            <option value={PENDING_PAYMENT_STATUS.IN_ARREARS}>En mora</option>
+            <option value={PENDING_PAYMENT_STATUS.OVERDUE}>Vencidos</option>
+            <option value={PENDING_PAYMENT_STATUS.PAID}>Pagados</option>
           </FilterSelect>
         </div>
 
@@ -392,14 +443,13 @@ const ModernPendingPaymentsView = ({
             </div>
           ) : (
             paginatedData.map((p) => {
-              const isPaid = isPagoPaid(p);
               return (
-                <div key={p.id} className="rounded-md border border-border bg-card px-3.5 py-3">
+                <div key={p.id} className={`rounded-md border px-3.5 py-3 ${rowToneClassName(p.temporalStatus)}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="text-[13.5px] text-foreground truncate">{p.nombre}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-2">
-                        {renderFecha(p.fechaVencimiento)}
+                        {renderFecha(p.fechaVencimiento, p.segundaFechaVencimiento)}
                         <Badge variant="outline">{p.categoria}</Badge>
                         {p.document?.isValid && (
                           <button
@@ -419,7 +469,7 @@ const ModernPendingPaymentsView = ({
                         {formatAmount(p.monto, { decimals: 0 })}
                       </p>
                       <div className="mt-1">
-                        <EstadoPill isPaid={isPaid} />
+                        <EstadoPill status={p.temporalStatus} />
                       </div>
                     </div>
                   </div>
@@ -440,7 +490,7 @@ const ModernPendingPaymentsView = ({
                         <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
-                    {!isPaid && (
+                    {!isPagoPaid(p) && (
                       <button
                         onClick={() => onMarcarPagado && onMarcarPagado(p)}
                         className="flex items-center gap-1.5 rounded-sm bg-primary px-3 py-1.5 font-sans text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:bg-primary-active"
@@ -555,19 +605,27 @@ const ModernPendingPaymentsView = ({
           <label htmlFor={controlIds.desktopStatus} className="sr-only">Filtrar vencimientos por estado</label>
           <FilterSelect id={controlIds.desktopStatus} value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}>
             <option value="all">Todos los estados</option>
-            <option value="pending">Pendientes</option>
-            <option value="overdue">Vencidos</option>
-            <option value="paid">Pagados</option>
+            <option value={PENDING_PAYMENT_STATUS.PENDING}>Pendientes</option>
+            <option value={PENDING_PAYMENT_STATUS.IN_ARREARS}>En mora</option>
+            <option value={PENDING_PAYMENT_STATUS.OVERDUE}>Vencidos</option>
+            <option value={PENDING_PAYMENT_STATUS.PAID}>Pagados</option>
           </FilterSelect>
         </div>
 
-        <div className="mb-5 max-w-xs">
+        <div className="mb-5 grid max-w-2xl grid-cols-2 gap-3">
           <KpiCard
             label="Total pendiente"
             value={formatAmount(totalPendiente, { decimals: 0 })}
-            subtext={`${pendientes.length} pendiente${pendientes.length !== 1 ? 's' : ''}${vencidos.length ? ` · ${vencidos.length} vencido${vencidos.length !== 1 ? 's' : ''}` : ''}`}
+            subtext={`${pendientes.length} sin pagar · ${enMora.length} en mora`}
             borderColor="#f9d791"
             valueColor="var(--warning)"
+          />
+          <KpiCard
+            label="Vencidos"
+            value={formatAmount(totalVencido, { decimals: 0 })}
+            subtext={`${vencidos.length} vencido${vencidos.length !== 1 ? 's' : ''}`}
+            borderColor="var(--destructive)"
+            valueColor="var(--destructive)"
           />
         </div>
 
@@ -594,10 +652,9 @@ const ModernPendingPaymentsView = ({
                 </tr>
               ) : (
                 paginatedData.map((p) => {
-                  const isPaid = isPagoPaid(p);
                   return (
-                    <tr key={p.id} className="group border-b border-muted transition-colors hover:bg-card-hover">
-                      <td className="px-3.5 py-2.5">{renderFecha(p.fechaVencimiento)}</td>
+                    <tr key={p.id} className={`group border-b transition-colors ${tableRowToneClassName(p.temporalStatus)}`}>
+                      <td className="px-3.5 py-2.5">{renderFecha(p.fechaVencimiento, p.segundaFechaVencimiento)}</td>
                       <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">{p.nombre}</td>
                       <td className="px-3.5 py-2.5">
                         <Badge variant="outline">{p.categoria}</Badge>
@@ -606,11 +663,11 @@ const ModernPendingPaymentsView = ({
                         {formatAmount(p.monto, { decimals: 0 })}
                       </td>
                       <td className="px-3.5 py-2.5">
-                        <EstadoPill isPaid={isPaid} />
+                        <EstadoPill status={p.temporalStatus} />
                       </td>
                       <td className="px-3.5 py-2.5">
                         <div className="flex items-center justify-end gap-1.5">
-                          {!isPaid && (
+                          {!isPagoPaid(p) && (
                             <button
                               onClick={() => onMarcarPagado && onMarcarPagado(p)}
                               className="flex items-center gap-1.5 rounded-sm bg-primary px-2.5 py-1.5 font-sans text-[12px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:bg-primary-active"

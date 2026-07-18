@@ -46,14 +46,14 @@ const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onEditObjetivo, on
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-[1100px] px-4 py-5 sm:px-[34px] sm:py-[28px]">
-        <div className="mb-4 flex items-end justify-between gap-3 border-b-[3px] border-double border-[#cfc6ae] pb-3 dark:border-[#2e3844] sm:mb-[22px] sm:pb-[18px]">
+        <div className="mb-4 flex items-end justify-between gap-3 border-b-[3px] border-double border-[#b8ad78] pb-3 dark:border-[#363646] sm:mb-[22px] sm:pb-[18px]">
           <h1 className="font-serif text-[26px] font-bold leading-none text-foreground sm:text-[42px]">Objetivos</h1>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={refresh}
               disabled={isRefreshing}
-              className="flex items-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50 dark:border-[#2e3844] dark:bg-[#212836] dark:hover:bg-[#2e3844]"
+              className="flex items-center gap-1.5 rounded-sm border border-[#c8bf91] bg-white px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#e4d794] disabled:opacity-50 dark:border-[#363646] dark:bg-[#2a2a37] dark:hover:bg-[#363646]"
               title="Actualizar objetivos"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -62,7 +62,7 @@ const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onEditObjetivo, on
             <button
               type="button"
               onClick={onNewObjetivo}
-              className="flex items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] dark:hover:bg-[#7d9970]"
+              className="flex items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[#76946a]"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Nuevo objetivo</span>
@@ -71,12 +71,12 @@ const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onEditObjetivo, on
         </div>
 
         {data.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-md border border-[#ddd5c2] bg-card py-14 text-center dark:border-[#2e3844]">
+          <div className="flex flex-col items-center justify-center gap-3 rounded-md border border-[#c8bf91] bg-card py-14 text-center dark:border-[#363646]">
             <p className="text-[13.5px] italic text-muted-foreground">Sin objetivos activos</p>
             <button
               type="button"
               onClick={onNewObjetivo}
-              className="rounded-sm border border-[#ddd5c2] bg-white px-4 py-[9px] font-sans text-[13px] font-medium text-foreground transition-colors duration-150 hover:bg-[#f0ead9] dark:border-[#2e3844] dark:bg-[#212836] dark:hover:bg-[#2e3844]"
+              className="rounded-sm border border-[#c8bf91] bg-white px-4 py-[9px] font-sans text-[13px] font-medium text-foreground transition-colors duration-150 hover:bg-[#e4d794] dark:border-[#363646] dark:bg-[#2a2a37] dark:hover:bg-[#363646]"
             >
               Crear objetivo
             </button>
@@ -88,10 +88,10 @@ const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onEditObjetivo, on
               const fechaMeta = parseDateSafe(obj.fechaObjetivo);
 
               return (
-                <div key={obj.id} className="rounded-md border border-[#ddd5c2] bg-card p-5 dark:border-[#2e3844]">
+                <div key={obj.id} className="rounded-md border border-[#c8bf91] bg-card p-5 dark:border-[#363646]">
                   <div className="mb-4 flex items-start justify-between gap-3">
                     <div className="flex min-w-0 items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-[#f0ead9] dark:bg-[#212836]">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm bg-[#e4d794] dark:bg-[#2a2a37]">
                         <Icon className="h-5 w-5 text-primary" />
                       </div>
                       <h3 className="truncate font-serif text-[17px] font-semibold text-foreground">{obj.nombre}</h3>
@@ -100,7 +100,7 @@ const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onEditObjetivo, on
                       <button
                         type="button"
                         onClick={() => onEditObjetivo && onEditObjetivo(obj.raw)}
-                        className="rounded-sm p-1.5 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-foreground dark:text-[#93a0af] dark:hover:bg-white/5"
+                        className="rounded-sm p-1.5 text-[#625f55] transition-colors hover:bg-black/5 hover:text-foreground dark:text-[#c8c093] dark:hover:bg-white/5"
                         title="Editar objetivo"
                       >
                         <Pencil className="h-4 w-4" />
@@ -108,7 +108,7 @@ const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onEditObjetivo, on
                       <button
                         type="button"
                         onClick={() => { setObjetivoToDelete(obj); setShowDeleteConfirm(true); }}
-                        className="rounded-sm p-1.5 text-[#8a8677] transition-colors hover:bg-black/5 hover:text-[#a04a34] dark:text-[#93a0af] dark:hover:bg-white/5 dark:hover:text-[#c26a52]"
+                        className="rounded-sm p-1.5 text-[#625f55] transition-colors hover:bg-black/5 hover:text-[#b83245] dark:text-[#c8c093] dark:hover:bg-white/5 dark:hover:text-[#e46876]"
                         title="Eliminar objetivo"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -117,7 +117,7 @@ const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onEditObjetivo, on
                   </div>
 
                   <div className="mb-1.5 flex items-center justify-between">
-                    <span className="text-[12px] text-[#8a8677] dark:text-[#93a0af]">Progreso</span>
+                    <span className="text-[12px] text-[#625f55] dark:text-[#c8c093]">Progreso</span>
                     <span className="font-mono text-[13px] font-semibold text-primary">{obj.porcentaje}%</span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full" style={{ background: 'var(--muted)' }}>
@@ -129,17 +129,17 @@ const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onEditObjetivo, on
 
                   <div className="mt-4 flex items-baseline justify-between font-mono text-[13.5px]">
                     <span className="font-semibold text-foreground">{formatAmount(obj.montoActual, { decimals: 0 })}</span>
-                    <span className="text-[#8a8677] dark:text-[#93a0af]">/ {formatAmount(obj.montoObjetivo, { decimals: 0 })}</span>
+                    <span className="text-[#625f55] dark:text-[#c8c093]">/ {formatAmount(obj.montoObjetivo, { decimals: 0 })}</span>
                   </div>
 
-                  <div className="mt-1.5 font-mono text-[11px] text-[#8a8677] dark:text-[#93a0af]">
+                  <div className="mt-1.5 font-mono text-[11px] text-[#625f55] dark:text-[#c8c093]">
                     {fechaMeta ? `Meta: ${fechaMeta.toLocaleDateString('es-AR')}` : <span className="italic">Sin fecha meta</span>}
                   </div>
 
                   <button
                     type="button"
                     onClick={() => onAportar && onAportar(obj)}
-                    className="mt-4 w-full rounded-sm bg-primary px-4 py-2 font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] dark:hover:bg-[#7d9970]"
+                    className="mt-4 w-full rounded-sm bg-primary px-4 py-2 font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[#76946a]"
                   >
                     Aportar
                   </button>

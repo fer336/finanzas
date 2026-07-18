@@ -64,14 +64,11 @@ function App() {
         <div className="w-full max-w-sm">
           {/* Marca */}
           <div className="text-center mb-10 animate-in fade-in zoom-in duration-500">
-            <div
-              className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl"
-              style={{ backgroundColor: '#20242c' }}
-            >
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-foreground">
               <img src="/favicon.svg" alt="" className="h-[26px] w-[26px]" />
             </div>
             <h1 className="font-serif text-[28px] font-bold text-foreground tracking-tight">
-              Finance<span className="text-[#b35a42]">.</span>
+              Finance<span className="text-destructive">.</span>
             </h1>
             <p className="mt-1.5 text-[13px] text-muted-foreground">
               Tu libreta contable, en un solo lugar.
@@ -80,7 +77,7 @@ function App() {
 
           {/* Card login */}
           <div
-            className="rounded-xl border border-[#ddd5c2] bg-card p-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
+            className="rounded-xl border border-border bg-card p-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
             style={{ animationDelay: '100ms' }}
           >
             <LoginButton />
@@ -88,16 +85,16 @@ function App() {
 
           {/* Footer */}
           <div className="text-center mt-8 space-y-2 animate-in fade-in duration-500" style={{ animationDelay: '300ms' }}>
-            <p className="text-[11px] text-[#8a8677]">
+            <p className="text-[11px] text-muted-foreground">
               © 2026 Finance
             </p>
             <div className="flex items-center justify-center gap-1.5 text-[11px]">
-              <span className="text-[#8a8677]">hecho por</span>
+              <span className="text-muted-foreground">hecho por</span>
               <a
                 href="https://qeva.xyz"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[#5d6470] hover:text-foreground transition-colors font-medium inline-flex items-center gap-1 group"
+                className="text-secondary-foreground hover:text-foreground transition-colors font-medium inline-flex items-center gap-1 group"
               >
                 Qeva AI
                 <svg className="w-3 h-3 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">

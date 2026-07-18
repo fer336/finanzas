@@ -1,7 +1,7 @@
 import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
 
 /**
- * Derivación de datos para la vista "Inicio" (tema Papel), compartida entre
+ * Derivación de datos para la vista "Inicio" (tema Kanagawa), compartida entre
  * ModernDashboard (desktop) y MobileDashboardHome (mobile) — ver
  * design_handoff_rediseno_papel/README.md sección "2. Inicio (dashboard)".
  *
@@ -10,25 +10,15 @@ import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
  * useFinancialData.js, sin tocar).
  */
 
-const CATEGORY_PALETTE = ['#b35a42', '#e9c46a', '#5a7d52', '#3d5a80', '#8a6fa0', '#9aa2ad'];
+const CATEGORY_PALETTE = ['var(--destructive)', 'var(--warning)', 'var(--success)', 'var(--info)', 'var(--violet)', 'var(--muted-foreground)'];
 
 const MESES = [
   'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
 ];
 
-function lightenHex(hex, amount) {
-  const num = parseInt(hex.slice(1), 16);
-  const r = Math.min(255, (num >> 16) + amount);
-  const g = Math.min(255, ((num >> 8) & 0x00ff) + amount);
-  const b = Math.min(255, (num & 0x0000ff) + amount);
-  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
-}
-
 function getCategoryColor(index) {
-  const base = CATEGORY_PALETTE[index % CATEGORY_PALETTE.length];
-  const cycle = Math.floor(index / CATEGORY_PALETTE.length);
-  return cycle === 0 ? base : lightenHex(base, cycle * 28);
+  return CATEGORY_PALETTE[index % CATEGORY_PALETTE.length];
 }
 
 function getTransactionAmount(t) {
@@ -126,24 +116,24 @@ export function useDashboardHomeData({
     {
       key: 'ingresos',
       label: 'Ingresos',
-      borderColor: '#5a7d52',
-      valueColor: '#476442',
+      borderColor: 'var(--success)',
+      valueColor: 'var(--success)',
       value: formatAmount(totalIngresos, { decimals: 0 }),
       subtext: `${ingresosDelMes.length} entrada${ingresosDelMes.length === 1 ? '' : 's'}`,
     },
     {
       key: 'gastos',
       label: 'Gastos',
-      borderColor: '#b35a42',
-      valueColor: '#a04a34',
+      borderColor: 'var(--destructive)',
+      valueColor: 'var(--destructive)',
       value: formatAmount(totalGastos, { decimals: 0 }),
       subtext: `${gastosDelMes.length} movimiento${gastosDelMes.length === 1 ? '' : 's'}`,
     },
     {
       key: 'resultado',
       label: 'Resultado del mes',
-      borderColor: '#3d5a80',
-      valueColor: resultadoMes >= 0 ? '#476442' : '#a04a34',
+      borderColor: 'var(--info)',
+      valueColor: resultadoMes >= 0 ? 'var(--success)' : 'var(--destructive)',
       value: resultadoMes < 0
         ? `− ${formatAmount(Math.abs(resultadoMes), { decimals: 0 })}`
         : formatAmount(resultadoMes, { decimals: 0 }),

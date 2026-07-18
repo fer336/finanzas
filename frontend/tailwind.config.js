@@ -56,15 +56,15 @@ module.exports = {
         },
       },
       borderRadius: {
-        // Escala Papel (DESIGN.md "Radius"): 6px inputs/botones, 8px cards,
+        // Kanagawa keeps the existing compact product radius scale.
         // 10px paneles grandes. 999px (pills/badges) ya lo cubre `rounded-full`.
         sm: "6px",
         md: "8px",
         lg: "10px",
       },
       fontFamily: {
-        // Fraunces = títulos/wordmark, Work Sans = cuerpo/UI, IBM Plex Mono =
-        // todos los valores numéricos/fechas/tags (ver DESIGN.md "Typography").
+        // Typography remains stable across Lotus and Wave so theme changes do
+        // not alter information density or layout.
         serif: [
           'Fraunces',
           'ui-serif',
@@ -85,13 +85,9 @@ module.exports = {
         ]
       },
       boxShadow: {
-        // Sin sombra decorativa en el tema Papel — la profundidad se logra
-        // solo con bordes y contraste de fondo. Se dejan definidos por si
-        // algún componente aún no restyleado los referencia, pero no se
-        // deben aplicar en código nuevo.
-        glow: '0 0 20px rgba(59, 130, 246, 0.3)',
-        'glow-lg': '0 0 30px rgba(59, 130, 246, 0.4)',
-        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        glow: 'none',
+        'glow-lg': 'none',
+        'glass': 'none',
       },
       backdropBlur: {
         xs: '2px',

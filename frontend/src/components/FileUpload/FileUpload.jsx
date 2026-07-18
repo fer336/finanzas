@@ -260,7 +260,7 @@ const FileUpload = ({
         <div
           className={`relative rounded-md border-2 border-dashed p-6 transition-colors ${
             dragActive
-              ? 'border-primary bg-[#5a7d52]/10 dark:bg-[#8fae7f]/10'
+              ? 'border-primary bg-[#526a3a]/10 dark:bg-[#98bb6c]/10'
               : 'border-border bg-muted hover:border-muted-foreground'
           }`}
           onDragEnter={handleDrag}
@@ -331,7 +331,7 @@ const FileUpload = ({
           {!uploading && (
             <button
               onClick={uploadFile}
-              className="w-full mt-3 px-4 py-[7px] bg-primary hover:bg-[#4f7047] rounded-sm text-primary-foreground text-[13px] font-semibold transition-colors duration-150 flex items-center justify-center gap-2 dark:hover:bg-[#7d9970]"
+              className="w-full mt-3 px-4 py-[7px] bg-primary hover:bg-[#5f7841] rounded-sm text-primary-foreground text-[13px] font-semibold transition-colors duration-150 flex items-center justify-center gap-2 dark:hover:bg-[#76946a]"
             >
               <Upload className="w-3.5 h-3.5" />
               Subir archivo
@@ -358,7 +358,7 @@ const FileUpload = ({
 
       {/* Uploaded File Display */}
       {uploadedFileUrl && (
-        <div className="rounded-md border border-primary bg-[#5a7d52]/10 p-4 dark:bg-[#8fae7f]/10">
+        <div className="rounded-md border border-primary bg-[#526a3a]/10 p-4 dark:bg-[#98bb6c]/10">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3 flex-1 min-w-0">
               <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
@@ -399,7 +399,7 @@ const FileUpload = ({
 
       {/* Error Message */}
       {error && (
-        <div className="rounded-md border border-destructive bg-[#a04a34]/5 p-4 dark:bg-[#c26a52]/10">
+        <div className="rounded-md border border-destructive bg-[#b83245]/5 p-4 dark:bg-[#e46876]/10">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
             <p className="text-[12.5px] text-destructive">{error}</p>

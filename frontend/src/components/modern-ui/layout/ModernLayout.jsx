@@ -6,7 +6,7 @@ import { useIsMobile } from '../../../hooks/use-mobile';
 /**
  * ModernLayout - Layout wrapper con nav superior (desktop) + bottom nav
  * (mobile). Reemplaza el viejo Sidebar + Header oscuros por la barra de
- * navegación superior del tema "Papel" (ver DESIGN.md y
+ * navegación superior del tema "Kanagawa" (ver DESIGN.md y
  * design_handoff_rediseno_papel/README.md sección 1).
  */
 const ModernLayout = ({

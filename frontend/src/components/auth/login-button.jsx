@@ -35,7 +35,7 @@ export function LoginButton({ className = "" }) {
       <button
         onClick={handleGoogleLogin}
         disabled={isLoading}
-        className="group relative w-full inline-flex items-center justify-center gap-3 px-8 py-3.5 bg-primary hover:bg-[#4f7047] text-primary-foreground font-sans font-semibold text-[14px] rounded-sm transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="group relative w-full inline-flex items-center justify-center gap-3 px-8 py-3.5 bg-primary hover:bg-[#5f7841] text-primary-foreground font-sans font-semibold text-[14px] rounded-sm transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
         type="button"
       >
         {isLoading ? (

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 /**
- * MobileBottomNav — nav inferior mobile del tema "Papel". Los 3 ítems
+ * MobileBottomNav — nav inferior mobile del tema "Kanagawa". Los 3 ítems
  * principales + "Más" son el mismo esquema de 6 secciones que ModernTopNav
  * (ver design_handoff_rediseno_papel/README.md "Mapa de migración"):
  * Inicio/Movimientos/Vencimientos van fijos abajo, Objetivos/Inversiones/
@@ -68,7 +68,7 @@ const MobileBottomNav = ({ currentView, onNavigate, isDarkMode = false, onToggle
       {/* Overlay del menú deslizable */}
       {isMenuOpen && (
         <div
-          className="fixed inset-0 bg-[#20242c]/40 z-40"
+          className="fixed inset-0 bg-[#545464]/40 z-40"
           onClick={() => setIsMenuOpen(false)}
           style={{ animation: 'fadeIn 0.3s ease-out' }}
         />
@@ -81,23 +81,23 @@ const MobileBottomNav = ({ currentView, onNavigate, isDarkMode = false, onToggle
         }`}
         style={{ maxHeight: '70vh' }}
       >
-        <div className="bg-card rounded-t-lg border-t border-[#ddd5c2] dark:border-[#2e3844]">
+        <div className="bg-card rounded-t-lg border-t border-[#c8bf91] dark:border-[#363646]">
           {/* Handle para arrastrar */}
           <div className="flex justify-center py-3">
-            <div className="w-12 h-1.5 bg-[#e7e0cf] rounded-full dark:bg-[#2e3844]" />
+            <div className="w-12 h-1.5 bg-[#d5cea3] rounded-full dark:bg-[#363646]" />
           </div>
 
           {/* Header del menú */}
           <div className="flex items-center justify-between px-6 pb-4">
             <div>
               <h3 className="text-xl font-serif font-semibold text-foreground">Menú</h3>
-              <p className="text-sm text-[#8a8677] dark:text-[#93a0af]">Gestiona tu aplicación</p>
+              <p className="text-sm text-[#625f55] dark:text-[#c8c093]">Gestiona tu aplicación</p>
             </div>
             <button
               onClick={() => setIsMenuOpen(false)}
-              className="w-10 h-10 rounded-full bg-white border border-[#ddd5c2] hover:bg-[#f0ead9] flex items-center justify-center transition-colors dark:bg-[#212836] dark:border-[#2e3844] dark:hover:bg-[#2e3844]"
+              className="w-10 h-10 rounded-full bg-white border border-[#c8bf91] hover:bg-[#e4d794] flex items-center justify-center transition-colors dark:bg-[#2a2a37] dark:border-[#363646] dark:hover:bg-[#363646]"
             >
-              <X className="h-5 w-5 text-[#5d6470] dark:text-[#93a0af]" />
+              <X className="h-5 w-5 text-[#43436c] dark:text-[#c8c093]" />
             </button>
           </div>
 
@@ -110,10 +110,10 @@ const MobileBottomNav = ({ currentView, onNavigate, isDarkMode = false, onToggle
                   <button
                     key={item.id}
                     onClick={() => handleMenuItemClick(item.id)}
-                    className="p-4 rounded-md bg-white border border-[#ddd5c2] active:scale-95 active:bg-[#f0ead9] transition-all hover:border-[#20242c]/20 dark:bg-[#212836] dark:border-[#2e3844] dark:active:bg-[#2e3844] dark:hover:border-white/20"
+                    className="p-4 rounded-md bg-white border border-[#c8bf91] active:scale-95 active:bg-[#e4d794] transition-all hover:border-[#545464]/20 dark:bg-[#2a2a37] dark:border-[#363646] dark:active:bg-[#363646] dark:hover:border-white/20"
                   >
                     <div className="flex flex-col items-center text-center space-y-3">
-                      <div className="w-12 h-12 rounded-md flex items-center justify-center bg-[#faf7ef] border border-[#ddd5c2] text-[#5a7d52] dark:bg-[#1a2029] dark:border-[#2e3844] dark:text-[#8fae7f]">
+                      <div className="w-12 h-12 rounded-md flex items-center justify-center bg-[#e5ddb0] border border-[#c8bf91] text-[#526a3a] dark:bg-[#181820] dark:border-[#363646] dark:text-[#98bb6c]">
                         <Icon className="h-6 w-6" />
                       </div>
                       <span className="text-sm font-medium text-foreground">{item.label}</span>
@@ -125,10 +125,10 @@ const MobileBottomNav = ({ currentView, onNavigate, isDarkMode = false, onToggle
               {onToggleTheme && (
                 <button
                   onClick={() => { onToggleTheme(); }}
-                  className="p-4 rounded-md bg-white border border-[#ddd5c2] active:scale-95 active:bg-[#f0ead9] transition-all hover:border-[#20242c]/20 dark:bg-[#212836] dark:border-[#2e3844] dark:active:bg-[#2e3844] dark:hover:border-white/20"
+                  className="p-4 rounded-md bg-white border border-[#c8bf91] active:scale-95 active:bg-[#e4d794] transition-all hover:border-[#545464]/20 dark:bg-[#2a2a37] dark:border-[#363646] dark:active:bg-[#363646] dark:hover:border-white/20"
                 >
                   <div className="flex flex-col items-center text-center space-y-3">
-                    <div className="w-12 h-12 rounded-md flex items-center justify-center bg-[#faf7ef] border border-[#ddd5c2] text-[#5a7d52] dark:bg-[#1a2029] dark:border-[#2e3844] dark:text-[#8fae7f]">
+                    <div className="w-12 h-12 rounded-md flex items-center justify-center bg-[#e5ddb0] border border-[#c8bf91] text-[#526a3a] dark:bg-[#181820] dark:border-[#363646] dark:text-[#98bb6c]">
                       {isDarkMode ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
                     </div>
                     <span className="text-sm font-medium text-foreground">
@@ -143,13 +143,13 @@ const MobileBottomNav = ({ currentView, onNavigate, isDarkMode = false, onToggle
             <div className="mt-4">
               <button
                 onClick={handleLogout}
-                className="w-full p-4 rounded-md bg-white border border-[#e0c98a] active:scale-95 transition-all hover:bg-[#fdf6e3] dark:bg-[#212836] dark:border-[#d8ac5a] dark:hover:bg-[rgba(216,172,90,0.14)]"
+                className="w-full p-4 rounded-md bg-white border border-[#de9800] active:scale-95 transition-all hover:bg-[#f9d791] dark:bg-[#2a2a37] dark:border-[#e6c384] dark:hover:bg-[rgba(230,195,132,0.14)]"
               >
                 <div className="flex items-center justify-center space-x-3">
-                  <div className="w-10 h-10 rounded-md bg-[#fdf6e3] border border-[#e0c98a] flex items-center justify-center dark:bg-[rgba(216,172,90,0.14)] dark:border-[#d8ac5a]">
-                    <LogOut className="h-5 w-5 text-[#a04a34] dark:text-[#c26a52]" />
+                  <div className="w-10 h-10 rounded-md bg-[#f9d791] border border-[#de9800] flex items-center justify-center dark:bg-[rgba(230,195,132,0.14)] dark:border-[#e6c384]">
+                    <LogOut className="h-5 w-5 text-[#b83245] dark:text-[#e46876]" />
                   </div>
-                  <span className="text-base font-medium text-[#a04a34] dark:text-[#c26a52]">Cerrar Sesión</span>
+                  <span className="text-base font-medium text-[#b83245] dark:text-[#e46876]">Cerrar Sesión</span>
                 </div>
               </button>
             </div>
@@ -158,7 +158,7 @@ const MobileBottomNav = ({ currentView, onNavigate, isDarkMode = false, onToggle
       </div>
 
   {/* Bottom Navigation Bar */}
-  <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-[#ddd5c2] z-50 safe-area-bottom dark:border-[#2e3844]">
+  <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-[#c8bf91] z-50 safe-area-bottom dark:border-[#363646]">
     <div className="flex items-center justify-between px-6 py-4">
       {mainNavItems.map((item) => {
         const Icon = item.icon;
@@ -171,8 +171,8 @@ const MobileBottomNav = ({ currentView, onNavigate, isDarkMode = false, onToggle
             onClick={() => handleNavClick(item.id)}
             className={`flex flex-col items-center justify-center gap-1.5 transition-colors duration-150 ${
               isActive || (isMenuButton && isMenuOpen)
-                ? 'text-[#20242c] dark:text-[#ece7d8]'
-                : 'text-[#8a8677] hover:text-[#5d6470] dark:text-[#93a0af] dark:hover:text-[#ece7d8]'
+                ? 'text-[#545464] dark:text-[#dcd7ba]'
+                : 'text-[#625f55] hover:text-[#43436c] dark:text-[#c8c093] dark:hover:text-[#dcd7ba]'
             }`}
           >
             <Icon

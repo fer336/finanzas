@@ -126,7 +126,7 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
   if (!isOpen) return null;
 
   const inputClass = (hasError) =>
-    `w-full px-3.5 py-2.5 bg-white border ${hasError ? 'border-[#a04a34] dark:border-[#c26a52]' : 'border-[#ddd5c2] dark:border-[#2e3844]'} rounded-sm text-foreground text-[13.5px] placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring transition-colors duration-150 dark:bg-[#212836] dark:placeholder:text-[#93a0af]`;
+    `w-full px-3.5 py-2.5 bg-white border ${hasError ? 'border-[#b83245] dark:border-[#e46876]' : 'border-[#c8bf91] dark:border-[#363646]'} rounded-sm text-foreground text-[13.5px] placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring transition-colors duration-150 dark:bg-[#2a2a37] dark:placeholder:text-[#c8c093]`;
 
   const modalContent = (
     <div
@@ -134,18 +134,18 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
       style={{ background: 'rgba(32,36,44,.4)' }}
       onClick={(event) => event.target === event.currentTarget && handleClose()}
     >
-      <div className="w-full max-w-2xl max-h-[95vh] overflow-y-auto rounded-[12px] border border-[#ddd5c2] bg-[#faf7ef] dark:border-[#2e3844] dark:bg-[#1a2029]">
+      <div className="w-full max-w-2xl max-h-[95vh] overflow-y-auto rounded-[12px] border border-[#c8bf91] bg-[#e5ddb0] dark:border-[#363646] dark:bg-[#181820]">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#e7e0cf] bg-[#faf7ef] p-5 dark:border-[#2e3844] dark:bg-[#1a2029]">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#d5cea3] bg-[#e5ddb0] p-5 dark:border-[#363646] dark:bg-[#181820]">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-[#f0ead9] dark:bg-[#212836]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-[#e4d794] dark:bg-[#2a2a37]">
               <Target className="h-5 w-5 text-primary" />
             </div>
             <div>
               <h2 className="font-serif text-[20px] font-bold text-foreground">
                 {objetivo ? 'Editar objetivo' : 'Nuevo objetivo'}
               </h2>
-              <p className="mt-0.5 text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
+              <p className="mt-0.5 text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
                 {objetivo ? 'Actualizá los detalles de tu meta' : 'Definí tu meta de ahorro'}
               </p>
             </div>
@@ -155,23 +155,23 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
             onClick={handleClose}
             className="rounded-sm p-2 transition-colors duration-150 hover:bg-black/5 dark:hover:bg-white/5"
           >
-            <X className="h-5 w-5 text-[#8a8677] dark:text-[#93a0af]" />
+            <X className="h-5 w-5 text-[#625f55] dark:text-[#c8c093]" />
           </button>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 p-5">
           {errors.general && (
-            <div className="flex items-start gap-3 rounded-sm border border-[#e0c98a] bg-[#fdf6e3] px-3 py-2.5 dark:border-[#d8ac5a] dark:bg-[rgba(216,172,90,0.14)]">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#a04a34] dark:text-[#c26a52]" />
-              <p className="text-[12.5px] text-[#a04a34] dark:text-[#c26a52]">{errors.general}</p>
+            <div className="flex items-start gap-3 rounded-sm border border-[#de9800] bg-[#f9d791] px-3 py-2.5 dark:border-[#e6c384] dark:bg-[rgba(230,195,132,0.14)]">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#b83245] dark:text-[#e46876]" />
+              <p className="text-[12.5px] text-[#b83245] dark:text-[#e46876]">{errors.general}</p>
             </div>
           )}
 
           {/* Nombre */}
-          <label className="block text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
+          <label className="block text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
             <span className="mb-1 block">
-              Nombre del objetivo <span className="text-[#a04a34] dark:text-[#c26a52]">*</span>
+              Nombre del objetivo <span className="text-[#b83245] dark:text-[#e46876]">*</span>
             </span>
             <input
               type="text"
@@ -180,11 +180,11 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
               placeholder="ej. Viaje a Europa, Comprar auto..."
               className={inputClass(errors.nombre)}
             />
-            {errors.nombre && <p className="mt-1 text-[12px] text-[#a04a34] dark:text-[#c26a52]">{errors.nombre}</p>}
+            {errors.nombre && <p className="mt-1 text-[12px] text-[#b83245] dark:text-[#e46876]">{errors.nombre}</p>}
           </label>
 
           {/* Tipo de objetivo */}
-          <label className="block text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
+          <label className="block text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
             <span className="mb-1 block">Tipo de objetivo</span>
             <select
               value={formData.tipo}
@@ -200,7 +200,7 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
           </label>
 
           {/* Icono */}
-          <div className="text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
+          <div className="text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
             <span className="mb-1 block">Icono</span>
             <div className="grid grid-cols-6 gap-2 sm:grid-cols-8">
               {iconos.map((icono) => (
@@ -210,8 +210,8 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
                   onClick={() => setFormData((prev) => ({ ...prev, icono }))}
                   className={`rounded-sm border p-2.5 text-xl transition-colors duration-150 ${
                     formData.icono === icono
-                      ? 'border-primary bg-[#f0ead9] dark:bg-[#212836]'
-                      : 'border-[#ddd5c2] bg-white hover:bg-[#f0ead9] dark:border-[#2e3844] dark:bg-[#1a2029] dark:hover:bg-[#212836]'
+                      ? 'border-primary bg-[#e4d794] dark:bg-[#2a2a37]'
+                      : 'border-[#c8bf91] bg-white hover:bg-[#e4d794] dark:border-[#363646] dark:bg-[#181820] dark:hover:bg-[#2a2a37]'
                   }`}
                 >
                   {icono}
@@ -222,9 +222,9 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
 
           {/* Monto y moneda */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <label className="block text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
+            <label className="block text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
               <span className="mb-1 block">
-                Monto objetivo <span className="text-[#a04a34] dark:text-[#c26a52]">*</span>
+                Monto objetivo <span className="text-[#b83245] dark:text-[#e46876]">*</span>
               </span>
               <input
                 type="number"
@@ -234,10 +234,10 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
                 placeholder="0.00"
                 className={`${inputClass(errors.monto_objetivo)} font-mono`}
               />
-              {errors.monto_objetivo && <p className="mt-1 text-[12px] text-[#a04a34] dark:text-[#c26a52]">{errors.monto_objetivo}</p>}
+              {errors.monto_objetivo && <p className="mt-1 text-[12px] text-[#b83245] dark:text-[#e46876]">{errors.monto_objetivo}</p>}
             </label>
 
-            <label className="block text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
+            <label className="block text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
               <span className="mb-1 block">Moneda</span>
               <select
                 value={formData.moneda}
@@ -255,7 +255,7 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
 
           {/* Fechas */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <label className="block text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
+            <label className="block text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
               <span className="mb-1 block">Fecha de inicio</span>
               <input
                 type="date"
@@ -265,7 +265,7 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
               />
             </label>
 
-            <label className="block text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
+            <label className="block text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
               <span className="mb-1 block">Fecha objetivo (meta)</span>
               <input
                 type="date"
@@ -277,7 +277,7 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
           </div>
 
           {/* Prioridad */}
-          <div className="text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
+          <div className="text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
             <span className="mb-1 block">Prioridad</span>
             <div className="grid grid-cols-3 gap-2.5">
               {prioridades.map((prioridad) => (
@@ -287,8 +287,8 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
                   onClick={() => setFormData((prev) => ({ ...prev, prioridad: prioridad.value }))}
                   className={`rounded-sm border px-3 py-2.5 text-[13px] transition-colors duration-150 ${
                     formData.prioridad === prioridad.value
-                      ? 'border-primary bg-[#f0ead9] font-semibold text-foreground dark:bg-[#212836]'
-                      : 'border-[#ddd5c2] bg-white text-[#5d6470] hover:bg-[#f0ead9] dark:border-[#2e3844] dark:bg-[#1a2029] dark:text-[#93a0af] dark:hover:bg-[#212836]'
+                      ? 'border-primary bg-[#e4d794] font-semibold text-foreground dark:bg-[#2a2a37]'
+                      : 'border-[#c8bf91] bg-white text-[#43436c] hover:bg-[#e4d794] dark:border-[#363646] dark:bg-[#181820] dark:text-[#c8c093] dark:hover:bg-[#2a2a37]'
                   }`}
                 >
                   {prioridad.label}
@@ -298,7 +298,7 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
           </div>
 
           {/* Descripción */}
-          <label className="block text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
+          <label className="block text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
             <span className="mb-1 block">Descripción</span>
             <textarea
               value={formData.descripcion}
@@ -310,7 +310,7 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
           </label>
 
           {/* Notas */}
-          <label className="block text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
+          <label className="block text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
             <span className="mb-1 block">Notas adicionales</span>
             <textarea
               value={formData.notas}
@@ -322,23 +322,23 @@ const ObjetivoFormModal = ({ isOpen, onClose, onSuccess, objetivo = null, catego
           </label>
 
           {/* Buttons */}
-          <div className="flex flex-col justify-end gap-3 border-t border-[#e7e0cf] pt-4 dark:border-[#2e3844] sm:flex-row">
+          <div className="flex flex-col justify-end gap-3 border-t border-[#d5cea3] pt-4 dark:border-[#363646] sm:flex-row">
             <button
               type="button"
               onClick={handleClose}
               disabled={isSaving}
-              className="w-full rounded-sm border border-[#ddd5c2] bg-white px-[15px] py-[8px] text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50 dark:border-[#2e3844] dark:bg-[#212836] dark:hover:bg-[#2e3844] sm:w-auto"
+              className="w-full rounded-sm border border-[#c8bf91] bg-white px-[15px] py-[8px] text-[13px] text-foreground transition-colors duration-150 hover:bg-[#e4d794] disabled:opacity-50 dark:border-[#363646] dark:bg-[#2a2a37] dark:hover:bg-[#363646] sm:w-auto"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary px-[15px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:opacity-50 dark:hover:bg-[#7d9970] sm:w-auto"
+              className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary px-[15px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] disabled:opacity-50 dark:hover:bg-[#76946a] sm:w-auto"
             >
               {isSaving ? (
                 <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#faf7ef] border-t-transparent dark:border-[#12161c]" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#e5ddb0] border-t-transparent dark:border-[#1f1f28]" />
                   Guardando...
                 </>
               ) : (

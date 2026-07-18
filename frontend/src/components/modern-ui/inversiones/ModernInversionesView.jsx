@@ -6,7 +6,7 @@ import ModernMonedasView from '../monedas/ModernMonedasView';
 import { useIsMobile } from '../../../hooks/use-mobile';
 
 /**
- * ModernInversionesView — container "Inversiones" del tema "Papel".
+ * ModernInversionesView — container "Inversiones" del tema "Kanagawa".
  * Agrupa CEDEARs + Cotización Dólar + Monedas en una sola sección con
  * tabs internos (ver design_handoff_rediseno_papel/README.md "Mapa de
  * migración" y sección "6. Inversiones"). Cada tab sigue usando su propia
@@ -29,10 +29,10 @@ const loadTab = () => {
 };
 
 // Toggle de pills — mismo patrón visual que Mensual/Acumulado y Día/Semana/Mes
-// (ver ModernTransactionsView). Activa en fondo oscuro #20242c, ya que estos
+// (ver ModernTransactionsView). Activa en fondo oscuro #545464, ya que estos
 // tabs cambian de contenido completo (nivel "modo"), no filtran un rango.
 const PillToggle = ({ options, value, onChange }) => (
-  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] dark:border-[#2e3844] bg-card p-[3px]">
+  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#c8bf91] dark:border-[#363646] bg-card p-[3px]">
     {options.map((opt) => (
       <button
         key={opt.value}
@@ -40,8 +40,8 @@ const PillToggle = ({ options, value, onChange }) => (
         onClick={() => onChange(opt.value)}
         className={`rounded-full px-4 py-1.5 font-mono text-[12px] transition-colors duration-150 ${
           value === opt.value
-            ? 'bg-[#20242c] dark:bg-[#ece7d8] font-semibold text-[#f4f0e6] dark:text-[#12161c]'
-            : 'text-[#5d6470] dark:text-[#93a0af] hover:text-foreground'
+            ? 'bg-[#545464] dark:bg-[#dcd7ba] font-semibold text-[#f2ecbc] dark:text-[#1f1f28]'
+            : 'text-[#43436c] dark:text-[#c8c093] hover:text-foreground'
         }`}
       >
         {opt.label}
@@ -87,7 +87,7 @@ const ModernInversionesView = ({
       <div className={`mx-auto max-w-[1100px] ${isMobile ? 'px-4 py-4' : 'px-[34px] py-[28px]'}`}>
         {/* Cabecera (mismo patrón que Movimientos / Vencimientos) */}
         <div
-          className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] dark:border-[#2e3844] ${
+          className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#b8ad78] dark:border-[#363646] ${
             isMobile ? 'mb-3 pb-3' : 'mb-[22px] pb-[18px]'
           }`}
         >

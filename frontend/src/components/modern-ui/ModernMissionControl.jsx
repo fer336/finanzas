@@ -1118,7 +1118,7 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
         // página (ahora vive embebida en Ajustes, ver ModernAjustesView).
         // Estos ids viejos siguen alcanzables desde el menú móvil
         // (MobileBottomNav), así que se les da acá el mismo contenedor de
-        // página que usan el resto de las vistas Papel.
+        // página que usan el resto de las vistas Kanagawa.
         return (
           <div className="min-h-screen bg-background">
             <div className="mx-auto max-w-[1100px] px-4 py-5 sm:px-[34px] sm:py-[28px]">

@@ -9,7 +9,7 @@ import TrendUp2 from 'reicon-react/icons/TrendUp2';
 import Settings from 'reicon-react/icons/Settings';
 
 /**
- * ModernTopNav — barra de navegación superior del tema "Papel".
+ * ModernTopNav — barra de navegación superior del tema "Kanagawa".
  * Reemplaza ModernSidebar + ModernHeader en desktop (ver DESIGN.md /
  * design_handoff_rediseno_papel/README.md sección "1. Barra de
  * navegación superior").
@@ -114,7 +114,7 @@ const ModernTopNav = ({
 
   return (
     <nav
-      className="flex items-center border-b border-[#ddd5c2] bg-card dark:border-[#2e3844]"
+      className="flex items-center border-b border-[#c8bf91] bg-card dark:border-[#363646]"
       style={{ padding: '14px 34px', gap: '26px' }}
     >
       {/* Wordmark */}
@@ -123,7 +123,7 @@ const ModernTopNav = ({
         onClick={() => onNavigate && onNavigate('dashboard')}
         className="shrink-0 font-serif text-[20px] font-bold text-foreground"
       >
-        Finance<span className="text-[#b35a42] dark:text-[#c26a52]">.</span>
+        Finance<span className="text-[#b83245] dark:text-[#e46876]">.</span>
       </button>
 
       {/* Nav pills */}
@@ -138,19 +138,19 @@ const ModernTopNav = ({
               onClick={() => onNavigate && onNavigate(item.view)}
               className={`flex items-center gap-1.5 rounded-full px-3.5 py-[7px] transition-colors duration-150 ${
                 isActive
-                  ? 'bg-[#20242c] font-semibold text-[#f4f0e6] dark:bg-[#ece7d8] dark:text-[#12161c]'
-                  : 'text-[#5d6470] hover:bg-black/5 dark:text-[#93a0af] dark:hover:bg-white/5'
+                  ? 'bg-[#545464] font-semibold text-[#f2ecbc] dark:bg-[#dcd7ba] dark:text-[#1f1f28]'
+                  : 'text-[#43436c] hover:bg-black/5 dark:text-[#c8c093] dark:hover:bg-white/5'
               }`}
             >
               {Icon && (
                 <Icon
                   size={16}
-                  color={isActive ? (isDarkMode ? '#12161c' : '#f4f0e6') : (isDarkMode ? '#93a0af' : '#8a8677')}
+                  color={isActive ? (isDarkMode ? '#1f1f28' : '#f2ecbc') : (isDarkMode ? '#c8c093' : '#625f55')}
                 />
               )}
               {item.label}
               {item.showBadge && pendingPaymentsCount > 0 && (
-                <span className="rounded-full bg-[#e9c46a] px-[6px] py-[1px] font-mono text-[10px] font-semibold text-[#20242c]">
+                <span className="rounded-full bg-[#f9d791] px-[6px] py-[1px] font-mono text-[10px] font-semibold text-[#545464]">
                   {pendingPaymentsCount}
                 </span>
               )}
@@ -162,20 +162,20 @@ const ModernTopNav = ({
       {/* Right side: buscar + acción primaria + utilidades */}
       <div className="ml-auto flex shrink-0 items-center gap-2.5">
         <div className="relative hidden lg:block">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8a8677] dark:text-[#93a0af]" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#625f55] dark:text-[#c8c093]" />
           <input
             type="text"
             value={searchValue}
             onChange={handleSearchChange}
             placeholder="Buscar…"
-            className="w-48 rounded-sm border border-[#ddd5c2] bg-white py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#2e3844] dark:bg-[#212836] dark:placeholder:text-[#93a0af]"
+            className="w-48 rounded-sm border border-[#c8bf91] bg-white py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#363646] dark:bg-[#2a2a37] dark:placeholder:text-[#c8c093]"
           />
         </div>
 
         <button
           type="button"
           onClick={onNewTransaction}
-          className="rounded-sm bg-primary px-[15px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] dark:hover:bg-[#7d9970]"
+          className="rounded-sm bg-primary px-[15px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[#76946a]"
         >
           + Nuevo
         </button>
@@ -189,7 +189,7 @@ const ModernTopNav = ({
             type="button"
             onClick={onToggleAmountVisibility}
             title={amountsVisible ? 'Ocultar montos' : 'Mostrar montos'}
-            className="rounded-sm border border-[#ddd5c2] bg-white p-2 text-[#8a8677] transition-colors duration-150 hover:bg-[#f0ead9] hover:text-foreground dark:border-[#2e3844] dark:bg-[#212836] dark:text-[#93a0af] dark:hover:bg-[#2e3844]"
+            className="rounded-sm border border-[#c8bf91] bg-white p-2 text-[#625f55] transition-colors duration-150 hover:bg-[#e4d794] hover:text-foreground dark:border-[#363646] dark:bg-[#2a2a37] dark:text-[#c8c093] dark:hover:bg-[#363646]"
           >
             {amountsVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
           </button>
@@ -200,7 +200,7 @@ const ModernTopNav = ({
             type="button"
             onClick={onToggleTheme}
             title={isDarkMode ? 'Modo claro' : 'Modo oscuro'}
-            className="rounded-sm border border-[#ddd5c2] bg-white p-2 text-[#8a8677] transition-colors duration-150 hover:bg-[#f0ead9] hover:text-foreground dark:border-[#2e3844] dark:bg-[#212836] dark:text-[#93a0af] dark:hover:bg-[#2e3844]"
+            className="rounded-sm border border-[#c8bf91] bg-white p-2 text-[#625f55] transition-colors duration-150 hover:bg-[#e4d794] hover:text-foreground dark:border-[#363646] dark:bg-[#2a2a37] dark:text-[#c8c093] dark:hover:bg-[#363646]"
           >
             {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
@@ -212,7 +212,7 @@ const ModernTopNav = ({
               type="button"
               onClick={() => setShowUserMenu((prev) => !prev)}
               title="Mi cuenta"
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-[#ddd5c2] bg-white text-[12px] font-semibold text-foreground overflow-hidden dark:border-[#2e3844] dark:bg-[#212836]"
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-[#c8bf91] bg-white text-[12px] font-semibold text-foreground overflow-hidden dark:border-[#363646] dark:bg-[#2a2a37]"
             >
               {user.picture ? (
                 <img
@@ -226,17 +226,17 @@ const ModernTopNav = ({
             </button>
 
             {showUserMenu && (
-              <div className="absolute right-0 top-full z-40 mt-2 w-56 overflow-hidden rounded-md border border-[#ddd5c2] bg-card dark:border-[#2e3844]">
-                <div className="border-b border-[#ddd5c2] px-4 py-3 dark:border-[#2e3844]">
+              <div className="absolute right-0 top-full z-40 mt-2 w-56 overflow-hidden rounded-md border border-[#c8bf91] bg-card dark:border-[#363646]">
+                <div className="border-b border-[#c8bf91] px-4 py-3 dark:border-[#363646]">
                   <p className="truncate text-[13.5px] font-medium text-foreground">
                     {user.full_name || user.name || 'Usuario'}
                   </p>
-                  <p className="truncate text-[12px] text-[#8a8677] dark:text-[#93a0af]">{user.email || ''}</p>
+                  <p className="truncate text-[12px] text-[#625f55] dark:text-[#c8c093]">{user.email || ''}</p>
                 </div>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-[13.5px] text-[#a04a34] transition-colors duration-150 hover:bg-[#f0ead9] dark:text-[#c26a52] dark:hover:bg-[#212836]"
+                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-[13.5px] text-[#b83245] transition-colors duration-150 hover:bg-[#e4d794] dark:text-[#e46876] dark:hover:bg-[#2a2a37]"
                 >
                   <LogOut className="h-4 w-4" />
                   Cerrar sesión

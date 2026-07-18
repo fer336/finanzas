@@ -40,8 +40,8 @@ const EvolucionMensualChart = ({ data, formatAmount }) => (
             color: 'var(--foreground)',
           }}
         />
-        <Bar dataKey="ingresos" fill="#5a7d52" radius={[3, 3, 0, 0]} maxBarSize={18} />
-        <Bar dataKey="gastos" fill="#b35a42" radius={[3, 3, 0, 0]} maxBarSize={18} />
+        <Bar dataKey="ingresos" fill="var(--success)" radius={[3, 3, 0, 0]} maxBarSize={18} />
+        <Bar dataKey="gastos" fill="var(--destructive)" radius={[3, 3, 0, 0]} maxBarSize={18} />
       </BarChart>
     </ResponsiveContainer>
   </div>
@@ -53,7 +53,7 @@ EvolucionMensualChart.propTypes = {
 };
 
 /**
- * EmptyState — DESIGN.md "Estado vacío": itálico 13.5px #8a8677, nunca un
+ * EmptyState — DESIGN.md "Estado vacío": itálico 13.5px #625f55, nunca un
  * área en blanco.
  */
 const EmptyState = ({ children }) => (
@@ -65,7 +65,7 @@ EmptyState.propTypes = { children: PropTypes.node };
 const DashboardSkeleton = () => (
   <div className="min-h-screen bg-background">
     <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
-      <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px] dark:border-border">
+      <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-border pb-[18px]">
         <div className="space-y-2.5">
           <Skeleton className="h-[11px] w-40" />
           <Skeleton className="h-[42px] w-72" />
@@ -90,7 +90,7 @@ const DashboardSkeleton = () => (
 );
 
 /**
- * ModernDashboard — vista "Inicio" del tema Papel (desktop).
+ * ModernDashboard — vista "Inicio" del tema Kanagawa (desktop).
  * Ver design_handoff_rediseno_papel/README.md sección "2. Inicio (dashboard)".
  */
 const ModernDashboard = ({
@@ -192,20 +192,20 @@ const ModernDashboard = ({
       <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
 
         {/* ── Cabecera de período ── */}
-        <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px] dark:border-border">
+        <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-border pb-[18px]">
           <div>
             <div className="flex items-center gap-2.5">
               <div
-                className="font-mono text-[11px] uppercase text-[#3d5a80] dark:text-muted-foreground"
+                className="font-mono text-[11px] uppercase text-[var(--info)]"
                 style={{ letterSpacing: '.16em' }}
               >
                 Período {periodoLabel}
               </div>
-              <div className="flex items-center gap-1 rounded-full border border-[#ddd5c2] bg-card px-1.5 py-1 dark:border-border">
+              <div className="flex items-center gap-1 rounded-full border border-border bg-card px-1.5 py-1">
                 <button onClick={goToPrevMonth} className="p-1 rounded-full hover:bg-black/5 transition-colors dark:hover:bg-card-hover" title="Mes anterior">
-                  <ChevronLeft className="w-3.5 h-3.5 text-[#8a8677] dark:text-muted-foreground" />
+                  <ChevronLeft className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
-                <button onClick={goToToday} className="px-1.5 font-mono text-[11px] text-[#5d6470] transition-colors hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground">
+                <button onClick={goToToday} className="px-1.5 font-mono text-[11px] text-muted-foreground transition-colors hover:text-foreground">
                   hoy
                 </button>
                 <button
@@ -214,37 +214,37 @@ const ModernDashboard = ({
                   className="p-1 rounded-full hover:bg-black/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-card-hover"
                   title="Mes siguiente"
                 >
-                  <ChevronRight className="w-3.5 h-3.5 text-[#8a8677] dark:text-muted-foreground" />
+                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
               </div>
             </div>
             <h1 className="mt-1 font-serif text-[42px] font-bold leading-none text-foreground">
               {tituloMes}
             </h1>
-            <p className="mt-2 max-w-[58ch] text-[13.5px] text-[#5d6470] dark:text-muted-foreground">
+            <p className="mt-2 max-w-[58ch] text-[13.5px] text-secondary-foreground dark:text-muted-foreground">
               {veredicto}
             </p>
           </div>
-          <div className="shrink-0 rounded-md border border-[#ddd5c2] bg-card px-[18px] py-3 text-right dark:border-border">
+          <div className="shrink-0 rounded-md border border-border bg-card px-[18px] py-3 text-right">
             <div className="flex items-center justify-end gap-2">
-              <div className="font-mono text-[10px] uppercase tracking-[.1em] text-[#8a8677] dark:text-muted-foreground">
+              <div className="font-mono text-[10px] uppercase tracking-[.1em] text-muted-foreground">
                 {balanceMode === 'mensual' ? 'Resultado del mes' : 'Balance disponible'}
               </div>
               <PillToggle
                 options={[{ value: 'mensual', label: 'Mensual' }, { value: 'acumulado', label: 'Acumulado' }]}
                 value={balanceMode}
                 onChange={setBalanceMode}
-                activeClassName="bg-[#20242c] text-[#f4f0e6]"
+                activeClassName="bg-foreground text-background"
               />
             </div>
             <div className="mt-1 font-mono text-[24px] font-semibold text-foreground">
               {balanceMostrado < 0 ? '− ' : ''}{formatAmount(Math.abs(balanceMostrado), { decimals: 0 })}
             </div>
             {balanceMode === 'acumulado' && (
-              <div className="font-mono text-[11px] text-[#8a8677] dark:text-muted-foreground">{usdEquivalent}</div>
+              <div className="font-mono text-[11px] text-muted-foreground">{usdEquivalent}</div>
             )}
             {balanceMode === 'acumulado' && apartadoObjetivos > 0 && (
-              <div className="font-mono text-[11px] text-[#8a8677] dark:text-muted-foreground">
+              <div className="font-mono text-[11px] text-muted-foreground">
                 Apartado en objetivos: {formatAmount(apartadoObjetivos, { decimals: 0 })}
               </div>
             )}
@@ -269,13 +269,13 @@ const ModernDashboard = ({
         <div className="grid grid-cols-[1.5fr_1fr] gap-4">
 
           {/* Movimientos recientes */}
-          <div className="rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px] dark:border-border">
+          <div className="rounded-md border border-border bg-card px-5 py-[18px]">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-serif text-[17px] font-semibold text-foreground">Movimientos recientes</h2>
               <button
                 type="button"
                 onClick={() => onNavigate && onNavigate('transactions-full')}
-                className="text-[13px] text-[#3d5a80] hover:underline"
+                className="text-[13px] text-[var(--info)] hover:underline"
               >
                 ver todos
               </button>
@@ -288,22 +288,22 @@ const ModernDashboard = ({
                 {movimientosRecientes.map((m, i) => (
                   <Fragment key={m.id ?? `${m.fechaMMDD}-${m.descripcion}-${i}`}>
                     <span
-                      className={`font-mono text-[11.5px] text-[#8a8677] dark:text-muted-foreground ${i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px] dark:border-muted' : ''}`}
+                      className={`font-mono text-[11.5px] text-muted-foreground ${i > 0 ? 'border-t border-dashed border-muted pt-[9px]' : ''}`}
                     >
                       {m.fechaMMDD}
                     </span>
-                    <span className={i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px] dark:border-muted' : ''}>
+                    <span className={i > 0 ? 'border-t border-dashed border-muted pt-[9px]' : ''}>
                       {m.descripcion}{' '}
                       <span
                         className="ml-1.5 font-mono text-[10px] uppercase"
-                        style={{ color: m.esIngreso ? '#476442' : '#a04a34' }}
+                        style={{ color: m.esIngreso ? 'var(--success)' : 'var(--destructive)' }}
                       >
                         {m.categoria}
                       </span>
                     </span>
                     <span
-                      className={`text-right font-mono font-semibold ${i > 0 ? 'border-t border-dashed border-[#ddd5c2] pt-[9px] dark:border-muted' : ''}`}
-                      style={{ color: m.esIngreso ? '#476442' : '#a04a34' }}
+                      className={`text-right font-mono font-semibold ${i > 0 ? 'border-t border-dashed border-muted pt-[9px]' : ''}`}
+                      style={{ color: m.esIngreso ? 'var(--success)' : 'var(--destructive)' }}
                     >
                       {m.montoFormatted}
                     </span>
@@ -317,7 +317,7 @@ const ModernDashboard = ({
           <div className="flex flex-col gap-4">
 
             {/* Gastos / Ingresos por categoría */}
-            <div className="rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px] dark:border-border">
+            <div className="rounded-md border border-border bg-card px-5 py-[18px]">
               <div className="mb-3 flex items-center justify-between gap-2">
                 <h2 className="font-serif text-[17px] font-semibold text-foreground">
                   {donutMode === 'gastos' ? 'Gastos por categoría' : 'Ingresos por categoría'}
@@ -326,7 +326,7 @@ const ModernDashboard = ({
                   options={[{ value: 'gastos', label: 'Gastos' }, { value: 'ingresos', label: 'Ingresos' }]}
                   value={donutMode}
                   onChange={setDonutMode}
-                  activeClassName="bg-[#20242c] text-[#f4f0e6]"
+                  activeClassName="bg-foreground text-background"
                 />
               </div>
               {donutData.length === 0 ? (
@@ -345,7 +345,7 @@ const ModernDashboard = ({
                           <span className="h-[9px] w-[9px] shrink-0 rounded-sm" style={{ background: c.color }} />
                           {c.nombre}
                         </span>
-                        <span className="font-mono text-[#5d6470] dark:text-muted-foreground">{c.pct}%</span>
+                        <span className="font-mono text-secondary-foreground dark:text-muted-foreground">{c.pct}%</span>
                       </Fragment>
                     ))}
                   </div>
@@ -357,18 +357,18 @@ const ModernDashboard = ({
             <button
               type="button"
               onClick={goToVencimientos}
-              className="rounded-md border border-[#e0c98a] bg-[#fdf6e3] px-5 py-4 text-left dark:border-[#d8ac5a] dark:bg-[rgba(216,172,90,0.14)]"
+              className="rounded-md border border-[#de9800] bg-[#f9d791] px-5 py-4 text-left dark:border-[#e6c384] dark:bg-[rgba(230,195,132,0.14)]"
             >
               <div className="flex items-baseline justify-between">
                 <span className="font-serif text-[15px] font-semibold text-foreground">Vencimientos</span>
-                <span className="font-mono text-[12px] font-semibold text-[#8a6a1f] dark:text-[#d8ac5a]">
+                <span className="font-mono text-[12px] font-semibold text-[#6b572f] dark:text-[#e6c384]">
                   {formatAmount(totalPendiente, { decimals: 0 })}
                 </span>
               </div>
               {pendientesActivos.length === 0 ? (
-                <p className="mt-1.5 text-[12.5px] italic text-[#8a8677] dark:text-[#93a0af]">Sin vencimientos pendientes.</p>
+                <p className="mt-1.5 text-[12.5px] italic text-[#625f55] dark:text-[#c8c093]">Sin vencimientos pendientes.</p>
               ) : (
-                <p className="mt-1.5 text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
+                <p className="mt-1.5 text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
                   {pendientesActivos.length} pendiente{pendientesActivos.length === 1 ? '' : 's'}
                   {proximoVencimiento && proximoVencimientoLabel ? (
                     <>
@@ -385,18 +385,18 @@ const ModernDashboard = ({
             <button
               type="button"
               onClick={goToPrestamos}
-              className="rounded-md border border-[#b7c7d8] bg-[#eef5fb] px-5 py-4 text-left dark:border-[#6f8baa] dark:bg-[rgba(111,139,170,0.16)]"
+              className="rounded-md border border-[#9fb5c9] bg-[#c7d7e0] px-5 py-4 text-left dark:border-[#658594] dark:bg-[rgba(126,156,216,0.14)]"
             >
               <div className="flex items-baseline justify-between">
                 <span className="font-serif text-[15px] font-semibold text-foreground">Préstamos</span>
-                <span className="font-mono text-[12px] font-semibold text-[#3d5a80] dark:text-[#9eb7d0]">
+                <span className="font-mono text-[12px] font-semibold text-[#4d699b] dark:text-[#7e9cd8]">
                   {formatAmount(totalPrestamosADevolver, { decimals: 0 })}
                 </span>
               </div>
               {prestamosActivos.length === 0 ? (
-                <p className="mt-1.5 text-[12.5px] italic text-[#8a8677] dark:text-[#93a0af]">Sin préstamos pendientes.</p>
+                <p className="mt-1.5 text-[12.5px] italic text-[#625f55] dark:text-[#c8c093]">Sin préstamos pendientes.</p>
               ) : (
-                <p className="mt-1.5 text-[12.5px] text-[#5d6470] dark:text-[#93a0af]">
+                <p className="mt-1.5 text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
                   {prestamosActivos.length} préstamo{prestamosActivos.length === 1 ? '' : 's'} activo{prestamosActivos.length === 1 ? '' : 's'}
                   {proximoPrestamo && proximoPrestamoLabel ? (
                     <>
@@ -412,12 +412,12 @@ const ModernDashboard = ({
         </div>
 
         {/* ── Evolución mensual (últimos 6 meses) ── */}
-        <div className="mt-4 rounded-md border border-[#ddd5c2] bg-card px-5 py-[18px] dark:border-border">
+        <div className="mt-4 rounded-md border border-border bg-card px-5 py-[18px]">
           <div className="mb-3 flex items-center gap-4">
             <h2 className="font-serif text-[17px] font-semibold text-foreground">Evolución mensual</h2>
-            <div className="flex items-center gap-3 text-[11.5px] text-[#5d6470] dark:text-muted-foreground">
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[#5a7d52]" />Ingresos</span>
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[#b35a42]" />Gastos</span>
+            <div className="flex items-center gap-3 text-[11.5px] text-secondary-foreground dark:text-muted-foreground">
+              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[var(--success)]" />Ingresos</span>
+              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[var(--destructive)]" />Gastos</span>
             </div>
           </div>
           <EvolucionMensualChart data={evolucionMensual} formatAmount={formatAmount} />

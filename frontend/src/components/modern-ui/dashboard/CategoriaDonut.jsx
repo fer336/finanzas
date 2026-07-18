@@ -3,7 +3,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
 /**
  * CategoriaDonut — dona de recharts para "Gastos por categoría", tema
- * Papel. Compartida entre ModernDashboard (desktop) y MobileDashboardHome.
+ * Kanagawa. Compartida entre ModernDashboard (desktop) y MobileDashboardHome.
  */
 const CategoriaDonut = ({ categorias, total, formatAmount, size = 120 }) => (
   <div className="relative mx-auto shrink-0" style={{ height: size, width: size }}>
@@ -38,7 +38,7 @@ const CategoriaDonut = ({ categorias, total, formatAmount, size = 120 }) => (
       </PieChart>
     </ResponsiveContainer>
     <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-      <p className="font-mono text-[9.5px] uppercase tracking-[.06em] text-[#8a8677] dark:text-[#93a0af]">Total</p>
+      <p className="font-mono text-[9.5px] uppercase tracking-[.06em] text-[#625f55] dark:text-[#c8c093]">Total</p>
       <p className="font-mono text-[13px] font-semibold text-foreground">{formatAmount(total, { decimals: 0 })}</p>
     </div>
   </div>

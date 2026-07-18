@@ -15,7 +15,7 @@ import apiServices from '../../../services/api';
 import { useIsMobile } from '../../../hooks/use-mobile';
 
 /**
- * ModernAjustesView — container "Ajustes" del tema "Papel".
+ * ModernAjustesView — container "Ajustes" del tema "Kanagawa".
  * Tab "General" agrupa Widgets del dashboard + Modo de balance;
  * "Categorías" y "Métodos de pago" viven
  * en tabs propios (mismo patrón de tabs que ModernInversionesView) en
@@ -39,7 +39,7 @@ const loadTab = () => {
   return 'general';
 };
 
-// Switch on/off — track 36×20px radius 999px, off #d8d6cf, on #5a7d52,
+// Switch on/off — track 36×20px radius 999px, off #d8d6cf, on #526a3a,
 // thumb blanco 16px (ver DESIGN.md "Components" > Switch). `ui/toggle.jsx`
 // del proyecto es un toggle-button de Radix (estado on/off visual distinto,
 // pensado para grupos de botones), no un switch — por eso se arma acá un
@@ -55,7 +55,7 @@ const Switch = ({ checked, onChange, label }) => (
     style={{ background: checked ? 'var(--primary)' : 'var(--border)' }}
   >
     <span
-      className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all duration-150 dark:bg-[#212836]"
+      className="absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all duration-150 dark:bg-[#2a2a37]"
       style={{ left: checked ? '18px' : '2px' }}
     />
   </button>
@@ -68,9 +68,9 @@ Switch.propTypes = {
 };
 
 // Toggle de pills — mismo patrón visual que Mensual/Acumulado en
-// ModernTransactionsView (activa en azul #3d5a80, es un modo de "scope").
+// ModernTransactionsView (activa en azul #4d699b, es un modo de "scope").
 const PillToggle = ({ options, value, onChange }) => (
-  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] bg-card p-[3px] dark:border-[#2e3844]">
+  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#c8bf91] bg-card p-[3px] dark:border-[#363646]">
     {options.map((opt) => (
       <button
         key={opt.value}
@@ -78,8 +78,8 @@ const PillToggle = ({ options, value, onChange }) => (
         onClick={() => onChange(opt.value)}
         className={`rounded-full px-4 py-1.5 font-mono text-[12px] transition-colors duration-150 ${
           value === opt.value
-            ? 'bg-[#3d5a80] font-semibold text-[#faf7ef]'
-            : 'text-[#5d6470] hover:text-foreground dark:text-[#93a0af]'
+            ? 'bg-[#4d699b] font-semibold text-[#e5ddb0]'
+            : 'text-[#43436c] hover:text-foreground dark:text-[#c8c093]'
         }`}
       >
         {opt.label}
@@ -98,10 +98,10 @@ PillToggle.propTypes = {
 };
 
 // Tabs de sección — mismo patrón que ModernInversionesView (fondo oscuro
-// #20242c en la pill activa, porque estos tabs cambian de contenido
+// #545464 en la pill activa, porque estos tabs cambian de contenido
 // completo en vez de filtrar un rango).
 const SectionTabs = ({ options, value, onChange }) => (
-  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] bg-card p-[3px] dark:border-[#2e3844]">
+  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#c8bf91] bg-card p-[3px] dark:border-[#363646]">
     {options.map((opt) => (
       <button
         key={opt.value}
@@ -109,8 +109,8 @@ const SectionTabs = ({ options, value, onChange }) => (
         onClick={() => onChange(opt.value)}
         className={`rounded-full px-4 py-1.5 font-mono text-[12px] transition-colors duration-150 ${
           value === opt.value
-            ? 'bg-[#20242c] font-semibold text-[#f4f0e6] dark:bg-[#ece7d8] dark:text-[#12161c]'
-            : 'text-[#5d6470] hover:text-foreground dark:text-[#93a0af]'
+            ? 'bg-[#545464] font-semibold text-[#f2ecbc] dark:bg-[#dcd7ba] dark:text-[#1f1f28]'
+            : 'text-[#43436c] hover:text-foreground dark:text-[#c8c093]'
         }`}
       >
         {opt.label}
@@ -130,9 +130,9 @@ SectionTabs.propTypes = {
 
 // ─── Section shell — card estándar con título Fraunces ─────────────────────
 const Section = ({ title, description, children }) => (
-  <section className="rounded-md border border-[#ddd5c2] bg-card p-5 dark:border-[#2e3844]">
+  <section className="rounded-md border border-[#c8bf91] bg-card p-5 dark:border-[#363646]">
     <h2 className="font-serif text-[17px] font-semibold text-foreground">{title}</h2>
-    {description && <p className="mt-1 text-[12.5px] text-[#8a8677] dark:text-[#93a0af]">{description}</p>}
+    {description && <p className="mt-1 text-[12.5px] text-[#625f55] dark:text-[#c8c093]">{description}</p>}
     <div className="mt-4">{children}</div>
   </section>
 );
@@ -228,10 +228,10 @@ const ApiKeysSection = () => {
   return (
     <div>
       {justCreatedKey && (
-        <div className="mb-4 rounded-sm border border-[#e9c46a] bg-[#fdf6e3] p-4 dark:border-[#d8ac5a] dark:bg-[rgba(216,172,90,0.14)]">
+        <div className="mb-4 rounded-sm border border-[#f9d791] bg-[#f9d791] p-4 dark:border-[#e6c384] dark:bg-[rgba(230,195,132,0.14)]">
           <div className="mb-2 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 text-[#8a6a1f] dark:text-[#d8ac5a]" />
-            <p className="font-serif text-[14px] font-semibold text-[#8a6a1f] dark:text-[#d8ac5a]">
+            <AlertTriangle className="h-4 w-4 text-[#6b572f] dark:text-[#e6c384]" />
+            <p className="font-serif text-[14px] font-semibold text-[#6b572f] dark:text-[#e6c384]">
               Guardá esta key ahora — no se va a volver a mostrar
             </p>
           </div>
@@ -241,24 +241,24 @@ const ApiKeysSection = () => {
               readOnly
               value={justCreatedKey.key}
               onClick={(e) => e.target.select()}
-              className="w-full rounded-sm border border-[#e9c46a] bg-white px-3 py-2 font-mono text-[12.5px] text-[#20242c] dark:border-[#d8ac5a] dark:bg-[#212836] dark:text-[#ece7d8]"
+              className="w-full rounded-sm border border-[#f9d791] bg-white px-3 py-2 font-mono text-[12.5px] text-[#545464] dark:border-[#e6c384] dark:bg-[#2a2a37] dark:text-[#dcd7ba]"
             />
             <button
               type="button"
               onClick={handleCopy}
-              className="flex shrink-0 items-center gap-1.5 rounded-sm border border-[#e9c46a] bg-white px-3 py-2 font-sans text-[12.5px] font-medium text-[#8a6a1f] transition-colors duration-150 hover:bg-[#f0ead9] dark:border-[#d8ac5a] dark:bg-[#212836] dark:text-[#d8ac5a] dark:hover:bg-[#2e3844]"
+              className="flex shrink-0 items-center gap-1.5 rounded-sm border border-[#f9d791] bg-white px-3 py-2 font-sans text-[12.5px] font-medium text-[#6b572f] transition-colors duration-150 hover:bg-[#e4d794] dark:border-[#e6c384] dark:bg-[#2a2a37] dark:text-[#e6c384] dark:hover:bg-[#363646]"
             >
               {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
               {copied ? 'Copiado' : 'Copiar'}
             </button>
           </div>
-          <p className="mt-2 text-[11.5px] text-[#8a6a1f] dark:text-[#d8ac5a]">
+          <p className="mt-2 text-[11.5px] text-[#6b572f] dark:text-[#e6c384]">
             Por seguridad, esta es la única vez que vas a poder ver el token completo.
           </p>
           <button
             type="button"
             onClick={() => setJustCreatedKey(null)}
-            className="mt-3 rounded-sm border border-[#e9c46a] bg-white px-3 py-[6px] font-sans text-[11.5px] text-[#8a6a1f] transition-colors duration-150 hover:bg-[#f0ead9] dark:border-[#d8ac5a] dark:bg-[#212836] dark:text-[#d8ac5a] dark:hover:bg-[#2e3844]"
+            className="mt-3 rounded-sm border border-[#f9d791] bg-white px-3 py-[6px] font-sans text-[11.5px] text-[#6b572f] transition-colors duration-150 hover:bg-[#e4d794] dark:border-[#e6c384] dark:bg-[#2a2a37] dark:text-[#e6c384] dark:hover:bg-[#363646]"
           >
             Ya la guardé, cerrar
           </button>
@@ -266,17 +266,17 @@ const ApiKeysSection = () => {
       )}
 
       {error && (
-        <div className="mb-4 rounded-sm border border-[#a04a34]/40 bg-[#a04a34]/5 p-3 text-[12.5px] text-[#a04a34] dark:border-[#c26a52]/40 dark:bg-[#c26a52]/10 dark:text-[#c26a52]">
+        <div className="mb-4 rounded-sm border border-[#b83245]/40 bg-[#b83245]/5 p-3 text-[12.5px] text-[#b83245] dark:border-[#e46876]/40 dark:bg-[#e46876]/10 dark:text-[#e46876]">
           {error}
         </div>
       )}
 
       <div className="mb-4 flex items-start justify-between gap-3">
-        <p className="text-[12.5px] text-[#8a8677] dark:text-[#93a0af]">Cada key da acceso completo a tu cuenta vía la API.</p>
+        <p className="text-[12.5px] text-[#625f55] dark:text-[#c8c093]">Cada key da acceso completo a tu cuenta vía la API.</p>
         <button
           type="button"
           onClick={() => setShowCreateForm((v) => !v)}
-          className="flex shrink-0 items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] dark:hover:bg-[#7d9970]"
+          className="flex shrink-0 items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[#76946a]"
         >
           <Plus className="h-3.5 w-3.5" />
           Generar token
@@ -284,7 +284,7 @@ const ApiKeysSection = () => {
       </div>
 
       {showCreateForm && (
-        <form onSubmit={handleCreate} className="mb-4 flex items-center gap-2 rounded-sm border border-[#ddd5c2] bg-white p-3 dark:border-[#2e3844] dark:bg-[#212836]">
+        <form onSubmit={handleCreate} className="mb-4 flex items-center gap-2 rounded-sm border border-[#c8bf91] bg-white p-3 dark:border-[#363646] dark:bg-[#2a2a37]">
           <input
             type="text"
             value={nombre}
@@ -292,28 +292,28 @@ const ApiKeysSection = () => {
             placeholder="Ej: Agente Lucy externo"
             maxLength={100}
             autoFocus
-            className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3 py-2 text-[13.5px] text-foreground placeholder:text-[#8a8677] transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#2e3844] dark:bg-[#212836] dark:placeholder:text-[#93a0af]"
+            className="w-full rounded-sm border border-[#c8bf91] bg-white px-3 py-2 text-[13.5px] text-foreground placeholder:text-[#625f55] transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#363646] dark:bg-[#2a2a37] dark:placeholder:text-[#c8c093]"
           />
           <button
             type="submit"
             disabled={creating || !nombre.trim()}
-            className="shrink-0 rounded-sm bg-primary px-3.5 py-2 font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-[#7d9970]"
+            className="shrink-0 rounded-sm bg-primary px-3.5 py-2 font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-[#76946a]"
           >
             {creating ? 'Creando…' : 'Crear'}
           </button>
         </form>
       )}
 
-      <div className="overflow-hidden overflow-x-auto rounded-md border border-[#ddd5c2] bg-card dark:border-[#2e3844]">
+      <div className="overflow-hidden overflow-x-auto rounded-md border border-[#c8bf91] bg-card dark:border-[#363646]">
         <table className="w-full min-w-[640px]">
           <thead>
-            <tr className="border-b-2 border-[#ddd5c2] dark:border-[#2e3844]">
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Nombre</th>
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Prefijo</th>
-              <th className="hidden px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] sm:table-cell dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Creado</th>
-              <th className="hidden px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] sm:table-cell dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Último uso</th>
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Estado</th>
-              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-[#93a0af]" style={{ letterSpacing: '.08em' }}>Acciones</th>
+            <tr className="border-b-2 border-[#c8bf91] dark:border-[#363646]">
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Nombre</th>
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Prefijo</th>
+              <th className="hidden px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#625f55] sm:table-cell dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Creado</th>
+              <th className="hidden px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#625f55] sm:table-cell dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Último uso</th>
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Estado</th>
+              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -327,28 +327,28 @@ const ApiKeysSection = () => {
               keys.map((k) => {
                 const isRevoked = Boolean(k.revocado_en);
                 return (
-                  <tr key={k.id} className="group border-b border-[#e7e0cf] transition-colors hover:bg-[#f0ead9] dark:border-[#2e3844] dark:hover:bg-[#212836]">
+                  <tr key={k.id} className="group border-b border-[#d5cea3] transition-colors hover:bg-[#e4d794] dark:border-[#363646] dark:hover:bg-[#2a2a37]">
                     <td className="px-3.5 py-2.5">
                       <div className="flex min-w-0 items-center gap-2.5">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-[#f0ead9] dark:bg-[#212836]">
-                          <KeyRound className="h-4 w-4 text-[#8a8677] dark:text-[#93a0af]" />
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-[#e4d794] dark:bg-[#2a2a37]">
+                          <KeyRound className="h-4 w-4 text-[#625f55] dark:text-[#c8c093]" />
                         </div>
                         <span className="truncate font-serif text-[14.5px] font-semibold text-foreground">{k.nombre}</span>
                       </div>
                     </td>
                     <td className="px-3.5 py-2.5">
-                      <span className="font-mono text-[12px] text-[#5d6470] dark:text-[#93a0af]">{k.key_prefix}…</span>
+                      <span className="font-mono text-[12px] text-[#43436c] dark:text-[#c8c093]">{k.key_prefix}…</span>
                     </td>
-                    <td className="hidden px-3.5 py-2.5 font-mono text-[11.5px] text-[#8a8677] sm:table-cell dark:text-[#93a0af]">
+                    <td className="hidden px-3.5 py-2.5 font-mono text-[11.5px] text-[#625f55] sm:table-cell dark:text-[#c8c093]">
                       {formatDate(k.creado_en) || '—'}
                     </td>
-                    <td className="hidden px-3.5 py-2.5 font-mono text-[11.5px] text-[#8a8677] sm:table-cell dark:text-[#93a0af]">
+                    <td className="hidden px-3.5 py-2.5 font-mono text-[11.5px] text-[#625f55] sm:table-cell dark:text-[#c8c093]">
                       {formatDate(k.ultimo_uso) || 'Nunca'}
                     </td>
                     <td className="px-3.5 py-2.5">
                       <span
                         className={`inline-flex rounded-full border px-2 py-[2px] font-mono text-[10.5px] uppercase tracking-[.04em] ${
-                          isRevoked ? 'border-[#ddd5c2] text-[#8a8677] dark:border-[#2e3844] dark:text-[#93a0af]' : 'border-[#5a7d52] text-[#476442] dark:border-[#8fae7f] dark:text-[#8fae7f]'
+                          isRevoked ? 'border-[#c8bf91] text-[#625f55] dark:border-[#363646] dark:text-[#c8c093]' : 'border-[#526a3a] text-[#526a3a] dark:border-[#98bb6c] dark:text-[#98bb6c]'
                         }`}
                       >
                         {isRevoked ? 'Revocada' : 'Activa'}
@@ -360,7 +360,7 @@ const ApiKeysSection = () => {
                           <button
                             type="button"
                             onClick={() => handleRevoke(k.id)}
-                            className="flex items-center gap-1 rounded-sm px-1.5 py-1 text-[#8a8677] opacity-0 transition-colors group-hover:opacity-100 hover:bg-black/5 hover:text-[#a04a34] dark:text-[#93a0af] dark:hover:bg-white/5 dark:hover:text-[#c26a52]"
+                            className="flex items-center gap-1 rounded-sm px-1.5 py-1 text-[#625f55] opacity-0 transition-colors group-hover:opacity-100 hover:bg-black/5 hover:text-[#b83245] dark:text-[#c8c093] dark:hover:bg-white/5 dark:hover:text-[#e46876]"
                             title="Revocar API key"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -413,7 +413,7 @@ const ModernAjustesView = ({
       <div className={`mx-auto max-w-[1100px] ${isMobile ? 'px-4 py-4' : 'px-[34px] py-[28px]'}`}>
         {/* Cabecera (mismo patrón que Movimientos / Vencimientos / Inversiones) */}
         <div
-          className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] dark:border-[#2e3844] ${
+          className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#b8ad78] dark:border-[#363646] ${
             isMobile ? 'mb-3 pb-3' : 'mb-[22px] pb-[18px]'
           }`}
         >

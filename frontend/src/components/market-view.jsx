@@ -342,28 +342,28 @@ export function MarketView() {
                       <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#dcd5ac20" />
                   <XAxis 
                     dataKey="timestamp" 
-                    stroke="#ffffff60"
-                    tick={{ fill: '#ffffff80', fontSize: 12 }}
+                    stroke="#dcd5ac60"
+                    tick={{ fill: '#dcd5ac80', fontSize: 12 }}
                     tickFormatter={(value) => {
                       const date = new Date(value);
                       return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                     }}
                   />
                   <YAxis 
-                    stroke="#ffffff60"
-                    tick={{ fill: '#ffffff80', fontSize: 12 }}
+                    stroke="#dcd5ac60"
+                    tick={{ fill: '#dcd5ac80', fontSize: 12 }}
                     domain={['auto', 'auto']}
                     tickFormatter={(value) => `$${value.toFixed(2)}`}
                   />
                   <Tooltip 
                     contentStyle={{ 
                       backgroundColor: '#000000dd', 
-                      border: '1px solid #ffffff20',
+                      border: '1px solid #dcd5ac20',
                       borderRadius: '8px',
-                      color: '#ffffff'
+                      color: '#dcd5ac'
                     }}
                     formatter={(value) => [`$${value.toFixed(2)}`, 'Precio']}
                   />

@@ -5,122 +5,116 @@
 
 @layer base {
   :root {
-    /* ============================================================
-     * Tema "Papel" — editorial claro tipo libreta contable.
-     * Fuente de verdad: DESIGN.md (sección "Color Palette").
-     * Nota histórica: el tema oscuro NEÓN anterior (glassmorphism,
-     * glow, sidebar oscuro) fue descartado explícitamente (ver
-     * PRODUCT.md "Anti-references", ahora archivado). Ese rechazo
-     * era a ESE look puntual, no a un dark mode en general — los
-     * valores `.dark` de acá abajo son una variante oscura del mismo
-     * sistema Papel (misma tipografía, mismos roles de acento, cero
-     * sombra/gradiente decorativo), tomada de
-     * resumen-diario-2026-07-13.html.
-     * ============================================================ */
+    color-scheme: light;
+    /* Kanagawa Lotus. Keep these roles aligned with the Wave block below. */
 
     /* Fondos */
-    --background: #f4f0e6;
+    --background: #f2ecbc;
     /* Página */
-    --foreground: #20242c;
+    --foreground: #545464;
     /* Texto principal */
 
     /* Card/Panel */
-    --card: #faf7ef;
+    --card: #e5ddb0;
     /* Superficie / card */
-    --card-foreground: #20242c;
-    --card-hover: #f0ead9;
+    --card-foreground: #545464;
+    --card-hover: #e4d794;
     /* Hover de filas de tabla */
 
     /* Popover/Modal */
-    --popover: #faf7ef;
-    --popover-foreground: #20242c;
+    --popover: #d5cea3;
+    --popover-foreground: #43436c;
 
     /* Primary - Verde (ingresos / acción primaria) */
-    --primary: #5a7d52;
-    --primary-foreground: #faf7ef;
-    --primary-glow: rgba(90, 125, 82, 0);
+    --primary: #526a3a;
+    --primary-foreground: #f2ecbc;
+    --primary-glow: rgba(82, 106, 58, 0);
     /* sin glow decorativo — DESIGN.md prohíbe sombras/gradientes */
 
     /* Secondary - Botón/superficie secundaria (borde + blanco) */
-    --secondary: #ffffff;
-    --secondary-foreground: #20242c;
-    --secondary-glow: rgba(221, 213, 194, 0);
+    --secondary: #dcd5ac;
+    --secondary-foreground: #43436c;
+    --secondary-glow: rgba(220, 213, 172, 0);
 
     /* Muted/Subtle - Bordes sutiles / texto terciario */
-    --muted: #e7e0cf;
-    --muted-foreground: #8a8677;
+    --muted: #d5cea3;
+    --muted-foreground: #625f55;
 
     /* Accent - Dorado (avisos / pendiente) */
-    --accent: #fdf6e3;
-    --accent-foreground: #8a6a1f;
+    --accent: #f9d791;
+    --accent-foreground: #6b572f;
 
     /* Destructive - Arcilla (gastos) */
-    --destructive: #b35a42;
-    --destructive-foreground: #faf7ef;
+    --destructive: #b83245;
+    --destructive-foreground: #f2ecbc;
 
     /* Success - Verde (mismo acento que ingresos/primario) */
-    --success: #5a7d52;
-    --success-foreground: #faf7ef;
+    --success: #526a3a;
+    --success-foreground: #f2ecbc;
 
     /* Bordes & Inputs */
-    --border: #ddd5c2;
+    --border: #c8bf91;
     /* Estándar */
-    --input: #ddd5c2;
-    --ring: #5a7d52;
+    --input: #c8bf91;
+    --ring: #4d699b;
+    --info: #4d699b;
+    --warning: #6b572f;
+    --violet: #624c83;
 
     --radius: 0.5rem;
     /* 8px — radio de card, ver tailwind.config.js para escala completa */
   }
 
-  /* Variante oscura del tema Papel — mismos roles semánticos que
-     :root (verde=ingresos, arcilla=gastos, dorado=pendiente,
-     azul=info), paleta tomada de resumen-diario-2026-07-13.html. */
+  /* Kanagawa Wave. */
   .dark {
     color-scheme: dark;
 
     /* Fondos */
-    --background: #12161c;
-    --foreground: #ece7d8;
+    --background: #1f1f28;
+    --foreground: #dcd7ba;
 
     /* Card/Panel */
-    --card: #1a2029;
-    --card-foreground: #ece7d8;
-    --card-hover: #212836;
+    --card: #181820;
+    --card-foreground: #dcd7ba;
+    --card-hover: #2a2a37;
 
     /* Popover/Modal */
-    --popover: #1a2029;
-    --popover-foreground: #ece7d8;
+    --popover: #16161d;
+    --popover-foreground: #dcd7ba;
 
     /* Primary - Verde (ingresos / acción primaria) */
-    --primary: #8fae7f;
-    --primary-foreground: #12161c;
-    --primary-glow: rgba(143, 174, 127, 0);
+    --primary: #98bb6c;
+    --primary-foreground: #16161d;
+    --primary-glow: rgba(152, 187, 108, 0);
 
     /* Secondary - Botón/superficie secundaria */
-    --secondary: #212836;
-    --secondary-foreground: #ece7d8;
-    --secondary-glow: rgba(46, 56, 68, 0);
+    --secondary: #2a2a37;
+    --secondary-foreground: #dcd7ba;
+    --secondary-glow: rgba(42, 42, 55, 0);
 
     /* Muted/Subtle - Bordes sutiles / texto terciario */
-    --muted: #2e3844;
-    --muted-foreground: #93a0af;
+    --muted: #363646;
+    --muted-foreground: #c8c093;
 
     /* Accent - Dorado (avisos / pendiente) */
-    --accent: rgba(216, 172, 90, 0.14);
-    --accent-foreground: #d8ac5a;
+    --accent: #49443c;
+    --accent-foreground: #e6c384;
 
     /* Destructive - Arcilla (gastos) */
-    --destructive: #c26a52;
-    --destructive-foreground: #ece7d8;
+    --destructive: #e46876;
+    --destructive-foreground: #16161d;
 
     /* Success - Verde (mismo acento que ingresos/primario) */
-    --success: #8fae7f;
-    --success-foreground: #12161c;
+    --success: #98bb6c;
+    --success-foreground: #16161d;
 
     /* Bordes & Inputs */
-    --border: #2e3844;
-    --input: #2e3844;
-    --ring: #8fae7f;
+    --border: #363646;
+    --input: #363646;
+    --ring: #7e9cd8;
+    --info: #7e9cd8;
+    --warning: #e6c384;
+    --violet: #957fb8;
   }
 }
 
@@ -168,30 +162,22 @@
   background: var(--primary);
 }
 
-/* Glassmorphism Utilities */
+/* Legacy utility names kept for callers, rendered as solid Kanagawa surfaces. */
 .glass-panel {
-  background: rgba(24, 24, 27, 0.7);
-  /* Zinc 900 with opacity */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-panel:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  background: rgba(39, 39, 42, 0.8);
-  /* Zinc 800 with opacity */
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  border-color: var(--ring);
+  background: var(--card-hover);
 }
 
 .glass-card {
-  background: linear-gradient(145deg, rgba(39, 39, 42, 0.4), rgba(24, 24, 27, 0.4));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
 }
 
@@ -256,26 +242,33 @@
   animation-delay: 300ms;
 }
 
-/* Text Gradients */
+/* Legacy helpers now use semantic solid colors. */
 .text-gradient-primary {
-  background: linear-gradient(135deg, #3b82f6, #60a5fa);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--info);
 }
 
 .text-gradient-success {
-  background: linear-gradient(135deg, #22c55e, #4ade80);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--success);
 }
 
 .text-gradient-danger {
-  background: linear-gradient(135deg, #ef4444, #f87171);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--destructive);
+}
+
+::selection {
+  background: var(--ring);
+  color: var(--primary-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Hide scrollbar utility */

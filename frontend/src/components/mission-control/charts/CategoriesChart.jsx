@@ -76,15 +76,15 @@ export const CategoriesChart = ({ transactions = [], selectedMonth }) => {
 
     const data = payload[0].payload;
     return (
-      <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 shadow-xl">
-        <p className="text-white font-semibold mb-1">{data.name}</p>
-        <p className="text-gray-300 text-sm mb-1">
+      <div className="bg-gray-900 dark:bg-[#181820] border border-gray-700 dark:border-[#363646] rounded-lg p-3 shadow-xl">
+        <p className="text-white dark:text-[#dcd7ba] font-semibold mb-1">{data.name}</p>
+        <p className="text-gray-300 dark:text-[#c8c093] text-sm mb-1">
           {data.transactions} transaccion{data.transactions !== 1 ? 'es' : ''}
         </p>
-        <p className="text-white font-bold text-lg">
+        <p className="text-white dark:text-[#dcd7ba] font-bold text-lg">
           {formatCurrency(data.value)}
         </p>
-        <p className="text-gray-400 text-sm">
+        <p className="text-gray-400 dark:text-[#c8c093] text-sm">
           {data.percentage?.toFixed(1)}% del total
         </p>
       </div>
@@ -186,19 +186,19 @@ export const CategoriesChart = ({ transactions = [], selectedMonth }) => {
           <h4 className="text-[#0F172A] dark:text-[#F8FAFC] text-sm font-semibold mb-3">Top 10 Categorías</h4>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={chartData.barData} layout="horizontal">
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" horizontal={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
               <XAxis
                 type="number"
-                stroke="#9ca3af"
-                tick={{ fill: '#9ca3af', fontSize: 11 }}
+                stroke="var(--muted-foreground)"
+                tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
                 tickLine={false}
                 tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
               />
               <YAxis
                 type="category"
                 dataKey="name"
-                stroke="#9ca3af"
-                tick={{ fill: '#9ca3af', fontSize: 11 }}
+                stroke="var(--muted-foreground)"
+                tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
                 tickLine={false}
                 width={100}
               />

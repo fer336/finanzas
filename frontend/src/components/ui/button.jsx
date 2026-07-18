@@ -9,16 +9,16 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Botón primario (DESIGN.md "Components"): fondo #5a7d52, texto
-        // #faf7ef, hover #4f7047.
-        default: "bg-primary text-primary-foreground hover:bg-[#4f7047]",
+        // Botón primario (DESIGN.md "Components"): fondo #526a3a, texto
+        // #e5ddb0, hover #5f7841.
+        default: "bg-primary text-primary-foreground hover:bg-[#5f7841]",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        // Botón secundario: borde #ddd5c2, fondo blanco.
+        // Botón secundario: borde #c8bf91, fondo blanco.
         outline:
-          "border border-[#ddd5c2] bg-white text-foreground hover:bg-[#f0ead9] dark:border-border dark:bg-secondary dark:text-foreground dark:hover:bg-card-hover",
+          "border border-[#c8bf91] bg-white text-foreground hover:bg-[#e4d794] dark:border-border dark:bg-secondary dark:text-foreground dark:hover:bg-card-hover",
         secondary:
-          "bg-secondary text-secondary-foreground border border-[#ddd5c2] hover:bg-[#f0ead9] dark:border-border dark:bg-secondary dark:text-foreground dark:hover:bg-card-hover",
+          "bg-secondary text-secondary-foreground border border-[#c8bf91] hover:bg-[#e4d794] dark:border-border dark:bg-secondary dark:text-foreground dark:hover:bg-card-hover",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },

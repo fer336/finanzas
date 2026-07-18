@@ -3,7 +3,7 @@
  * Crea issues en Linear (proyecto Sistema Finanzas) directamente desde la app.
  * El webhook de Linear notifica automáticamente a Telegram vía n8n.
  *
- * Tema "Papel": vive como sub-sección embebida dentro de Ajustes (ver
+ * Tema "Kanagawa": vive como sub-sección embebida dentro de Ajustes (ver
  * design_handoff_rediseno_papel/README.md "7. Ajustes"), por eso no trae
  * fondo de página propio.
  */
@@ -38,7 +38,7 @@ const TIPOS = [
     emoji: '🐛',
     icon: Bug,
     description: 'Algo no funciona como debería',
-    color: '#a04a34',
+    color: 'var(--destructive)',
   },
   {
     id: 'Feature',
@@ -46,7 +46,7 @@ const TIPOS = [
     emoji: '✨',
     icon: Sparkles,
     description: 'Nueva funcionalidad que me gustaría',
-    color: '#8a6fa0',
+    color: 'var(--violet)',
   },
   {
     id: 'Improvement',
@@ -54,7 +54,7 @@ const TIPOS = [
     emoji: '🔧',
     icon: Wrench,
     description: 'Algo que podría funcionar mejor',
-    color: '#3d5a80',
+    color: 'var(--info)',
   },
 ];
 
@@ -100,9 +100,9 @@ const formatDate = (iso) => {
 };
 
 const stateBadge = (stateType) => {
-  if (stateType === 'completed') return 'border-[#5a7d52] bg-[#5a7d52]/10 text-[#476442]';
-  if (stateType === 'canceled') return 'border-[#ddd5c2] bg-[#f0ead9] text-[#8a8677]';
-  return 'border-[#e0c98a] bg-[#fdf6e3] text-[#8a6a1f]';
+  if (stateType === 'completed') return 'border-[#526a3a] bg-[#526a3a]/10 text-[#526a3a]';
+  if (stateType === 'canceled') return 'border-[#c8bf91] bg-[#e4d794] text-[#625f55]';
+  return 'border-[#de9800] bg-[#f9d791] text-[#6b572f]';
 };
 
 // ─── Componente principal ─────────────────────────────────────────────────────
@@ -236,18 +236,18 @@ const ReportesBugsView = () => {
     return (
       <div className="flex items-center justify-center py-10">
         <div className="w-full max-w-lg text-center">
-          <div className="rounded-md border border-[#ddd5c2] bg-white p-8">
-            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-[#5a7d52] bg-[#5a7d52]/10">
-              <CheckCircle2 className="h-8 w-8 text-[#476442]" />
+          <div className="rounded-md border border-[#c8bf91] bg-white p-8">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-[#526a3a] bg-[#526a3a]/10">
+              <CheckCircle2 className="h-8 w-8 text-[#526a3a]" />
             </div>
             <h2 className="mb-2 font-serif text-[20px] font-semibold text-foreground">¡Reporte enviado!</h2>
-            <p className="mb-1 text-[13.5px] text-[#5d6470]">{resultado.message}</p>
-            <p className="mb-6 text-[12px] text-[#8a8677]">Ya recibí una notificación en Telegram 📱</p>
+            <p className="mb-1 text-[13.5px] text-[#43436c]">{resultado.message}</p>
+            <p className="mb-6 text-[12px] text-[#625f55]">Ya recibí una notificación en Telegram 📱</p>
 
-            <div className="mb-6 rounded-sm border border-[#ddd5c2] bg-[#f0ead9] p-4 text-left">
+            <div className="mb-6 rounded-sm border border-[#c8bf91] bg-[#e4d794] p-4 text-left">
               <div className="mb-2 flex items-center gap-2">
-                <Tag className="h-3.5 w-3.5 text-[#8a8677]" />
-                <span className="text-[11px] uppercase tracking-[.06em] text-[#8a8677]">Issue creado</span>
+                <Tag className="h-3.5 w-3.5 text-[#625f55]" />
+                <span className="text-[11px] uppercase tracking-[.06em] text-[#625f55]">Issue creado</span>
               </div>
               <p className="font-mono text-[15px] font-semibold text-foreground">{resultado.issue_identifier}</p>
             </div>
@@ -257,7 +257,7 @@ const ReportesBugsView = () => {
                 href={resultado.issue_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 rounded-sm bg-primary px-5 py-[9px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047]"
+                className="flex items-center justify-center gap-2 rounded-sm bg-primary px-5 py-[9px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841]"
               >
                 <ExternalLink className="h-4 w-4" />
                 Ver en Linear
@@ -265,7 +265,7 @@ const ReportesBugsView = () => {
               <button
                 type="button"
                 onClick={resetForm}
-                className="rounded-sm border border-[#ddd5c2] bg-white px-5 py-[9px] text-[13px] font-medium text-foreground transition-colors duration-150 hover:bg-[#f0ead9]"
+                className="rounded-sm border border-[#c8bf91] bg-white px-5 py-[9px] text-[13px] font-medium text-foreground transition-colors duration-150 hover:bg-[#e4d794]"
               >
                 Enviar otro reporte
               </button>
@@ -279,7 +279,7 @@ const ReportesBugsView = () => {
   // ─── Main form ────────────────────────────────────────────────────────────
   return (
     <div>
-      <p className="mb-4 text-[12.5px] text-[#8a8677]">
+      <p className="mb-4 text-[12.5px] text-[#625f55]">
         Reportá bugs, sugerí mejoras o pedí nuevas funcionalidades — se crea un issue en Linear al instante.
       </p>
 
@@ -289,8 +289,8 @@ const ReportesBugsView = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
 
             {/* Tipo — pills */}
-            <div className="rounded-sm border border-[#ddd5c2] bg-white p-4">
-              <label className="mb-3 block text-[12.5px] font-medium text-[#5d6470]">
+            <div className="rounded-sm border border-[#c8bf91] bg-white p-4">
+              <label className="mb-3 block text-[12.5px] font-medium text-[#43436c]">
                 Tipo de reporte *
               </label>
               <div className="grid grid-cols-3 gap-2.5">
@@ -304,9 +304,9 @@ const ReportesBugsView = () => {
                       onClick={() => setTipo(t.id)}
                       className="flex flex-col items-center gap-1.5 rounded-sm border p-3 transition-colors duration-150"
                       style={{
-                        borderColor: isActive ? t.color : '#ddd5c2',
-                        backgroundColor: isActive ? `${t.color}1a` : '#ffffff',
-                        color: isActive ? t.color : '#8a8677',
+                        borderColor: isActive ? t.color : '#c8bf91',
+                        backgroundColor: isActive ? `${t.color}1a` : '#dcd5ac',
+                        color: isActive ? t.color : '#625f55',
                       }}
                     >
                       <Icon className="h-4 w-4" />
@@ -321,10 +321,10 @@ const ReportesBugsView = () => {
             </div>
 
             {/* Título */}
-            <div className="rounded-sm border border-[#ddd5c2] bg-white p-4">
+            <div className="rounded-sm border border-[#c8bf91] bg-white p-4">
               <div className="mb-2 flex items-center justify-between">
-                <label className="text-[12.5px] font-medium text-[#5d6470]">Título *</label>
-                <span className={`font-mono text-[11px] ${charsTitulo > 180 ? 'text-[#a04a34]' : 'text-[#8a8677]'}`}>
+                <label className="text-[12.5px] font-medium text-[#43436c]">Título *</label>
+                <span className={`font-mono text-[11px] ${charsTitulo > 180 ? 'text-[#b83245]' : 'text-[#625f55]'}`}>
                   {charsTitulo}/200
                 </span>
               </div>
@@ -334,15 +334,15 @@ const ReportesBugsView = () => {
                 onChange={(e) => setTitulo(e.target.value)}
                 placeholder={`Ej: ${tipo === 'Bug' ? 'Las transacciones no cargan en marzo' : tipo === 'Feature' ? 'Agregar exportación a Excel' : 'Mejorar la velocidad del dashboard'}`}
                 maxLength={200}
-                className="w-full rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
 
             {/* Descripción */}
-            <div className="rounded-sm border border-[#ddd5c2] bg-white p-4">
+            <div className="rounded-sm border border-[#c8bf91] bg-white p-4">
               <div className="mb-2 flex items-center justify-between">
-                <label className="text-[12.5px] font-medium text-[#5d6470]">Descripción detallada *</label>
-                <span className={`font-mono text-[11px] ${charsDesc > 2700 ? 'text-[#a04a34]' : 'text-[#8a8677]'}`}>
+                <label className="text-[12.5px] font-medium text-[#43436c]">Descripción detallada *</label>
+                <span className={`font-mono text-[11px] ${charsDesc > 2700 ? 'text-[#b83245]' : 'text-[#625f55]'}`}>
                   {charsDesc}/3000
                 </span>
               </div>
@@ -358,38 +358,38 @@ const ReportesBugsView = () => {
                 }
                 maxLength={3000}
                 rows={6}
-                className="w-full resize-none rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring"
+                className="w-full resize-none rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
 
             {/* Sección + Prioridad en fila */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {/* Sección */}
-              <div className="rounded-sm border border-[#ddd5c2] bg-white p-4">
-                <label className="mb-2 block text-[12.5px] font-medium text-[#5d6470]">Sección *</label>
+              <div className="rounded-sm border border-[#c8bf91] bg-white p-4">
+                <label className="mb-2 block text-[12.5px] font-medium text-[#43436c]">Sección *</label>
                 <div className="relative">
                   <select
                     value={seccion}
                     onChange={(e) => setSeccion(e.target.value)}
-                    className="w-full cursor-pointer appearance-none rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="w-full cursor-pointer appearance-none rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     <option value="">¿Dónde ocurre?</option>
                     {SECCIONES.map((s) => (
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
-                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8a8677]" />
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#625f55]" />
                 </div>
               </div>
 
               {/* Prioridad */}
-              <div className="rounded-sm border border-[#ddd5c2] bg-white p-4">
-                <label className="mb-2 block text-[12.5px] font-medium text-[#5d6470]">Prioridad</label>
+              <div className="rounded-sm border border-[#c8bf91] bg-white p-4">
+                <label className="mb-2 block text-[12.5px] font-medium text-[#43436c]">Prioridad</label>
                 <div className="relative">
                   <select
                     value={prioridad}
                     onChange={(e) => setPrioridad(e.target.value)}
-                    className="w-full cursor-pointer appearance-none rounded-sm border border-[#ddd5c2] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring"
+                    className="w-full cursor-pointer appearance-none rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring"
                   >
                     {PRIORIDADES.map((p) => (
                       <option key={p.id} value={p.id}>
@@ -397,15 +397,15 @@ const ReportesBugsView = () => {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8a8677]" />
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#625f55]" />
                 </div>
               </div>
             </div>
 
             {/* Upload imagen */}
-            <div className="rounded-sm border border-[#ddd5c2] bg-white p-4">
-              <label className="mb-3 block text-[12.5px] font-medium text-[#5d6470]">
-                Captura de pantalla <span className="font-normal text-[#8a8677]">(opcional)</span>
+            <div className="rounded-sm border border-[#c8bf91] bg-white p-4">
+              <label className="mb-3 block text-[12.5px] font-medium text-[#43436c]">
+                Captura de pantalla <span className="font-normal text-[#625f55]">(opcional)</span>
               </label>
 
               {imagenPreview ? (
@@ -413,29 +413,29 @@ const ReportesBugsView = () => {
                   <img
                     src={imagenPreview}
                     alt="Preview"
-                    className="max-h-48 w-full rounded-sm border border-[#ddd5c2] bg-[#f0ead9] object-contain"
+                    className="max-h-48 w-full rounded-sm border border-[#c8bf91] bg-[#e4d794] object-contain"
                   />
                   <button
                     type="button"
                     onClick={removeImagen}
-                    className="absolute right-2 top-2 rounded-sm border border-[#ddd5c2] bg-white/90 p-1.5 transition-colors hover:bg-[#a04a34]/10"
+                    className="absolute right-2 top-2 rounded-sm border border-[#c8bf91] bg-white/90 p-1.5 transition-colors hover:bg-[#b83245]/10"
                   >
-                    <X className="h-4 w-4 text-[#a04a34]" />
+                    <X className="h-4 w-4 text-[#b83245]" />
                   </button>
-                  <p className="mt-2 text-[11px] text-[#8a8677]">
+                  <p className="mt-2 text-[11px] text-[#625f55]">
                     {imagen?.name} ({(imagen?.size / 1024).toFixed(0)}KB)
                   </p>
                 </div>
               ) : (
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="group cursor-pointer rounded-sm border-2 border-dashed border-[#ddd5c2] p-8 text-center transition-colors duration-150 hover:border-[#8a8677]"
+                  className="group cursor-pointer rounded-sm border-2 border-dashed border-[#c8bf91] p-8 text-center transition-colors duration-150 hover:border-[#625f55]"
                 >
-                  <ImageIcon className="mx-auto mb-3 h-7 w-7 text-[#8a8677] transition-colors group-hover:text-foreground" />
-                  <p className="text-[13px] text-[#8a8677] transition-colors group-hover:text-foreground">
+                  <ImageIcon className="mx-auto mb-3 h-7 w-7 text-[#625f55] transition-colors group-hover:text-foreground" />
+                  <p className="text-[13px] text-[#625f55] transition-colors group-hover:text-foreground">
                     Clic para adjuntar imagen
                   </p>
-                  <p className="mt-1 text-[11px] text-[#8a8677]">
+                  <p className="mt-1 text-[11px] text-[#625f55]">
                     JPG, PNG, WEBP o GIF — máx {MAX_IMAGE_SIZE_MB}MB
                   </p>
                 </div>
@@ -450,7 +450,7 @@ const ReportesBugsView = () => {
               />
 
               {imagenError && (
-                <p className="mt-2 flex items-center gap-1 text-[11.5px] text-[#a04a34]">
+                <p className="mt-2 flex items-center gap-1 text-[11.5px] text-[#b83245]">
                   <XCircle className="h-3 w-3" />
                   {imagenError}
                 </p>
@@ -459,9 +459,9 @@ const ReportesBugsView = () => {
 
             {/* Error general */}
             {(status === 'error' || errorMsg) && (
-              <div className="flex items-start gap-2.5 rounded-sm border border-[#a04a34]/40 bg-[#a04a34]/5 p-3.5">
-                <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#a04a34]" />
-                <p className="text-[12.5px] text-[#a04a34]">{errorMsg}</p>
+              <div className="flex items-start gap-2.5 rounded-sm border border-[#b83245]/40 bg-[#b83245]/5 p-3.5">
+                <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-[#b83245]" />
+                <p className="text-[12.5px] text-[#b83245]">{errorMsg}</p>
               </div>
             )}
 
@@ -469,7 +469,7 @@ const ReportesBugsView = () => {
             <button
               type="submit"
               disabled={status === 'loading'}
-              className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary px-5 py-3 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-sm bg-primary px-5 py-3 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {status === 'loading' ? (
                 <>
@@ -489,7 +489,7 @@ const ReportesBugsView = () => {
         {/* ── Panel lateral (1/3) ──────────────────────────────────────── */}
         <div className="space-y-3.5">
           {/* Flujo del reporte */}
-          <div className="rounded-sm border border-[#ddd5c2] bg-white p-4">
+          <div className="rounded-sm border border-[#c8bf91] bg-white p-4">
             <div className="mb-3 flex items-center gap-2">
               <Zap className="h-3.5 w-3.5 text-primary" />
               <h3 className="font-serif text-[14px] font-semibold text-foreground">¿Qué pasa al enviar?</h3>
@@ -503,7 +503,7 @@ const ReportesBugsView = () => {
               ].map((step, i) => (
                 <div key={i} className="flex items-start gap-2.5">
                   <span className="shrink-0 text-[13px]">{step.icon}</span>
-                  <p className="text-[11.5px] leading-relaxed text-[#5d6470]">{step.text}</p>
+                  <p className="text-[11.5px] leading-relaxed text-[#43436c]">{step.text}</p>
                 </div>
               ))}
             </div>
@@ -528,8 +528,8 @@ const ReportesBugsView = () => {
                 'Mencioná si pasa siempre o a veces',
               ].map((tip, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <span className="mt-0.5 text-[11px] text-[#8a8677]">•</span>
-                  <span className="text-[11.5px] text-[#5d6470]">{tip}</span>
+                  <span className="mt-0.5 text-[11px] text-[#625f55]">•</span>
+                  <span className="text-[11.5px] text-[#43436c]">{tip}</span>
                 </li>
               ))}
               {tipo === 'Feature' && [
@@ -539,8 +539,8 @@ const ReportesBugsView = () => {
                 'Priorizá urgente solo si es crítico para tu flujo',
               ].map((tip, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <span className="mt-0.5 text-[11px] text-[#8a8677]">•</span>
-                  <span className="text-[11.5px] text-[#5d6470]">{tip}</span>
+                  <span className="mt-0.5 text-[11px] text-[#625f55]">•</span>
+                  <span className="text-[11.5px] text-[#43436c]">{tip}</span>
                 </li>
               ))}
               {tipo === 'Improvement' && [
@@ -550,27 +550,27 @@ const ReportesBugsView = () => {
                 'Ejemplos concretos ayudan mucho',
               ].map((tip, i) => (
                 <li key={i} className="flex items-start gap-2">
-                  <span className="mt-0.5 text-[11px] text-[#8a8677]">•</span>
-                  <span className="text-[11.5px] text-[#5d6470]">{tip}</span>
+                  <span className="mt-0.5 text-[11px] text-[#625f55]">•</span>
+                  <span className="text-[11.5px] text-[#43436c]">{tip}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Link a Linear */}
-          <div className="rounded-sm border border-[#ddd5c2] bg-white p-4">
+          <div className="rounded-sm border border-[#c8bf91] bg-white p-4">
             <div className="mb-2.5 flex items-center gap-2">
-              <MessageSquare className="h-3.5 w-3.5 text-[#8a8677]" />
+              <MessageSquare className="h-3.5 w-3.5 text-[#625f55]" />
               <h3 className="font-serif text-[14px] font-semibold text-foreground">Ver todos los reportes</h3>
             </div>
-            <p className="mb-2.5 text-[11.5px] text-[#8a8677]">
+            <p className="mb-2.5 text-[11.5px] text-[#625f55]">
               Podés ver el estado de todos los reportes enviados directamente en Linear.
             </p>
             <a
               href="https://linear.app/aplicaciones/project/sistema-finanzas-2b89e325c201/overview"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-[12px] font-medium text-[#3d5a80] transition-colors hover:underline"
+              className="flex items-center gap-1.5 text-[12px] font-medium text-[#4d699b] transition-colors hover:underline"
             >
               <ExternalLink className="h-3 w-3" />
               Abrir proyecto en Linear
@@ -578,14 +578,14 @@ const ReportesBugsView = () => {
           </div>
 
           {/* Estado actual */}
-          <div className="rounded-sm border border-[#ddd5c2] bg-white p-4">
+          <div className="rounded-sm border border-[#c8bf91] bg-white p-4">
             <div className="mb-2.5 flex items-center gap-2">
-              <AlertTriangle className="h-3.5 w-3.5 text-[#8a6a1f]" />
+              <AlertTriangle className="h-3.5 w-3.5 text-[#6b572f]" />
               <h3 className="font-serif text-[14px] font-semibold text-foreground">Prioridades actuales</h3>
             </div>
-            <p className="text-[11.5px] leading-relaxed text-[#8a8677]">
+            <p className="text-[11.5px] leading-relaxed text-[#625f55]">
               Los reportes se revisan regularmente. Los marcados como{' '}
-              <span className="text-[#a04a34]">Urgente</span> o <span className="text-[#8a6a1f]">Alta</span> se
+              <span className="text-[#b83245]">Urgente</span> o <span className="text-[#6b572f]">Alta</span> se
               atienden primero.
             </p>
           </div>
@@ -593,41 +593,41 @@ const ReportesBugsView = () => {
       </div>
 
       <div className="mt-5">
-        <div className="rounded-sm border border-[#ddd5c2] bg-white p-4">
+        <div className="rounded-sm border border-[#c8bf91] bg-white p-4">
           <div className="mb-3.5 flex items-center justify-between gap-3">
             <div>
               <h2 className="font-serif text-[15px] font-semibold text-foreground">Mis reportes en Linear</h2>
-              <p className="text-[11.5px] text-[#8a8677]">
+              <p className="text-[11.5px] text-[#625f55]">
                 Acá ves lo que cargaste y si está resuelto o en progreso.
               </p>
             </div>
             <button
               type="button"
               onClick={() => cargarMisReportes()}
-              className="rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] text-[12px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9]"
+              className="rounded-sm border border-[#c8bf91] bg-white px-3 py-[7px] text-[12px] text-foreground transition-colors duration-150 hover:bg-[#e4d794]"
             >
               Actualizar
             </button>
           </div>
 
           {reportesLoading ? (
-            <div className="flex items-center justify-center gap-2 py-10 text-[13px] text-[#8a8677]">
+            <div className="flex items-center justify-center gap-2 py-10 text-[13px] text-[#625f55]">
               <Loader2 className="h-4 w-4 animate-spin" />
               Cargando reportes...
             </div>
           ) : reportesError ? (
-            <div className="rounded-sm border border-[#a04a34]/40 bg-[#a04a34]/5 p-3.5 text-[12.5px] text-[#a04a34]">
+            <div className="rounded-sm border border-[#b83245]/40 bg-[#b83245]/5 p-3.5 text-[12.5px] text-[#b83245]">
               {reportesError}
             </div>
           ) : misReportes.length === 0 ? (
-            <p className="py-8 text-center text-[13.5px] italic text-[#8a8677]">
+            <p className="py-8 text-center text-[13.5px] italic text-[#625f55]">
               Todavía no encontramos reportes tuyos en Linear.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[720px] text-[13px]">
                 <thead>
-                  <tr className="border-b-2 border-[#ddd5c2] text-left font-mono text-[10.5px] uppercase tracking-[.08em] text-[#8a8677]">
+                  <tr className="border-b-2 border-[#c8bf91] text-left font-mono text-[10.5px] uppercase tracking-[.08em] text-[#625f55]">
                     <th className="py-2.5 pr-3 font-medium">Ticket</th>
                     <th className="py-2.5 pr-3 font-medium">Título</th>
                     <th className="py-2.5 pr-3 font-medium">Prioridad</th>
@@ -638,22 +638,22 @@ const ReportesBugsView = () => {
                 </thead>
                 <tbody>
                   {misReportes.map((r) => (
-                    <tr key={r.id} className="border-b border-[#e7e0cf] transition-colors duration-150 hover:bg-[#f0ead9]">
+                    <tr key={r.id} className="border-b border-[#d5cea3] transition-colors duration-150 hover:bg-[#e4d794]">
                       <td className="py-2.5 pr-3 font-mono text-[12px] text-foreground">{r.identifier}</td>
                       <td className="max-w-[320px] truncate py-2.5 pr-3 text-foreground" title={r.title}>{r.title}</td>
-                      <td className="py-2.5 pr-3 text-[#5d6470]">{r.priority_label || 'Normal'}</td>
+                      <td className="py-2.5 pr-3 text-[#43436c]">{r.priority_label || 'Normal'}</td>
                       <td className="py-2.5 pr-3">
                         <span className={`inline-flex items-center rounded-full border px-2.5 py-[3px] font-mono text-[10.5px] uppercase ${stateBadge(r.state_type)}`}>
                           {r.resuelto ? 'Resuelto' : (r.state_name || 'Pendiente')}
                         </span>
                       </td>
-                      <td className="py-2.5 pr-3 font-mono text-[11.5px] text-[#8a8677]">{formatDate(r.created_at)}</td>
+                      <td className="py-2.5 pr-3 font-mono text-[11.5px] text-[#625f55]">{formatDate(r.created_at)}</td>
                       <td className="py-2.5 text-right">
                         <a
                           href={r.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[12px] font-medium text-[#3d5a80] hover:underline"
+                          className="inline-flex items-center gap-1 text-[12px] font-medium text-[#4d699b] hover:underline"
                         >
                           Ver
                           <ExternalLink className="h-3 w-3" />

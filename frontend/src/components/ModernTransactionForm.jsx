@@ -64,8 +64,8 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
   const [loadingCotizaciones, setLoadingCotizaciones] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fieldClassName = 'w-full px-3.5 py-2.5 bg-secondary border border-border rounded-sm text-[13.5px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-[#5a7d52]/20 transition-colors duration-150 dark:focus:ring-[#8fae7f]/25';
-  const selectClassName = 'w-full px-3.5 py-2.5 pr-9 bg-secondary border border-border rounded-sm text-[13.5px] text-foreground appearance-none cursor-pointer focus:outline-none focus:border-primary focus:ring-2 focus:ring-[#5a7d52]/20 transition-colors duration-150 dark:focus:ring-[#8fae7f]/25';
+  const fieldClassName = 'w-full px-3.5 py-2.5 bg-secondary border border-border rounded-sm text-[13.5px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-[#526a3a]/20 transition-colors duration-150 dark:focus:ring-[#98bb6c]/25';
+  const selectClassName = 'w-full px-3.5 py-2.5 pr-9 bg-secondary border border-border rounded-sm text-[13.5px] text-foreground appearance-none cursor-pointer focus:outline-none focus:border-primary focus:ring-2 focus:ring-[#526a3a]/20 transition-colors duration-150 dark:focus:ring-[#98bb6c]/25';
 
   // Load data when form opens
   useEffect(() => {
@@ -323,7 +323,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
   };
   if (!isOpen) return null;
 
-  // Modal Papel — overlay + panel tokens compartidos con el resto de modales
+  // Modal Kanagawa — overlay + panel tokens compartidos con el resto de modales
   // ya restyleados (ver ObjetivoFormModal.jsx / design_handoff README).
   return (
     <div
@@ -546,7 +546,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                   <button
                     type="button"
                     onClick={createQuickCategory}
-                    className="rounded-sm bg-primary px-4 py-2.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] dark:hover:bg-[#7d9970]"
+                    className="rounded-sm bg-primary px-4 py-2.5 text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[#76946a]"
                   >
                     Guardar
                   </button>
@@ -735,7 +735,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
           <button
             onClick={handleSubmit}
             disabled={loading || isSubmitting || !formData.description.trim() || !formData.amount}
-            className="flex items-center gap-2 rounded-sm bg-primary px-[18px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-[#7d9970]"
+            className="flex items-center gap-2 rounded-sm bg-primary px-[18px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-[#76946a]"
           >
             {loading || isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save size={16} />}
             {editingTransaction ? 'Guardar cambios' : 'Registrar'}

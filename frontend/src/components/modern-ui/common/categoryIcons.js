@@ -77,7 +77,7 @@ import {
 } from 'lucide-react';
 
 /**
- * Set curado de íconos reicon-react para categorías (tema "Papel").
+ * Set curado de íconos reicon-react para categorías (tema "Kanagawa").
  * `icono` en el backend es un string libre ("Emoji o icono de la
  * categoría") — las categorías nuevas guardan el `name` de acá; las
  * viejas siguen guardando un emoji o un nombre de lucide-react (ver

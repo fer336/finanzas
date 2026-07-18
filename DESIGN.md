@@ -1,36 +1,42 @@
 # Design
 
-Theme: "Papel" — dashboard editorial claro tipo libreta contable. Reemplaza el tema oscuro actual.
+Theme: "Kanagawa". El modo oscuro usa Kanagawa Wave y el modo claro usa Kanagawa Lotus. Ambos comparten los mismos roles semánticos, jerarquía y comportamiento.
 
 ## Color Palette
 
-Fondos:
-- Página: `#f4f0e6`
-- Superficie / card: `#faf7ef`
-- Superficie elevada / inputs: `#ffffff`
-- Destacado dorado (avisos): `#fdf6e3`
+### Kanagawa Lotus (light)
 
-Bordes:
-- Estándar: `#ddd5c2`
-- Sutil / dashed: `#e7e0cf`
-- Doble regla de cabecera: `#cfc6ae`
-- Dorado: `#e0c98a`
+- Página: `#f2ecbc`
+- Superficie / card: `#e5ddb0`
+- Superficie elevada / inputs: `#dcd5ac`
+- Hover: `#e4d794`
+- Texto principal: `#545464`
+- Texto secundario: `#43436c`
+- Texto tenue: `#625f55`
+- Borde: `#c8bf91`
+- Primario / ingresos: `#526a3a`
+- Gastos / error: `#b83245`
+- Información: `#4d699b`
+- Pendiente / warning: fondo `#f9d791`, texto `#6b572f`
+- Violeta auxiliar: `#624c83`
 
-Texto:
-- Principal: `#20242c`
-- Secundario: `#5d6470`
-- Terciario / labels: `#8a8677`
+### Kanagawa Wave (dark)
 
-Acentos:
-- Verde (ingresos / primario): `#5a7d52` · texto verde `#476442` · hover botón `#4f7047`
-- Arcilla (gastos): `#b35a42` · texto rojo `#a04a34`
-- Azul (info / período): `#3d5a80`
-- Dorado (pendiente): `#e9c46a` · texto dorado `#8a6a1f`
-- Violeta (aux, categorías extra): `#8a6fa0`
-- Gris (aux, categorías extra): `#9aa2ad`
-- Nav activa / botones oscuros: fondo `#20242c`, texto `#f4f0e6`
+- Página: `#1f1f28`
+- Superficie / card: `#181820`
+- Superficie elevada / inputs: `#2a2a37`
+- Hover: `#363646`
+- Texto principal: `#dcd7ba`
+- Texto secundario: `#c8c093`
+- Texto tenue: `#727169`
+- Borde: `#363646`
+- Primario / ingresos: `#98bb6c`
+- Gastos / error: `#e46876`
+- Información: `#7e9cd8`
+- Pendiente / warning: fondo `#49443c`, texto `#e6c384`
+- Violeta auxiliar: `#957fb8`
 
-Sin gradientes, sin glassmorphism. Sombras: ninguna — la profundidad se logra solo con bordes y contraste de fondo.
+Los valores base provienen de la paleta oficial de `rebelot/kanagawa.nvim`. Los tonos funcionales de Lotus se oscurecen ligeramente cuando es necesario para mantener contraste AA. Sin gradientes, glassmorphism ni glow decorativo. La profundidad se consigue con capas de superficie y bordes.
 
 ## Typography
 
@@ -55,18 +61,18 @@ Sin gradientes, sin glassmorphism. Sombras: ninguna — la profundidad se logra 
 
 ## Components
 
-- **Nav pills**: activo fondo `#20242c` texto `#f4f0e6` weight 600; inactivo transparente texto `#5d6470`, hover `rgba(0,0,0,.05)`.
-- **Badge contador** (ej. Vencimientos): IBM Plex Mono 10px, fondo `#e9c46a`, texto `#20242c`, radius 999px, padding `1px 6px`.
-- **Botón primario**: fondo `#5a7d52`, texto `#faf7ef`, weight 600, radius 6px, padding `8px 15px`, hover `#4f7047`.
-- **Botón secundario**: borde `#ddd5c2`, fondo `#fff`.
-- **KPI card**: fondo `#faf7ef`, borde `#ddd5c2`, radius 8px, `border-top: 3px solid` (color según tipo de dato), label 11px uppercase `#8a8677`, valor mono 600 24px, subtexto 12px `#8a8677`.
-- **Tabla**: header mono 10.5px uppercase `letter-spacing: .08em` `#8a8677`, `border-bottom: 2px solid #ddd5c2`; filas `padding: 10px 14px`, separador `1px solid #e7e0cf`, hover `#f0ead9`.
+- **Nav pills**: activo con alto contraste entre `foreground` y `background`; inactivo transparente con hover `card-hover`.
+- **Badge contador** (ej. Vencimientos): IBM Plex Mono 10px, fondo `accent`, texto `accent-foreground`, radius 999px, padding `1px 6px`.
+- **Botón primario**: fondo `primary`, texto `primary-foreground`, weight 600, radius 6px, padding `8px 15px`.
+- **Botón secundario**: borde `border`, fondo `secondary`.
+- **KPI card**: fondo `card`, borde `border`, radius 8px, `border-top: 3px solid` según el tipo de dato; label 11px uppercase, valor mono 600 24px.
+- **Tabla**: header mono 10.5px uppercase con `letter-spacing: .08em`; filas `padding: 10px 14px`, separador sutil y hover de superficie.
 - **Pill de tipo/estado** (ingreso/gasto, pendiente/pagado): outline, mono 10.5px uppercase, radius 999px, padding `3px 8px`.
-- **Switch**: track 36×20px radius 999px, off `#d8d6cf`, on `#5a7d52`, thumb blanco 16px.
-- **Barra de progreso**: 8px alto, track `#e7e0cf`, fill `#5a7d52`, radius 999px.
-- **Modal**: fondo `#faf7ef`, overlay `rgba(32,36,44,.4)`, radius 12px.
-- **Estado vacío**: texto itálico 13.5px `#8a8677`, nunca área en blanco.
-- **Skeleton loading**: fondo `#e7e0cf` animado, radius del componente que reemplaza.
+- **Switch**: track 36×20px radius 999px, off `muted`, on `primary`, thumb `secondary` 16px.
+- **Barra de progreso**: 8px alto, track `muted`, fill `primary`, radius 999px.
+- **Modal**: fondo `popover`, overlay oscuro translúcido, radius 12px.
+- **Estado vacío**: texto itálico 13.5px `muted-foreground`, nunca área en blanco.
+- **Skeleton loading**: fondo `muted` animado, radius del componente que reemplaza.
 
 ## Motion
 
@@ -79,4 +85,4 @@ Sin gradientes, sin glassmorphism. Sombras: ninguna — la profundidad se logra 
 
 ## Sources of truth
 
-Este archivo (`DESIGN.md`) es la fuente de verdad de los tokens del tema Papel — el handoff original del rediseño ya no vive en el repo.
+Este archivo (`DESIGN.md`) y `frontend/src/index.css` son las fuentes de verdad del tema Kanagawa.

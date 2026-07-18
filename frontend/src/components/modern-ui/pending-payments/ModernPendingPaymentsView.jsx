@@ -40,11 +40,11 @@ const calcularDiasRestantes = (fechaVencimiento) => {
   return Math.ceil((fecha - hoy) / (1000 * 60 * 60 * 24));
 };
 
-// ─── Piezas de UI compartidas con el patrón Papel (ver ModernTransactionsView) ──
+// ─── Piezas de UI compartidas con el patrón Kanagawa (ver ModernTransactionsView) ──
 const FilterSelect = ({ className = '', ...props }) => (
   <select
     {...props}
-    className={`rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring dark:border-border dark:bg-secondary ${className}`}
+    className={`rounded-sm border border-[#c8bf91] bg-white px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring dark:border-border dark:bg-secondary ${className}`}
   />
 );
 FilterSelect.propTypes = { className: PropTypes.string };
@@ -56,14 +56,14 @@ EmptyState.propTypes = { children: PropTypes.node };
 
 // Toggle de pills Mensual/Acumulado (mismo patrón visual que Movimientos).
 const PillToggle = ({ options, value, onChange, activeClassName }) => (
-  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#ddd5c2] bg-card p-[3px] dark:border-border">
+  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#c8bf91] bg-card p-[3px] dark:border-border">
     {options.map((opt) => (
       <button
         key={opt.value}
         type="button"
         onClick={() => onChange(opt.value)}
         className={`rounded-full px-3 py-1 font-mono text-[12px] transition-colors duration-150 ${
-          value === opt.value ? `${activeClassName} font-semibold` : 'text-[#5d6470] hover:text-foreground dark:text-muted-foreground'
+          value === opt.value ? `${activeClassName} font-semibold` : 'text-[#43436c] hover:text-foreground dark:text-muted-foreground'
         }`}
       >
         {opt.label}
@@ -183,15 +183,15 @@ const ModernPendingPaymentsView = ({
   const renderFecha = (fechaVencimiento) => {
     const fecha = parseDateSafe(fechaVencimiento);
     if (!fecha) {
-      return <span className="font-mono text-[12px] italic text-[#8a8677] dark:text-muted-foreground">a confirmar</span>;
+      return <span className="font-mono text-[12px] italic text-[#625f55] dark:text-muted-foreground">a confirmar</span>;
     }
-    return <span className="font-mono text-[12px] text-[#5d6470] dark:text-muted-foreground">{fecha.toLocaleDateString('es-AR')}</span>;
+    return <span className="font-mono text-[12px] text-[#43436c] dark:text-muted-foreground">{fecha.toLocaleDateString('es-AR')}</span>;
   };
 
   const EstadoPill = ({ isPaid }) => {
     const pillClassName = isPaid
-      ? 'border-[#476442] text-[#476442] dark:border-[#8fae7f] dark:text-[#8fae7f]'
-      : 'border-[#e0c98a] text-[#8a6a1f] dark:border-[#d8ac5a] dark:text-[#d8ac5a]';
+      ? 'border-[#526a3a] text-[#526a3a] dark:border-[#98bb6c] dark:text-[#98bb6c]'
+      : 'border-[#de9800] text-[#6b572f] dark:border-[#e6c384] dark:text-[#e6c384]';
     return (
       <Badge variant="outline" className={pillClassName}>
         {isPaid ? 'pagado' : 'pendiente'}
@@ -207,7 +207,7 @@ const ModernPendingPaymentsView = ({
       disabled={isRefreshing}
       title={isRefreshing ? 'Actualizando…' : 'Actualizar'}
       aria-label={isRefreshing ? 'Actualizando…' : 'Actualizar'}
-      className="flex items-center justify-center gap-1.5 rounded-sm border border-[#ddd5c2] bg-white px-2.5 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#f0ead9] disabled:opacity-50 dark:border-border dark:bg-secondary dark:hover:bg-card-hover sm:px-3"
+      className="flex items-center justify-center gap-1.5 rounded-sm border border-[#c8bf91] bg-white px-2.5 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#e4d794] disabled:opacity-50 dark:border-border dark:bg-secondary dark:hover:bg-card-hover sm:px-3"
     >
       <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
       <span className="hidden sm:inline">{isRefreshing ? 'Actualizando…' : 'Actualizar'}</span>
@@ -220,7 +220,7 @@ const ModernPendingPaymentsView = ({
       onClick={() => onNewPago && onNewPago()}
       title="Nuevo vencimiento"
       aria-label="Nuevo vencimiento"
-      className="flex items-center justify-center gap-1.5 rounded-sm bg-primary px-2.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] sm:px-3.5"
+      className="flex items-center justify-center gap-1.5 rounded-sm bg-primary px-2.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] sm:px-3.5"
     >
       <Plus className="h-3.5 w-3.5" />
       <span className="hidden sm:inline">Nuevo</span>
@@ -233,7 +233,7 @@ const ModernPendingPaymentsView = ({
       options={[{ value: 'vencimientos', label: 'Vencimientos' }, { value: 'prestamos', label: 'Préstamos' }]}
       value={section}
       onChange={setSection}
-      activeClassName="bg-[#20242c] text-[#f4f0e6]"
+      activeClassName="bg-[#545464] text-[#f2ecbc]"
     />
   );
 
@@ -241,7 +241,7 @@ const ModernPendingPaymentsView = ({
     return (
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-[1100px] px-4 py-4 sm:px-[34px] sm:py-[28px]">
-          <div className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] dark:border-border ${isMobile ? 'mb-3 pb-3' : 'mb-[22px] pb-[18px]'}`}>
+          <div className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#b8ad78] dark:border-border ${isMobile ? 'mb-3 pb-3' : 'mb-[22px] pb-[18px]'}`}>
             <h1 className={`font-serif font-bold leading-none text-foreground ${isMobile ? 'text-[26px]' : 'text-[42px]'}`}>Vencimientos</h1>
           </div>
           <div className="mb-4">
@@ -263,9 +263,9 @@ const ModernPendingPaymentsView = ({
     return (
       <div className="min-h-screen bg-background">
         <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
-          <div className="h-8 w-56 animate-pulse rounded-sm bg-[#e7e0cf] dark:bg-muted" />
-          <div className="mt-4 h-24 w-full max-w-xs animate-pulse rounded-md bg-[#e7e0cf] dark:bg-muted" />
-          <div className="mt-5 h-64 w-full animate-pulse rounded-md bg-[#e7e0cf] dark:bg-muted" />
+          <div className="h-8 w-56 animate-pulse rounded-sm bg-[#d5cea3] dark:bg-muted" />
+          <div className="mt-4 h-24 w-full max-w-xs animate-pulse rounded-md bg-[#d5cea3] dark:bg-muted" />
+          <div className="mt-5 h-64 w-full animate-pulse rounded-md bg-[#d5cea3] dark:bg-muted" />
         </div>
       </div>
     );
@@ -274,7 +274,7 @@ const ModernPendingPaymentsView = ({
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <p className="text-[13.5px] text-[#a04a34]">Error al cargar vencimientos: {error.message}</p>
+        <p className="text-[13.5px] text-[#b83245]">Error al cargar vencimientos: {error.message}</p>
       </div>
     );
   }
@@ -288,7 +288,7 @@ const ModernPendingPaymentsView = ({
     return (
       <div className="min-h-screen bg-background pb-8">
         <div className="px-4 pt-4 pb-3">
-          <div className="mb-3 flex items-end justify-between gap-2 border-b-[3px] border-double border-[#cfc6ae] pb-3 dark:border-border">
+          <div className="mb-3 flex items-end justify-between gap-2 border-b-[3px] border-double border-[#b8ad78] pb-3 dark:border-border">
             <h1 className="min-w-0 flex-1 truncate font-serif text-[26px] font-bold leading-none text-foreground">Vencimientos</h1>
             <div className="flex shrink-0 items-center gap-2">
               <RefreshButton />
@@ -305,8 +305,8 @@ const ModernPendingPaymentsView = ({
               label="Total pendiente"
               value={formatAmount(totalPendiente, { decimals: 0 })}
               subtext={`${pendientes.length} pendiente${pendientes.length !== 1 ? 's' : ''}${vencidos.length ? ` · ${vencidos.length} vencido${vencidos.length !== 1 ? 's' : ''}` : ''}`}
-              borderColor="#e9c46a"
-              valueColor="#8a6a1f"
+              borderColor="#f9d791"
+              valueColor="var(--warning)"
             />
           </div>
 
@@ -315,25 +315,25 @@ const ModernPendingPaymentsView = ({
               options={[{ value: 'monthly', label: 'Mensual' }, { value: 'accumulated', label: 'Acumulado' }]}
               value={viewMode}
               onChange={setViewMode}
-              activeClassName="bg-[#20242c] text-[#f4f0e6]"
+              activeClassName="bg-[#545464] text-[#f2ecbc]"
             />
             {viewMode === 'monthly' && (
               <input
                 type="month"
                 value={selectedMonthFilter}
                 onChange={(e) => setSelectedMonthFilter(e.target.value)}
-                className="min-w-0 rounded-sm border border-[#ddd5c2] bg-white px-2 py-1.5 font-mono text-[11.5px] text-foreground focus:outline-none dark:border-border dark:bg-secondary"
+                className="min-w-0 rounded-sm border border-[#c8bf91] bg-white px-2 py-1.5 font-mono text-[11.5px] text-foreground focus:outline-none dark:border-border dark:bg-secondary"
               />
             )}
           </div>
 
           <div className="relative mb-2.5">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8a8677] dark:text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#625f55] dark:text-muted-foreground" />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar…"
-              className="w-full rounded-sm border border-[#ddd5c2] bg-white py-2 pl-9 pr-3 text-[13px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring dark:border-border dark:bg-secondary dark:placeholder:text-muted-foreground"
+              className="w-full rounded-sm border border-[#c8bf91] bg-white py-2 pl-9 pr-3 text-[13px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-border dark:bg-secondary dark:placeholder:text-muted-foreground"
             />
           </div>
 
@@ -351,7 +351,7 @@ const ModernPendingPaymentsView = ({
 
         <div className="flex flex-col gap-2 px-4">
           {paginatedData.length === 0 ? (
-            <div className="flex items-center justify-center rounded-md border border-[#ddd5c2] bg-card py-10 dark:border-border">
+            <div className="flex items-center justify-center rounded-md border border-[#c8bf91] bg-card py-10 dark:border-border">
               <EmptyState>
                 {searchQuery ? `Sin resultados para "${searchQuery}".` : 'Sin vencimientos en esta vista.'}
               </EmptyState>
@@ -360,7 +360,7 @@ const ModernPendingPaymentsView = ({
             paginatedData.map((p) => {
               const isPaid = isPagoPaid(p);
               return (
-                <div key={p.id} className="rounded-md border border-[#ddd5c2] bg-card px-3.5 py-3 dark:border-border">
+                <div key={p.id} className="rounded-md border border-[#c8bf91] bg-card px-3.5 py-3 dark:border-border">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="text-[13.5px] text-foreground truncate">{p.nombre}</p>
@@ -378,14 +378,14 @@ const ModernPendingPaymentsView = ({
                       </div>
                     </div>
                   </div>
-                  <div className="mt-2.5 flex items-center justify-between border-t border-dashed border-[#e7e0cf] pt-2 dark:border-muted">
+                  <div className="mt-2.5 flex items-center justify-between border-t border-dashed border-[#d5cea3] pt-2 dark:border-muted">
                     <div className="flex gap-3">
-                      <button onClick={() => onEditPago && onEditPago(p)} className="p-1 text-[#8a8677] hover:text-foreground dark:text-muted-foreground">
+                      <button onClick={() => onEditPago && onEditPago(p)} className="p-1 text-[#625f55] hover:text-foreground dark:text-muted-foreground">
                         <Edit className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => { setPagoToDelete(p); setShowDeleteConfirm(true); }}
-                        className="p-1 text-[#8a8677] hover:text-[#a04a34] dark:text-muted-foreground dark:hover:text-[#c26a52]"
+                        className="p-1 text-[#625f55] hover:text-[#b83245] dark:text-muted-foreground dark:hover:text-[#e46876]"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -393,7 +393,7 @@ const ModernPendingPaymentsView = ({
                     {!isPaid && (
                       <button
                         onClick={() => onMarcarPagado && onMarcarPagado(p)}
-                        className="flex items-center gap-1.5 rounded-sm bg-primary px-3 py-1.5 font-sans text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047]"
+                        className="flex items-center gap-1.5 rounded-sm bg-primary px-3 py-1.5 font-sans text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841]"
                       >
                         <Check className="h-3.5 w-3.5" />
                         Marcar pagado
@@ -406,23 +406,23 @@ const ModernPendingPaymentsView = ({
           )}
 
           {totalPages > 1 && (
-            <div className="mt-2 flex items-center justify-between rounded-md border border-[#ddd5c2] bg-card px-4 py-3 dark:border-border">
+            <div className="mt-2 flex items-center justify-between rounded-md border border-[#c8bf91] bg-card px-4 py-3 dark:border-border">
               <button
                 onClick={() => currentPage > 1 && setCurrentPage((p) => p - 1)}
                 disabled={currentPage === 1}
                 className="rounded-sm p-2 hover:bg-black/5 disabled:opacity-30 dark:hover:bg-card-hover"
               >
-                <ChevronLeft className="h-4 w-4 text-[#8a8677] dark:text-muted-foreground" />
+                <ChevronLeft className="h-4 w-4 text-[#625f55] dark:text-muted-foreground" />
               </button>
-              <span className="font-mono text-[12px] text-[#5d6470] dark:text-muted-foreground">
-                {currentPage} / {totalPages} <span className="text-[#8a8677] dark:text-muted-foreground">({sortedData.length})</span>
+              <span className="font-mono text-[12px] text-[#43436c] dark:text-muted-foreground">
+                {currentPage} / {totalPages} <span className="text-[#625f55] dark:text-muted-foreground">({sortedData.length})</span>
               </span>
               <button
                 onClick={() => currentPage < totalPages && setCurrentPage((p) => p + 1)}
                 disabled={currentPage >= totalPages}
                 className="rounded-sm p-2 hover:bg-black/5 disabled:opacity-30 dark:hover:bg-card-hover"
               >
-                <ChevronRight className="h-4 w-4 text-[#8a8677] dark:text-muted-foreground" />
+                <ChevronRight className="h-4 w-4 text-[#625f55] dark:text-muted-foreground" />
               </button>
             </div>
           )}
@@ -446,7 +446,7 @@ const ModernPendingPaymentsView = ({
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
-        <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#cfc6ae] pb-[18px] dark:border-border">
+        <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#b8ad78] pb-[18px] dark:border-border">
           <h1 className="font-serif text-[42px] font-bold leading-none text-foreground">Vencimientos</h1>
           <div className="flex items-center gap-2">
             <RefreshButton />
@@ -463,26 +463,26 @@ const ModernPendingPaymentsView = ({
             options={[{ value: 'monthly', label: 'Mensual' }, { value: 'accumulated', label: 'Acumulado' }]}
             value={viewMode}
             onChange={setViewMode}
-            activeClassName="bg-[#20242c] text-[#f4f0e6]"
+            activeClassName="bg-[#545464] text-[#f2ecbc]"
           />
           {viewMode === 'monthly' && (
             <input
               type="month"
               value={selectedMonthFilter}
               onChange={(e) => setSelectedMonthFilter(e.target.value)}
-              className="rounded-sm border border-[#ddd5c2] bg-white px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none dark:border-border dark:bg-secondary"
+              className="rounded-sm border border-[#c8bf91] bg-white px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none dark:border-border dark:bg-secondary"
             />
           )}
         </div>
 
         <div className="mb-4 flex gap-2.5">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8a8677] dark:text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#625f55] dark:text-muted-foreground" />
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar…"
-              className="w-full rounded-sm border border-[#ddd5c2] bg-white py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-[#8a8677] focus:outline-none focus:ring-2 focus:ring-ring transition-colors dark:border-border dark:bg-secondary dark:placeholder:text-muted-foreground"
+              className="w-full rounded-sm border border-[#c8bf91] bg-white py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring transition-colors dark:border-border dark:bg-secondary dark:placeholder:text-muted-foreground"
             />
           </div>
           <FilterSelect value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}>
@@ -498,21 +498,21 @@ const ModernPendingPaymentsView = ({
             label="Total pendiente"
             value={formatAmount(totalPendiente, { decimals: 0 })}
             subtext={`${pendientes.length} pendiente${pendientes.length !== 1 ? 's' : ''}${vencidos.length ? ` · ${vencidos.length} vencido${vencidos.length !== 1 ? 's' : ''}` : ''}`}
-            borderColor="#e9c46a"
-            valueColor="#8a6a1f"
+            borderColor="#f9d791"
+            valueColor="var(--warning)"
           />
         </div>
 
-        <div className="rounded-md border border-[#ddd5c2] bg-card overflow-hidden dark:border-border">
+        <div className="rounded-md border border-[#c8bf91] bg-card overflow-hidden dark:border-border">
           <table className="w-full">
             <thead>
-              <tr className="border-b-2 border-[#ddd5c2] dark:border-border">
-                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Vence</th>
-                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Descripción</th>
-                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Categoría</th>
-                <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Monto</th>
-                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Estado</th>
-                <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#8a8677] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Acciones</th>
+              <tr className="border-b-2 border-[#c8bf91] dark:border-border">
+                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Vence</th>
+                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Descripción</th>
+                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Categoría</th>
+                <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Monto</th>
+                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Estado</th>
+                <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -528,7 +528,7 @@ const ModernPendingPaymentsView = ({
                 paginatedData.map((p) => {
                   const isPaid = isPagoPaid(p);
                   return (
-                    <tr key={p.id} className="group border-b border-[#e7e0cf] hover:bg-[#f0ead9] transition-colors dark:border-muted dark:hover:bg-card-hover">
+                    <tr key={p.id} className="group border-b border-[#d5cea3] hover:bg-[#e4d794] transition-colors dark:border-muted dark:hover:bg-card-hover">
                       <td className="px-3.5 py-2.5">{renderFecha(p.fechaVencimiento)}</td>
                       <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">{p.nombre}</td>
                       <td className="px-3.5 py-2.5">
@@ -545,7 +545,7 @@ const ModernPendingPaymentsView = ({
                           {!isPaid && (
                             <button
                               onClick={() => onMarcarPagado && onMarcarPagado(p)}
-                              className="flex items-center gap-1.5 rounded-sm bg-primary px-2.5 py-1.5 font-sans text-[12px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047]"
+                              className="flex items-center gap-1.5 rounded-sm bg-primary px-2.5 py-1.5 font-sans text-[12px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841]"
                             >
                               <Check className="h-3.5 w-3.5" />
                               Marcar pagado
@@ -557,14 +557,14 @@ const ModernPendingPaymentsView = ({
                               className="p-1.5 rounded-sm hover:bg-black/5 transition-colors dark:hover:bg-card-hover"
                               title="Editar"
                             >
-                              <Edit className="h-4 w-4 text-[#8a8677] dark:text-muted-foreground" />
+                              <Edit className="h-4 w-4 text-[#625f55] dark:text-muted-foreground" />
                             </button>
                             <button
                               onClick={() => { setPagoToDelete(p); setShowDeleteConfirm(true); }}
                               className="p-1.5 rounded-sm hover:bg-black/5 transition-colors dark:hover:bg-card-hover"
                               title="Eliminar"
                             >
-                              <Trash2 className="h-4 w-4 text-[#8a8677] hover:text-[#a04a34] dark:text-muted-foreground dark:hover:text-[#c26a52]" />
+                              <Trash2 className="h-4 w-4 text-[#625f55] hover:text-[#b83245] dark:text-muted-foreground dark:hover:text-[#e46876]" />
                             </button>
                           </div>
                         </div>
@@ -577,8 +577,8 @@ const ModernPendingPaymentsView = ({
           </table>
 
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#e7e0cf] dark:border-muted">
-              <p className="font-mono text-[12px] text-[#8a8677] dark:text-muted-foreground">
+            <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#d5cea3] dark:border-muted">
+              <p className="font-mono text-[12px] text-[#625f55] dark:text-muted-foreground">
                 Página {currentPage} de {totalPages} ({sortedData.length} resultados)
               </p>
               <div className="flex items-center gap-2">
@@ -587,7 +587,7 @@ const ModernPendingPaymentsView = ({
                   disabled={currentPage === 1}
                   className="p-1.5 rounded-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black/5 dark:hover:bg-card-hover"
                 >
-                  <ChevronLeft className="h-4 w-4 text-[#8a8677] dark:text-muted-foreground" />
+                  <ChevronLeft className="h-4 w-4 text-[#625f55] dark:text-muted-foreground" />
                 </button>
                 <span className="font-mono text-[12px] text-foreground px-2">{currentPage}</span>
                 <button
@@ -595,7 +595,7 @@ const ModernPendingPaymentsView = ({
                   disabled={currentPage >= totalPages}
                   className="p-1.5 rounded-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black/5 dark:hover:bg-card-hover"
                 >
-                  <ChevronRight className="h-4 w-4 text-[#8a8677] dark:text-muted-foreground" />
+                  <ChevronRight className="h-4 w-4 text-[#625f55] dark:text-muted-foreground" />
                 </button>
               </div>
             </div>

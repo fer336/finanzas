@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import { Save, Wallet, X } from 'lucide-react';
 
 /**
- * PaymentMethodModal — alta/edición de método de pago, tema "Papel".
+ * PaymentMethodModal — alta/edición de método de pago, tema "Kanagawa".
  * Mismo patrón visual que CategoryModal (overlay rgba(32,36,44,.4),
- * panel #faf7ef, radius 12px, pills de tipo, paleta de color en tonos
+ * panel #e5ddb0, radius 12px, pills de tipo, paleta de color en tonos
  * tierra). El ícono sigue siendo un emoji libre — set curado chico,
  * no amerita el picker reicon-react usado en categorías.
  */
@@ -18,9 +18,9 @@ const TYPE_OPTIONS = [
 ];
 
 const COLOR_OPTIONS = [
-  '#5a7d52', '#476442', '#b35a42', '#a04a34', '#3d5a80',
-  '#8a6fa0', '#e9c46a', '#8a6a1f', '#9aa2ad', '#5d6470',
-  '#20242c', '#6b8e7a', '#c17a52', '#4a7a9d', '#a37fb8',
+  'var(--success)', 'var(--success)', 'var(--destructive)', 'var(--destructive)', 'var(--info)',
+  'var(--violet)', '#f9d791', 'var(--warning)', 'var(--muted-foreground)', '#43436c',
+  'var(--foreground)', '#6b8e7a', '#c17a52', '#4a7a9d', '#a37fb8',
 ];
 
 const ICON_OPTIONS = ['💳', '💵', '🏦', '💰', '💎', '📋', '🪙', '💸', '🏧', '📱'];
@@ -29,7 +29,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
   const [formData, setFormData] = useState({
     nombre: '',
     tipo: 'tarjeta',
-    color: '#5a7d52',
+    color: 'var(--success)',
     icono: '💳',
     descripcion: '',
     activo: true,
@@ -43,7 +43,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
       setFormData({
         nombre: paymentMethod.Nombre || paymentMethod.nombre || '',
         tipo: paymentMethod.Tipo || paymentMethod.tipo || 'tarjeta',
-        color: paymentMethod.Color || paymentMethod.color || '#5a7d52',
+        color: paymentMethod.Color || paymentMethod.color || 'var(--success)',
         icono: paymentMethod.Icono || paymentMethod.icono || '💳',
         descripcion: paymentMethod.Descripcion || paymentMethod.descripcion || '',
         activo:
@@ -57,7 +57,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
       setFormData({
         nombre: '',
         tipo: 'tarjeta',
-        color: '#5a7d52',
+        color: 'var(--success)',
         icono: '💳',
         descripcion: '',
         activo: true,
@@ -95,10 +95,10 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: 'rgba(32,36,44,.4)' }}>
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-[#ddd5c2] dark:border-[#2e3844] bg-[#faf7ef] dark:bg-[#1a2029]">
-        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#ddd5c2] dark:border-[#2e3844] bg-[#faf7ef] dark:bg-[#1a2029] px-5 py-4 sm:px-6">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-[#c8bf91] dark:border-[#363646] bg-[#e5ddb0] dark:bg-[#181820]">
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#c8bf91] dark:border-[#363646] bg-[#e5ddb0] dark:bg-[#181820] px-5 py-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="rounded-sm bg-[#f0ead9] dark:bg-[#212836] p-2">
+            <div className="rounded-sm bg-[#e4d794] dark:bg-[#2a2a37] p-2">
               <Wallet className="h-5 w-5 text-primary" />
             </div>
             <h2 className="font-serif text-[19px] font-bold text-foreground sm:text-[21px]">
@@ -108,7 +108,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
           <button
             type="button"
             onClick={onClose}
-            className="rounded-sm p-2 text-[#8a8677] dark:text-[#93a0af] transition-colors hover:bg-black/5 hover:text-foreground"
+            className="rounded-sm p-2 text-[#625f55] dark:text-[#c8c093] transition-colors hover:bg-black/5 hover:text-foreground"
           >
             <X className="h-5 w-5" />
           </button>
@@ -116,25 +116,25 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
 
         <form onSubmit={handleSubmit} className="space-y-5 p-5 sm:p-6">
           {errors.general && (
-            <div className="rounded-sm border border-[#a04a34]/40 dark:border-[#c26a52]/40 bg-[#a04a34]/5 dark:bg-[#c26a52]/5 p-3.5 text-[12.5px] text-[#a04a34] dark:text-[#c26a52]">
+            <div className="rounded-sm border border-[#b83245]/40 dark:border-[#e46876]/40 bg-[#b83245]/5 dark:bg-[#e46876]/5 p-3.5 text-[12.5px] text-[#b83245] dark:text-[#e46876]">
               {errors.general}
             </div>
           )}
 
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Nombre *</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Nombre *</label>
             <input
               type="text"
               value={formData.nombre}
               onChange={(e) => handleChange('nombre', e.target.value)}
-              className="w-full rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] dark:placeholder:text-[#93a0af] focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full rounded-sm border border-[#c8bf91] dark:border-[#363646] bg-white dark:bg-[#2a2a37] px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] dark:placeholder:text-[#c8c093] focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="Ej: Tarjeta Visa, Efectivo, Transferencia"
             />
-            {errors.nombre && <p className="mt-1 text-[11.5px] text-[#a04a34] dark:text-[#c26a52]">{errors.nombre}</p>}
+            {errors.nombre && <p className="mt-1 text-[11.5px] text-[#b83245] dark:text-[#e46876]">{errors.nombre}</p>}
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Tipo</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Tipo</label>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {TYPE_OPTIONS.map((option) => {
                 const isSelected = formData.tipo === option.value;
@@ -151,7 +151,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
                     }
                   >
                     <span className="text-lg leading-none">{option.icon}</span>
-                    <span className="text-[11px] leading-tight text-[#5d6470] dark:text-[#93a0af]">{option.label}</span>
+                    <span className="text-[11px] leading-tight text-[#43436c] dark:text-[#c8c093]">{option.label}</span>
                   </button>
                 );
               })}
@@ -159,7 +159,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Ícono</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Ícono</label>
             <div className="grid grid-cols-5 gap-2 sm:grid-cols-10">
               {ICON_OPTIONS.map((icon) => {
                 const isSelected = formData.icono === icon;
@@ -183,7 +183,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Color</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Color</label>
             <div className="grid grid-cols-8 gap-2 sm:grid-cols-10">
               {COLOR_OPTIONS.map((color) => (
                 <button
@@ -191,7 +191,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
                   type="button"
                   onClick={() => handleChange('color', color)}
                   className={`h-8 rounded-sm border-2 transition-all ${
-                    formData.color === color ? 'scale-105 border-[#20242c] dark:border-[#ece7d8]' : 'border-transparent'
+                    formData.color === color ? 'scale-105 border-[#545464] dark:border-[#dcd7ba]' : 'border-transparent'
                   }`}
                   style={{ backgroundColor: color }}
                 />
@@ -200,12 +200,12 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#5d6470] dark:text-[#93a0af]">Descripción</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Descripción</label>
             <textarea
               value={formData.descripcion}
               onChange={(e) => handleChange('descripcion', e.target.value)}
               rows={3}
-              className="w-full resize-none rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#8a8677] dark:placeholder:text-[#93a0af] focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full resize-none rounded-sm border border-[#c8bf91] dark:border-[#363646] bg-white dark:bg-[#2a2a37] px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] dark:placeholder:text-[#c8c093] focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="Descripción opcional"
             />
           </div>
@@ -216,9 +216,9 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
               type="checkbox"
               checked={formData.activo}
               onChange={(e) => handleChange('activo', e.target.checked)}
-              className="h-4 w-4 rounded-sm border-[#ddd5c2] dark:border-[#2e3844] text-primary focus:ring-ring"
+              className="h-4 w-4 rounded-sm border-[#c8bf91] dark:border-[#363646] text-primary focus:ring-ring"
             />
-            <label htmlFor="metodo-pago-activo" className="text-[13px] text-[#5d6470] dark:text-[#93a0af]">
+            <label htmlFor="metodo-pago-activo" className="text-[13px] text-[#43436c] dark:text-[#c8c093]">
               Método activo
             </label>
           </div>
@@ -227,13 +227,13 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-sm border border-[#ddd5c2] dark:border-[#2e3844] bg-white dark:bg-[#212836] px-4 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#f0ead9] dark:hover:bg-[#212836]"
+              className="flex-1 rounded-sm border border-[#c8bf91] dark:border-[#363646] bg-white dark:bg-[#2a2a37] px-4 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#e4d794] dark:hover:bg-[#2a2a37]"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex flex-1 items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2.5 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#4f7047] dark:hover:bg-[#7d9970]"
+              className="flex flex-1 items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2.5 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[#76946a]"
             >
               <Save className="h-4 w-4" />
               Guardar

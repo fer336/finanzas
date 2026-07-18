@@ -25,11 +25,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import apiServices from '../../services/api';
 import yfinanceService from '../../services/yfinanceService';
 import { getSecondDueDateValue } from '../../utils/pendingPaymentStatus';
+import ErrorBoundary from './common/ErrorBoundary';
 
 // Modern UI Components
 import ModernLayout from './layout/ModernLayout';
 import LoadingSpinner from './common/LoadingSpinner';
 import ConfirmModal from './common/ConfirmModal';
+import StitchPendingPaymentModal from './pending-payments/StitchPendingPaymentModal';
 
 // ====== LAZY LOADED VIEWS (Code Splitting) ======
 const ModernDashboard = lazy(() => import('./dashboard/ModernDashboard'));
@@ -53,7 +55,8 @@ const BulkTransactionUpload = lazy(() => import('../BulkTransactionUpload'));
 const BudgetModal = lazy(() => import('../modals/BudgetModal'));
 const AsignarDineroModal = lazy(() => import('../modals/AsignarDineroModal'));
 const ObjetivoFormModal = lazy(() => import('../mission-control/ObjetivoFormModal'));
-const StitchPendingPaymentModal = lazy(() => import('./pending-payments/StitchPendingPaymentModal'));
+// Direct import — no lazy() to avoid Suspense blanking on HMR/dev re-suspends
+// const StitchPendingPaymentModal = lazy(() => import('./pending-payments/StitchPendingPaymentModal'));
 const PrestamoModal = lazy(() => import('./pending-payments/PrestamoModal'));
 const PrestamoPayModal = lazy(() => import('./pending-payments/PrestamoPayModal'));
 const CurrencyModal = lazy(() => import('./common/modals/CurrencyModal').then(m => ({ default: m.CurrencyModal })));
@@ -1646,7 +1649,7 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
       )}
       {/* Pending Payment Form Modal */}
       {showPendingPaymentModal && (
-        <Suspense fallback={null}>
+        <ErrorBoundary>
           <StitchPendingPaymentModal
             isOpen={showPendingPaymentModal}
             onClose={() => {
@@ -1701,7 +1704,7 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
             categories={categories}
             paymentMethods={paymentMethods}
           />
-        </Suspense>
+          </ErrorBoundary>
       )}
 
       {showPayPendingPaymentModal && (

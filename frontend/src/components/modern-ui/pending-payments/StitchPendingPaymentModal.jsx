@@ -536,7 +536,7 @@ const StitchPendingPaymentModal = ({
           role="dialog"
           aria-modal="true"
           aria-labelledby={modalTitleId}
-          className="relative flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground"
+          className="relative flex h-full max-h-[90vh] w-full max-w-2xl flex-col rounded-xl border border-border bg-popover text-popover-foreground"
         >
 
           {/* Header (Sticky) */}
@@ -560,7 +560,7 @@ const StitchPendingPaymentModal = ({
           </div>
 
           {/* Content (Scrollable) */}
-          <form onSubmit={handleSubmit} className="custom-scrollbar flex-1 space-y-7 overflow-y-auto p-6 sm:p-8">
+          <form onSubmit={handleSubmit} className="custom-scrollbar flex-1 min-h-0 space-y-7 overflow-y-auto p-6 sm:p-8">
 
             {/* Información Básica */}
             <section className="space-y-4">
@@ -576,7 +576,7 @@ const StitchPendingPaymentModal = ({
                     id={formIds.nombre}
                     type="text"
                     value={formData.Nombre}
-                    onChange={(e) => setFormData({...formData, Nombre: e.target.value})}
+                    onChange={(e) => setFormData(prev => ({...prev, Nombre: e.target.value}))}
                     className={inputClassName}
                     placeholder="Ej: Netflix, Alquiler, Luz..."
                     required
@@ -588,7 +588,7 @@ const StitchPendingPaymentModal = ({
                   <textarea
                     id={formIds.descripcion}
                     value={formData.Descripcion}
-                    onChange={(e) => setFormData({...formData, Descripcion: e.target.value})}
+                    onChange={(e) => setFormData(prev => ({...prev, Descripcion: e.target.value}))}
                     className={`${inputClassName} resize-none`}
                     placeholder="Añadir una nota o descripción..."
                     rows={3}
@@ -601,7 +601,7 @@ const StitchPendingPaymentModal = ({
                     id={formIds.factura}
                     type="text"
                     value={formData.num_factura}
-                    onChange={(e) => setFormData({...formData, num_factura: e.target.value})}
+                    onChange={(e) => setFormData(prev => ({...prev, num_factura: e.target.value}))}
                     className={inputClassName}
                     placeholder="Ej: 001-00123456"
                   />
@@ -625,7 +625,7 @@ const StitchPendingPaymentModal = ({
                     type="number"
                     step="0.01"
                     value={formData.Monto}
-                    onChange={(e) => setFormData({...formData, Monto: e.target.value})}
+                    onChange={(e) => setFormData(prev => ({...prev, Monto: e.target.value}))}
                     className={`${inputClassName} font-mono`}
                     placeholder="0.00"
                     required
@@ -638,7 +638,7 @@ const StitchPendingPaymentModal = ({
                   <select
                     id={formIds.moneda}
                     value={formData.Moneda}
-                    onChange={(e) => setFormData({...formData, Moneda: e.target.value})}
+                    onChange={(e) => setFormData(prev => ({...prev, Moneda: e.target.value}))}
                     className={inputClassName}
                   >
                     <option value="ARS">ARS - Pesos Argentinos</option>
@@ -706,7 +706,7 @@ const StitchPendingPaymentModal = ({
                   <select
                     id={formIds.categoria}
                     value={formData.categorias_id}
-                    onChange={(e) => setFormData({...formData, categorias_id: e.target.value})}
+                    onChange={(e) => setFormData(prev => ({...prev, categorias_id: e.target.value}))}
                     className={inputClassName}
                   >
                     <option value="">Sin categoría</option>
@@ -723,7 +723,7 @@ const StitchPendingPaymentModal = ({
                   <select
                     id={formIds.metodoPago}
                     value={formData.metodos_pago_id}
-                    onChange={(e) => setFormData({...formData, metodos_pago_id: e.target.value})}
+                    onChange={(e) => setFormData(prev => ({...prev, metodos_pago_id: e.target.value}))}
                     className={inputClassName}
                   >
                     <option value="">Sin método</option>
@@ -754,7 +754,7 @@ const StitchPendingPaymentModal = ({
                         name="tipo"
                         value={tipo.toLowerCase()}
                         checked={formData.Tipo.toLowerCase() === tipo.toLowerCase()}
-                        onChange={() => setFormData({...formData, Tipo: tipo.toLowerCase()})}
+                        onChange={() => setFormData(prev => ({...prev, Tipo: tipo.toLowerCase()}))}
                         className="sr-only"
                       />
                       <span className="text-[12.5px] font-medium">{tipo}</span>
@@ -783,7 +783,7 @@ const StitchPendingPaymentModal = ({
                         name="prioridad"
                         value={pri.value}
                         checked={formData.Prioridad === pri.value}
-                        onChange={() => setFormData({...formData, Prioridad: pri.value})}
+                        onChange={() => setFormData(prev => ({...prev, Prioridad: pri.value}))}
                         className="sr-only"
                       />
                       {pri.label}
@@ -820,7 +820,7 @@ const StitchPendingPaymentModal = ({
                         name="estado"
                         value={estado.value}
                         checked={formData.Estado === estado.value}
-                        onChange={() => setFormData({...formData, Estado: estado.value})}
+                        onChange={() => setFormData(prev => ({...prev, Estado: estado.value}))}
                         className="sr-only"
                       />
                       {estado.label}
@@ -841,7 +841,7 @@ const StitchPendingPaymentModal = ({
                   aria-checked={formData.Recurrente}
                   aria-label="Marcar vencimiento como pago recurrente"
                   aria-describedby="pending-payment-recurrence-description"
-                  onClick={() => setFormData({...formData, Recurrente: !formData.Recurrente})}
+                  onClick={() => setFormData(prev => ({...prev, Recurrente: !prev.Recurrente}))}
                   className="relative h-5 w-9 shrink-0 rounded-full transition-colors duration-150"
                   style={{ background: formData.Recurrente ? 'var(--primary)' : 'var(--muted)' }}
                 >
@@ -870,7 +870,7 @@ const StitchPendingPaymentModal = ({
                         name="frecuencia-recurrencia"
                         value={freq.toLowerCase()}
                         checked={formData.FrecuenciaRecurrencia === freq.toLowerCase()}
-                        onChange={() => setFormData({...formData, FrecuenciaRecurrencia: freq.toLowerCase()})}
+                        onChange={() => setFormData(prev => ({...prev, FrecuenciaRecurrencia: freq.toLowerCase()}))}
                         className="sr-only"
                       />
                       {formData.FrecuenciaRecurrencia === freq.toLowerCase() && (
@@ -895,7 +895,7 @@ const StitchPendingPaymentModal = ({
                 label="Factura original"
                 hint="El PDF o imagen de la factura/servicio a pagar"
                 value={formData.url_pdf}
-                onChange={(val) => setFormData({ ...formData, url_pdf: val })}
+                onChange={(val) => setFormData(prev => ({ ...prev, url_pdf: val }))}
                 previewTitle="Factura"
                 accentColor="var(--info)"
                 uploadPrefix="facturas"
@@ -906,7 +906,7 @@ const StitchPendingPaymentModal = ({
                 label="Comprobante de pago"
                 hint="El ticket o recibo que prueba que ya pagaste"
                 value={formData.comprobante}
-                onChange={(val) => setFormData({ ...formData, comprobante: val })}
+                onChange={(val) => setFormData(prev => ({ ...prev, comprobante: val }))}
                 previewTitle="Comprobante"
                 accentColor="var(--success)"
                 uploadPrefix="comprobantes"

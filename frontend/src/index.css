@@ -6,115 +6,187 @@
 @layer base {
   :root {
     color-scheme: light;
-    /* Kanagawa Lotus. Keep these roles aligned with the Wave block below. */
+    --background-deep: #ece4d6;
+    --background-alt: #f3eee3;
+    --surface: #fbf8f0;
+    --surface-elevated: #f1eadf;
+    --surface-violet: #e8dfef;
+    --border-subtle: #d8ccbd;
+    --border-strong: #8f7baa;
+    --divider: rgba(87, 69, 130, 0.22);
+    --text-primary: #40384d;
+    --text-secondary: #5c5063;
+    --text-muted: #7d6f83;
+    --text-violet-soft: #6f5d92;
+    --primary-hover: #685496;
+    --primary-active: #7865a5;
+    --primary-soft: #957fb8;
+    --primary-dark: #383058;
+    --primary-surface: #e8dfef;
+    --income: #4e913f;
+    --income-light: #6faf55;
+    --income-dark: #315c2d;
+    --income-border: #407838;
+    --expense: #d33e48;
+    --expense-light: #e6535e;
+    --expense-dark: #822d33;
+    --expense-border: #c03030;
+    --result-positive: #506da8;
+    --result-positive-soft: #7e9cd8;
+    --result-positive-dark: #394f80;
+    --category-food: #e9444f;
+    --category-education: #e9a52b;
+    --category-services: #4e913f;
+    --category-sport: #347ac1;
+    --category-transport: #32a7b7;
+    --category-various: #a75bc4;
+    --category-other: #e06a35;
+    --category-cleaning: #8f8177;
+    --category-finance: #8a6a4a;
+    --category-health: #d27e99;
 
     /* Fondos */
-    --background: #f2ecbc;
+    --background: #f7f3ea;
     /* Página */
-    --foreground: #545464;
+    --foreground: var(--text-primary);
     /* Texto principal */
 
     /* Card/Panel */
-    --card: #e5ddb0;
+    --card: var(--surface);
     /* Superficie / card */
-    --card-foreground: #545464;
-    --card-hover: #e4d794;
+    --card-foreground: var(--text-primary);
+    --card-hover: var(--surface-elevated);
     /* Hover de filas de tabla */
 
     /* Popover/Modal */
-    --popover: #d5cea3;
-    --popover-foreground: #43436c;
+    --popover: var(--surface-elevated);
+    --popover-foreground: var(--text-secondary);
 
-    /* Primary - Verde (ingresos / acción primaria) */
-    --primary: #526a3a;
-    --primary-foreground: #f2ecbc;
-    --primary-glow: rgba(82, 106, 58, 0);
-    /* sin glow decorativo — DESIGN.md prohíbe sombras/gradientes */
+    --primary: #574582;
+    --primary-foreground: #f0e6e0;
+    --primary-glow: rgba(87, 69, 130, 0);
 
     /* Secondary - Botón/superficie secundaria (borde + blanco) */
-    --secondary: #dcd5ac;
-    --secondary-foreground: #43436c;
+    --secondary: var(--surface-elevated);
+    --secondary-foreground: var(--text-secondary);
     --secondary-glow: rgba(220, 213, 172, 0);
 
     /* Muted/Subtle - Bordes sutiles / texto terciario */
-    --muted: #d5cea3;
-    --muted-foreground: #625f55;
+    --muted: #e5ddd1;
+    --muted-foreground: var(--text-muted);
 
     /* Accent - Dorado (avisos / pendiente) */
-    --accent: #f9d791;
+    --accent: #efe1ba;
     --accent-foreground: #6b572f;
 
     /* Destructive - Arcilla (gastos) */
-    --destructive: #b83245;
-    --destructive-foreground: #f2ecbc;
+    --destructive: var(--expense);
+    --destructive-foreground: #f0e6e0;
 
     /* Success - Verde (mismo acento que ingresos/primario) */
-    --success: #526a3a;
-    --success-foreground: #f2ecbc;
+    --success: var(--income);
+    --success-foreground: #f0e6e0;
 
     /* Bordes & Inputs */
-    --border: #c8bf91;
+    --border: #cfc2b8;
     /* Estándar */
-    --input: #c8bf91;
-    --ring: #4d699b;
-    --info: #4d699b;
+    --input: #cfc2b8;
+    --ring: var(--primary-soft);
+    --info: var(--result-positive-dark);
     --warning: #6b572f;
-    --violet: #624c83;
+    --violet: var(--primary-soft);
 
     --radius: 0.5rem;
     /* 8px — radio de card, ver tailwind.config.js para escala completa */
   }
 
-  /* Kanagawa Wave. */
+  /* Kanagawa Violet Dark. */
   .dark {
     color-scheme: dark;
+    --background-deep: #030411;
+    --background-alt: #090b1b;
+    --surface: #0d0d1f;
+    --surface-elevated: #111124;
+    --surface-violet: #191727;
+    --border-subtle: #2f2d45;
+    --border-strong: #4f4c6a;
+    --divider: rgba(138, 123, 145, 0.28);
+    --text-primary: #f0e6e0;
+    --text-secondary: #c9b9bd;
+    --text-muted: #8a7b91;
+    --text-violet-soft: #a99ac4;
+    --primary-hover: #685496;
+    --primary-active: #7865a5;
+    --primary-soft: #957fb8;
+    --primary-dark: #383058;
+    --primary-surface: #302858;
+    --income: #4e913f;
+    --income-light: #6faf55;
+    --income-dark: #315c2d;
+    --income-border: #407838;
+    --expense: #d33e48;
+    --expense-light: #e6535e;
+    --expense-dark: #822d33;
+    --expense-border: #c03030;
+    --result-positive: #7e9cd8;
+    --result-positive-soft: #a3b9e5;
+    --result-positive-dark: #506da8;
+    --category-food: #e9444f;
+    --category-education: #e9a52b;
+    --category-services: #4e913f;
+    --category-sport: #347ac1;
+    --category-transport: #32a7b7;
+    --category-various: #a75bc4;
+    --category-other: #e06a35;
+    --category-cleaning: #c9b9ad;
+    --category-finance: #8a6a4a;
+    --category-health: #d27e99;
 
     /* Fondos */
-    --background: #1f1f28;
-    --foreground: #dcd7ba;
+    --background: #050717;
+    --foreground: var(--text-primary);
 
     /* Card/Panel */
-    --card: #181820;
-    --card-foreground: #dcd7ba;
-    --card-hover: #2a2a37;
+    --card: var(--surface);
+    --card-foreground: var(--text-primary);
+    --card-hover: var(--surface-elevated);
 
     /* Popover/Modal */
-    --popover: #16161d;
-    --popover-foreground: #dcd7ba;
+    --popover: var(--surface-elevated);
+    --popover-foreground: var(--text-primary);
 
-    /* Primary - Verde (ingresos / acción primaria) */
-    --primary: #98bb6c;
-    --primary-foreground: #16161d;
-    --primary-glow: rgba(152, 187, 108, 0);
+    --primary: #574582;
+    --primary-foreground: #f0e6e0;
+    --primary-glow: rgba(87, 69, 130, 0);
 
     /* Secondary - Botón/superficie secundaria */
-    --secondary: #2a2a37;
-    --secondary-foreground: #dcd7ba;
+    --secondary: var(--surface-violet);
+    --secondary-foreground: var(--text-secondary);
     --secondary-glow: rgba(42, 42, 55, 0);
 
     /* Muted/Subtle - Bordes sutiles / texto terciario */
-    --muted: #363646;
-    --muted-foreground: #c8c093;
+    --muted: var(--border-subtle);
+    --muted-foreground: var(--text-muted);
 
     /* Accent - Dorado (avisos / pendiente) */
-    --accent: #49443c;
+    --accent: #3f3544;
     --accent-foreground: #e6c384;
 
     /* Destructive - Arcilla (gastos) */
-    --destructive: #e46876;
-    --destructive-foreground: #16161d;
+    --destructive: var(--expense);
+    --destructive-foreground: #f0e6e0;
 
     /* Success - Verde (mismo acento que ingresos/primario) */
-    --success: #98bb6c;
-    --success-foreground: #16161d;
+    --success: var(--income);
+    --success-foreground: #f0e6e0;
 
     /* Bordes & Inputs */
-    --border: #363646;
-    --input: #363646;
-    --ring: #7e9cd8;
-    --info: #7e9cd8;
+    --border: #393550;
+    --input: #393550;
+    --ring: var(--primary-soft);
+    --info: var(--result-positive);
     --warning: #e6c384;
-    --violet: #957fb8;
+    --violet: var(--primary-soft);
   }
 }
 
@@ -128,7 +200,7 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    font-family: 'Work Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     @apply bg-background text-foreground;
@@ -164,7 +236,7 @@
 
 /* Legacy utility names kept for callers, rendered as solid Kanagawa surfaces. */
 .glass-panel {
-  background: var(--card);
+  background: var(--kanagawa-card-background, var(--card));
   border: 1px solid var(--border);
   border-radius: var(--radius);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -176,7 +248,7 @@
 }
 
 .glass-card {
-  background: var(--card);
+  background: var(--kanagawa-card-background, var(--card));
   border: 1px solid var(--border);
   border-radius: var(--radius);
 }
@@ -258,6 +330,230 @@
 ::selection {
   background: var(--ring);
   color: var(--primary-foreground);
+}
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 70% 15%, rgba(149, 127, 184, 0.08), transparent 36%),
+    linear-gradient(145deg, #f7f3ea 0%, #f3eee3 52%, #ece4d6 100%);
+  color: var(--foreground);
+}
+
+.dark .app-shell {
+  background:
+    radial-gradient(circle at 70% 15%, rgba(87, 69, 130, 0.12), transparent 34%),
+    radial-gradient(circle at 15% 75%, rgba(49, 36, 86, 0.18), transparent 38%),
+    linear-gradient(145deg, #030411 0%, #050717 48%, #090b1b 100%);
+}
+
+.dashboard-content {
+  position: relative;
+  z-index: 1;
+}
+
+.kanagawa-dashboard-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.kanagawa-dashboard-background-dark {
+  opacity: 0.44;
+}
+
+.kanagawa-dashboard-background-light {
+  opacity: 0.72;
+}
+
+.kanagawa-card {
+  background: var(--kanagawa-card-background, linear-gradient(145deg, rgba(251, 248, 240, 0.94), rgba(241, 234, 223, 0.92)));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow:
+    0 18px 44px rgba(64, 56, 77, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.dark .kanagawa-card {
+  --kanagawa-card-background: linear-gradient(145deg, rgba(17, 17, 36, 0.94), rgba(9, 11, 27, 0.92));
+  box-shadow:
+    0 18px 44px rgba(3, 4, 17, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+}
+
+.kanagawa-card.kanagawa-app-bar {
+  border-width: 0 0 1px;
+  border-radius: 0;
+  box-shadow:
+    0 8px 24px rgba(64, 56, 77, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.kanagawa-card.kanagawa-bottom-bar {
+  border-width: 1px 0 0;
+  border-radius: 0;
+  box-shadow:
+    0 -10px 28px rgba(64, 56, 77, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.kanagawa-card.kanagawa-bottom-sheet {
+  border-width: 1px 0 0;
+  border-radius: 16px 16px 0 0;
+}
+
+.dark .kanagawa-card.kanagawa-app-bar {
+  box-shadow:
+    0 8px 24px rgba(3, 4, 17, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.dark .kanagawa-card.kanagawa-bottom-bar {
+  box-shadow:
+    0 -10px 28px rgba(3, 4, 17, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.kanagawa-interactive {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.kanagawa-interactive:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.kanagawa-interactive:focus-visible {
+  outline: 2px solid var(--primary-soft);
+  outline-offset: 3px;
+}
+
+.kanagawa-button-primary {
+  color: var(--primary-foreground);
+  background: var(--primary);
+  border: 1px solid var(--primary-active);
+  border-radius: 12px;
+  box-shadow:
+    0 8px 24px rgba(3, 4, 17, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.kanagawa-button-primary:hover {
+  background: var(--primary-hover);
+}
+
+.kanagawa-button-primary:active {
+  background: var(--primary-active);
+}
+
+.kanagawa-callout-warning {
+  border-color: var(--category-education);
+  background: var(--accent);
+}
+
+.dark .kanagawa-callout-warning {
+  background: rgba(63, 53, 68, 0.82);
+}
+
+.kanagawa-callout-info {
+  border-color: var(--result-positive);
+  background: var(--secondary);
+}
+
+.dark .kanagawa-callout-info {
+  background: rgba(126, 156, 216, 0.14);
+}
+
+.card-art {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+.card-copy {
+  position: relative;
+  z-index: 2;
+}
+
+.card-art-income {
+  right: -2%;
+  bottom: -12%;
+  width: 46%;
+  max-height: 110%;
+  object-fit: contain;
+  object-position: right bottom;
+  opacity: 0.38;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.25) 20%, black 48%, black 100%);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.25) 20%, black 48%, black 100%);
+}
+
+.card-art-expense {
+  right: -3%;
+  bottom: -10%;
+  width: 48%;
+  max-height: 115%;
+  object-fit: contain;
+  object-position: right bottom;
+  opacity: 0.36;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.28) 22%, black 50%, black 100%);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.28) 22%, black 50%, black 100%);
+}
+
+.card-income {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-color: var(--income-border);
+  box-shadow:
+    0 18px 44px rgba(3, 4, 17, 0.16),
+    0 0 22px rgba(78, 145, 63, 0.08);
+}
+
+.card-expense {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-color: var(--expense-border);
+  box-shadow:
+    0 18px 44px rgba(3, 4, 17, 0.16),
+    0 0 22px rgba(211, 62, 72, 0.08);
+}
+
+@media (max-width: 900px) {
+  .kanagawa-dashboard-background {
+    object-position: center bottom;
+  }
+
+  .kanagawa-dashboard-background-dark {
+    opacity: 0.3;
+  }
+
+  .kanagawa-dashboard-background-light {
+    opacity: 0.5;
+  }
+
+  .card-art-income,
+  .card-art-expense {
+    width: 42%;
+    opacity: 0.3;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -23,7 +23,7 @@ const LoadingSpinner = ({ message = 'Cargando…', fullScreen = true }) => {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
+    <div className="flex min-h-screen items-center justify-center">
       {content}
     </div>
   );

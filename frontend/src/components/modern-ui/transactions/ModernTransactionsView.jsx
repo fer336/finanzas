@@ -361,7 +361,7 @@ const ModernTransactionsView = ({
   // ── Render Mobile ─────────────────────────────────────────────────────────
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-background pb-8">
+      <div className="min-h-screen pb-8">
         <div className="px-4 pt-4 pb-3">
 
           {/* Cabecera de período */}
@@ -502,6 +502,7 @@ const ModernTransactionsView = ({
         {/* KPIs */}
         <div className="grid grid-cols-3 gap-2 px-4 mb-4">
           <KpiCard
+            kpiKey="ingresos"
             label="Ingresos"
             value={formatAmount(totales.ingresos, { decimals: 0 })}
             subtext={`${filtered.filter(t => t.tipo === 'ingreso').length} tx`}
@@ -509,6 +510,7 @@ const ModernTransactionsView = ({
             valueColor="var(--success)"
           />
           <KpiCard
+            kpiKey="gastos"
             label="Gastos"
             value={formatAmount(totales.gastos, { decimals: 0 })}
             subtext={`${filtered.filter(t => t.tipo === 'gasto').length} tx`}
@@ -545,21 +547,22 @@ const ModernTransactionsView = ({
 
               return (
                 <div key={rowId} className="rounded-md border border-border bg-card px-3.5 py-3">
-                  <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <p className="text-[13.5px] text-foreground truncate">{descripcion}</p>
-                      <div className="mt-1 flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-[11.5px] text-[#625f55]">{displayDate}</span>
+                      <p className="truncate text-[13.5px] text-foreground">{descripcion}</p>
+                      <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2">
+                        <span className="shrink-0 font-mono text-[11.5px] text-[#625f55]">{displayDate}</span>
                         <Badge
                           variant="outline"
+                          className="max-w-full min-w-0 truncate"
                           style={{ borderColor: pillColor, color: pillColor }}
                         >
                           {categoryName}
                         </Badge>
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="font-mono font-semibold text-[13.5px]" style={{ color: pillColor }}>
+                    <div className="shrink-0 text-right">
+                      <p className="whitespace-nowrap font-mono text-[13.5px] font-semibold" style={{ color: pillColor }}>
                         {esIngreso ? '+' : '−'} {formatAmount(monto, { decimals: 0 })}
                       </p>
                     </div>
@@ -621,7 +624,7 @@ const ModernTransactionsView = ({
 
   // ── Render Desktop ────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
 
         {/* ── Cabecera de período (mismo patrón que Inicio) ── */}
@@ -773,6 +776,7 @@ const ModernTransactionsView = ({
         {/* ── KPIs del rango filtrado ── */}
         <div className="mb-5 grid grid-cols-3 gap-3.5">
           <KpiCard
+            kpiKey="ingresos"
             label="Ingresos"
             value={formatAmount(totales.ingresos, { decimals: 0 })}
             subtext={`${filtered.filter(t => t.tipo === 'ingreso').length} transacciones`}
@@ -780,6 +784,7 @@ const ModernTransactionsView = ({
             valueColor="var(--success)"
           />
           <KpiCard
+            kpiKey="gastos"
             label="Gastos"
             value={formatAmount(totales.gastos, { decimals: 0 })}
             subtext={`${filtered.filter(t => t.tipo === 'gasto').length} transacciones`}

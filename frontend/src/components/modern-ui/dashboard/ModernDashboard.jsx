@@ -27,7 +27,7 @@ const EvolucionMensualChart = ({ data, formatAmount }) => (
           dataKey="mes"
           axisLine={false}
           tickLine={false}
-          tick={{ fontSize: 11, fill: 'var(--muted-foreground)', fontFamily: 'IBM Plex Mono, monospace' }}
+          tick={{ fontSize: 11, fill: 'var(--muted-foreground)', fontFamily: 'JetBrains Mono, monospace' }}
         />
         <Tooltip
           formatter={(value, name) => [formatAmount(value, { decimals: 0 }), name === 'ingresos' ? 'Ingresos' : 'Gastos']}
@@ -63,7 +63,7 @@ const EmptyState = ({ children }) => (
 EmptyState.propTypes = { children: PropTypes.node };
 
 const DashboardSkeleton = () => (
-  <div className="min-h-screen bg-background">
+  <div className="min-h-screen">
     <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
       <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-border pb-[18px]">
         <div className="space-y-2.5">
@@ -188,7 +188,7 @@ const ModernDashboard = ({
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
 
         {/* ── Cabecera de período ── */}
@@ -196,8 +196,8 @@ const ModernDashboard = ({
           <div>
             <div className="flex items-center gap-2.5">
               <div
-                className="font-mono text-[11px] uppercase text-[var(--info)]"
-                style={{ letterSpacing: '.16em' }}
+                className="font-mono text-[11px] uppercase"
+                style={{ color: 'var(--info)', letterSpacing: '.16em' }}
               >
                 Período {periodoLabel}
               </div>
@@ -225,7 +225,7 @@ const ModernDashboard = ({
               {veredicto}
             </p>
           </div>
-          <div className="shrink-0 rounded-md border border-border bg-card px-[18px] py-3 text-right">
+          <div className="kanagawa-card shrink-0 rounded-md px-[18px] py-3 text-right">
             <div className="flex items-center justify-end gap-2">
               <div className="font-mono text-[10px] uppercase tracking-[.1em] text-muted-foreground">
                 {balanceMode === 'mensual' ? 'Resultado del mes' : 'Balance disponible'}
@@ -256,6 +256,7 @@ const ModernDashboard = ({
           {kpis.map((kpi) => (
             <KpiCard
               key={kpi.key}
+              kpiKey={kpi.key}
               label={kpi.label}
               value={kpi.value}
               subtext={kpi.subtext}
@@ -269,13 +270,14 @@ const ModernDashboard = ({
         <div className="grid grid-cols-[1.5fr_1fr] gap-4">
 
           {/* Movimientos recientes */}
-          <div className="rounded-md border border-border bg-card px-5 py-[18px]">
+          <div className="kanagawa-card rounded-md px-5 py-[18px]">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-serif text-[17px] font-semibold text-foreground">Movimientos recientes</h2>
               <button
                 type="button"
                 onClick={() => onNavigate && onNavigate('transactions-full')}
-                className="text-[13px] text-[var(--info)] hover:underline"
+                className="text-[13px] hover:underline"
+                style={{ color: 'var(--info)' }}
               >
                 ver todos
               </button>
@@ -317,7 +319,7 @@ const ModernDashboard = ({
           <div className="flex flex-col gap-4">
 
             {/* Gastos / Ingresos por categoría */}
-            <div className="rounded-md border border-border bg-card px-5 py-[18px]">
+            <div className="kanagawa-card rounded-md px-5 py-[18px]">
               <div className="mb-3 flex items-center justify-between gap-2">
                 <h2 className="font-serif text-[17px] font-semibold text-foreground">
                   {donutMode === 'gastos' ? 'Gastos por categoría' : 'Ingresos por categoría'}
@@ -357,18 +359,18 @@ const ModernDashboard = ({
             <button
               type="button"
               onClick={goToVencimientos}
-              className="rounded-md border border-[#de9800] bg-[#f9d791] px-5 py-4 text-left dark:border-[#e6c384] dark:bg-[rgba(230,195,132,0.14)]"
+              className="kanagawa-callout-warning kanagawa-interactive rounded-md border px-5 py-4 text-left"
             >
               <div className="flex items-baseline justify-between">
                 <span className="font-serif text-[15px] font-semibold text-foreground">Vencimientos</span>
-                <span className="font-mono text-[12px] font-semibold text-[#6b572f] dark:text-[#e6c384]">
+                <span className="font-mono text-[12px] font-semibold text-accent-foreground">
                   {formatAmount(totalPendiente, { decimals: 0 })}
                 </span>
               </div>
               {pendientesActivos.length === 0 ? (
-                <p className="mt-1.5 text-[12.5px] italic text-[#625f55] dark:text-[#c8c093]">Sin vencimientos pendientes.</p>
+                <p className="mt-1.5 text-[12.5px] italic text-muted-foreground">Sin vencimientos pendientes.</p>
               ) : (
-                <p className="mt-1.5 text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
+                <p className="mt-1.5 text-[12.5px] text-secondary-foreground dark:text-muted-foreground">
                   {pendientesActivos.length} pendiente{pendientesActivos.length === 1 ? '' : 's'}
                   {proximoVencimiento && proximoVencimientoLabel ? (
                     <>
@@ -385,18 +387,18 @@ const ModernDashboard = ({
             <button
               type="button"
               onClick={goToPrestamos}
-              className="rounded-md border border-[#9fb5c9] bg-[#c7d7e0] px-5 py-4 text-left dark:border-[#658594] dark:bg-[rgba(126,156,216,0.14)]"
+              className="kanagawa-callout-info kanagawa-interactive rounded-md border px-5 py-4 text-left"
             >
               <div className="flex items-baseline justify-between">
                 <span className="font-serif text-[15px] font-semibold text-foreground">Préstamos</span>
-                <span className="font-mono text-[12px] font-semibold text-[#4d699b] dark:text-[#7e9cd8]">
+                <span className="font-mono text-[12px] font-semibold" style={{ color: 'var(--result-positive)' }}>
                   {formatAmount(totalPrestamosADevolver, { decimals: 0 })}
                 </span>
               </div>
               {prestamosActivos.length === 0 ? (
-                <p className="mt-1.5 text-[12.5px] italic text-[#625f55] dark:text-[#c8c093]">Sin préstamos pendientes.</p>
+                <p className="mt-1.5 text-[12.5px] italic text-muted-foreground">Sin préstamos pendientes.</p>
               ) : (
-                <p className="mt-1.5 text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
+                <p className="mt-1.5 text-[12.5px] text-secondary-foreground dark:text-muted-foreground">
                   {prestamosActivos.length} préstamo{prestamosActivos.length === 1 ? '' : 's'} activo{prestamosActivos.length === 1 ? '' : 's'}
                   {proximoPrestamo && proximoPrestamoLabel ? (
                     <>
@@ -412,12 +414,12 @@ const ModernDashboard = ({
         </div>
 
         {/* ── Evolución mensual (últimos 6 meses) ── */}
-        <div className="mt-4 rounded-md border border-border bg-card px-5 py-[18px]">
+        <div className="kanagawa-card mt-4 rounded-md px-5 py-[18px]">
           <div className="mb-3 flex items-center gap-4">
             <h2 className="font-serif text-[17px] font-semibold text-foreground">Evolución mensual</h2>
             <div className="flex items-center gap-3 text-[11.5px] text-secondary-foreground dark:text-muted-foreground">
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[var(--success)]" />Ingresos</span>
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-[var(--destructive)]" />Gastos</span>
+              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-success" />Ingresos</span>
+              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-destructive" />Gastos</span>
             </div>
           </div>
           <EvolucionMensualChart data={evolucionMensual} formatAmount={formatAmount} />

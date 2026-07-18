@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
@@ -25,6 +25,7 @@ export const ThemeProvider = ({ children }) => {
     // Aplicar la clase del tema al documento
     document.documentElement.classList.remove('light', 'dark');
     document.documentElement.classList.add(theme);
+    document.documentElement.dataset.theme = theme === 'dark' ? 'kanagawa-violet-dark' : 'kanagawa-violet-light';
   }, [theme]);
 
   const toggleTheme = () => {

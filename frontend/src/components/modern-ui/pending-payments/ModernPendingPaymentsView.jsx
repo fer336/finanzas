@@ -239,7 +239,7 @@ const ModernPendingPaymentsView = ({
 
   if (section === 'prestamos') {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <div className="mx-auto max-w-[1100px] px-4 py-4 sm:px-[34px] sm:py-[28px]">
           <div className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#b8ad78] dark:border-border ${isMobile ? 'mb-3 pb-3' : 'mb-[22px] pb-[18px]'}`}>
             <h1 className={`font-serif font-bold leading-none text-foreground ${isMobile ? 'text-[26px]' : 'text-[42px]'}`}>Vencimientos</h1>
@@ -261,7 +261,7 @@ const ModernPendingPaymentsView = ({
   // ── Loading / error ──────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
           <div className="h-8 w-56 animate-pulse rounded-sm bg-[#d5cea3] dark:bg-muted" />
           <div className="mt-4 h-24 w-full max-w-xs animate-pulse rounded-md bg-[#d5cea3] dark:bg-muted" />
@@ -273,7 +273,7 @@ const ModernPendingPaymentsView = ({
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-screen items-center justify-center">
         <p className="text-[13.5px] text-[#b83245]">Error al cargar vencimientos: {error.message}</p>
       </div>
     );
@@ -286,7 +286,7 @@ const ModernPendingPaymentsView = ({
   // ── Render mobile ────────────────────────────────────────────────────────
   if (isMobile) {
     return (
-      <div className="min-h-screen bg-background pb-8">
+      <div className="min-h-screen pb-8">
         <div className="px-4 pt-4 pb-3">
           <div className="mb-3 flex items-end justify-between gap-2 border-b-[3px] border-double border-[#b8ad78] pb-3 dark:border-border">
             <h1 className="min-w-0 flex-1 truncate font-serif text-[26px] font-bold leading-none text-foreground">Vencimientos</h1>
@@ -444,7 +444,7 @@ const ModernPendingPaymentsView = ({
 
   // ── Render desktop ───────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
         <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#b8ad78] pb-[18px] dark:border-border">
           <h1 className="font-serif text-[42px] font-bold leading-none text-foreground">Vencimientos</h1>

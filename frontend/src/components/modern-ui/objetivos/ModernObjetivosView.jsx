@@ -44,7 +44,7 @@ const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onEditObjetivo, on
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className="mx-auto max-w-[1100px] px-4 py-5 sm:px-[34px] sm:py-[28px]">
         <div className="mb-4 flex items-end justify-between gap-3 border-b-[3px] border-double border-[#b8ad78] pb-3 dark:border-[#363646] sm:mb-[22px] sm:pb-[18px]">
           <h1 className="font-serif text-[26px] font-bold leading-none text-foreground sm:text-[42px]">Objetivos</h1>

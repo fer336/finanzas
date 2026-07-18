@@ -10,14 +10,42 @@ import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
  * useFinancialData.js, sin tocar).
  */
 
-const CATEGORY_PALETTE = ['var(--destructive)', 'var(--warning)', 'var(--success)', 'var(--info)', 'var(--violet)', 'var(--muted-foreground)'];
+const CATEGORY_PALETTE = [
+  'var(--category-food)',
+  'var(--category-education)',
+  'var(--category-services)',
+  'var(--category-sport)',
+  'var(--category-transport)',
+  'var(--category-various)',
+  'var(--category-other)',
+  'var(--category-cleaning)',
+  'var(--category-finance)',
+  'var(--category-health)',
+];
+
+const CATEGORY_COLOR_BY_NAME = [
+  { match: ['comida', 'alimento', 'restaurante', 'supermercado'], color: 'var(--category-food)' },
+  { match: ['educacion', 'educación', 'curso'], color: 'var(--category-education)' },
+  { match: ['servicio', 'luz', 'gas', 'internet'], color: 'var(--category-services)' },
+  { match: ['deporte', 'gimnasio'], color: 'var(--category-sport)' },
+  { match: ['transporte', 'combustible', 'nafta'], color: 'var(--category-transport)' },
+  { match: ['varias', 'varios'], color: 'var(--category-various)' },
+  { match: ['otro'], color: 'var(--category-other)' },
+  { match: ['cuidado', 'limpieza'], color: 'var(--category-cleaning)' },
+  { match: ['deuda', 'finanza', 'prestamo', 'préstamo'], color: 'var(--category-finance)' },
+  { match: ['salud', 'medicina', 'farmacia'], color: 'var(--category-health)' },
+];
 
 const MESES = [
   'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
 ];
 
-function getCategoryColor(index) {
+function getCategoryColor(index, name = '') {
+  const normalizedName = name.toLowerCase();
+  const matched = CATEGORY_COLOR_BY_NAME.find(({ match }) => match.some((term) => normalizedName.includes(term)));
+  if (matched) return matched.color;
+
   return CATEGORY_PALETTE[index % CATEGORY_PALETTE.length];
 }
 
@@ -132,7 +160,7 @@ export function useDashboardHomeData({
     {
       key: 'resultado',
       label: 'Resultado del mes',
-      borderColor: 'var(--info)',
+      borderColor: 'var(--result-positive)',
       valueColor: resultadoMes >= 0 ? 'var(--success)' : 'var(--destructive)',
       value: resultadoMes < 0
         ? `− ${formatAmount(Math.abs(resultadoMes), { decimals: 0 })}`
@@ -174,7 +202,7 @@ export function useDashboardHomeData({
         nombre,
         monto,
         pct: total > 0 ? Math.round((monto / total) * 100) : 0,
-        color: getCategoryColor(index),
+        color: getCategoryColor(index, nombre),
       }));
   }
 

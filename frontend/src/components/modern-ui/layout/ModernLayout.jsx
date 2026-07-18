@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import ModernTopNav from './ModernTopNav';
 import MobileBottomNav from '../../MobileBottomNav';
 import { useIsMobile } from '../../../hooks/use-mobile';
+import { KanagawaDashboardBackground } from '../common/KanagawaDecorativeImages';
 
 /**
  * ModernLayout - Layout wrapper con nav superior (desktop) + bottom nav
@@ -26,9 +27,10 @@ const ModernLayout = ({
   const isMobile = useIsMobile();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="app-shell">
+      <KanagawaDashboardBackground isDarkMode={isDarkMode} />
       {/* Nav superior (solo desktop) */}
-      <div className="hidden md:block">
+      <div className="dashboard-content hidden md:block">
         <ModernTopNav
           currentView={currentView}
           onNavigate={onNavigate}
@@ -45,7 +47,7 @@ const ModernLayout = ({
       </div>
 
       {/* Page Content */}
-      <main className="pb-24 md:pb-0">
+      <main className="dashboard-content pb-24 md:pb-0">
         {children}
       </main>
 
@@ -53,6 +55,8 @@ const ModernLayout = ({
         <MobileBottomNav
           currentView={currentView}
           onNavigate={onNavigate}
+          amountsVisible={amountsVisible}
+          onToggleAmountVisibility={onToggleAmountVisibility}
           isDarkMode={isDarkMode}
           onToggleTheme={onToggleTheme}
         />

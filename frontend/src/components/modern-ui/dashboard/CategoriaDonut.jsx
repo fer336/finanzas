@@ -20,7 +20,8 @@ const CategoriaDonut = ({ categorias, total, formatAmount, size = 120 }) => (
           nameKey="nombre"
           startAngle={90}
           endAngle={450}
-          stroke="none"
+          stroke="var(--surface)"
+          strokeWidth={2}
         >
           {categorias.map((c) => (
             <Cell key={c.nombre} fill={c.color} />
@@ -31,14 +32,15 @@ const CategoriaDonut = ({ categorias, total, formatAmount, size = 120 }) => (
           contentStyle={{
             background: 'var(--card)',
             border: '1px solid var(--border)',
-            borderRadius: 6,
+            borderRadius: 12,
             fontSize: 12.5,
+            color: 'var(--foreground)',
           }}
         />
       </PieChart>
     </ResponsiveContainer>
     <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-      <p className="font-mono text-[9.5px] uppercase tracking-[.06em] text-[#625f55] dark:text-[#c8c093]">Total</p>
+      <p className="font-mono text-[9.5px] uppercase tracking-[.06em] text-muted-foreground">Total</p>
       <p className="font-mono text-[13px] font-semibold text-foreground">{formatAmount(total, { decimals: 0 })}</p>
     </div>
   </div>

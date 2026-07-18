@@ -112,18 +112,22 @@ const ModernTopNav = ({
     onLogout && onLogout();
   };
 
+  const amountVisibilityLabel = amountsVisible ? 'Ocultar montos' : 'Mostrar montos';
+  const themeToggleLabel = isDarkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro';
+  const accountMenuLabel = showUserMenu ? 'Cerrar menú de cuenta' : 'Abrir menú de cuenta';
+
   return (
     <nav
-      className="flex items-center border-b border-[#c8bf91] bg-card dark:border-[#363646]"
+      className="kanagawa-card kanagawa-app-bar flex items-center"
       style={{ padding: '14px 34px', gap: '26px' }}
     >
       {/* Wordmark */}
       <button
         type="button"
         onClick={() => onNavigate && onNavigate('dashboard')}
-        className="shrink-0 font-serif text-[20px] font-bold text-foreground"
+        className="shrink-0 font-serif text-[20px] font-bold text-foreground kanagawa-interactive rounded-sm px-1"
       >
-        Finance<span className="text-[#b83245] dark:text-[#e46876]">.</span>
+        Finance<span className="text-destructive">.</span>
       </button>
 
       {/* Nav pills */}
@@ -138,19 +142,19 @@ const ModernTopNav = ({
               onClick={() => onNavigate && onNavigate(item.view)}
               className={`flex items-center gap-1.5 rounded-full px-3.5 py-[7px] transition-colors duration-150 ${
                 isActive
-                  ? 'bg-[#545464] font-semibold text-[#f2ecbc] dark:bg-[#dcd7ba] dark:text-[#1f1f28]'
-                  : 'text-[#43436c] hover:bg-black/5 dark:text-[#c8c093] dark:hover:bg-white/5'
+                  ? 'bg-primary font-semibold text-primary-foreground'
+                  : 'text-secondary-foreground hover:bg-card-hover dark:text-muted-foreground'
               }`}
             >
               {Icon && (
                 <Icon
                   size={16}
-                  color={isActive ? (isDarkMode ? '#1f1f28' : '#f2ecbc') : (isDarkMode ? '#c8c093' : '#625f55')}
+                  color={isActive ? 'var(--primary-foreground)' : 'var(--muted-foreground)'}
                 />
               )}
               {item.label}
               {item.showBadge && pendingPaymentsCount > 0 && (
-                <span className="rounded-full bg-[#f9d791] px-[6px] py-[1px] font-mono text-[10px] font-semibold text-[#545464]">
+                <span className="rounded-full bg-accent px-[6px] py-[1px] font-mono text-[10px] font-semibold text-accent-foreground">
                   {pendingPaymentsCount}
                 </span>
               )}
@@ -162,20 +166,20 @@ const ModernTopNav = ({
       {/* Right side: buscar + acción primaria + utilidades */}
       <div className="ml-auto flex shrink-0 items-center gap-2.5">
         <div className="relative hidden lg:block">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#625f55] dark:text-[#c8c093]" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             value={searchValue}
             onChange={handleSearchChange}
             placeholder="Buscar…"
-            className="w-48 rounded-sm border border-[#c8bf91] bg-white py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#363646] dark:bg-[#2a2a37] dark:placeholder:text-[#c8c093]"
+            className="w-48 rounded-sm border border-border bg-secondary py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
 
         <button
           type="button"
           onClick={onNewTransaction}
-          className="rounded-sm bg-primary px-[15px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[#76946a]"
+          className="kanagawa-button-primary px-[15px] py-[8px] text-[13px] font-semibold transition-colors duration-150"
         >
           + Nuevo
         </button>
@@ -188,8 +192,9 @@ const ModernTopNav = ({
           <button
             type="button"
             onClick={onToggleAmountVisibility}
-            title={amountsVisible ? 'Ocultar montos' : 'Mostrar montos'}
-            className="rounded-sm border border-[#c8bf91] bg-white p-2 text-[#625f55] transition-colors duration-150 hover:bg-[#e4d794] hover:text-foreground dark:border-[#363646] dark:bg-[#2a2a37] dark:text-[#c8c093] dark:hover:bg-[#363646]"
+            aria-label={amountVisibilityLabel}
+            title={amountVisibilityLabel}
+            className="kanagawa-interactive rounded-sm border border-border bg-secondary p-2 text-muted-foreground hover:bg-card-hover hover:text-foreground"
           >
             {amountsVisible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
           </button>
@@ -199,8 +204,9 @@ const ModernTopNav = ({
           <button
             type="button"
             onClick={onToggleTheme}
-            title={isDarkMode ? 'Modo claro' : 'Modo oscuro'}
-            className="rounded-sm border border-[#c8bf91] bg-white p-2 text-[#625f55] transition-colors duration-150 hover:bg-[#e4d794] hover:text-foreground dark:border-[#363646] dark:bg-[#2a2a37] dark:text-[#c8c093] dark:hover:bg-[#363646]"
+            aria-label={themeToggleLabel}
+            title={themeToggleLabel}
+            className="kanagawa-interactive rounded-sm border border-border bg-secondary p-2 text-muted-foreground hover:bg-card-hover hover:text-foreground"
           >
             {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
@@ -211,8 +217,11 @@ const ModernTopNav = ({
             <button
               type="button"
               onClick={() => setShowUserMenu((prev) => !prev)}
-              title="Mi cuenta"
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-[#c8bf91] bg-white text-[12px] font-semibold text-foreground overflow-hidden dark:border-[#363646] dark:bg-[#2a2a37]"
+              aria-label={accountMenuLabel}
+              title={accountMenuLabel}
+              aria-expanded={showUserMenu}
+              aria-haspopup="menu"
+              className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full border border-border bg-secondary text-[12px] font-semibold text-foreground"
             >
               {user.picture ? (
                 <img
@@ -226,17 +235,17 @@ const ModernTopNav = ({
             </button>
 
             {showUserMenu && (
-              <div className="absolute right-0 top-full z-40 mt-2 w-56 overflow-hidden rounded-md border border-[#c8bf91] bg-card dark:border-[#363646]">
-                <div className="border-b border-[#c8bf91] px-4 py-3 dark:border-[#363646]">
+              <div className="kanagawa-card absolute right-0 top-full z-40 mt-2 w-56 overflow-hidden rounded-md">
+                <div className="border-b border-border px-4 py-3">
                   <p className="truncate text-[13.5px] font-medium text-foreground">
                     {user.full_name || user.name || 'Usuario'}
                   </p>
-                  <p className="truncate text-[12px] text-[#625f55] dark:text-[#c8c093]">{user.email || ''}</p>
+                  <p className="truncate text-[12px] text-muted-foreground">{user.email || ''}</p>
                 </div>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-[13.5px] text-[#b83245] transition-colors duration-150 hover:bg-[#e4d794] dark:text-[#e46876] dark:hover:bg-[#2a2a37]"
+                  className="flex w-full items-center gap-2.5 px-4 py-2.5 text-[13.5px] text-destructive transition-colors duration-150 hover:bg-card-hover"
                 >
                   <LogOut className="h-4 w-4" />
                   Cerrar sesión

@@ -1,48 +1,69 @@
 # Design
 
-Theme: "Kanagawa". El modo oscuro usa Kanagawa Wave y el modo claro usa Kanagawa Lotus. Ambos comparten los mismos roles semánticos, jerarquía y comportamiento.
+Theme: "Kanagawa Violet". El modo oscuro usa Kanagawa Violet Dark y el modo claro usa una variante Kanagawa Violet Light. Ambos comparten los mismos roles semánticos, jerarquía, recursos ornamentales y comportamiento.
 
 ## Color Palette
 
-### Kanagawa Lotus (light)
+### Kanagawa Violet Light
 
-- Página: `#f2ecbc`
-- Superficie / card: `#e5ddb0`
-- Superficie elevada / inputs: `#dcd5ac`
-- Hover: `#e4d794`
-- Texto principal: `#545464`
-- Texto secundario: `#43436c`
-- Texto tenue: `#625f55`
-- Borde: `#c8bf91`
-- Primario / ingresos: `#526a3a`
-- Gastos / error: `#b83245`
-- Información: `#4d699b`
-- Pendiente / warning: fondo `#f9d791`, texto `#6b572f`
-- Violeta auxiliar: `#624c83`
-
-### Kanagawa Wave (dark)
-
-- Página: `#1f1f28`
-- Superficie / card: `#181820`
-- Superficie elevada / inputs: `#2a2a37`
-- Hover: `#363646`
-- Texto principal: `#dcd7ba`
-- Texto secundario: `#c8c093`
-- Texto tenue: `#727169`
-- Borde: `#363646`
-- Primario / ingresos: `#98bb6c`
-- Gastos / error: `#e46876`
-- Información: `#7e9cd8`
-- Pendiente / warning: fondo `#49443c`, texto `#e6c384`
+- Página: `#f7f3ea`
+- Fondo profundo: `#ece4d6`
+- Superficie / card: `#fbf8f0`
+- Superficie elevada / inputs: `#f1eadf`
+- Superficie violeta: `#e8dfef`
+- Texto principal: `#40384d`
+- Texto secundario: `#5c5063`
+- Texto tenue: `#7d6f83`
+- Borde: `#cfc2b8`
+- Primario / navegación: `#574582`
+- Primario hover / active: `#685496` / `#7865a5`
+- Ingresos: `#4e913f`
+- Gastos / error: `#d33e48`
+- Información / resultado positivo: `#506da8`
+- Pendiente / warning: fondo `#efe1ba`, texto `#6b572f`
 - Violeta auxiliar: `#957fb8`
 
-Los valores base provienen de la paleta oficial de `rebelot/kanagawa.nvim`. Los tonos funcionales de Lotus se oscurecen ligeramente cuando es necesario para mantener contraste AA. Sin gradientes, glassmorphism ni glow decorativo. La profundidad se consigue con capas de superficie y bordes.
+### Kanagawa Violet Dark
+
+- Fondo profundo: `#030411`
+- Página: `#050717`
+- Fondo alternativo: `#090b1b`
+- Superficie / card: `#0d0d1f`
+- Superficie elevada / inputs: `#111124`
+- Superficie violeta: `#191727`
+- Texto principal: `#f0e6e0`
+- Texto secundario: `#c9b9bd`
+- Texto tenue: `#8a7b91`
+- Borde: `#393550`
+- Borde fuerte: `#4f4c6a`
+- Primario / navegación: `#574582`
+- Primario hover / active: `#685496` / `#7865a5`
+- Ingresos: `#4e913f`
+- Gastos / error: `#d33e48`
+- Información / resultado positivo: `#7e9cd8`
+- Pendiente / warning: fondo `#3f3544`, texto `#e6c384`
+- Violeta auxiliar: `#957fb8`
+
+La variante Violet usa fondos azul-negro, superficies violetas profundas, texto crema rosado y acentos semánticos de alto contraste. Sin blanco puro ni negro puro. Los grabados japoneses se usan como ornamentación de baja opacidad, siempre detrás de los datos.
+
+### Category colors
+
+- Comida: `#e9444f`
+- Educación / cursos: `#e9a52b`
+- Servicios: `#4e913f`
+- Educación / deporte: `#347ac1`
+- Transporte / combustible: `#32a7b7`
+- Varias: `#a75bc4`
+- Otros: `#e06a35`
+- Cuidado / limpieza: `#c9b9ad`
+- Deudas / finanzas: `#8a6a4a`
+- Salud: `#d27e99`
 
 ## Typography
 
-- **Fraunces** (Google Fonts, opsz 9..144, pesos 400/600/700) — títulos y wordmark. Escala: 42px (título de período), 20px (wordmark), 17px (títulos de card), 15px (títulos menores).
-- **Work Sans** (400/500/600) — cuerpo y UI. Escala: 13.5px (base), 13px (botones/nav), 12.5px (leyendas), 12px (subtextos), 11px (labels uppercase).
-- **IBM Plex Mono** (400/500/600) — TODOS los valores numéricos, fechas, tags, badges, eyebrows. Escala: 24px (KPIs), 12–13px (tablas), 10–11px (tags/labels).
+- **Cormorant Garamond** (400/600/700) — títulos, meses y cifras destacadas.
+- **Inter** con fallback **Manrope** (400/500/600) — cuerpo, navegación y texto de interfaz.
+- **JetBrains Mono** (400/500/600) — fechas, períodos, montos, tags, badges y etiquetas técnicas.
 - Line-height base: 1.45. Montos con separador de miles `Intl.NumberFormat('es-AR')` y signo explícito `+`/`−`.
 
 ## Spacing & Layout
@@ -63,9 +84,9 @@ Los valores base provienen de la paleta oficial de `rebelot/kanagawa.nvim`. Los 
 
 - **Nav pills**: activo con alto contraste entre `foreground` y `background`; inactivo transparente con hover `card-hover`.
 - **Badge contador** (ej. Vencimientos): IBM Plex Mono 10px, fondo `accent`, texto `accent-foreground`, radius 999px, padding `1px 6px`.
-- **Botón primario**: fondo `primary`, texto `primary-foreground`, weight 600, radius 6px, padding `8px 15px`.
+- **Botón primario**: fondo `primary`, texto `primary-foreground`, borde `primary-active`, weight 600, radius 12px, padding `8px 15px`, sombra sobria e inset highlight mínimo.
 - **Botón secundario**: borde `border`, fondo `secondary`.
-- **KPI card**: fondo `card`, borde `border`, radius 8px, `border-top: 3px solid` según el tipo de dato; label 11px uppercase, valor mono 600 24px.
+- **KPI card**: fondo con `kanagawa-card`, borde `border`, radius 16px, `border-top: 3px solid` según el tipo de dato; label 11px uppercase, valor mono 600 24px. Las tarjetas de ingresos y gastos incluyen ilustraciones decorativas con `alt=""`, `aria-hidden="true"`, `pointer-events: none`, máscara hacia la izquierda y contenido con z-index superior.
 - **Tabla**: header mono 10.5px uppercase con `letter-spacing: .08em`; filas `padding: 10px 14px`, separador sutil y hover de superficie.
 - **Pill de tipo/estado** (ingreso/gasto, pendiente/pagado): outline, mono 10.5px uppercase, radius 999px, padding `3px 8px`.
 - **Switch**: track 36×20px radius 999px, off `muted`, on `primary`, thumb `secondary` 16px.
@@ -76,7 +97,18 @@ Los valores base provienen de la paleta oficial de `rebelot/kanagawa.nvim`. Los 
 
 ## Motion
 
-- Transiciones cortas: `background .15s, color .15s` en hover/estado activo. Nada de layout animation, nada de bounce/elastic.
+- Transiciones cortas de 150–160ms para fondo, color, borde, sombra y `transform: translateY(-1px)` en elementos interactivos. Nada de layout animation, bounce o elastic. Respetar `prefers-reduced-motion`.
+
+## Ornamentation and assets
+
+- Source paths live in `frontend/src/theme/kanagawa-assets.js`.
+- Public assets are served from `frontend/public/assets/kanagawa/`.
+- Dark dashboard background: `kanagawa-dashboard-background.png` at opacity `0.44` desktop, `0.30` mobile.
+- Light dashboard background: `kanagawa-dashboard-background-light.png` at opacity `0.72` desktop, `0.50` mobile.
+- General backgrounds are fixed, decorative, cover the viewport, stay behind content and preserve wave left plus Fuji lower-right.
+- Income card art: `kanagawa-income-pines.png`, lower right, 46% width, opacity around `0.38`, masked toward the left.
+- Expense card art: `kanagawa-expense-fuji.png`, right side, 48% width, opacity around `0.36`, masked toward the left.
+- Images never replace text, controls, amounts, semantic colors or chart labels.
 
 ## Responsive
 

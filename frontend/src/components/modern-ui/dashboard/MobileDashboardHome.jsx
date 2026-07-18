@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Skeleton } from '../../ui/skeleton';
 import CategoriaDonut from './CategoriaDonut';
 import PillToggle from '../common/PillToggle';
+import KpiCard from '../common/KpiCard';
 import { useDashboardHomeData } from './useDashboardHomeData';
 import { useBalanceNeto } from '../../../hooks/useFinancialData';
 
@@ -19,7 +20,7 @@ const EmptyState = ({ children }) => (
 EmptyState.propTypes = { children: PropTypes.node };
 
 const MobileSkeleton = () => (
-  <div className="min-h-screen space-y-4 bg-background px-4 pb-28 pt-6">
+  <div className="min-h-screen space-y-4 px-4 pb-28 pt-6">
     <Skeleton className="h-[11px] w-32" />
     <Skeleton className="h-9 w-48" />
     <Skeleton className="h-[13px] w-full" />
@@ -121,12 +122,12 @@ const MobileDashboardHome = ({
   }
 
   return (
-    <div className="min-h-screen space-y-5 bg-background px-4 pb-28 pt-6">
+    <div className="min-h-screen space-y-5 px-4 pb-28 pt-6">
 
       {/* ── Cabecera de período ── */}
       <div>
         <div className="flex items-center justify-between gap-2">
-          <div className="font-mono text-[10px] uppercase text-[var(--info)]" style={{ letterSpacing: '.16em' }}>
+          <div className="font-mono text-[10px] uppercase" style={{ color: 'var(--info)', letterSpacing: '.16em' }}>
             Período {periodoLabel}
           </div>
           <div className="flex items-center gap-1 rounded-full border border-border bg-card px-1.5 py-1">
@@ -153,7 +154,7 @@ const MobileDashboardHome = ({
       </div>
 
       {/* Sello de saldo */}
-      <div className="rounded-md border border-border bg-card px-[18px] py-3">
+      <div className="kanagawa-card rounded-md px-[18px] py-3">
         <div className="flex items-center justify-between gap-2">
           <div className="font-mono text-[10px] uppercase tracking-[.1em] text-muted-foreground">
             {balanceMode === 'mensual' ? 'Resultado del mes' : 'Balance disponible'}
@@ -181,28 +182,27 @@ const MobileDashboardHome = ({
       {/* ── KPIs (1 columna en mobile) ── */}
       <div className="space-y-3">
         {kpis.map((kpi) => (
-          <div
+          <KpiCard
             key={kpi.key}
-            className="rounded-md border border-border bg-card px-[18px] py-4"
-            style={{ borderTop: `3px solid ${kpi.borderColor}` }}
-          >
-            <div className="text-[11px] uppercase tracking-[.06em] text-muted-foreground">{kpi.label}</div>
-            <div className="mt-1.5 font-mono text-[24px] font-semibold" style={{ color: kpi.valueColor }}>
-              {kpi.value}
-            </div>
-            <div className="mt-0.5 text-[12px] text-muted-foreground">{kpi.subtext}</div>
-          </div>
+            kpiKey={kpi.key}
+            label={kpi.label}
+            value={kpi.value}
+            subtext={kpi.subtext}
+            borderColor={kpi.borderColor}
+            valueColor={kpi.valueColor}
+          />
         ))}
       </div>
 
       {/* ── Movimientos recientes ── */}
-      <div className="rounded-md border border-border bg-card px-5 py-[18px]">
+      <div className="kanagawa-card rounded-md px-5 py-[18px]">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-serif text-[17px] font-semibold text-foreground">Movimientos recientes</h2>
           <button
             type="button"
             onClick={() => onNavigate && onNavigate('transactions-full')}
-            className="text-[13px] text-[var(--info)] hover:underline"
+            className="text-[13px] hover:underline"
+            style={{ color: 'var(--info)' }}
           >
             ver todos
           </button>
@@ -211,7 +211,7 @@ const MobileDashboardHome = ({
         {movimientosRecientes.length === 0 ? (
           <EmptyState>Sin movimientos en esta vista.</EmptyState>
         ) : (
-          <div className="grid grid-cols-[46px_1fr_auto] items-center gap-x-2.5 gap-y-[9px] text-[13.5px]">
+          <div className="grid min-w-0 grid-cols-[46px_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-[9px] text-[13.5px]">
             {movimientosRecientes.map((m, i) => (
               <Fragment key={m.id ?? `${m.fechaMMDD}-${m.descripcion}-${i}`}>
                 <span
@@ -219,17 +219,17 @@ const MobileDashboardHome = ({
                 >
                   {m.fechaMMDD}
                 </span>
-                <span className={i > 0 ? 'border-t border-dashed border-muted pt-[9px]' : ''}>
-                  {m.descripcion}
+                <span className={`min-w-0 ${i > 0 ? 'border-t border-dashed border-muted pt-[9px]' : ''}`}>
+                  <span className="block truncate">{m.descripcion}</span>
                   <span
-                    className="ml-1.5 block font-mono text-[10px] uppercase"
+                    className="block truncate font-mono text-[10px] uppercase"
                     style={{ color: m.esIngreso ? 'var(--success)' : 'var(--destructive)' }}
                   >
                     {m.categoria}
                   </span>
                 </span>
                 <span
-                  className={`text-right font-mono font-semibold ${i > 0 ? 'border-t border-dashed border-muted pt-[9px]' : ''}`}
+                  className={`shrink-0 whitespace-nowrap text-right font-mono font-semibold ${i > 0 ? 'border-t border-dashed border-muted pt-[9px]' : ''}`}
                   style={{ color: m.esIngreso ? 'var(--success)' : 'var(--destructive)' }}
                 >
                   {m.montoFormatted}
@@ -241,7 +241,7 @@ const MobileDashboardHome = ({
       </div>
 
       {/* ── Gastos / Ingresos por categoría ── */}
-      <div className="rounded-md border border-border bg-card px-5 py-[18px]">
+      <div className="kanagawa-card rounded-md px-5 py-[18px]">
         <div className="mb-3 flex items-center justify-between gap-2">
           <h2 className="font-serif text-[17px] font-semibold text-foreground">
             {donutMode === 'gastos' ? 'Gastos por categoría' : 'Ingresos por categoría'}
@@ -256,21 +256,21 @@ const MobileDashboardHome = ({
         {donutData.length === 0 ? (
           <EmptyState>Sin {donutMode === 'gastos' ? 'gastos' : 'ingresos'} en esta vista.</EmptyState>
         ) : (
-          <div className="flex items-center gap-4">
+          <div className="flex min-w-0 items-center gap-4">
             <CategoriaDonut
               categorias={donutData}
               total={donutTotal}
               formatAmount={formatAmount}
               size={96}
             />
-            <div className="grid flex-1 grid-cols-[1fr_auto] gap-x-3.5 gap-y-[5px] text-[12.5px]">
+            <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] gap-x-3.5 gap-y-[5px] text-[12.5px]">
               {donutData.map((c) => (
                 <Fragment key={c.nombre}>
-                  <span className="flex items-center gap-[7px] text-foreground">
+                  <span className="flex min-w-0 items-center gap-[7px] text-foreground">
                     <span className="h-[9px] w-[9px] shrink-0 rounded-sm" style={{ background: c.color }} />
-                    {c.nombre}
+                    <span className="min-w-0 truncate">{c.nombre}</span>
                   </span>
-                  <span className="font-mono text-secondary-foreground dark:text-muted-foreground">{c.pct}%</span>
+                  <span className="shrink-0 whitespace-nowrap text-right font-mono text-secondary-foreground dark:text-muted-foreground">{c.pct}%</span>
                 </Fragment>
               ))}
             </div>
@@ -282,18 +282,18 @@ const MobileDashboardHome = ({
       <button
         type="button"
         onClick={goToVencimientos}
-        className="w-full rounded-md border border-[#de9800] bg-[#f9d791] px-5 py-4 text-left dark:border-[#e6c384] dark:bg-[rgba(230,195,132,0.14)]"
+        className="kanagawa-callout-warning kanagawa-interactive w-full rounded-md border px-5 py-4 text-left"
       >
         <div className="flex items-baseline justify-between">
           <span className="font-serif text-[15px] font-semibold text-foreground">Vencimientos</span>
-          <span className="font-mono text-[12px] font-semibold text-[#6b572f] dark:text-[#e6c384]">
+          <span className="font-mono text-[12px] font-semibold text-accent-foreground">
             {formatAmount(totalPendiente, { decimals: 0 })}
           </span>
         </div>
         {pendientesActivos.length === 0 ? (
-          <p className="mt-1.5 text-[12.5px] italic text-[#625f55] dark:text-muted-foreground">Sin vencimientos pendientes.</p>
+          <p className="mt-1.5 text-[12.5px] italic text-muted-foreground">Sin vencimientos pendientes.</p>
         ) : (
-          <p className="mt-1.5 text-[12.5px] text-[#43436c] dark:text-muted-foreground">
+          <p className="mt-1.5 text-[12.5px] text-secondary-foreground dark:text-muted-foreground">
             {pendientesActivos.length} pendiente{pendientesActivos.length === 1 ? '' : 's'}
             {proximoVencimiento && proximoVencimientoLabel ? (
               <>
@@ -310,18 +310,18 @@ const MobileDashboardHome = ({
       <button
         type="button"
         onClick={goToPrestamos}
-        className="w-full rounded-md border border-[#9fb5c9] bg-[#c7d7e0] px-5 py-4 text-left dark:border-[#658594] dark:bg-[rgba(126,156,216,0.14)]"
+        className="kanagawa-callout-info kanagawa-interactive w-full rounded-md border px-5 py-4 text-left"
       >
         <div className="flex items-baseline justify-between">
           <span className="font-serif text-[15px] font-semibold text-foreground">Préstamos</span>
-          <span className="font-mono text-[12px] font-semibold text-[#4d699b] dark:text-[#7e9cd8]">
+          <span className="font-mono text-[12px] font-semibold" style={{ color: 'var(--result-positive)' }}>
             {formatAmount(totalPrestamosADevolver, { decimals: 0 })}
           </span>
         </div>
         {prestamosActivos.length === 0 ? (
-          <p className="mt-1.5 text-[12.5px] italic text-[#625f55] dark:text-muted-foreground">Sin préstamos pendientes.</p>
+          <p className="mt-1.5 text-[12.5px] italic text-muted-foreground">Sin préstamos pendientes.</p>
         ) : (
-          <p className="mt-1.5 text-[12.5px] text-[#43436c] dark:text-muted-foreground">
+          <p className="mt-1.5 text-[12.5px] text-secondary-foreground dark:text-muted-foreground">
             {prestamosActivos.length} préstamo{prestamosActivos.length === 1 ? '' : 's'} activo{prestamosActivos.length === 1 ? '' : 's'}
             {proximoPrestamo && proximoPrestamoLabel ? (
               <>

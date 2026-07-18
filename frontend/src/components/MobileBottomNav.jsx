@@ -12,6 +12,8 @@ import {
   LogOut,
   Sun,
   Moon,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 
 /**
@@ -22,7 +24,14 @@ import {
  * Ajustes viven en la hoja "Más" junto con la acción rápida de
  * Carga Masiva (que no tiene otro entry point en mobile).
  */
-const MobileBottomNav = ({ currentView, onNavigate, isDarkMode = false, onToggleTheme }) => {
+const MobileBottomNav = ({
+  currentView,
+  onNavigate,
+  isDarkMode = false,
+  onToggleTheme,
+  amountsVisible = true,
+  onToggleAmountVisibility,
+}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const mainNavItems = [
@@ -81,23 +90,26 @@ const MobileBottomNav = ({ currentView, onNavigate, isDarkMode = false, onToggle
         }`}
         style={{ maxHeight: '70vh' }}
       >
-        <div className="bg-card rounded-t-lg border-t border-[#c8bf91] dark:border-[#363646]">
+          <div className="kanagawa-card kanagawa-bottom-sheet">
           {/* Handle para arrastrar */}
           <div className="flex justify-center py-3">
-            <div className="w-12 h-1.5 bg-[#d5cea3] rounded-full dark:bg-[#363646]" />
+            <div className="w-12 h-1.5 rounded-full bg-muted" />
           </div>
 
           {/* Header del menú */}
           <div className="flex items-center justify-between px-6 pb-4">
             <div>
               <h3 className="text-xl font-serif font-semibold text-foreground">Menú</h3>
-              <p className="text-sm text-[#625f55] dark:text-[#c8c093]">Gestiona tu aplicación</p>
+              <p className="text-sm text-muted-foreground">Gestiona tu aplicación</p>
             </div>
             <button
+              type="button"
               onClick={() => setIsMenuOpen(false)}
-              className="w-10 h-10 rounded-full bg-white border border-[#c8bf91] hover:bg-[#e4d794] flex items-center justify-center transition-colors dark:bg-[#2a2a37] dark:border-[#363646] dark:hover:bg-[#363646]"
+              className="kanagawa-interactive flex h-10 w-10 items-center justify-center rounded-full border border-border bg-secondary transition-colors hover:bg-card-hover"
+              aria-label="Cerrar menú"
+              title="Cerrar menú"
             >
-              <X className="h-5 w-5 text-[#43436c] dark:text-[#c8c093]" />
+              <X className="h-5 w-5 text-muted-foreground" />
             </button>
           </div>
 
@@ -110,10 +122,10 @@ const MobileBottomNav = ({ currentView, onNavigate, isDarkMode = false, onToggle
                   <button
                     key={item.id}
                     onClick={() => handleMenuItemClick(item.id)}
-                    className="p-4 rounded-md bg-white border border-[#c8bf91] active:scale-95 active:bg-[#e4d794] transition-all hover:border-[#545464]/20 dark:bg-[#2a2a37] dark:border-[#363646] dark:active:bg-[#363646] dark:hover:border-white/20"
+                    className="kanagawa-interactive rounded-md border border-border bg-secondary p-4 active:scale-95 active:bg-card-hover"
                   >
                     <div className="flex flex-col items-center text-center space-y-3">
-                      <div className="w-12 h-12 rounded-md flex items-center justify-center bg-[#e5ddb0] border border-[#c8bf91] text-[#526a3a] dark:bg-[#181820] dark:border-[#363646] dark:text-[#98bb6c]">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-md border border-border bg-card text-primary">
                         <Icon className="h-6 w-6" />
                       </div>
                       <span className="text-sm font-medium text-foreground">{item.label}</span>
@@ -125,14 +137,33 @@ const MobileBottomNav = ({ currentView, onNavigate, isDarkMode = false, onToggle
               {onToggleTheme && (
                 <button
                   onClick={() => { onToggleTheme(); }}
-                  className="p-4 rounded-md bg-white border border-[#c8bf91] active:scale-95 active:bg-[#e4d794] transition-all hover:border-[#545464]/20 dark:bg-[#2a2a37] dark:border-[#363646] dark:active:bg-[#363646] dark:hover:border-white/20"
+                  className="kanagawa-interactive rounded-md border border-border bg-secondary p-4 active:scale-95 active:bg-card-hover"
                 >
                   <div className="flex flex-col items-center text-center space-y-3">
-                    <div className="w-12 h-12 rounded-md flex items-center justify-center bg-[#e5ddb0] border border-[#c8bf91] text-[#526a3a] dark:bg-[#181820] dark:border-[#363646] dark:text-[#98bb6c]">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-md border border-border bg-card text-primary">
                       {isDarkMode ? <Sun className="h-6 w-6" /> : <Moon className="h-6 w-6" />}
                     </div>
                     <span className="text-sm font-medium text-foreground">
                       {isDarkMode ? 'Modo claro' : 'Modo oscuro'}
+                    </span>
+                  </div>
+                </button>
+              )}
+
+              {onToggleAmountVisibility && (
+                <button
+                  type="button"
+                  onClick={onToggleAmountVisibility}
+                  className="kanagawa-interactive rounded-md border border-border bg-secondary p-4 active:scale-95 active:bg-card-hover"
+                  aria-label={amountsVisible ? 'Ocultar montos' : 'Mostrar montos'}
+                  title={amountsVisible ? 'Ocultar montos' : 'Mostrar montos'}
+                >
+                  <div className="flex flex-col items-center space-y-3 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-md border border-border bg-card text-primary">
+                      {amountsVisible ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+                    </div>
+                    <span className="text-sm font-medium text-foreground">
+                      {amountsVisible ? 'Ocultar montos' : 'Mostrar montos'}
                     </span>
                   </div>
                 </button>
@@ -143,13 +174,13 @@ const MobileBottomNav = ({ currentView, onNavigate, isDarkMode = false, onToggle
             <div className="mt-4">
               <button
                 onClick={handleLogout}
-                className="w-full p-4 rounded-md bg-white border border-[#de9800] active:scale-95 transition-all hover:bg-[#f9d791] dark:bg-[#2a2a37] dark:border-[#e6c384] dark:hover:bg-[rgba(230,195,132,0.14)]"
+                className="kanagawa-callout-warning kanagawa-interactive w-full rounded-md border p-4 active:scale-95"
               >
                 <div className="flex items-center justify-center space-x-3">
-                  <div className="w-10 h-10 rounded-md bg-[#f9d791] border border-[#de9800] flex items-center justify-center dark:bg-[rgba(230,195,132,0.14)] dark:border-[#e6c384]">
-                    <LogOut className="h-5 w-5 text-[#b83245] dark:text-[#e46876]" />
+                  <div className="flex h-10 w-10 items-center justify-center rounded-md border border-border bg-accent">
+                    <LogOut className="h-5 w-5 text-destructive" />
                   </div>
-                  <span className="text-base font-medium text-[#b83245] dark:text-[#e46876]">Cerrar Sesión</span>
+                  <span className="text-base font-medium text-destructive">Cerrar Sesión</span>
                 </div>
               </button>
             </div>
@@ -158,7 +189,7 @@ const MobileBottomNav = ({ currentView, onNavigate, isDarkMode = false, onToggle
       </div>
 
   {/* Bottom Navigation Bar */}
-  <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-[#c8bf91] z-50 safe-area-bottom dark:border-[#363646]">
+  <nav className="kanagawa-card kanagawa-bottom-bar safe-area-bottom fixed bottom-0 left-0 right-0 z-50">
     <div className="flex items-center justify-between px-6 py-4">
       {mainNavItems.map((item) => {
         const Icon = item.icon;
@@ -171,8 +202,8 @@ const MobileBottomNav = ({ currentView, onNavigate, isDarkMode = false, onToggle
             onClick={() => handleNavClick(item.id)}
             className={`flex flex-col items-center justify-center gap-1.5 transition-colors duration-150 ${
               isActive || (isMenuButton && isMenuOpen)
-                ? 'text-[#545464] dark:text-[#dcd7ba]'
-                : 'text-[#625f55] hover:text-[#43436c] dark:text-[#c8c093] dark:hover:text-[#dcd7ba]'
+                ? 'text-primary'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <Icon

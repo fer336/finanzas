@@ -409,7 +409,7 @@ const ModernAjustesView = ({
   const balanceMode = settings.balanceMode === 'accumulated' ? 'accumulated' : 'monthly';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className={`mx-auto max-w-[1100px] ${isMobile ? 'px-4 py-4' : 'px-[34px] py-[28px]'}`}>
         {/* Cabecera (mismo patrón que Movimientos / Vencimientos / Inversiones) */}
         <div

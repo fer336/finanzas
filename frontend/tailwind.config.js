@@ -63,22 +63,22 @@ module.exports = {
         lg: "10px",
       },
       fontFamily: {
-        // Typography remains stable across Lotus and Wave so theme changes do
+        // Typography remains stable across Kanagawa Violet themes so mode changes do
         // not alter information density or layout.
         serif: [
-          'Fraunces',
+          'Cormorant Garamond',
           'ui-serif',
           'Georgia',
           'serif'
         ],
         sans: [
-          'Work Sans',
           'Inter',
+          'Manrope',
           'ui-sans-serif',
           'system-ui'
         ],
         mono: [
-          'IBM Plex Mono',
+          'JetBrains Mono',
           'ui-monospace',
           'SFMono-Regular',
           'monospace'

@@ -2,6 +2,9 @@ const IMAGE_EXTENSION_PATTERN = /\.(jpe?g|png|webp|gif|bmp|svg)(\?.*)?$/i;
 const PDF_EXTENSION_PATTERN = /\.pdf(\?.*)?$/i;
 const SAFE_PROTOCOLS = new Set(['http:', 'https:']);
 const REJECTED_PROTOCOLS = new Set(['javascript:', 'data:', 'blob:', 'file:']);
+const KNOWN_S3_ORIGIN = 'https://s3.qeva.xyz';
+const KNOWN_S3_HOSTNAME = 's3.qeva.xyz';
+const KNOWN_S3_BUCKET_PREFIX = '/facturas/';
 
 const getEnv = () => {
   try {
@@ -33,6 +36,195 @@ const isLocalHostname = (hostname = '') => (
   || hostname === '[::1]'
 );
 
+const hasControlCharacters = (value = '') => {
+  for (let index = 0; index < value.length; index += 1) {
+    const codePoint = value.charCodeAt(index);
+    if (codePoint <= 31 || codePoint === 127) return true;
+  }
+
+  return false;
+};
+
+const splitUrlPath = (value = '') => value.split(/[?#]/, 1)[0];
+
+const getRawPathFromAbsoluteCandidate = (candidate = '') => {
+  const withoutScheme = candidate.replace(/^https:\/\//i, '');
+  const slashIndex = withoutScheme.indexOf('/');
+  return slashIndex >= 0 ? splitUrlPath(withoutScheme.slice(slashIndex)) : '';
+};
+
+const validateKnownS3RawPath = (rawPath = '') => {
+  if (!rawPath.startsWith(KNOWN_S3_BUCKET_PREFIX)) {
+    return 'legacy-s3-format-unrecognized';
+  }
+
+  if (rawPath === KNOWN_S3_BUCKET_PREFIX) {
+    return 'legacy-s3-object-missing';
+  }
+
+  if (rawPath.includes('\\') || hasControlCharacters(rawPath)) {
+    return 'unsafe-s3-path';
+  }
+
+  const objectSegments = rawPath.slice(KNOWN_S3_BUCKET_PREFIX.length).split('/');
+  if (objectSegments.some((segment) => !segment)) {
+    return 'unsafe-s3-path';
+  }
+
+  try {
+    for (const segment of objectSegments) {
+      const decodedSegment = decodeURIComponent(segment);
+      if (
+        decodedSegment === '.'
+        || decodedSegment === '..'
+        || decodedSegment.includes('/')
+        || decodedSegment.includes('\\')
+        || hasControlCharacters(decodedSegment)
+      ) {
+        return 'unsafe-s3-path';
+      }
+    }
+  } catch {
+    return 'malformed';
+  }
+
+  return '';
+};
+
+const validateKnownS3Search = (search = '') => {
+  if (!search) return '';
+  if (search.includes('\\') || hasControlCharacters(search)) return 'unsafe-s3-query';
+
+  try {
+    const queryParts = search.slice(1).split('&');
+    for (const queryPart of queryParts) {
+      const equalsIndex = queryPart.indexOf('=');
+      const name = equalsIndex >= 0 ? queryPart.slice(0, equalsIndex) : queryPart;
+      const value = equalsIndex >= 0 ? queryPart.slice(equalsIndex + 1) : '';
+      const decodedName = decodeURIComponent(name.replace(/\+/g, '%20'));
+      const decodedValue = decodeURIComponent(value.replace(/\+/g, '%20'));
+      if (
+        decodedName.includes('\\')
+        || decodedValue.includes('\\')
+        || decodedName.includes('..')
+        || decodedValue.includes('..')
+        || hasControlCharacters(decodedName)
+        || hasControlCharacters(decodedValue)
+      ) {
+        return 'unsafe-s3-query';
+      }
+    }
+  } catch {
+    return 'malformed';
+  }
+
+  return '';
+};
+
+const buildKnownS3CanonicalCandidate = (input = '') => {
+  if (/^https:\/\//i.test(input)) {
+    try {
+      const parsed = new URL(input);
+      return parsed.hostname.toLowerCase() === KNOWN_S3_HOSTNAME ? input : '';
+    } catch {
+      return '';
+    }
+  }
+  if (/^\/\/s3\.qeva\.xyz(?::\d+)?\/facturas\//i.test(input)) return `https:${input}`;
+  if (input.startsWith('/facturas/')) return `${KNOWN_S3_ORIGIN}${input}`;
+  if (input.startsWith('facturas/')) return `${KNOWN_S3_ORIGIN}/${input}`;
+  if (/^s3\.qeva\.xyz(?::\d+)?\/facturas\//i.test(input)) return `https://${input}`;
+  return '';
+};
+
+const normalizeKnownS3DocumentUrl = (input = '') => {
+  const candidate = buildKnownS3CanonicalCandidate(input);
+
+  if (!candidate) {
+    return { matched: false };
+  }
+
+  if (candidate.includes('\\') || hasControlCharacters(candidate)) {
+    return {
+      matched: true,
+      result: { isValid: false, reason: 'unsafe-s3-path', rawUrl: input },
+    };
+  }
+
+  let parsed;
+  try {
+    parsed = new URL(candidate);
+  } catch {
+    return {
+      matched: true,
+      result: { isValid: false, reason: 'malformed', rawUrl: input },
+    };
+  }
+
+  if (/^https:\/\/(?:[^/@]+@)?s3\.qeva\.xyz:\d+/i.test(candidate)) {
+    return {
+      matched: true,
+      result: { isValid: false, reason: 'port-not-allowed', rawUrl: input },
+    };
+  }
+
+  if (parsed.protocol !== 'https:' || parsed.hostname.toLowerCase() !== KNOWN_S3_HOSTNAME) {
+    return {
+      matched: true,
+      result: { isValid: false, reason: 'legacy-s3-format-unrecognized', rawUrl: input },
+    };
+  }
+
+  if (parsed.username || parsed.password) {
+    return {
+      matched: true,
+      result: { isValid: false, reason: 'credentials-not-allowed', rawUrl: input },
+    };
+  }
+
+  if (parsed.port) {
+    return {
+      matched: true,
+      result: { isValid: false, reason: 'port-not-allowed', rawUrl: input },
+    };
+  }
+
+  const rawPath = getRawPathFromAbsoluteCandidate(candidate);
+  const pathError = validateKnownS3RawPath(rawPath);
+  if (pathError) {
+    return {
+      matched: true,
+      result: { isValid: false, reason: pathError, rawUrl: input },
+    };
+  }
+
+  const searchError = validateKnownS3Search(parsed.search);
+  if (searchError) {
+    return {
+      matched: true,
+      result: { isValid: false, reason: searchError, rawUrl: input },
+    };
+  }
+
+  const href = `${KNOWN_S3_ORIGIN}${parsed.pathname}${parsed.search}`;
+  const fileType = getDocumentFileType(href);
+
+  return {
+    matched: true,
+    result: {
+      isValid: true,
+      rawUrl: input,
+      href,
+      absoluteUrl: href,
+      origin: KNOWN_S3_ORIGIN,
+      fileType,
+      canEmbed: fileType === 'pdf' || fileType === 'image',
+      canOpenExternal: true,
+      documentName: getDocumentName(href),
+    },
+  };
+};
+
 const addOrigin = (origins, value) => {
   if (!value) return;
   try {
@@ -61,7 +253,7 @@ export const buildDocumentUrlPolicy = ({ env = getEnv(), locationObject } = {}) 
   // Backend MinIO uploads construct public URLs as
   // https://{MINIO_ENDPOINT}/{MINIO_BUCKET_NAME}/{object_name}.
   // Repo deployment/secrets point at s3.qeva.xyz/facturas.
-  addOrigin(allowedOrigins, 'https://s3.qeva.xyz');
+  addOrigin(allowedOrigins, KNOWN_S3_ORIGIN);
 
   return {
     allowedOrigins,
@@ -74,6 +266,15 @@ export const normalizeDocumentPreviewUrl = (rawUrl, policy = buildDocumentUrlPol
   const input = typeof rawUrl === 'string' ? rawUrl.trim() : '';
   if (!input) {
     return { isValid: false, reason: 'empty', rawUrl: input };
+  }
+
+  const knownS3Url = normalizeKnownS3DocumentUrl(input);
+  if (knownS3Url.matched) {
+    return knownS3Url.result;
+  }
+
+  if (input.includes('\\') || hasControlCharacters(input)) {
+    return { isValid: false, reason: 'malformed', rawUrl: input };
   }
 
   const isRelativeInput = input.startsWith('/') && !input.startsWith('//');

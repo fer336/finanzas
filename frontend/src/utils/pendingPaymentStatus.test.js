@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
+import { copyFileSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { resolve, join } from 'node:path';
+import { tmpdir } from 'node:os';
 import { pathToFileURL } from 'node:url';
 import {
   PENDING_PAYMENT_STATUS,
@@ -14,19 +17,32 @@ import {
 
 describe('pending payment date-only status helpers', () => {
   it('does not shift date-only parsing across representative timezones', () => {
-    const moduleUrl = pathToFileURL(`${process.cwd()}/src/utils/pendingPaymentStatus.js`).href;
-    for (const timezone of ['America/Argentina/Buenos_Aires', 'America/Los_Angeles', 'Pacific/Kiritimati']) {
-      const output = execFileSync(
-        process.execPath,
-        [
-          '--input-type=module',
-          '--eval',
-          `import { parseLocalDateOnly, formatLocalDateOnly } from ${JSON.stringify(moduleUrl)}; const d = parseLocalDateOnly('2026-07-01'); console.log([d.getFullYear(), d.getMonth() + 1, d.getDate(), formatLocalDateOnly(d)].join('|'));`,
-        ],
-        { env: { ...process.env, TZ: timezone }, encoding: 'utf8' },
-      ).trim();
+    const modulePath = resolve(process.cwd(), 'src/utils/pendingPaymentStatus.js');
+    const tmpDir = mkdtempSync(join(tmpdir(), 'tz-test-'));
+    const moduleCopyPath = join(tmpDir, 'pendingPaymentStatus.mjs');
+    const scriptPath = join(tmpDir, 'test.mjs');
 
-      expect(output).toBe('2026|7|1|2026-07-01');
+    copyFileSync(modulePath, moduleCopyPath);
+    const moduleUrl = pathToFileURL(moduleCopyPath).href;
+
+    writeFileSync(scriptPath, [
+      `import { parseLocalDateOnly, formatLocalDateOnly } from ${JSON.stringify(moduleUrl)};`,
+      `const d = parseLocalDateOnly('2026-07-01');`,
+      `console.log([d.getFullYear(), d.getMonth() + 1, d.getDate(), formatLocalDateOnly(d)].join('|'));`,
+    ].join('\n'));
+
+    try {
+      for (const timezone of ['America/Argentina/Buenos_Aires', 'America/Los_Angeles', 'Pacific/Kiritimati']) {
+        const output = execFileSync(
+          process.execPath,
+          [scriptPath],
+          { env: { ...process.env, TZ: timezone }, encoding: 'utf8' },
+        ).trim();
+
+        expect(output).toBe('2026|7|1|2026-07-01');
+      }
+    } finally {
+      rmSync(tmpDir, { recursive: true, force: true });
     }
   });
 

@@ -13,12 +13,12 @@ Theme: "Kanagawa Violet". El modo oscuro usa Kanagawa Violet Dark y el modo clar
 - Superficie violeta: `#e8dfef`
 - Texto principal: `#40384d`
 - Texto secundario: `#5c5063`
-- Texto tenue: `#7d6f83`
+- Texto tenue: `#6f6074` (AA over elevated light surfaces)
 - Borde: `#cfc2b8`
 - Primario / navegación: `#574582`
-- Primario hover / active: `#685496` / `#7865a5`
-- Ingresos: `#4e913f`
-- Gastos / error: `#d33e48`
+- Primario hover / active: `#685496` / `#604b8b` (active keeps small cream text above AA contrast)
+- Ingresos: `#4e913f`; success control background: `#315c2d` with cream text for AA contrast
+- Gastos: `#d33e48`; destructive control background: `#822d33` with cream text for AA contrast
 - Información / resultado positivo: `#506da8`
 - Pendiente / warning: fondo `#efe1ba`, texto `#6b572f`
 - Violeta auxiliar: `#957fb8`
@@ -33,13 +33,13 @@ Theme: "Kanagawa Violet". El modo oscuro usa Kanagawa Violet Dark y el modo clar
 - Superficie violeta: `#191727`
 - Texto principal: `#f0e6e0`
 - Texto secundario: `#c9b9bd`
-- Texto tenue: `#8a7b91`
+- Texto tenue: `#9a8ca0` (AA over `#191727` violet surfaces)
 - Borde: `#393550`
 - Borde fuerte: `#4f4c6a`
 - Primario / navegación: `#574582`
-- Primario hover / active: `#685496` / `#7865a5`
-- Ingresos: `#4e913f`
-- Gastos / error: `#d33e48`
+- Primario hover / active: `#685496` / `#604b8b` (active keeps small cream text above AA contrast)
+- Ingresos: `#4e913f`; success control background: `#315c2d` with cream text for AA contrast
+- Gastos: `#d33e48`; destructive control background: `#822d33` with cream text for AA contrast
 - Información / resultado positivo: `#7e9cd8`
 - Pendiente / warning: fondo `#3f3544`, texto `#e6c384`
 - Violeta auxiliar: `#957fb8`
@@ -92,6 +92,7 @@ La variante Violet usa fondos azul-negro, superficies violetas profundas, texto 
 - **Switch**: track 36×20px radius 999px, off `muted`, on `primary`, thumb `secondary` 16px.
 - **Barra de progreso**: 8px alto, track `muted`, fill `primary`, radius 999px.
 - **Modal**: fondo `popover`, overlay oscuro translúcido, radius 12px.
+- **Document preview modal**: every factura/comprobante URL sink must use `normalizeDocumentPreviewUrl` before rendering an Eye action, external link, image, or iframe. Allowed origins are the app/backend origins plus `https://s3.qeva.xyz`; unsafe protocols, credentialed URLs, unexpected origins, and non-local `http:` are rejected. PDF iframes stay sandboxed.
 - **Estado vacío**: texto itálico 13.5px `muted-foreground`, nunca área en blanco.
 - **Skeleton loading**: fondo `muted` animado, radius del componente que reemplaza.
 
@@ -103,12 +104,16 @@ La variante Violet usa fondos azul-negro, superficies violetas profundas, texto 
 
 - Source paths live in `frontend/src/theme/kanagawa-assets.js`.
 - Public assets are served from `frontend/public/assets/kanagawa/`.
-- Dark dashboard background: `kanagawa-dashboard-background.png` at opacity `0.44` desktop, `0.30` mobile.
-- Light dashboard background: `kanagawa-dashboard-background-light.png` at opacity `0.72` desktop, `0.50` mobile.
+- Dark dashboard background: `kanagawa-dashboard-background.webp` at opacity `0.44` desktop, `0.30` mobile.
+- Light dashboard background: `kanagawa-dashboard-background-light.webp` at opacity `0.72` desktop, `0.50` mobile.
 - General backgrounds are fixed, decorative, cover the viewport, stay behind content and preserve wave left plus Fuji lower-right.
-- Income card art: `kanagawa-income-pines.png`, lower right, 46% width, opacity around `0.38`, masked toward the left.
-- Expense card art: `kanagawa-expense-fuji.png`, right side, 48% width, opacity around `0.36`, masked toward the left.
+- Income card art: `kanagawa-income-pines-transparent.webp`, lower right, 46% width, opacity around `0.38`, masked toward the left.
+- Expense card art: `kanagawa-expense-fuji-transparent.webp`, right side, 48% width, opacity around `0.36`, masked toward the left.
 - Images never replace text, controls, amounts, semantic colors or chart labels.
+
+## Testing guardrails
+
+- Frontend URL policy and document-preview regressions are covered by Vitest (`npm test`) and must run in CI before lint/build.
 
 ## Responsive
 

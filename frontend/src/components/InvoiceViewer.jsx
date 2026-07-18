@@ -1,22 +1,27 @@
 import React from 'react';
 import { X, ExternalLink, Download, FileText } from 'lucide-react';
+import { normalizeDocumentPreviewUrl } from '../utils/documentPreviewUrl';
 
 const InvoiceViewer = ({ isOpen, onClose, payment, invoiceUrl }) => {
   if (!isOpen) return null;
 
+  const safeInvoice = normalizeDocumentPreviewUrl(invoiceUrl || '');
+  const canOpenInvoice = safeInvoice.isValid;
+
   const handleOpenExternal = () => {
-    if (invoiceUrl) {
-      window.open(invoiceUrl, '_blank', 'noopener,noreferrer');
+    if (canOpenInvoice) {
+      window.open(safeInvoice.href, '_blank', 'noopener,noreferrer');
     }
   };
 
   const handleDownload = () => {
-    if (invoiceUrl) {
+    if (canOpenInvoice) {
       // Crear un enlace temporal para descarga
       const link = document.createElement('a');
-      link.href = invoiceUrl;
+      link.href = safeInvoice.href;
       link.download = `factura_${payment?.descripcion || 'documento'}.pdf`;
       link.target = '_blank';
+      link.rel = 'noopener noreferrer';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -45,7 +50,7 @@ const InvoiceViewer = ({ isOpen, onClose, payment, invoiceUrl }) => {
             </div>
             
             <div className="flex items-center gap-2">
-              {invoiceUrl && (
+              {canOpenInvoice && (
                 <>
                   <button
                     onClick={handleDownload}
@@ -79,13 +84,13 @@ const InvoiceViewer = ({ isOpen, onClose, payment, invoiceUrl }) => {
 
         {/* Content */}
         <div className="flex-1 p-4 overflow-hidden" style={{background: '#242424'}}>
-          {invoiceUrl ? (
+          {canOpenInvoice ? (
             <div className="w-full h-full bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
               <iframe
-                src={invoiceUrl}
+                src={safeInvoice.href}
                 className="w-full h-full border-none"
                 title={`Factura - ${payment?.descripcion || 'Documento'}`}
-                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                sandbox="allow-same-origin allow-downloads allow-popups"
                 loading="lazy"
               />
             </div>

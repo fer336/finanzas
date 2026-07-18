@@ -10,6 +10,7 @@ import {
   Clock
 } from 'lucide-react';
 import apiServices from '../services/api';
+import { normalizeDocumentPreviewUrl } from '../utils/documentPreviewUrl';
 
 const { pagosPendientesApi, formatearFecha, formatearMoneda } = apiServices;
 
@@ -106,8 +107,9 @@ const PaidInvoicesView = () => {
   }, []);
 
   const handleViewInvoice = (payment) => {
-    if (payment.url_pdf) {
-      window.open(payment.url_pdf, '_blank', 'noopener,noreferrer');
+    const document = normalizeDocumentPreviewUrl(payment.url_pdf || '');
+    if (document.isValid) {
+      window.open(document.href, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -342,7 +344,7 @@ const PaidInvoicesView = () => {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
-                          {payment.url_pdf && (
+                          {normalizeDocumentPreviewUrl(payment.url_pdf || '').isValid && (
                           <button
                               onClick={() => handleViewInvoice(payment)}
                             className="px-3 py-2 bg-blue-600/50 border border-blue-500/50 text-white text-xs font-bold rounded-md hover:bg-blue-600/80 flex items-center justify-center gap-1.5"

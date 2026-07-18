@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, X, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from './ui/button';
+import { normalizeDocumentPreviewUrl } from '../utils/documentPreviewUrl';
 import { Card, CardContent } from './ui/card';
 import { Progress } from './ui/progress';
 
@@ -210,6 +211,7 @@ export function ComprobanteUploader({ onFileUpload, existingFile, transaccionId,
   };
 
   if (existingFile) {
+    const existingDocument = normalizeDocumentPreviewUrl(existingFile.url || existingFile.data || '');
     return (
       <Card className="border-green-200 bg-green-50/10">
         <CardContent className="p-4">
@@ -224,13 +226,15 @@ export function ComprobanteUploader({ onFileUpload, existingFile, transaccionId,
                 </p>
               </div>
             </div>
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => window.open(existingFile.url || existingFile.data, '_blank')}
-            >
-              Ver
-            </Button>
+            {existingDocument.isValid && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => window.open(existingDocument.href, '_blank', 'noopener,noreferrer')}
+              >
+                Ver
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

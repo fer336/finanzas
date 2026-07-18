@@ -22,5 +22,8 @@ export default defineConfig({
   build: {
     outDir: 'build',
   },
+  test: {
+    environment: 'jsdom',
+    allowOnly: false,
+  },
 });
-

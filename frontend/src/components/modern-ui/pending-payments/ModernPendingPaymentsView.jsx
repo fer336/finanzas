@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Search, Edit, Trash2, Check, ChevronLeft, ChevronRight, RefreshCw, Plus } from 'lucide-react';
+import { Search, Edit, Trash2, Check, ChevronLeft, ChevronRight, RefreshCw, Plus, Eye } from 'lucide-react';
 import { Badge } from '../../ui/badge';
 import KpiCard from '../common/KpiCard';
 import ConfirmModal from '../common/ConfirmModal';
 import ModernPrestamosSection from './ModernPrestamosSection';
+import DocumentPreviewModal from './DocumentPreviewModal';
 import { usePendingPayments, QUERY_KEYS } from '../../../hooks/useFinancialData';
 import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
 import { useRefresh } from '../../../hooks/useRefresh';
 import { useIsMobile } from '../../../hooks/use-mobile';
+import { normalizePaymentDocument } from '../../../utils/documentPreviewUrl';
 
 const SECTION_KEY = 'vencimientos_section'; // 'vencimientos' | 'prestamos'
 const loadSection = () => {
@@ -44,7 +46,7 @@ const calcularDiasRestantes = (fechaVencimiento) => {
 const FilterSelect = ({ className = '', ...props }) => (
   <select
     {...props}
-    className={`rounded-sm border border-[#c8bf91] bg-white px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring dark:border-border dark:bg-secondary ${className}`}
+    className={`rounded-sm border border-border bg-secondary px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring ${className}`}
   />
 );
 FilterSelect.propTypes = { className: PropTypes.string };
@@ -55,15 +57,16 @@ const EmptyState = ({ children }) => (
 EmptyState.propTypes = { children: PropTypes.node };
 
 // Toggle de pills Mensual/Acumulado (mismo patrón visual que Movimientos).
-const PillToggle = ({ options, value, onChange, activeClassName }) => (
-  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#c8bf91] bg-card p-[3px] dark:border-border">
+const PillToggle = ({ options, value, onChange, activeClassName, idPrefix, ariaLabel }) => (
+  <div className="inline-flex items-center gap-[3px] rounded-full border border-border bg-card p-[3px]" aria-label={ariaLabel}>
     {options.map((opt) => (
       <button
+        id={idPrefix ? `${idPrefix}-${opt.value}` : undefined}
         key={opt.value}
         type="button"
         onClick={() => onChange(opt.value)}
         className={`rounded-full px-3 py-1 font-mono text-[12px] transition-colors duration-150 ${
-          value === opt.value ? `${activeClassName} font-semibold` : 'text-[#43436c] hover:text-foreground dark:text-muted-foreground'
+          value === opt.value ? `${activeClassName} font-semibold` : 'text-muted-foreground hover:bg-card-hover hover:text-foreground'
         }`}
       >
         {opt.label}
@@ -80,6 +83,8 @@ PillToggle.propTypes = {
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   activeClassName: PropTypes.string.isRequired,
+  idPrefix: PropTypes.string,
+  ariaLabel: PropTypes.string,
 };
 
 const ModernPendingPaymentsView = ({
@@ -109,7 +114,19 @@ const ModernPendingPaymentsView = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [pagoToDelete, setPagoToDelete] = useState(null);
+  const [previewDocument, setPreviewDocument] = useState(null);
   const itemsPerPage = 20;
+  const controlIds = {
+    mobileViewMode: 'pending-payments-mobile-view-mode',
+    mobileMonth: 'pending-payments-mobile-month',
+    mobileSearch: 'pending-payments-mobile-search',
+    mobileStatus: 'pending-payments-mobile-status',
+    desktopViewMode: 'pending-payments-desktop-view-mode',
+    desktopMonth: 'pending-payments-desktop-month',
+    desktopSearch: 'pending-payments-desktop-search',
+    desktopStatus: 'pending-payments-desktop-status',
+    section: 'pending-payments-section',
+  };
 
   // Normalizar datos del backend (misma lógica que la versión anterior de esta vista).
   const pagos = (pagosData?.list || pagosData || []).map((p) => {
@@ -127,6 +144,7 @@ const ModernPendingPaymentsView = ({
       fechaVencimiento,
       estado: (p.estado || p.Estado || 'pendiente').toString().toLowerCase(),
       categoria: categoriaNombre,
+      document: normalizePaymentDocument(p),
     };
   });
 
@@ -183,9 +201,9 @@ const ModernPendingPaymentsView = ({
   const renderFecha = (fechaVencimiento) => {
     const fecha = parseDateSafe(fechaVencimiento);
     if (!fecha) {
-      return <span className="font-mono text-[12px] italic text-[#625f55] dark:text-muted-foreground">a confirmar</span>;
+      return <span className="font-mono text-[12px] italic text-muted-foreground">a confirmar</span>;
     }
-    return <span className="font-mono text-[12px] text-[#43436c] dark:text-muted-foreground">{fecha.toLocaleDateString('es-AR')}</span>;
+    return <span className="font-mono text-[12px] text-muted-foreground">{fecha.toLocaleDateString('es-AR')}</span>;
   };
 
   const EstadoPill = ({ isPaid }) => {
@@ -207,7 +225,7 @@ const ModernPendingPaymentsView = ({
       disabled={isRefreshing}
       title={isRefreshing ? 'Actualizando…' : 'Actualizar'}
       aria-label={isRefreshing ? 'Actualizando…' : 'Actualizar'}
-      className="flex items-center justify-center gap-1.5 rounded-sm border border-[#c8bf91] bg-white px-2.5 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#e4d794] disabled:opacity-50 dark:border-border dark:bg-secondary dark:hover:bg-card-hover sm:px-3"
+      className="flex items-center justify-center gap-1.5 rounded-sm border border-border bg-secondary px-2.5 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-card-hover disabled:opacity-50 sm:px-3"
     >
       <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
       <span className="hidden sm:inline">{isRefreshing ? 'Actualizando…' : 'Actualizar'}</span>
@@ -220,7 +238,7 @@ const ModernPendingPaymentsView = ({
       onClick={() => onNewPago && onNewPago()}
       title="Nuevo vencimiento"
       aria-label="Nuevo vencimiento"
-      className="flex items-center justify-center gap-1.5 rounded-sm bg-primary px-2.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] sm:px-3.5"
+      className="flex items-center justify-center gap-1.5 rounded-sm bg-primary px-2.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:bg-primary-active sm:px-3.5"
     >
       <Plus className="h-3.5 w-3.5" />
       <span className="hidden sm:inline">Nuevo</span>
@@ -233,7 +251,9 @@ const ModernPendingPaymentsView = ({
       options={[{ value: 'vencimientos', label: 'Vencimientos' }, { value: 'prestamos', label: 'Préstamos' }]}
       value={section}
       onChange={setSection}
-      activeClassName="bg-[#545464] text-[#f2ecbc]"
+      activeClassName="bg-primary text-primary-foreground"
+      idPrefix={controlIds.section}
+      ariaLabel="Sección de vencimientos"
     />
   );
 
@@ -279,6 +299,10 @@ const ModernPendingPaymentsView = ({
     );
   }
 
+  const openDocumentPreview = (p) => {
+    if (p.document?.isValid) setPreviewDocument(p);
+  };
+
   const handleDeleteConfirm = () => {
     if (pagoToDelete) onDeletePago && onDeletePago(pagoToDelete.id);
   };
@@ -315,29 +339,39 @@ const ModernPendingPaymentsView = ({
               options={[{ value: 'monthly', label: 'Mensual' }, { value: 'accumulated', label: 'Acumulado' }]}
               value={viewMode}
               onChange={setViewMode}
-              activeClassName="bg-[#545464] text-[#f2ecbc]"
+              activeClassName="bg-primary text-primary-foreground"
+              idPrefix={controlIds.mobileViewMode}
+              ariaLabel="Modo de período"
             />
             {viewMode === 'monthly' && (
-              <input
-                type="month"
-                value={selectedMonthFilter}
-                onChange={(e) => setSelectedMonthFilter(e.target.value)}
-                className="min-w-0 rounded-sm border border-[#c8bf91] bg-white px-2 py-1.5 font-mono text-[11.5px] text-foreground focus:outline-none dark:border-border dark:bg-secondary"
-              />
+              <div className="min-w-0">
+                <label htmlFor={controlIds.mobileMonth} className="sr-only">Mes de vencimientos</label>
+                <input
+                  id={controlIds.mobileMonth}
+                  type="month"
+                  value={selectedMonthFilter}
+                  onChange={(e) => setSelectedMonthFilter(e.target.value)}
+                  className="min-w-0 rounded-sm border border-border bg-secondary px-2 py-1.5 font-mono text-[11.5px] text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring"
+                />
+              </div>
             )}
           </div>
 
           <div className="relative mb-2.5">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#625f55] dark:text-muted-foreground" />
+            <label htmlFor={controlIds.mobileSearch} className="sr-only">Buscar vencimientos</label>
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
+              id={controlIds.mobileSearch}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar…"
-              className="w-full rounded-sm border border-[#c8bf91] bg-white py-2 pl-9 pr-3 text-[13px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-border dark:bg-secondary dark:placeholder:text-muted-foreground"
+              className="w-full rounded-sm border border-border bg-secondary py-2 pl-9 pr-3 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring"
             />
           </div>
 
+          <label htmlFor={controlIds.mobileStatus} className="sr-only">Filtrar vencimientos por estado</label>
           <FilterSelect
+            id={controlIds.mobileStatus}
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
             className="w-full py-2"
@@ -351,7 +385,7 @@ const ModernPendingPaymentsView = ({
 
         <div className="flex flex-col gap-2 px-4">
           {paginatedData.length === 0 ? (
-            <div className="flex items-center justify-center rounded-md border border-[#c8bf91] bg-card py-10 dark:border-border">
+            <div className="flex items-center justify-center rounded-md border border-border bg-card py-10">
               <EmptyState>
                 {searchQuery ? `Sin resultados para "${searchQuery}".` : 'Sin vencimientos en esta vista.'}
               </EmptyState>
@@ -360,13 +394,24 @@ const ModernPendingPaymentsView = ({
             paginatedData.map((p) => {
               const isPaid = isPagoPaid(p);
               return (
-                <div key={p.id} className="rounded-md border border-[#c8bf91] bg-card px-3.5 py-3 dark:border-border">
+                <div key={p.id} className="rounded-md border border-border bg-card px-3.5 py-3">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="text-[13.5px] text-foreground truncate">{p.nombre}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         {renderFecha(p.fechaVencimiento)}
                         <Badge variant="outline">{p.categoria}</Badge>
+                        {p.document?.isValid && (
+                          <button
+                            type="button"
+                            onClick={() => openDocumentPreview(p)}
+                            className="inline-flex items-center gap-1 rounded-sm border border-border bg-secondary px-2 py-1 text-[11.5px] font-medium text-foreground transition-colors hover:bg-card-hover focus:outline-none focus:ring-2 focus:ring-ring"
+                            aria-label={`Ver documento de ${p.nombre}`}
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            Documento
+                          </button>
+                        )}
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
@@ -380,12 +425,17 @@ const ModernPendingPaymentsView = ({
                   </div>
                   <div className="mt-2.5 flex items-center justify-between border-t border-dashed border-[#d5cea3] pt-2 dark:border-muted">
                     <div className="flex gap-3">
-                      <button onClick={() => onEditPago && onEditPago(p)} className="p-1 text-[#625f55] hover:text-foreground dark:text-muted-foreground">
+                      <button
+                        onClick={() => onEditPago && onEditPago(p)}
+                        className="p-1 text-muted-foreground hover:text-foreground"
+                        aria-label={`Editar vencimiento ${p.nombre}`}
+                      >
                         <Edit className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => { setPagoToDelete(p); setShowDeleteConfirm(true); }}
-                        className="p-1 text-[#625f55] hover:text-[#b83245] dark:text-muted-foreground dark:hover:text-[#e46876]"
+                        className="p-1 text-muted-foreground hover:text-destructive"
+                        aria-label={`Eliminar vencimiento ${p.nombre}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -393,7 +443,8 @@ const ModernPendingPaymentsView = ({
                     {!isPaid && (
                       <button
                         onClick={() => onMarcarPagado && onMarcarPagado(p)}
-                        className="flex items-center gap-1.5 rounded-sm bg-primary px-3 py-1.5 font-sans text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841]"
+                        className="flex items-center gap-1.5 rounded-sm bg-primary px-3 py-1.5 font-sans text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:bg-primary-active"
+                        aria-label={`Marcar vencimiento ${p.nombre} como pagado`}
                       >
                         <Check className="h-3.5 w-3.5" />
                         Marcar pagado
@@ -406,23 +457,25 @@ const ModernPendingPaymentsView = ({
           )}
 
           {totalPages > 1 && (
-            <div className="mt-2 flex items-center justify-between rounded-md border border-[#c8bf91] bg-card px-4 py-3 dark:border-border">
+            <div className="mt-2 flex items-center justify-between rounded-md border border-border bg-card px-4 py-3">
               <button
                 onClick={() => currentPage > 1 && setCurrentPage((p) => p - 1)}
                 disabled={currentPage === 1}
                 className="rounded-sm p-2 hover:bg-black/5 disabled:opacity-30 dark:hover:bg-card-hover"
+                aria-label="Página anterior"
               >
-                <ChevronLeft className="h-4 w-4 text-[#625f55] dark:text-muted-foreground" />
+                <ChevronLeft className="h-4 w-4 text-muted-foreground" />
               </button>
-              <span className="font-mono text-[12px] text-[#43436c] dark:text-muted-foreground">
-                {currentPage} / {totalPages} <span className="text-[#625f55] dark:text-muted-foreground">({sortedData.length})</span>
+              <span className="font-mono text-[12px] text-foreground">
+                {currentPage} / {totalPages} <span className="text-muted-foreground">({sortedData.length})</span>
               </span>
               <button
                 onClick={() => currentPage < totalPages && setCurrentPage((p) => p + 1)}
                 disabled={currentPage >= totalPages}
                 className="rounded-sm p-2 hover:bg-black/5 disabled:opacity-30 dark:hover:bg-card-hover"
+                aria-label="Página siguiente"
               >
-                <ChevronRight className="h-4 w-4 text-[#625f55] dark:text-muted-foreground" />
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
           )}
@@ -437,6 +490,12 @@ const ModernPendingPaymentsView = ({
           confirmText="Eliminar"
           cancelText="Cancelar"
           type="danger"
+        />
+        <DocumentPreviewModal
+          isOpen={!!previewDocument}
+          onClose={() => setPreviewDocument(null)}
+          documentUrl={previewDocument?.document?.href || ''}
+          title={previewDocument ? `Documento de ${previewDocument.nombre}` : 'Vista previa del documento'}
         />
       </div>
     );
@@ -463,29 +522,38 @@ const ModernPendingPaymentsView = ({
             options={[{ value: 'monthly', label: 'Mensual' }, { value: 'accumulated', label: 'Acumulado' }]}
             value={viewMode}
             onChange={setViewMode}
-            activeClassName="bg-[#545464] text-[#f2ecbc]"
+            activeClassName="bg-primary text-primary-foreground"
+            idPrefix={controlIds.desktopViewMode}
+            ariaLabel="Modo de período"
           />
           {viewMode === 'monthly' && (
-            <input
-              type="month"
-              value={selectedMonthFilter}
-              onChange={(e) => setSelectedMonthFilter(e.target.value)}
-              className="rounded-sm border border-[#c8bf91] bg-white px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none dark:border-border dark:bg-secondary"
-            />
+            <div>
+              <label htmlFor={controlIds.desktopMonth} className="sr-only">Mes de vencimientos</label>
+              <input
+                id={controlIds.desktopMonth}
+                type="month"
+                value={selectedMonthFilter}
+                onChange={(e) => setSelectedMonthFilter(e.target.value)}
+                className="rounded-sm border border-border bg-secondary px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring"
+              />
+            </div>
           )}
         </div>
 
         <div className="mb-4 flex gap-2.5">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#625f55] dark:text-muted-foreground" />
+            <label htmlFor={controlIds.desktopSearch} className="sr-only">Buscar vencimientos</label>
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
+              id={controlIds.desktopSearch}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Buscar…"
-              className="w-full rounded-sm border border-[#c8bf91] bg-white py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring transition-colors dark:border-border dark:bg-secondary dark:placeholder:text-muted-foreground"
+              className="w-full rounded-sm border border-border bg-secondary py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring transition-colors"
             />
           </div>
-          <FilterSelect value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}>
+          <label htmlFor={controlIds.desktopStatus} className="sr-only">Filtrar vencimientos por estado</label>
+          <FilterSelect id={controlIds.desktopStatus} value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}>
             <option value="all">Todos los estados</option>
             <option value="pending">Pendientes</option>
             <option value="overdue">Vencidos</option>
@@ -503,16 +571,16 @@ const ModernPendingPaymentsView = ({
           />
         </div>
 
-        <div className="rounded-md border border-[#c8bf91] bg-card overflow-hidden dark:border-border">
+        <div className="overflow-hidden rounded-md border border-border bg-card">
           <table className="w-full">
             <thead>
-              <tr className="border-b-2 border-[#c8bf91] dark:border-border">
-                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Vence</th>
-                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Descripción</th>
-                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Categoría</th>
-                <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Monto</th>
-                <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Estado</th>
-                <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-muted-foreground" style={{ letterSpacing: '.08em' }}>Acciones</th>
+              <tr className="border-b-2 border-border">
+                <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-muted-foreground" style={{ letterSpacing: '.08em' }}>Vence</th>
+                <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-muted-foreground" style={{ letterSpacing: '.08em' }}>Descripción</th>
+                <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-muted-foreground" style={{ letterSpacing: '.08em' }}>Categoría</th>
+                <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-muted-foreground" style={{ letterSpacing: '.08em' }}>Monto</th>
+                <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-muted-foreground" style={{ letterSpacing: '.08em' }}>Estado</th>
+                <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-muted-foreground" style={{ letterSpacing: '.08em' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -528,7 +596,7 @@ const ModernPendingPaymentsView = ({
                 paginatedData.map((p) => {
                   const isPaid = isPagoPaid(p);
                   return (
-                    <tr key={p.id} className="group border-b border-[#d5cea3] hover:bg-[#e4d794] transition-colors dark:border-muted dark:hover:bg-card-hover">
+                    <tr key={p.id} className="group border-b border-muted transition-colors hover:bg-card-hover">
                       <td className="px-3.5 py-2.5">{renderFecha(p.fechaVencimiento)}</td>
                       <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">{p.nombre}</td>
                       <td className="px-3.5 py-2.5">
@@ -545,26 +613,39 @@ const ModernPendingPaymentsView = ({
                           {!isPaid && (
                             <button
                               onClick={() => onMarcarPagado && onMarcarPagado(p)}
-                              className="flex items-center gap-1.5 rounded-sm bg-primary px-2.5 py-1.5 font-sans text-[12px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841]"
+                              className="flex items-center gap-1.5 rounded-sm bg-primary px-2.5 py-1.5 font-sans text-[12px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:bg-primary-active"
+                              aria-label={`Marcar vencimiento ${p.nombre} como pagado`}
                             >
                               <Check className="h-3.5 w-3.5" />
                               Marcar pagado
                             </button>
                           )}
-                          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                            {p.document?.isValid && (
+                              <button
+                                onClick={() => openDocumentPreview(p)}
+                                className="rounded-sm p-1.5 transition-colors hover:bg-card-hover focus:outline-none focus:ring-2 focus:ring-ring"
+                                title="Ver documento"
+                                aria-label={`Ver documento de ${p.nombre}`}
+                              >
+                                <Eye className="h-4 w-4 text-muted-foreground" />
+                              </button>
+                            )}
                             <button
                               onClick={() => onEditPago && onEditPago(p)}
-                              className="p-1.5 rounded-sm hover:bg-black/5 transition-colors dark:hover:bg-card-hover"
+                              className="rounded-sm p-1.5 transition-colors hover:bg-card-hover focus:outline-none focus:ring-2 focus:ring-ring"
                               title="Editar"
+                              aria-label={`Editar vencimiento ${p.nombre}`}
                             >
-                              <Edit className="h-4 w-4 text-[#625f55] dark:text-muted-foreground" />
+                              <Edit className="h-4 w-4 text-muted-foreground" />
                             </button>
                             <button
                               onClick={() => { setPagoToDelete(p); setShowDeleteConfirm(true); }}
-                              className="p-1.5 rounded-sm hover:bg-black/5 transition-colors dark:hover:bg-card-hover"
+                              className="rounded-sm p-1.5 transition-colors hover:bg-card-hover focus:outline-none focus:ring-2 focus:ring-ring"
                               title="Eliminar"
+                              aria-label={`Eliminar vencimiento ${p.nombre}`}
                             >
-                              <Trash2 className="h-4 w-4 text-[#625f55] hover:text-[#b83245] dark:text-muted-foreground dark:hover:text-[#e46876]" />
+                              <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
                             </button>
                           </div>
                         </div>
@@ -577,8 +658,8 @@ const ModernPendingPaymentsView = ({
           </table>
 
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-5 py-3.5 border-t border-[#d5cea3] dark:border-muted">
-              <p className="font-mono text-[12px] text-[#625f55] dark:text-muted-foreground">
+            <div className="flex items-center justify-between border-t border-muted px-5 py-3.5">
+              <p className="font-mono text-[12px] text-muted-foreground">
                 Página {currentPage} de {totalPages} ({sortedData.length} resultados)
               </p>
               <div className="flex items-center gap-2">
@@ -586,16 +667,18 @@ const ModernPendingPaymentsView = ({
                   onClick={() => currentPage > 1 && setCurrentPage((p) => p - 1)}
                   disabled={currentPage === 1}
                   className="p-1.5 rounded-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black/5 dark:hover:bg-card-hover"
+                  aria-label="Página anterior"
                 >
-                  <ChevronLeft className="h-4 w-4 text-[#625f55] dark:text-muted-foreground" />
+                  <ChevronLeft className="h-4 w-4 text-muted-foreground" />
                 </button>
                 <span className="font-mono text-[12px] text-foreground px-2">{currentPage}</span>
                 <button
                   onClick={() => currentPage < totalPages && setCurrentPage((p) => p + 1)}
                   disabled={currentPage >= totalPages}
                   className="p-1.5 rounded-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black/5 dark:hover:bg-card-hover"
+                  aria-label="Página siguiente"
                 >
-                  <ChevronRight className="h-4 w-4 text-[#625f55] dark:text-muted-foreground" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </button>
               </div>
             </div>
@@ -612,6 +695,12 @@ const ModernPendingPaymentsView = ({
         confirmText="Eliminar"
         cancelText="Cancelar"
         type="danger"
+      />
+      <DocumentPreviewModal
+        isOpen={!!previewDocument}
+        onClose={() => setPreviewDocument(null)}
+        documentUrl={previewDocument?.document?.href || ''}
+        title={previewDocument ? `Documento de ${previewDocument.nombre}` : 'Vista previa del documento'}
       />
     </div>
   );

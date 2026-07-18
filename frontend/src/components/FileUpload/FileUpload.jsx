@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, X, FileText, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { normalizeDocumentPreviewUrl } from '../../utils/documentPreviewUrl';
 
 const FileUpload = ({ 
   onFileUploaded, 
@@ -17,6 +18,9 @@ const FileUpload = ({
   const [uploadedFileUrl, setUploadedFileUrl] = useState(currentFileUrl);
   const [dragActive, setDragActive] = useState(false);
   const [compressing, setCompressing] = useState(false);
+  const normalizedUploadedFile = normalizeDocumentPreviewUrl(uploadedFileUrl || '');
+  const hasSafeUploadedFile = uploadedFileUrl && normalizedUploadedFile.isValid;
+  const isSafeUploadedImage = hasSafeUploadedFile && normalizedUploadedFile.fileType === 'image';
 
   /**
    * 🖼️ Comprime imágenes que excedan 2MB
@@ -258,7 +262,7 @@ const FileUpload = ({
       {/* Upload Area */}
       {!uploadedFileUrl && (
         <div
-          className={`relative rounded-md border-2 border-dashed p-6 transition-colors ${
+          className={`relative rounded-md border-2 border-dashed p-6 transition-colors focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background ${
             dragActive
               ? 'border-primary bg-[#526a3a]/10 dark:bg-[#98bb6c]/10'
               : 'border-border bg-muted hover:border-muted-foreground'
@@ -272,6 +276,7 @@ const FileUpload = ({
             type="file"
             onChange={handleFileChange}
             accept={allowedTypes.join(',')}
+            aria-label="Seleccionar archivo para subir"
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             disabled={uploading || compressing}
           />
@@ -363,11 +368,18 @@ const FileUpload = ({
             <div className="flex items-start gap-3 flex-1 min-w-0">
               <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-medium text-primary mb-1">Archivo subido correctamente</p>
-                {showPreview && uploadedFileUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                <p className="text-[13px] font-medium text-primary mb-1">
+                  {hasSafeUploadedFile ? 'Archivo subido correctamente' : 'El enlace del archivo no es seguro'}
+                </p>
+                {!hasSafeUploadedFile && (
+                  <p className="text-[12px] text-muted-foreground">
+                    El archivo guardado no se puede previsualizar ni abrir porque no pertenece a un origen permitido.
+                  </p>
+                )}
+                {showPreview && isSafeUploadedImage ? (
                   <div className="mt-2">
                     <img
-                      src={uploadedFileUrl}
+                      src={normalizedUploadedFile.href}
                       alt="Preview"
                       className="max-w-full h-auto rounded-md border border-border max-h-48 object-contain"
                       onError={(e) => {
@@ -375,16 +387,16 @@ const FileUpload = ({
                       }}
                     />
                   </div>
-                ) : (
+                ) : hasSafeUploadedFile ? (
                   <a
-                    href={uploadedFileUrl}
+                    href={normalizedUploadedFile.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[12px] text-muted-foreground hover:text-foreground transition-colors break-all"
                   >
-                    {uploadedFileUrl}
+                    {normalizedUploadedFile.documentName || normalizedUploadedFile.href}
                   </a>
-                )}
+                ) : null}
               </div>
             </div>
             <button

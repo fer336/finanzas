@@ -16,10 +16,10 @@
     --divider: rgba(87, 69, 130, 0.22);
     --text-primary: #40384d;
     --text-secondary: #5c5063;
-    --text-muted: #7d6f83;
+    --text-muted: #6f6074;
     --text-violet-soft: #6f5d92;
     --primary-hover: #685496;
-    --primary-active: #7865a5;
+    --primary-active: #604b8b;
     --primary-soft: #957fb8;
     --primary-dark: #383058;
     --primary-surface: #e8dfef;
@@ -80,11 +80,11 @@
     --accent-foreground: #6b572f;
 
     /* Destructive - Arcilla (gastos) */
-    --destructive: var(--expense);
+    --destructive: var(--expense-dark);
     --destructive-foreground: #f0e6e0;
 
     /* Success - Verde (mismo acento que ingresos/primario) */
-    --success: var(--income);
+    --success: var(--income-dark);
     --success-foreground: #f0e6e0;
 
     /* Bordes & Inputs */
@@ -113,10 +113,10 @@
     --divider: rgba(138, 123, 145, 0.28);
     --text-primary: #f0e6e0;
     --text-secondary: #c9b9bd;
-    --text-muted: #8a7b91;
+    --text-muted: #9a8ca0;
     --text-violet-soft: #a99ac4;
     --primary-hover: #685496;
-    --primary-active: #7865a5;
+    --primary-active: #604b8b;
     --primary-soft: #957fb8;
     --primary-dark: #383058;
     --primary-surface: #302858;
@@ -173,11 +173,11 @@
     --accent-foreground: #e6c384;
 
     /* Destructive - Arcilla (gastos) */
-    --destructive: var(--expense);
+    --destructive: var(--expense-dark);
     --destructive-foreground: #f0e6e0;
 
     /* Success - Verde (mismo acento que ingresos/primario) */
-    --success: var(--income);
+    --success: var(--income-dark);
     --success-foreground: #f0e6e0;
 
     /* Bordes & Inputs */

@@ -23,6 +23,10 @@ module.exports = {
           DEFAULT: "var(--primary)",
           foreground: "var(--primary-foreground)",
           glow: "var(--primary-glow)",
+          hover: "var(--primary-hover)",
+          active: "var(--primary-active)",
+          soft: "var(--primary-soft)",
+          surface: "var(--primary-surface)",
         },
         secondary: {
           DEFAULT: "var(--secondary)",

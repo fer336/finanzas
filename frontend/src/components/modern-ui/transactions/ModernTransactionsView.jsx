@@ -13,6 +13,8 @@ import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
 import { useRefresh } from '../../../hooks/useRefresh';
 import { QUERY_KEYS } from '../../../hooks/useFinancialData';
 import { useIsMobile } from '../../../hooks/use-mobile';
+import { normalizeDocumentPreviewUrl } from '../../../utils/documentPreviewUrl';
+import DocumentPreviewModal from '../pending-payments/DocumentPreviewModal';
 
 // ─── Constantes de meses ─────────────────────────────────────────────────────
 const MESES = [
@@ -105,6 +107,7 @@ const ModernTransactionsView = ({
   const [selectedType, setSelectedType]   = useState('all');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentPage, setCurrentPage]     = useState(1);
+  const [previewDocumentUrl, setPreviewDocumentUrl] = useState('');
 
   // Vista: mensual (un mes con flechas) vs acumulado (multi-mes con checkboxes)
   const [viewMode, setViewMode]           = useState(loadViewMode);
@@ -302,6 +305,20 @@ const ModernTransactionsView = ({
   };
   const isCurrentMonth = selectedMonth >= `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
+  const getTransactionDocument = (transaction) => {
+    const rawUrl = transaction.archivo_adjunto
+      || transaction.ArchivoAdjunto
+      || transaction.comprobante
+      || transaction.Comprobante
+      || '';
+    return normalizeDocumentPreviewUrl(rawUrl);
+  };
+
+  const openDocumentPreview = (event, documentUrl) => {
+    event.stopPropagation();
+    setPreviewDocumentUrl(documentUrl);
+  };
+
   const currentMonthLabel = (() => {
     const [yr, mo] = selectedMonth.split('-').map(Number);
     const names = ['enero','febrero','marzo','abril','mayo','junio',
@@ -361,7 +378,8 @@ const ModernTransactionsView = ({
   // ── Render Mobile ─────────────────────────────────────────────────────────
   if (isMobile) {
     return (
-      <div className="min-h-screen pb-8">
+      <>
+        <div className="min-h-screen pb-8">
         <div className="px-4 pt-4 pb-3">
 
           {/* Cabecera de período */}
@@ -543,7 +561,7 @@ const ModernTransactionsView = ({
               const monto       = Math.abs(t.monto || t.monto_ars || 0);
               const rowId       = t.id || t.Id;
               const pillColor   = esIngreso ? 'var(--success)' : 'var(--destructive)';
-              const comprobanteUrl = t.archivo_adjunto || t.ArchivoAdjunto || t.comprobante || t.Comprobante || '';
+              const attachedDocument = getTransactionDocument(t);
 
               return (
                 <div key={rowId} className="rounded-md border border-border bg-card px-3.5 py-3">
@@ -568,9 +586,11 @@ const ModernTransactionsView = ({
                     </div>
                   </div>
                   <div className="mt-2.5 flex justify-end gap-3 border-t border-dashed border-muted pt-2">
-                    {comprobanteUrl && (
+                    {attachedDocument.isValid && (
                       <button
-                        onClick={e => { e.stopPropagation(); window.open(comprobanteUrl, '_blank', 'noopener,noreferrer'); }}
+                        type="button"
+                        onClick={(e) => openDocumentPreview(e, attachedDocument.rawUrl)}
+                        aria-label={`Ver comprobante de ${descripcion}`}
                         className="p-1 text-[#625f55] hover:text-foreground"
                         title="Ver comprobante"
                       >
@@ -578,13 +598,17 @@ const ModernTransactionsView = ({
                       </button>
                     )}
                     <button
+                      type="button"
                       onClick={() => onEditTransaction && onEditTransaction(t)}
+                      aria-label={`Editar movimiento ${descripcion}`}
                       className="p-1 text-[#625f55] hover:text-foreground"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
+                      type="button"
                       onClick={e => { e.stopPropagation(); onDeleteTransaction && onDeleteTransaction(t); }}
+                      aria-label={`Eliminar movimiento ${descripcion}`}
                       className="p-1 text-[#625f55] hover:text-[#b83245]"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -618,13 +642,21 @@ const ModernTransactionsView = ({
             </div>
           )}
         </div>
-      </div>
+        </div>
+        <DocumentPreviewModal
+          isOpen={!!previewDocumentUrl}
+          onClose={() => setPreviewDocumentUrl('')}
+          documentUrl={previewDocumentUrl}
+          title="Vista previa del comprobante"
+        />
+      </>
     );
   }
 
   // ── Render Desktop ────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen">
+    <>
+      <div className="min-h-screen">
       <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
 
         {/* ── Cabecera de período (mismo patrón que Inicio) ── */}
@@ -855,7 +887,7 @@ const ModernTransactionsView = ({
                   const monto       = Math.abs(t.monto || t.monto_ars || 0);
                   const rowId       = t.id || t.Id;
                   const pillColor   = esIngreso ? 'var(--success)' : 'var(--destructive)';
-                  const comprobanteUrl = t.archivo_adjunto || t.ArchivoAdjunto || t.comprobante || t.Comprobante || '';
+                  const attachedDocument = getTransactionDocument(t);
 
                   return (
                     <tr key={rowId} className="group border-b border-muted hover:bg-card-hover transition-colors last:border-b-0">
@@ -873,10 +905,12 @@ const ModernTransactionsView = ({
                         {esIngreso ? '+' : '−'} {formatAmount(monto, { decimals: 0 })}
                       </td>
                       <td className="px-3.5 py-2.5">
-                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          {comprobanteUrl && (
+                        <div className="flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                          {attachedDocument.isValid && (
                             <button
-                              onClick={e => { e.stopPropagation(); window.open(comprobanteUrl, '_blank', 'noopener,noreferrer'); }}
+                              type="button"
+                              onClick={(e) => openDocumentPreview(e, attachedDocument.rawUrl)}
+                              aria-label={`Ver comprobante de ${descripcion}`}
                               className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
                               title="Ver comprobante"
                             >
@@ -884,14 +918,18 @@ const ModernTransactionsView = ({
                             </button>
                           )}
                           <button
+                            type="button"
                             onClick={() => onEditTransaction && onEditTransaction(t)}
+                            aria-label={`Editar movimiento ${descripcion}`}
                             className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
                             title="Editar"
                           >
                             <Edit className="w-4 h-4 text-[#625f55]" />
                           </button>
                           <button
+                            type="button"
                             onClick={e => { e.stopPropagation(); onDeleteTransaction && onDeleteTransaction(t); }}
+                            aria-label={`Eliminar movimiento ${descripcion}`}
                             className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
                             title="Eliminar"
                           >
@@ -933,7 +971,14 @@ const ModernTransactionsView = ({
           )}
         </div>
       </div>
-    </div>
+      </div>
+      <DocumentPreviewModal
+        isOpen={!!previewDocumentUrl}
+        onClose={() => setPreviewDocumentUrl('')}
+        documentUrl={previewDocumentUrl}
+        title="Vista previa del comprobante"
+      />
+    </>
   );
 };
 

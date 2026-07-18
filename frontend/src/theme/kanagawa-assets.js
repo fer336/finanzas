@@ -1,10 +1,10 @@
 export const kanagawaAssets = {
-  dashboardBackgroundDark: '/assets/kanagawa/kanagawa-dashboard-background.png',
-  dashboardBackgroundLight: '/assets/kanagawa/kanagawa-dashboard-background-light.png',
-  dashboardBackgroundDarkMobile: '/assets/kanagawa/kanagawa-dashboard-background-mobile.png',
-  dashboardBackgroundLightMobile: '/assets/kanagawa/kanagawa-dashboard-background-light-mobile.png',
-  incomePines: '/assets/kanagawa/kanagawa-income-pines-transparent.png',
-  expenseFuji: '/assets/kanagawa/kanagawa-expense-fuji-transparent.png',
+  dashboardBackgroundDark: '/assets/kanagawa/kanagawa-dashboard-background.webp',
+  dashboardBackgroundLight: '/assets/kanagawa/kanagawa-dashboard-background-light.webp',
+  dashboardBackgroundDarkMobile: '/assets/kanagawa/kanagawa-dashboard-background-mobile.webp',
+  dashboardBackgroundLightMobile: '/assets/kanagawa/kanagawa-dashboard-background-light-mobile.webp',
+  incomePines: '/assets/kanagawa/kanagawa-income-pines-transparent.webp',
+  expenseFuji: '/assets/kanagawa/kanagawa-expense-fuji-transparent.webp',
 };
 
 export default kanagawaAssets;

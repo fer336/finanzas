@@ -14,7 +14,7 @@ itsdangerous>=2.1.2
 
 # Cliente HTTP
 httpx>=0.25.2
-requests>=2.31.0
+requests>=2.34.2
 
 # Finanzas y mercado
 yfinance>=0.2.32

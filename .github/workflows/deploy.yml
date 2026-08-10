@@ -134,7 +134,49 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.created=${{ github.event.repository.updated_at }}
 
-      # ── 7. Deploy vía Portainer Webhook ─────────────────────────────────
+      # ── 7. Pin docker-compose.yml antes del redeploy ─────────────────────
+      # El webhook de Portainer solo redeploya los tags que ya tiene el stack.
+      # Por eso el compose debe quedar actualizado en main antes de invocarlo.
+      # :latest no sirve acá — Swarm no repuebla el digest en un service
+      # update sin --force real, así que un redeploy puede quedar corriendo
+      # código viejo sin avisar.
+      - name: 📌 Pin docker-compose.yml a la versión deployada
+        run: |
+          VERSION="${{ steps.tags.outputs.VERSION }}"
+
+          # El workflow corre sobre el tag del release (detached HEAD). Crear
+          # el commit desde origin/main evita empujar el tag completo a main.
+          git fetch origin main
+          git checkout -B deploy-pin origin/main
+
+          sed -i -E "s#(ghcr\.io/${{ env.IMAGE_OWNER }}/finanzas-backend):[^\"[:space:]]+#\1:${VERSION}#" docker-compose.yml
+          sed -i -E "s#(ghcr\.io/${{ env.IMAGE_OWNER }}/finanzas-frontend):[^\"[:space:]]+#\1:${VERSION}#" docker-compose.yml
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docker-compose.yml
+          if git diff --staged --quiet; then
+            echo "docker-compose.yml ya está en ${VERSION}, sin cambios."
+          else
+            git commit -m "chore: pin docker-compose.yml a ${VERSION} [skip ci]"
+            for attempt in 1 2 3; do
+              if git push origin HEAD:main; then
+                echo "✅ docker-compose.yml fijado a ${VERSION} en main"
+                exit 0
+              fi
+
+              if [ "$attempt" -eq 3 ]; then
+                echo "❌ No se pudo actualizar docker-compose.yml en main después de 3 intentos"
+                exit 1
+              fi
+
+              echo "Push rechazado; sincronizando main antes del reintento ${attempt}/3..."
+              git fetch origin main
+              git rebase origin/main
+            done
+          fi
+
+      # ── 8. Deploy vía Portainer Webhook ─────────────────────────────────
       - name: 🚀 Trigger Portainer redeploy
         run: |
           HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
@@ -147,11 +189,9 @@ jobs:
             exit 1
           fi
 
-      # ── 8. Verificar salud real del deploy ───────────────────────────────
-      # El webhook de Portainer solo dispara el redeploy — no confirma que el
-      # contenedor haya levantado. Reintenta contra /health y falla el job de
-      # verdad si nunca responde 200 (antes esto quedaba en verde aunque el
-      # backend quedara en 0/1 réplicas).
+      # ── 9. Verificar salud real del deploy ───────────────────────────────
+      # El webhook solo dispara el redeploy — no confirma que el contenedor
+      # haya levantado. Reintenta contra /health y falla el job si no responde.
       - name: 🩺 Verificar salud del backend
         run: |
           URL="https://finanzas.qeva.xyz/health"
@@ -167,31 +207,6 @@ jobs:
           done
           echo "::error::Health check falló tras 10 intentos (último HTTP $STATUS). El backend no levantó. Revisá logs en Portainer."
           exit 1
-
-      # ── 9. Pin docker-compose.yml a la versión ya verificada sana ────────
-      # :latest no sirve acá — Swarm no repuebla el digest en un service
-      # update sin --force real, así que un redeploy puede quedar corriendo
-      # código viejo sin avisar (por eso se pasó a v1.0.3 a mano). En vez de
-      # taggear manualmente en cada release, el CI fija el tag exacto acá
-      # (igual que el job pin-stack de octopus) recién después de confirmar
-      # el health check — así el compose commiteado siempre referencia una
-      # versión que se sabe que levantó bien.
-      - name: 📌 Pin docker-compose.yml a la versión deployada
-        run: |
-          VERSION="${{ steps.tags.outputs.VERSION }}"
-          sed -i -E "s#(ghcr\.io/${{ env.IMAGE_OWNER }}/finanzas-backend):[^\"[:space:]]+#\1:${VERSION}#" docker-compose.yml
-          sed -i -E "s#(ghcr\.io/${{ env.IMAGE_OWNER }}/finanzas-frontend):[^\"[:space:]]+#\1:${VERSION}#" docker-compose.yml
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docker-compose.yml
-          if git diff --staged --quiet; then
-            echo "docker-compose.yml ya está en ${VERSION}, sin cambios."
-          else
-            git commit -m "chore: pin docker-compose.yml a ${VERSION} [skip ci]"
-            git push origin HEAD:main \
-              || echo "::warning::No se pudo pushear el pin a main. Actualizá docker-compose.yml a mano con la versión ${VERSION}."
-          fi
 
       # ── 10. Notificación ─────────────────────────────────────────────────
       - name: ✅ Notificar resultado

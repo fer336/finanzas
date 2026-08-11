@@ -14,11 +14,20 @@ const parseDateSafe = (value) => {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 };
 
-const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onEditObjetivo, onDeleteObjetivo, onAportar }) => {
+const ModernObjetivosView = ({
+  objetivos = [],
+  onNewObjetivo,
+  onEditObjetivo,
+  onDeleteObjetivo,
+  onAportar,
+  onEditarAporte,
+  onEliminarAporte,
+}) => {
   const { refresh, isRefreshing } = useRefresh([QUERY_KEYS.objetivos]);
   const { formatAmount } = useAmountVisibility();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [objetivoToDelete, setObjetivoToDelete] = useState(null);
+  const [aporteToDelete, setAporteToDelete] = useState(null);
 
   // Normalizar objetivos del API (soporta variantes de casing del backend).
   const data = objetivos.map((obj) => {
@@ -40,7 +49,14 @@ const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onEditObjetivo, on
   });
 
   const handleDeleteConfirm = () => {
-    if (objetivoToDelete) onDeleteObjetivo && onDeleteObjetivo(objetivoToDelete.id);
+    if (aporteToDelete) {
+      onEliminarAporte?.(aporteToDelete);
+    } else if (objetivoToDelete) {
+      onDeleteObjetivo?.(objetivoToDelete.id);
+    }
+    setShowDeleteConfirm(false);
+    setObjetivoToDelete(null);
+    setAporteToDelete(null);
   };
 
   return (
@@ -143,6 +159,50 @@ const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onEditObjetivo, on
                   >
                     Aportar
                   </button>
+
+                  {obj.raw.aportes?.length > 0 && (
+                    <div className="mt-4 border-t border-[#c8bf91] pt-3 dark:border-[#363646]">
+                      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-[#625f55] dark:text-[#c8c093]">
+                        Aportes
+                      </p>
+                      <div className="space-y-2">
+                        {obj.raw.aportes.map((aporte) => (
+                          <div key={aporte.id} className="flex items-center justify-between gap-2 rounded-sm bg-white/50 px-2.5 py-2 dark:bg-white/5">
+                            <div className="min-w-0">
+                              <p className="font-mono text-[12px] font-semibold text-foreground">
+                                {formatAmount(aporte.monto, { decimals: 0 })}
+                              </p>
+                              <p className="truncate text-[11px] text-[#625f55] dark:text-[#c8c093]">
+                                {aporte.fecha ? new Date(aporte.fecha).toLocaleDateString('es-AR') : 'Sin fecha'}
+                                {(aporte.notas || aporte.descripcion) ? ` · ${aporte.notas || aporte.descripcion}` : ''}
+                              </p>
+                            </div>
+                            <div className="flex shrink-0 gap-1">
+                              <button
+                                type="button"
+                                onClick={() => onEditarAporte?.(aporte, obj.raw)}
+                                className="rounded-sm p-1.5 text-[#625f55] hover:bg-black/5 hover:text-foreground dark:text-[#c8c093] dark:hover:bg-white/5"
+                                title="Editar aporte"
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setAporteToDelete(aporte);
+                                  setShowDeleteConfirm(true);
+                                }}
+                                className="rounded-sm p-1.5 text-[#625f55] hover:bg-black/5 hover:text-[#b83245] dark:text-[#c8c093] dark:hover:bg-white/5 dark:hover:text-[#e46876]"
+                                title="Eliminar aporte"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -152,10 +212,16 @@ const ModernObjetivosView = ({ objetivos = [], onNewObjetivo, onEditObjetivo, on
 
       <ConfirmModal
         isOpen={showDeleteConfirm}
-        onClose={() => { setShowDeleteConfirm(false); setObjetivoToDelete(null); }}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setObjetivoToDelete(null);
+          setAporteToDelete(null);
+        }}
         onConfirm={handleDeleteConfirm}
-        title="¿Eliminar objetivo?"
-        message={`¿Estás seguro de eliminar "${objetivoToDelete?.nombre}"? Esta acción no se puede deshacer.`}
+        title={aporteToDelete ? '¿Eliminar aporte?' : '¿Eliminar objetivo?'}
+        message={aporteToDelete
+          ? `Se restaurarán ${formatAmount(aporteToDelete.monto, { decimals: 0 })} al balance disponible. ¿Continuar?`
+          : `¿Estás seguro de eliminar "${objetivoToDelete?.nombre}"? Esta acción no se puede deshacer.`}
         confirmText="Eliminar"
         cancelText="Cancelar"
         type="danger"
@@ -170,6 +236,8 @@ ModernObjetivosView.propTypes = {
   onEditObjetivo: PropTypes.func,
   onDeleteObjetivo: PropTypes.func,
   onAportar: PropTypes.func,
+  onEditarAporte: PropTypes.func,
+  onEliminarAporte: PropTypes.func,
 };
 
 export default ModernObjetivosView;

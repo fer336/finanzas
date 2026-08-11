@@ -541,6 +541,15 @@ const objetivosApi = {
     });
   },
 
+  // Actualizar un aporte existente
+  async updateContribution(aporte_id, aporteData) {
+    debugLog('🎯 objetivosApi.updateContribution called', { aporte_id, aporteData });
+    return await apiRequest(`/objetivos/aportes/${aporte_id}`, {
+      method: 'PUT',
+      data: aporteData
+    });
+  },
+
   // Obtener aportes de un objetivo
   async getContributions(objetivo_id) {
     debugLog('🎯 objetivosApi.getContributions called', { objetivo_id });

@@ -167,6 +167,7 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   const [editingObjetivo, setEditingObjetivo] = useState(null);
   const [showAsignarDineroModal, setShowAsignarDineroModal] = useState(false);
   const [objetivoToFund, setObjetivoToFund] = useState(null);
+  const [aporteToEdit, setAporteToEdit] = useState(null);
   const [showPendingPaymentModal, setShowPendingPaymentModal] = useState(false);
   const [editingPendingPayment, setEditingPendingPayment] = useState(null);
   const [showPayPendingPaymentModal, setShowPayPendingPaymentModal] = useState(false);
@@ -1083,7 +1084,22 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
             }}
             onAportar={(obj) => {
               setObjetivoToFund(obj || null);
+              setAporteToEdit(null);
               setShowAsignarDineroModal(true);
+            }}
+            onEditarAporte={(aporte, objetivo) => {
+              setObjetivoToFund(objetivo || null);
+              setAporteToEdit(aporte || null);
+              setShowAsignarDineroModal(true);
+            }}
+            onEliminarAporte={async (aporte) => {
+              try {
+                await objetivosApi.deleteContribution(aporte.id);
+                await refreshData();
+              } catch (error) {
+                console.error('Error deleting contribution:', error);
+                alert('Error al eliminar el aporte');
+              }
             }}
           />
         );
@@ -1543,8 +1559,10 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
             onClose={() => {
               setShowAsignarDineroModal(false);
               setObjetivoToFund(null);
+              setAporteToEdit(null);
             }}
             objetivo={objetivoToFund}
+            aporte={aporteToEdit}
             onSuccess={handleAsignarDineroSuccess}
             balanceDisponible={balanceNetoData?.balance_disponible ?? 0}
             balancePorMoneda={headerCurrenciesBalance || {}}

@@ -58,6 +58,14 @@ class AporteCreate(BaseModel):
     notas: Optional[str] = None
 
 
+class AporteUpdate(BaseModel):
+    monto: Optional[Decimal] = Field(None, gt=0)
+    moneda: Optional[str] = Field(None, max_length=10)
+    fecha: Optional[date] = None
+    descripcion: Optional[str] = None
+    notas: Optional[str] = None
+
+
 @router.post("/")
 async def create_objetivo(
     objetivo_data: ObjetivoCreate,
@@ -266,6 +274,7 @@ async def add_contribution(
             'fecha': aporte.fecha.isoformat() if aporte.fecha else None,
             'descripcion': aporte.descripcion,
             'tipo': aporte.tipo,
+            'notas': aporte.notas,
             'created_at': aporte.created_at.isoformat() if aporte.created_at else None
         }
     except HTTPException:
@@ -332,21 +341,46 @@ async def delete_contribution(
     try:
         repo = ObjetivoAhorroRepository(db)
         
-        # El repository debería validar esto, pero por seguridad lo hacemos aquí si es posible
-        # o confiamos en que el repo solo borre si el objetivo es del usuario
-        # Para este caso, vamos a confiar en la integridad de la DB y el repo
+        monto = repo.delete_contribution(aporte_id, current_user.id)
         
-        success = repo.delete_contribution(aporte_id)
-        
-        if not success:
+        if monto is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Contribution not found"
+                detail="Contribution not found or not owned by the user"
             )
         
-        return {"message": "Contribution deleted successfully"}
+        return {"message": "Contribution deleted successfully", "restored_amount": float(monto)}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error deleting contribution: {str(e)}"
+        )
+
+
+@router.put("/aportes/{aporte_id}")
+async def update_contribution(
+    aporte_id: int,
+    aporte_data: AporteUpdate,
+    current_user: CurrentUser,
+    db: Session = Depends(get_db),
+):
+    """Update a contribution belonging to one of the user's goals."""
+    try:
+        repo = ObjetivoAhorroRepository(db)
+        data = {key: value for key, value in aporte_data.dict().items() if value is not None}
+        aporte = repo.update_contribution(aporte_id, data, current_user.id)
+        if not aporte:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Contribution not found or not owned by the user",
+            )
+        return repo._aporte_to_dict(aporte)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating contribution: {str(e)}",
         )

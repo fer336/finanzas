@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Target, DollarSign, Loader2 } from 'lucide-react';
 import apiServices from '../../services/api';
 
@@ -10,6 +10,7 @@ export const AsignarDineroModal = ({
   onClose,
   objetivo,
   onSuccess,
+  aporte = null,
   balanceDisponible = 0,
   balancePorMoneda = {},
 }) => {
@@ -17,6 +18,13 @@ export const AsignarDineroModal = ({
   const [nota, setNota] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setMonto(aporte ? String(aporte.monto ?? '') : '');
+    setNota(aporte?.notas || aporte?.descripcion || '');
+    setError('');
+  }, [aporte, isOpen]);
 
   if (!isOpen || !objetivo) return null;
 
@@ -30,11 +38,14 @@ export const AsignarDineroModal = ({
     setLoading(true);
     setError('');
     try {
-      await apiServices.objetivosApi.addContribution({
-        objetivo_id: objetivo.id || objetivo.Id,
-        monto: montoNum,
-        nota,
-      });
+      const payload = aporte
+        ? { monto: montoNum, notas: nota }
+        : { objetivo_id: objetivo.id || objetivo.Id, monto: montoNum, notas: nota };
+      if (aporte) {
+        await apiServices.objetivosApi.updateContribution(aporte.id, payload);
+      } else {
+        await apiServices.objetivosApi.addContribution(payload);
+      }
       onSuccess?.();
       onClose();
     } catch (err) {
@@ -63,7 +74,7 @@ export const AsignarDineroModal = ({
               <Target className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-foreground">Asignar dinero</h2>
+              <h2 className="text-lg font-bold text-foreground">{aporte ? 'Editar aporte' : 'Asignar dinero'}</h2>
               <p className="text-sm text-[#43436c] truncate max-w-[220px] dark:text-[#c8c093]">
                 {objetivo.nombre || objetivo.Nombre || 'Objetivo'}
               </p>
@@ -141,7 +152,7 @@ export const AsignarDineroModal = ({
                   Asignando...
                 </>
               ) : (
-                'Asignar'
+                aporte ? 'Guardar cambios' : 'Asignar'
               )}
             </button>
           </div>

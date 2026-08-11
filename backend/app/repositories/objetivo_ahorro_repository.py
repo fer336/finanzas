@@ -111,19 +111,54 @@ class ObjetivoAhorroRepository:
             AporteObjetivo.objetivo_id == objetivo_id
         ).order_by(AporteObjetivo.fecha.desc()).all()
     
-    def delete_contribution(self, aporte_id: int) -> bool:
-        """Delete a contribution"""
-        aporte = self.db.query(AporteObjetivo).filter(AporteObjetivo.id == aporte_id).first()
+    def get_contribution(self, aporte_id: int) -> Optional[AporteObjetivo]:
+        """Get a contribution by id."""
+        return self.db.query(AporteObjetivo).filter(AporteObjetivo.id == aporte_id).first()
+
+    def update_contribution(
+        self,
+        aporte_id: int,
+        aporte_data: Dict[str, Any],
+        usuario_id: UUID,
+    ) -> Optional[AporteObjetivo]:
+        """Update a contribution belonging to one of the user's goals."""
+        aporte = self.get_contribution(aporte_id)
         if not aporte:
-            return False
+            return None
+
+        if not aporte.objetivo or aporte.objetivo.usuario_id != usuario_id:
+            return None
+
+        for key, value in aporte_data.items():
+            if key not in {"objetivo_id", "referencia_id", "tipo_referencia"} and hasattr(aporte, key):
+                setattr(aporte, key, value)
+
+        self.db.commit()
+        self._recalculate_progress(aporte.objetivo_id)
+        self.db.refresh(aporte)
+        return aporte
+
+    def delete_contribution(self, aporte_id: int, usuario_id: UUID) -> Optional[Decimal]:
+        """Delete a contribution and return its amount to available balance.
+
+        Manual contributions are reservations, not expenses. Removing one
+        removes that reservation, so the balance available to the user
+        increases by the deleted amount without creating a duplicate income
+        transaction. Transaction-backed contributions remain tied to their
+        original transaction and are handled by that transaction separately.
+        """
+        aporte = self.get_contribution(aporte_id)
+        if not aporte or not aporte.objetivo or aporte.objetivo.usuario_id != usuario_id:
+            return None
         
         objetivo_id = aporte.objetivo_id
+        monto = Decimal(aporte.monto)
         self.db.delete(aporte)
         self.db.commit()
         
         # Recalculate progress after deletion
         self._recalculate_progress(objetivo_id)
-        return True
+        return monto
     
     def _recalculate_progress(self, objetivo_id: UUID) -> None:
         """Recalculate monto_actual and porcentaje_completado for a savings goal"""
@@ -207,5 +242,22 @@ class ObjetivoAhorroRepository:
                 'icono': objetivo.categoria.icono
             } if objetivo.categoria else None,
             'created_at': objetivo.created_at.isoformat() if objetivo.created_at else None,
-            'updated_at': objetivo.updated_at.isoformat() if objetivo.updated_at else None
+            'updated_at': objetivo.updated_at.isoformat() if objetivo.updated_at else None,
+            'aportes': [self._aporte_to_dict(aporte) for aporte in objetivo.aportes],
+        }
+
+    @staticmethod
+    def _aporte_to_dict(aporte: AporteObjetivo) -> Dict[str, Any]:
+        return {
+            'id': aporte.id,
+            'objetivo_id': str(aporte.objetivo_id),
+            'monto': float(aporte.monto),
+            'moneda': aporte.moneda,
+            'fecha': aporte.fecha.isoformat() if aporte.fecha else None,
+            'descripcion': aporte.descripcion,
+            'tipo': aporte.tipo,
+            'referencia_id': str(aporte.referencia_id) if aporte.referencia_id else None,
+            'tipo_referencia': aporte.tipo_referencia,
+            'notas': aporte.notas,
+            'created_at': aporte.created_at.isoformat() if aporte.created_at else None,
         }

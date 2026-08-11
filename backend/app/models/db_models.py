@@ -115,7 +115,9 @@ class MetodoPago(Base):
     nombre = Column(String(100), nullable=False)
     tipo = Column(String(50), nullable=True)
     activo = Column(Boolean, default=True)
-    color = Column(String(7), nullable=True)
+    # The UI stores CSS variables such as `var(--muted-foreground)`, not only
+    # seven-character hex colors.
+    color = Column(String(100), nullable=True)
     icono = Column(String(50), nullable=True)
     descripcion = Column(Text, nullable=True)
     fecha_creacion = Column(DateTime(timezone=True), default=datetime.utcnow)

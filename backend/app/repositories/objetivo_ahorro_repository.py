@@ -126,7 +126,7 @@ class ObjetivoAhorroRepository:
         if not aporte:
             return None
 
-        if not aporte.objetivo or aporte.objetivo.usuario_id != usuario_id:
+        if not aporte.objetivo or str(aporte.objetivo.usuario_id) != str(usuario_id):
             return None
 
         for key, value in aporte_data.items():
@@ -148,7 +148,7 @@ class ObjetivoAhorroRepository:
         original transaction and are handled by that transaction separately.
         """
         aporte = self.get_contribution(aporte_id)
-        if not aporte or not aporte.objetivo or aporte.objetivo.usuario_id != usuario_id:
+        if not aporte or not aporte.objetivo or str(aporte.objetivo.usuario_id) != str(usuario_id):
             return None
         
         objetivo_id = aporte.objetivo_id

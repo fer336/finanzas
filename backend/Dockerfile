@@ -28,7 +28,8 @@ COPY . .
 
 # Crear usuario no-root para seguridad
 RUN adduser --disabled-password --gecos '' --shell /bin/bash appuser \
-    && chown -R appuser:appuser /app
+    && chown -R appuser:appuser /app \
+    && chmod +x /app/scripts/entrypoint.sh
 USER appuser
 
 # Exponer puerto
@@ -38,5 +39,7 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Comando de inicio
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+# Comando de inicio: aplica migraciones de BD y luego arranca uvicorn.
+# Si la migración falla, el arranque falla y el health check del pipeline
+# de deploy detecta el problema (nunca queda verde falsamente).
+CMD ["/app/scripts/entrypoint.sh"]

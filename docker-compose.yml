@@ -3,7 +3,7 @@ version: "3.8"
 services:
   # ⚙️ Backend API
   backend:
-    image: ghcr.io/fer336/finanzas-backend:v1.0.31
+    image: ghcr.io/fer336/finanzas-backend:v1.0.32
     networks:
       - network_public
       - finanzas-internal
@@ -72,7 +72,7 @@ services:
 
   # 🎨 Frontend
   frontend:
-    image: ghcr.io/fer336/finanzas-frontend:v1.0.31
+    image: ghcr.io/fer336/finanzas-frontend:v1.0.32
     networks:
       - network_public
       - finanzas-internal

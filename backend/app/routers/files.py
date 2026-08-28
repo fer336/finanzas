@@ -3,15 +3,52 @@ Router para gestión de archivos con MinIO
 """
 import logging
 from typing import Optional
-from fastapi import APIRouter, UploadFile, File, HTTPException, Query
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query, Depends
 from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
 
 from app.services.minio_service import get_minio_service
 from app.core.dependencies import CurrentUser
+from app.database import get_db
+from app.models.db_models import Transaccion, PagoPendiente, Prestamo
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+
+def _verify_file_ownership(object_name: str, current_user, db: Session) -> None:
+    """
+    Verifica que el archivo pertenezca al usuario autenticado antes de
+    borrarlo o generar una URL prefirmada.
+
+    Los archivos subidos a partir de este fix quedan namespaced como
+    "<prefix>/<usuario_id>/<archivo>", así que alcanza con chequear el path.
+    Para archivos subidos ANTES del fix (sin el usuario_id en el path), se
+    verifica que el object_name esté referenciado como comprobante en algún
+    registro (transacción, pago pendiente o préstamo) de ese mismo usuario.
+    """
+    user_id_str = str(current_user.id)
+
+    if object_name.split("/")[1:2] == [user_id_str]:
+        return
+
+    for model in (Transaccion, PagoPendiente, Prestamo):
+        match = (
+            db.query(model.id)
+            .filter(
+                model.usuario_id == current_user.id,
+                model.comprobante.ilike(f"%{object_name}"),
+            )
+            .first()
+        )
+        if match is not None:
+            return
+
+    raise HTTPException(
+        status_code=403,
+        detail="No tenés permiso para acceder a este archivo",
+    )
 
 
 @router.post("/upload")
@@ -54,8 +91,9 @@ async def upload_file(
         await file.seek(0)
         
         # Obtener servicio MinIO y subir archivo
+        # Namespace por usuario para poder verificar ownership en delete/presigned-url
         minio_service = get_minio_service()
-        result = await minio_service.upload_file(file, prefix=prefix)
+        result = await minio_service.upload_file(file, prefix=f"{prefix}/{current_user.id}")
         
         logger.info(f"✅ Archivo subido exitosamente: {result['file_url']}")
         
@@ -80,18 +118,21 @@ async def upload_file(
 @router.delete("/delete")
 async def delete_file(
     current_user: CurrentUser,  # 🔒 Requiere autenticación (JWT o API key)
-    object_name: str = Query(..., description="Nombre del objeto en MinIO (ej: comprobantes/archivo.png)")
+    object_name: str = Query(..., description="Nombre del objeto en MinIO (ej: comprobantes/archivo.png)"),
+    db: Session = Depends(get_db)
 ):
     """
     Eliminar un archivo de MinIO
-    
+
     Args:
         object_name: Nombre del objeto en MinIO
-        
+
     Returns:
         JSONResponse: Confirmación de eliminación
     """
     try:
+        _verify_file_ownership(object_name, current_user, db)
+
         minio_service = get_minio_service()
         result = minio_service.delete_file(object_name)
         
@@ -117,21 +158,24 @@ async def delete_file(
 async def get_presigned_url(
     current_user: CurrentUser,  # 🔒 Requiere autenticación (JWT o API key)
     object_name: str = Query(..., description="Nombre del objeto en MinIO"),
-    expires_hours: int = Query(default=1, description="Horas de expiración (default: 1)")
+    expires_hours: int = Query(default=1, description="Horas de expiración (default: 1)"),
+    db: Session = Depends(get_db)
 ):
     """
     Generar una URL prefirmada para acceso temporal a un archivo
-    
+
     Args:
         object_name: Nombre del objeto en MinIO
         expires_hours: Horas de expiración
-        
+
     Returns:
         JSONResponse: URL prefirmada
     """
     try:
         from datetime import timedelta
-        
+
+        _verify_file_ownership(object_name, current_user, db)
+
         minio_service = get_minio_service()
         url = minio_service.get_presigned_url(
             object_name=object_name,

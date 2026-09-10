@@ -71,7 +71,7 @@ jobs:
     steps:
       # ── 1. Checkout ──────────────────────────────────────────────────────
       - name: 📥 Checkout código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # ── 2. Login a GitHub Container Registry ─────────────────────────────
       - name: 🔑 Login a ghcr.io

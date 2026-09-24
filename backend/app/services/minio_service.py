@@ -8,6 +8,7 @@ import logging
 import tempfile
 from datetime import datetime, timedelta
 from typing import Optional, BinaryIO
+from urllib.parse import urlparse
 from uuid import uuid4
 
 from minio import Minio
@@ -27,18 +28,22 @@ class MinIOService:
         secret_key: str,
         bucket_name: str = "facturas",
         secure: bool = True,
-        region: str = "us-east-1"
+        region: str = "us-east-1",
+        public_url: Optional[str] = None,
     ):
         """
         Inicializar servicio MinIO
-        
+
         Args:
-            endpoint: URL del servidor MinIO (sin https://)
+            endpoint: host:puerto del servidor MinIO (sin esquema, ej. "minio:9000")
             access_key: Access key de MinIO
             secret_key: Secret key de MinIO
             bucket_name: Nombre del bucket (default: facturas)
             secure: Usar HTTPS (default: True)
             region: Región de MinIO (default: us-east-1)
+            public_url: Origen público (con esquema) usado para construir URLs
+                accesibles desde el navegador, ej. "https://s3.qeva.xyz". Si no se
+                indica, se usa "https://{endpoint}" (comportamiento anterior).
         """
         self.endpoint = endpoint
         self.access_key = access_key
@@ -46,7 +51,9 @@ class MinIOService:
         self.bucket_name = bucket_name
         self.secure = secure
         self.region = region
-        
+        self.public_url = public_url.rstrip("/") if public_url else None
+        self._public_client: Optional[Minio] = None
+
         # Inicializar cliente MinIO
         try:
             self.client = Minio(
@@ -70,7 +77,53 @@ class MinIOService:
         except Exception as e:
             logger.error(f"❌ Error inicializando MinIO: {e}")
             raise
-    
+
+    def build_public_url(self, object_name: str) -> str:
+        """
+        Construir la URL pública de un objeto, usando public_url si está
+        configurada o cayendo de vuelta al endpoint interno (comportamiento anterior).
+
+        Args:
+            object_name: Nombre del objeto en MinIO (ej: comprobantes/archivo.png)
+
+        Returns:
+            str: URL pública completa del objeto
+        """
+        base = self.public_url if self.public_url else f"https://{self.endpoint}"
+        return f"{base}/{self.bucket_name}/{object_name}"
+
+    def _get_presign_client(self) -> Minio:
+        """
+        Obtener el cliente Minio usado para firmar URLs prefirmadas.
+
+        La firma de una URL prefirmada incluye el host, así que un cliente
+        configurado con el endpoint interno (ej. "minio:9000") generaría URLs
+        inalcanzables desde el navegador. Si public_url apunta a un host distinto
+        del endpoint interno, se crea (y cachea) un segundo cliente Minio
+        configurado con el host público para firmar en su lugar.
+
+        Returns:
+            Minio: cliente interno (self.client) o cliente público, según corresponda
+        """
+        if not self.public_url:
+            return self.client
+
+        parsed = urlparse(self.public_url)
+        public_endpoint = parsed.netloc or parsed.path
+        if public_endpoint == self.endpoint:
+            return self.client
+
+        if self._public_client is None:
+            self._public_client = Minio(
+                endpoint=public_endpoint,
+                access_key=self.access_key,
+                secret_key=self.secret_key,
+                secure=parsed.scheme == "https",
+                region=self.region,
+            )
+
+        return self._public_client
+
     async def upload_file(
         self,
         file: UploadFile,
@@ -137,7 +190,7 @@ class MinIOService:
             )
             
             # 6. Construir URL pública del archivo
-            file_url = f"https://{self.endpoint}/{self.bucket_name}/{object_name}"
+            file_url = self.build_public_url(object_name)
             
             logger.info(f"✅ Archivo subido exitosamente: {file_url}")
             
@@ -238,7 +291,8 @@ class MinIOService:
             str: URL prefirmada
         """
         try:
-            url = self.client.presigned_get_object(
+            client = self._get_presign_client()
+            url = client.presigned_get_object(
                 bucket_name=self.bucket_name,
                 object_name=object_name,
                 expires=expires
@@ -296,7 +350,8 @@ def get_minio_service() -> MinIOService:
             secret_key=settings.MINIO_SECRET_KEY,
             bucket_name=settings.MINIO_BUCKET_NAME,
             secure=settings.MINIO_SECURE,
-            region=settings.MINIO_REGION
+            region=settings.MINIO_REGION,
+            public_url=settings.MINIO_PUBLIC_URL
         )
     
     return _minio_service

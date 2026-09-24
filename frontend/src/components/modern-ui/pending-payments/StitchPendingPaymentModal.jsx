@@ -23,6 +23,7 @@ import {
   PENDING_PAYMENT_INVOICE_FIELDS,
   PENDING_PAYMENT_RECEIPT_FIELDS,
 } from '../../../utils/documentPreviewUrl';
+import { normalizeUploadFile, isAllowedUploadType } from '../../../utils/normalizeUploadFile';
 import {
   formatLocalDateOnly,
   getSecondDueDateValue,
@@ -104,11 +105,18 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
   };
 
   // ── Subida a MinIO ──
-  const doUpload = async (file) => {
+  const doUpload = async (rawFile) => {
+    let file;
+    try {
+      file = await normalizeUploadFile(rawFile);
+    } catch (err) {
+      setError(err.message || 'No se pudo convertir la foto HEIC. Probá con JPG o PNG.');
+      return;
+    }
+
     const maxSize = 10 * 1024 * 1024;
-    const allowed = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
     if (file.size > maxSize) { setError('El archivo es demasiado grande. Máximo 10MB.'); return; }
-    if (!allowed.includes(file.type)) { setError('Tipo de archivo no permitido. Use JPG, PNG o PDF.'); return; }
+    if (!isAllowedUploadType(file)) { setError('Tipo de archivo no permitido. Use JPG, PNG, WEBP, GIF, PDF o HEIC.'); return; }
 
     setError(null);
     setUploading(true);
@@ -274,7 +282,7 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
                 Arrastrá un archivo o hace clic para seleccionar
               </p>
               <p className="text-[11px] text-muted-foreground">
-                JPG, PNG, PDF — máx. 10MB
+                JPG, PNG, WEBP, GIF, PDF, HEIC — máx. 10MB
               </p>
             </button>
           )}
@@ -346,7 +354,7 @@ const FileUploadField = ({ label, hint, value, onChange, previewTitle, accentCol
 
       {/* Hidden file input */}
       <input id={fileInputId} ref={fileInputRef} type="file" className="hidden"
-             accept=".jpg,.jpeg,.png,.pdf" onChange={handleFileSelect} aria-label={`Subir ${label.toLowerCase()}`} />
+             accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.heic,.heif,image/heic,image/heif" onChange={handleFileSelect} aria-label={`Subir ${label.toLowerCase()}`} />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Calendar, FileUp, Loader2, Upload, X } from 'lucide-react';
+import { normalizeUploadFile, isAllowedUploadType } from '../../../utils/normalizeUploadFile';
 
 /**
  * PrestamoPayModal — marcar un préstamo como devuelto. Mismo flujo que
@@ -52,6 +53,32 @@ const PrestamoPayModal = ({
   }, [isOpen]);
 
   if (!isOpen || !prestamo) return null;
+
+  const handleFileSelect = async (event) => {
+    const rawFile = event.target.files?.[0] || null;
+    if (!rawFile) {
+      setSelectedFile(null);
+      return;
+    }
+
+    let file;
+    try {
+      file = await normalizeUploadFile(rawFile);
+    } catch (err) {
+      setError(err.message || 'No se pudo convertir la foto HEIC. Probá con JPG o PNG.');
+      setSelectedFile(null);
+      return;
+    }
+
+    if (!isAllowedUploadType(file)) {
+      setError('Tipo de archivo no permitido. Use JPG, PNG, WEBP, GIF, PDF o HEIC.');
+      setSelectedFile(null);
+      return;
+    }
+
+    setError('');
+    setSelectedFile(file);
+  };
 
   const fieldClassName = 'w-full rounded-sm border border-[#c8bf91] bg-white px-3 py-2.5 text-[13px] text-foreground transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#363646] dark:bg-[#2a2a37] dark:text-foreground dark:placeholder:text-[#c8c093]';
 
@@ -201,8 +228,8 @@ const PrestamoPayModal = ({
                 <span className="text-[13px] text-foreground">Seleccionar archivo</span>
                 <input
                   type="file"
-                  accept="image/*,.pdf"
-                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                  accept="image/*,.pdf,.heic,.heif,image/heic,image/heif"
+                  onChange={handleFileSelect}
                   className="hidden"
                 />
               </label>

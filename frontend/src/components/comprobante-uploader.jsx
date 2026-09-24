@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Upload, X, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from './ui/button';
 import { normalizeDocumentPreviewUrl } from '../utils/documentPreviewUrl';
+import { normalizeUploadFile, isAllowedUploadType } from '../utils/normalizeUploadFile';
 import { Card, CardContent } from './ui/card';
 import { Progress } from './ui/progress';
 
@@ -96,38 +97,48 @@ export function ComprobanteUploader({ onFileUpload, existingFile, transaccionId,
   const handleDrop = async (e) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     if (disabled) return;
-    
+
     const files = Array.from(e.dataTransfer.files);
     if (files.length > 0) {
-      const processedFile = await compressImage(files[0]);
-      handleFileUpload(processedFile);
+      await handleIncomingFile(files[0]);
     }
   };
 
   const handleFileSelect = async (e) => {
     if (disabled) return;
-    
+
     const files = Array.from(e.target.files);
     if (files.length > 0) {
-      const processedFile = await compressImage(files[0]);
-      handleFileUpload(processedFile);
+      await handleIncomingFile(files[0]);
     }
+  };
+
+  const handleIncomingFile = async (rawFile) => {
+    let normalizedFile;
+    try {
+      normalizedFile = await normalizeUploadFile(rawFile);
+    } catch (err) {
+      setError(err.message || 'No se pudo convertir la foto HEIC. Probá con JPG o PNG.');
+      return;
+    }
+
+    const processedFile = await compressImage(normalizedFile);
+    handleFileUpload(processedFile);
   };
 
   const handleFileUpload = async (file) => {
     // Validaciones
     const maxSize = 10 * 1024 * 1024; // 10MB
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
-    
+
     if (file.size > maxSize) {
       setError('El archivo es demasiado grande. Máximo 10MB.');
       return;
     }
-    
-    if (!allowedTypes.includes(file.type)) {
-      setError('Tipo de archivo no permitido. Use JPG, PNG o PDF.');
+
+    if (!isAllowedUploadType(file)) {
+      setError('Tipo de archivo no permitido. Use JPG, PNG, WEBP, GIF, PDF o HEIC.');
       return;
     }
 
@@ -270,7 +281,7 @@ export function ComprobanteUploader({ onFileUpload, existingFile, transaccionId,
                 }
               </p>
               <p className="text-xs text-muted-foreground">
-                JPG, PNG, PDF (máx. 10MB) • Imágenes &gt;2MB se comprimen auto
+                JPG, PNG, WEBP, GIF, PDF, HEIC (máx. 10MB) • Imágenes &gt;2MB se comprimen auto
               </p>
             </div>
           </div>
@@ -281,7 +292,7 @@ export function ComprobanteUploader({ onFileUpload, existingFile, transaccionId,
         ref={fileInputRef}
         type="file"
         className="hidden"
-        accept=".jpg,.jpeg,.png,.pdf"
+        accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.heic,.heif,image/heic,image/heif"
         onChange={handleFileSelect}
         disabled={disabled}
       />

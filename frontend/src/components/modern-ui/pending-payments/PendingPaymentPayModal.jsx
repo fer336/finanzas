@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Calendar, FileUp, Loader2, Upload, X } from 'lucide-react';
+import { normalizeUploadFile, isAllowedUploadType } from '../../../utils/normalizeUploadFile';
 
 const PendingPaymentPayModal = ({
   isOpen,
@@ -58,6 +59,32 @@ const PendingPaymentPayModal = ({
   }, [isOpen]);
 
   if (!isOpen || !payment) return null;
+
+  const handleFileSelect = async (event) => {
+    const rawFile = event.target.files?.[0] || null;
+    if (!rawFile) {
+      setSelectedFile(null);
+      return;
+    }
+
+    let file;
+    try {
+      file = await normalizeUploadFile(rawFile);
+    } catch (err) {
+      setError(err.message || 'No se pudo convertir la foto HEIC. Probá con JPG o PNG.');
+      setSelectedFile(null);
+      return;
+    }
+
+    if (!isAllowedUploadType(file)) {
+      setError('Tipo de archivo no permitido. Use JPG, PNG, WEBP, GIF, PDF o HEIC.');
+      setSelectedFile(null);
+      return;
+    }
+
+    setError('');
+    setSelectedFile(file);
+  };
 
   const uploadToMinIO = async () => {
     if (!selectedFile) return formData.comprobante;
@@ -205,8 +232,8 @@ const PendingPaymentPayModal = ({
                 <span className="text-[13px] text-foreground">Seleccionar archivo</span>
                 <input
                   type="file"
-                  accept="image/*,.pdf"
-                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                  accept="image/*,.pdf,.heic,.heif,image/heic,image/heif"
+                  onChange={handleFileSelect}
                   className="hidden"
                 />
               </label>

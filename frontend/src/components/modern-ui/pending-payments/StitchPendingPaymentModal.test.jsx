@@ -3,6 +3,11 @@ import '@testing-library/jest-dom/vitest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import StitchPendingPaymentModal from './StitchPendingPaymentModal';
 
+const heic2anyMock = vi.fn();
+vi.mock('heic2any', () => ({
+  default: (...args) => heic2anyMock(...args),
+}));
+
 const basePayment = {
   id: 'pending-payment-1',
   Nombre: 'Seguro del auto',
@@ -98,5 +103,29 @@ describe('StitchPendingPaymentModal document initial state', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(/posterior al primer vencimiento/i);
     expect(screen.getByRole('button', { name: /guardar cambios/i })).toBeDisabled();
     expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('converts a HEIC receipt to JPEG and uploads the converted file', async () => {
+    heic2anyMock.mockResolvedValue(new Blob(['converted'], { type: 'image/jpeg' }));
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { file_url: 'https://s3.qeva.xyz/comprobantes/foto.jpg' } }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    renderModal(basePayment);
+
+    const heicFile = new File(['heic-bytes'], 'IMG_1234.HEIC', { type: 'image/heic' });
+    const input = screen.getByLabelText(/subir comprobante de pago/i, { selector: 'input' });
+    fireEvent.change(input, { target: { files: [heicFile] } });
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+
+    const uploadedBody = fetchMock.mock.calls[0][1].body;
+    const uploadedFile = uploadedBody.get('file');
+    expect(uploadedFile.name).toBe('IMG_1234.jpg');
+    expect(uploadedFile.type).toBe('image/jpeg');
+
+    vi.unstubAllGlobals();
   });
 });

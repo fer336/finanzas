@@ -1,7 +1,14 @@
-import { render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import FileUpload from './FileUpload';
+
+afterEach(cleanup);
+
+const heic2anyMock = vi.fn();
+vi.mock('heic2any', () => ({
+  default: (...args) => heic2anyMock(...args),
+}));
 
 describe('FileUpload document URL policy', () => {
   it('gives the upload file input an accessible name inside a focus-visible drop area', () => {
@@ -34,5 +41,36 @@ describe('FileUpload document URL policy', () => {
     expect(link).toHaveAttribute('href', 'https://s3.qeva.xyz/facturas/receipt.pdf');
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+});
+
+describe('FileUpload HEIC conversion', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('converts a selected HEIC file to JPEG and uploads it', async () => {
+    heic2anyMock.mockResolvedValue(new Blob(['converted'], { type: 'image/jpeg' }));
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { file_url: 'https://s3.qeva.xyz/comprobantes/foto.jpg' } }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<FileUpload />);
+
+    const heicFile = new File(['heic-bytes'], 'IMG_5678.heic', { type: 'image/heic' });
+    const input = screen.getByLabelText(/seleccionar archivo para subir/i);
+    fireEvent.change(input, { target: { files: [heicFile] } });
+
+    const uploadButton = await screen.findByRole('button', { name: /subir archivo/i });
+    fireEvent.click(uploadButton);
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+
+    const uploadedBody = fetchMock.mock.calls[0][1].body;
+    const uploadedFile = uploadedBody.get('file');
+    expect(uploadedFile.name).toBe('IMG_5678.jpg');
+    expect(uploadedFile.type).toBe('image/jpeg');
   });
 });

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Upload, X, FileText, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import { normalizeDocumentPreviewUrl } from '../../utils/documentPreviewUrl';
+import { normalizeUploadFile, ALLOWED_UPLOAD_TYPES } from '../../utils/normalizeUploadFile';
 
 const FileUpload = ({ 
   onFileUploaded, 
@@ -8,7 +9,7 @@ const FileUpload = ({
   currentFileUrl = '', 
   prefix = 'comprobantes',
   maxSizeMB = 10,
-  allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'],
+  allowedTypes = ALLOWED_UPLOAD_TYPES,
   showPreview = true
 }) => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -116,8 +117,9 @@ const FileUpload = ({
 
   const validateFile = (file) => {
     // Validate file type
-    if (!allowedTypes.includes(file.type)) {
-      return `Inválido file type. Allowed: ${allowedTypes.join(', ')}`;
+    const isJpgAlias = file.type === 'image/jpg' && allowedTypes.includes('image/jpeg');
+    if (!allowedTypes.includes(file.type) && !isJpgAlias) {
+      return `Tipo de archivo no permitido. Use JPG, PNG, WEBP, GIF, PDF o HEIC.`;
     }
 
     // Validate file size (solo validar límite superior de 10MB, la compresión se hará después)
@@ -130,8 +132,16 @@ const FileUpload = ({
   };
 
   const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const rawFile = e.target.files?.[0];
+    if (rawFile) {
+      let file;
+      try {
+        file = await normalizeUploadFile(rawFile);
+      } catch (err) {
+        setError(err.message || 'No se pudo convertir la foto HEIC. Probá con JPG o PNG.');
+        return;
+      }
+
       const validationError = validateFile(file);
       if (validationError) {
         setError(validationError);
@@ -161,7 +171,15 @@ const FileUpload = ({
     setDragActive(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
+      const rawFile = e.dataTransfer.files[0];
+      let file;
+      try {
+        file = await normalizeUploadFile(rawFile);
+      } catch (err) {
+        setError(err.message || 'No se pudo convertir la foto HEIC. Probá con JPG o PNG.');
+        return;
+      }
+
       const validationError = validateFile(file);
       if (validationError) {
         setError(validationError);
@@ -275,7 +293,7 @@ const FileUpload = ({
           <input
             type="file"
             onChange={handleFileChange}
-            accept={allowedTypes.join(',')}
+            accept={`${allowedTypes.join(',')},.heic,.heif,image/heic,image/heif`}
             aria-label="Seleccionar archivo para subir"
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             disabled={uploading || compressing}
@@ -298,7 +316,7 @@ const FileUpload = ({
                     {dragActive ? 'Soltá el archivo aquí' : 'Click para subir o arrastrá y soltá'}
                   </p>
                   <p className="text-[12px] text-muted-foreground mt-1">
-                    Máximo {maxSizeMB}MB • JPG, PNG, PDF, WEBP
+                    Máximo {maxSizeMB}MB • JPG, PNG, PDF, WEBP, GIF, HEIC
                   </p>
                   <p className="text-[11px] text-muted-foreground mt-1">
                     Imágenes mayores a 2MB se comprimen automáticamente

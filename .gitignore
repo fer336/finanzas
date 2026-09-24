@@ -185,3 +185,6 @@ docker-compose.yml.bak
 # - archivos con tokens/passwords
 # - claves privadas
 # ===================================
+
+# Local token file
+token.txt

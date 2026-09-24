@@ -112,6 +112,7 @@ class Settings:
         "yes",
     )
     MINIO_REGION: str = os.getenv("MINIO_REGION", "us-east-1")
+    MINIO_PUBLIC_URL: str = os.getenv("MINIO_PUBLIC_URL", "https://s3.qeva.xyz")
 
     # Configuración de archivos
     MAX_FILE_SIZE_MB: int = 10

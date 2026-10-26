@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Search, Edit, Trash2, Check, RefreshCw, Plus } from 'lucide-react';
+import { Search, Check, RefreshCw, Plus } from 'lucide-react';
 import { Badge } from '../../ui/badge';
 import KpiCard from '../common/KpiCard';
 import ConfirmModal from '../common/ConfirmModal';
+import DocumentPreviewModal from './DocumentPreviewModal';
+import PaymentRowActions from './PaymentRowActions';
 import { usePrestamos, QUERY_KEYS } from '../../../hooks/useFinancialData';
 import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
 import { useRefresh } from '../../../hooks/useRefresh';
+import { useIsMobile } from '../../../hooks/use-mobile';
+import { normalizePaymentDocument } from '../../../utils/documentPreviewUrl';
 
 const parseDateSafe = (value) => {
   if (!value) return null;
@@ -19,23 +23,13 @@ const EmptyState = ({ children }) => (
 );
 EmptyState.propTypes = { children: PropTypes.node };
 
-const EstadoPill = ({ isPaid }) => {
-  const pillClassName = isPaid
-    ? 'border-[#526a3a] text-[#526a3a] dark:border-[#98bb6c] dark:text-[#98bb6c]'
-    : 'border-[#de9800] text-[#6b572f] dark:border-[#e6c384] dark:text-[#e6c384]';
-  return (
-    <Badge variant="outline" className={pillClassName}>
-      {isPaid ? 'pagado' : 'pendiente'}
-    </Badge>
-  );
-};
+const EstadoPill = ({ isPaid }) => (
+  <Badge variant="outline" className={isPaid ? 'border-primary text-primary' : 'border-warning text-warning'}>
+    {isPaid ? 'pagado' : 'pendiente'}
+  </Badge>
+);
 EstadoPill.propTypes = { isPaid: PropTypes.bool.isRequired };
 
-/**
- * ModernPrestamosSection — pestaña "Préstamos" dentro de Vencimientos.
- * Mismos tokens Kanagawa que ModernPendingPaymentsView (tabla mono uppercase
- * header, hover #e4d794, pills pendiente/pagado).
- */
 const ModernPrestamosSection = ({
   onNewPrestamo,
   onEditPrestamo,
@@ -45,11 +39,14 @@ const ModernPrestamosSection = ({
   const { data: prestamosData, isLoading, error } = usePrestamos();
   const { refresh, isRefreshing } = useRefresh([QUERY_KEYS.prestamos]);
   const { formatAmount } = useAmountVisibility();
+  const isMobile = useIsMobile();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [prestamoToDelete, setPrestamoToDelete] = useState(null);
+  const [previewDocument, setPreviewDocument] = useState(null);
 
+  // Preserve usePrestamos()' existing array contract; only normalize display fields.
   const prestamos = (prestamosData || []).map((p) => ({
     ...p,
     id: p.id,
@@ -58,9 +55,15 @@ const ModernPrestamosSection = ({
     monto_a_devolver: parseFloat(p.monto_a_devolver || 0),
     moneda: p.moneda || 'ARS',
     estado: (p.estado || 'pendiente').toString().toLowerCase(),
+    document: normalizePaymentDocument(p),
   }));
 
   const isPaid = (p) => p.estado === 'pagado';
+  const renderFecha = (fecha) => {
+    const parsed = parseDateSafe(fecha);
+    if (!parsed) return <span className="font-mono text-[12px] italic text-muted-foreground">sin fecha</span>;
+    return <span className="font-mono text-[12px] text-muted-foreground">{parsed.toLocaleDateString('es-AR')}</span>;
+  };
 
   let filteredData = prestamos;
   if (searchQuery) {
@@ -80,57 +83,52 @@ const ModernPrestamosSection = ({
   const totalPrestado = pendientes.reduce((sum, p) => sum + p.monto_prestado, 0);
   const totalADevolver = pendientes.reduce((sum, p) => sum + p.monto_a_devolver, 0);
 
-  const renderFecha = (fecha) => {
-    const parsed = parseDateSafe(fecha);
-    if (!parsed) return <span className="font-mono text-[12px] italic text-[#625f55] dark:text-[#c8c093]">sin fecha</span>;
-    return <span className="font-mono text-[12px] text-[#43436c] dark:text-[#c8c093]">{parsed.toLocaleDateString('es-AR')}</span>;
-  };
-
   const handleDeleteConfirm = () => {
     if (prestamoToDelete) onDeletePrestamo && onDeletePrestamo(prestamoToDelete.id);
   };
 
+  const openDocumentPreview = (prestamo) => {
+    if (prestamo.document?.isValid) setPreviewDocument(prestamo);
+  };
+
+  const renderActions = (prestamo) => (
+    <PaymentRowActions
+      onDocument={prestamo.document?.isValid ? () => openDocumentPreview(prestamo) : undefined}
+      onEdit={() => onEditPrestamo && onEditPrestamo(prestamo)}
+      onDelete={() => { setPrestamoToDelete(prestamo); setShowDeleteConfirm(true); }}
+      documentLabel={`Ver documento de ${prestamo.nombre_fuente}`}
+      editLabel={`Editar préstamo de ${prestamo.nombre_fuente}`}
+      deleteLabel={`Eliminar préstamo de ${prestamo.nombre_fuente}`}
+    />
+  );
+
   if (isLoading) {
-    return <div className="mt-4 h-64 w-full animate-pulse rounded-md bg-[#d5cea3] dark:bg-[#363646]" />;
+    return <div className="mt-4 h-64 w-full animate-pulse rounded-md bg-muted" />;
   }
 
   if (error) {
-    return <p className="text-[13.5px] text-[#b83245] dark:text-[#e46876]">Error al cargar préstamos: {error.message}</p>;
+    return <p className="text-[13.5px] text-destructive">Error al cargar préstamos: {error.message}</p>;
   }
 
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="grid grid-cols-2 gap-2.5 sm:flex sm:gap-2.5">
-          <KpiCard
-            label="Prestado (pendiente)"
-            value={formatAmount(totalPrestado, { decimals: 0 })}
-            borderColor="var(--info)"
-            valueColor="var(--info)"
-          />
+          <KpiCard label="Prestado (pendiente)" value={formatAmount(totalPrestado, { decimals: 0 })} borderColor="var(--info)" valueColor="var(--info)" />
           <KpiCard
             label="A devolver (pendiente)"
             value={formatAmount(totalADevolver, { decimals: 0 })}
             subtext={`${pendientes.length} préstamo${pendientes.length !== 1 ? 's' : ''}`}
-            borderColor="#f9d791"
-            valueColor="var(--accent-foreground)"
+            borderColor="var(--warning)"
+            valueColor="var(--warning)"
           />
         </div>
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={refresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-1.5 rounded-sm border border-[#c8bf91] dark:border-[#363646] bg-white dark:bg-[#2a2a37] px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#e4d794] dark:hover:bg-[#2a2a37] disabled:opacity-50"
-          >
+          <button type="button" onClick={refresh} disabled={isRefreshing} aria-label={isRefreshing ? 'Actualizando préstamos' : 'Actualizar préstamos'} className="flex items-center gap-1.5 rounded-sm border border-border bg-secondary px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-card-hover disabled:opacity-50">
             <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">{isRefreshing ? 'Actualizando…' : 'Actualizar'}</span>
           </button>
-          <button
-            type="button"
-            onClick={() => onNewPrestamo && onNewPrestamo()}
-            className="flex items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[#76946a]"
-          >
+          <button type="button" onClick={() => onNewPrestamo && onNewPrestamo()} aria-label="Nuevo préstamo" className="flex items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:bg-primary-active">
             <Plus className="h-3.5 w-3.5" />
             Nuevo
           </button>
@@ -138,99 +136,54 @@ const ModernPrestamosSection = ({
       </div>
 
       <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#625f55] dark:text-[#c8c093]" />
-        <input
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Buscar por fuente…"
-          className="w-full max-w-sm rounded-sm border border-[#c8bf91] dark:border-[#363646] bg-white dark:bg-[#2a2a37] py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-[#625f55] dark:placeholder:text-[#c8c093] focus:outline-none focus:ring-2 focus:ring-ring"
-        />
+        <label htmlFor="prestamo-search" className="sr-only">Buscar préstamos por fuente</label>
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <input id="prestamo-search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Buscar por fuente…" className="w-full max-w-sm rounded-sm border border-border bg-secondary py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
       </div>
 
-      <div className="overflow-hidden overflow-x-auto rounded-md border border-[#c8bf91] dark:border-[#363646] bg-card">
-        <table className="w-full min-w-[720px]">
-          <thead>
-            <tr className="border-b-2 border-[#c8bf91] dark:border-[#363646]">
-              <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Fuente</th>
-              <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Prestado</th>
-              <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>A devolver</th>
-              <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Vence</th>
-              <th className="text-left px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Estado</th>
-              <th className="text-right px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedData.length === 0 ? (
-              <tr>
-                <td colSpan={6} className="py-14 text-center">
-                  <EmptyState>
-                    {searchQuery ? `Sin resultados para "${searchQuery}".` : 'Sin préstamos registrados.'}
-                  </EmptyState>
-                </td>
-              </tr>
-            ) : (
-              sortedData.map((p) => {
-                const paid = isPaid(p);
-                return (
-                  <tr key={p.id} className="group border-b border-[#d5cea3] dark:border-[#363646] hover:bg-[#e4d794] dark:hover:bg-[#2a2a37] transition-colors">
-                    <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">{p.nombre_fuente}</td>
-                    <td className="px-3.5 py-2.5 text-right font-mono text-[#43436c] dark:text-[#c8c093]">
-                      {formatAmount(p.monto_prestado, { decimals: 0 })}
-                    </td>
-                    <td className="px-3.5 py-2.5 text-right font-mono font-semibold text-foreground">
-                      {formatAmount(p.monto_a_devolver, { decimals: 0 })}
-                    </td>
-                    <td className="px-3.5 py-2.5">{renderFecha(p.fecha_vencimiento)}</td>
-                    <td className="px-3.5 py-2.5">
-                      <EstadoPill isPaid={paid} />
-                    </td>
-                    <td className="px-3.5 py-2.5">
-                      <div className="flex items-center justify-end gap-1.5">
-                        {!paid && (
-                          <button
-                            onClick={() => onMarcarPagado && onMarcarPagado(p)}
-                            className="flex items-center gap-1.5 rounded-sm bg-primary px-2.5 py-1.5 font-sans text-[12px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[#76946a]"
-                          >
-                            <Check className="h-3.5 w-3.5" />
-                            Marcar pagado
-                          </button>
-                        )}
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => onEditPrestamo && onEditPrestamo(p)}
-                            className="p-1.5 rounded-sm hover:bg-black/5 transition-colors dark:hover:bg-card-hover"
-                            title="Editar"
-                          >
-                            <Edit className="h-4 w-4 text-[#625f55] dark:text-[#c8c093]" />
-                          </button>
-                          <button
-                            onClick={() => { setPrestamoToDelete(p); setShowDeleteConfirm(true); }}
-                            className="p-1.5 rounded-sm hover:bg-black/5 transition-colors dark:hover:bg-card-hover"
-                            title="Eliminar"
-                          >
-                            <Trash2 className="h-4 w-4 text-[#625f55] dark:text-[#c8c093] hover:text-[#b83245] dark:hover:text-[#e46876]" />
-                          </button>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+      {isMobile ? (
+        <div className="flex flex-col gap-2">
+          {sortedData.length === 0 ? (
+            <div className="rounded-md border border-border bg-card py-10 text-center"><EmptyState>{searchQuery ? `Sin resultados para "${searchQuery}".` : 'Sin préstamos registrados.'}</EmptyState></div>
+          ) : sortedData.map((p) => {
+            const paid = isPaid(p);
+            return (
+              <article key={p.id} data-testid={`loan-card-${p.id}`} className="rounded-md border border-border bg-card p-3.5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0"><p className="truncate text-[13.5px] text-foreground">{p.nombre_fuente}</p><div className="mt-1">{renderFecha(p.fecha_vencimiento)}</div></div>
+                  <EstadoPill isPaid={paid} />
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-3 border-y border-border py-2.5 font-mono text-[12px]">
+                  <span className="text-muted-foreground">Prestado <strong className="block text-foreground">{formatAmount(p.monto_prestado, { decimals: 0 })}</strong></span>
+                  <span className="text-muted-foreground">A devolver <strong className="block text-foreground">{formatAmount(p.monto_a_devolver, { decimals: 0 })}</strong></span>
+                </div>
+                <div className="mt-2.5 flex items-center justify-between gap-3">
+                  {renderActions(p)}
+                  {!paid && <button type="button" onClick={() => onMarcarPagado && onMarcarPagado(p)} className="flex items-center gap-1.5 rounded-sm bg-primary px-3 py-1.5 text-[12px] font-semibold text-primary-foreground transition-colors hover:bg-primary-hover active:bg-primary-active" aria-label={`Marcar préstamo de ${p.nombre_fuente} como pagado`}><Check className="h-3.5 w-3.5" />Marcar pagado</button>}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="overflow-hidden overflow-x-auto rounded-md border border-border bg-card">
+          <table className="w-full min-w-[720px]">
+            <thead><tr className="border-b-2 border-border">
+              {['Fuente', 'Prestado', 'A devolver', 'Vence', 'Estado', 'Acciones'].map((heading, index) => <th key={heading} className={`px-3.5 py-2.5 font-mono text-[10.5px] uppercase text-muted-foreground ${index === 1 || index === 2 || index === 5 ? 'text-right' : 'text-left'}`} style={{ letterSpacing: '.08em' }}>{heading}</th>)}
+            </tr></thead>
+            <tbody>{sortedData.length === 0 ? <tr><td colSpan={6} className="py-14 text-center"><EmptyState>{searchQuery ? `Sin resultados para "${searchQuery}".` : 'Sin préstamos registrados.'}</EmptyState></td></tr> : sortedData.map((p) => {
+              const paid = isPaid(p);
+              return <tr key={p.id} className="border-b border-muted transition-colors hover:bg-card-hover">
+                <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">{p.nombre_fuente}</td><td className="px-3.5 py-2.5 text-right font-mono text-muted-foreground">{formatAmount(p.monto_prestado, { decimals: 0 })}</td><td className="px-3.5 py-2.5 text-right font-mono font-semibold text-foreground">{formatAmount(p.monto_a_devolver, { decimals: 0 })}</td><td className="px-3.5 py-2.5">{renderFecha(p.fecha_vencimiento)}</td><td className="px-3.5 py-2.5"><EstadoPill isPaid={paid} /></td>
+                <td className="px-3.5 py-2.5"><div className="flex items-center justify-end gap-1.5">{!paid && <button type="button" onClick={() => onMarcarPagado && onMarcarPagado(p)} className="flex items-center gap-1.5 rounded-sm bg-primary px-2.5 py-1.5 font-sans text-[12px] font-semibold text-primary-foreground transition-colors hover:bg-primary-hover active:bg-primary-active" aria-label={`Marcar préstamo de ${p.nombre_fuente} como pagado`}><Check className="h-3.5 w-3.5" />Marcar pagado</button>}{renderActions(p)}</div></td>
+              </tr>;
+            })}</tbody>
+          </table>
+        </div>
+      )}
 
-      <ConfirmModal
-        isOpen={showDeleteConfirm}
-        onClose={() => { setShowDeleteConfirm(false); setPrestamoToDelete(null); }}
-        onConfirm={handleDeleteConfirm}
-        title="¿Eliminar préstamo?"
-        message={`¿Estás seguro de eliminar el préstamo de "${prestamoToDelete?.nombre_fuente}"? Esta acción no se puede deshacer.`}
-        confirmText="Eliminar"
-        cancelText="Cancelar"
-        type="danger"
-      />
+      <ConfirmModal isOpen={showDeleteConfirm} onClose={() => { setShowDeleteConfirm(false); setPrestamoToDelete(null); }} onConfirm={handleDeleteConfirm} title="¿Eliminar préstamo?" message={`¿Estás seguro de eliminar el préstamo de "${prestamoToDelete?.nombre_fuente}"? Esta acción no se puede deshacer.`} confirmText="Eliminar" cancelText="Cancelar" type="danger" />
+      <DocumentPreviewModal isOpen={!!previewDocument} onClose={() => setPreviewDocument(null)} documentUrl={previewDocument?.document?.href || ''} title={previewDocument ? `Documento de ${previewDocument.nombre_fuente}` : 'Vista previa del documento'} />
     </div>
   );
 };

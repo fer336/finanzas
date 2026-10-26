@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Search, Edit, Trash2, Check, ChevronLeft, ChevronRight, RefreshCw, Plus, Eye } from 'lucide-react';
+import { Search, Check, ChevronLeft, ChevronRight, RefreshCw, Plus } from 'lucide-react';
 import { Badge } from '../../ui/badge';
 import KpiCard from '../common/KpiCard';
 import ConfirmModal from '../common/ConfirmModal';
 import ModernPrestamosSection from './ModernPrestamosSection';
 import DocumentPreviewModal from './DocumentPreviewModal';
+import PaymentRowActions from './PaymentRowActions';
 import { usePendingPayments, QUERY_KEYS } from '../../../hooks/useFinancialData';
 import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
 import { useRefresh } from '../../../hooks/useRefresh';
@@ -451,17 +452,6 @@ const ModernPendingPaymentsView = ({
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         {renderFecha(p.fechaVencimiento, p.segundaFechaVencimiento)}
                         <Badge variant="outline">{p.categoria}</Badge>
-                        {p.document?.isValid && (
-                          <button
-                            type="button"
-                            onClick={() => openDocumentPreview(p)}
-                            className="inline-flex items-center gap-1 rounded-sm border border-border bg-secondary px-2 py-1 text-[11.5px] font-medium text-foreground transition-colors hover:bg-card-hover focus:outline-none focus:ring-2 focus:ring-ring"
-                            aria-label={`Ver documento de ${p.nombre}`}
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                            Documento
-                          </button>
-                        )}
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
@@ -474,22 +464,14 @@ const ModernPendingPaymentsView = ({
                     </div>
                   </div>
                   <div className="mt-2.5 flex items-center justify-between border-t border-dashed border-[#d5cea3] pt-2 dark:border-muted">
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => onEditPago && onEditPago(p)}
-                        className="p-1 text-muted-foreground hover:text-foreground"
-                        aria-label={`Editar vencimiento ${p.nombre}`}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => { setPagoToDelete(p); setShowDeleteConfirm(true); }}
-                        className="p-1 text-muted-foreground hover:text-destructive"
-                        aria-label={`Eliminar vencimiento ${p.nombre}`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+                    <PaymentRowActions
+                      onDocument={p.document?.isValid ? () => openDocumentPreview(p) : undefined}
+                      onEdit={() => onEditPago && onEditPago(p)}
+                      onDelete={() => { setPagoToDelete(p); setShowDeleteConfirm(true); }}
+                      documentLabel={`Ver documento de ${p.nombre}`}
+                      editLabel={`Editar vencimiento ${p.nombre}`}
+                      deleteLabel={`Eliminar vencimiento ${p.nombre}`}
+                    />
                     {!isPagoPaid(p) && (
                       <button
                         onClick={() => onMarcarPagado && onMarcarPagado(p)}
@@ -677,34 +659,14 @@ const ModernPendingPaymentsView = ({
                               Marcar pagado
                             </button>
                           )}
-                          <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-                            {p.document?.isValid && (
-                              <button
-                                onClick={() => openDocumentPreview(p)}
-                                className="rounded-sm p-1.5 transition-colors hover:bg-card-hover focus:outline-none focus:ring-2 focus:ring-ring"
-                                title="Ver documento"
-                                aria-label={`Ver documento de ${p.nombre}`}
-                              >
-                                <Eye className="h-4 w-4 text-muted-foreground" />
-                              </button>
-                            )}
-                            <button
-                              onClick={() => onEditPago && onEditPago(p)}
-                              className="rounded-sm p-1.5 transition-colors hover:bg-card-hover focus:outline-none focus:ring-2 focus:ring-ring"
-                              title="Editar"
-                              aria-label={`Editar vencimiento ${p.nombre}`}
-                            >
-                              <Edit className="h-4 w-4 text-muted-foreground" />
-                            </button>
-                            <button
-                              onClick={() => { setPagoToDelete(p); setShowDeleteConfirm(true); }}
-                              className="rounded-sm p-1.5 transition-colors hover:bg-card-hover focus:outline-none focus:ring-2 focus:ring-ring"
-                              title="Eliminar"
-                              aria-label={`Eliminar vencimiento ${p.nombre}`}
-                            >
-                              <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                            </button>
-                          </div>
+                          <PaymentRowActions
+                            onDocument={p.document?.isValid ? () => openDocumentPreview(p) : undefined}
+                            onEdit={() => onEditPago && onEditPago(p)}
+                            onDelete={() => { setPagoToDelete(p); setShowDeleteConfirm(true); }}
+                            documentLabel={`Ver documento de ${p.nombre}`}
+                            editLabel={`Editar vencimiento ${p.nombre}`}
+                            deleteLabel={`Eliminar vencimiento ${p.nombre}`}
+                          />
                         </div>
                       </td>
                     </tr>

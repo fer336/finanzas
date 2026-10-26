@@ -452,6 +452,7 @@ const ModernPendingPaymentsView = ({
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         {renderFecha(p.fechaVencimiento, p.segundaFechaVencimiento)}
                         <Badge variant="outline">{p.categoria}</Badge>
+
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
@@ -465,12 +466,11 @@ const ModernPendingPaymentsView = ({
                   </div>
                   <div className="mt-2.5 flex items-center justify-between border-t border-dashed border-[#d5cea3] pt-2 dark:border-muted">
                     <PaymentRowActions
+                      entityName={p.nombre}
+                      entityType="vencimiento"
                       onDocument={p.document?.isValid ? () => openDocumentPreview(p) : undefined}
                       onEdit={() => onEditPago && onEditPago(p)}
                       onDelete={() => { setPagoToDelete(p); setShowDeleteConfirm(true); }}
-                      documentLabel={`Ver documento de ${p.nombre}`}
-                      editLabel={`Editar vencimiento ${p.nombre}`}
-                      deleteLabel={`Eliminar vencimiento ${p.nombre}`}
                     />
                     {!isPagoPaid(p) && (
                       <button
@@ -660,12 +660,11 @@ const ModernPendingPaymentsView = ({
                             </button>
                           )}
                           <PaymentRowActions
+                            entityName={p.nombre}
+                            entityType="vencimiento"
                             onDocument={p.document?.isValid ? () => openDocumentPreview(p) : undefined}
                             onEdit={() => onEditPago && onEditPago(p)}
                             onDelete={() => { setPagoToDelete(p); setShowDeleteConfirm(true); }}
-                            documentLabel={`Ver documento de ${p.nombre}`}
-                            editLabel={`Editar vencimiento ${p.nombre}`}
-                            deleteLabel={`Eliminar vencimiento ${p.nombre}`}
                           />
                         </div>
                       </td>

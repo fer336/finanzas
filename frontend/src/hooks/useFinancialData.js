@@ -213,13 +213,18 @@ export const useDeletePendingPayment = () => {
 };
 
 // ====== PRÉSTAMOS ======
-export const usePrestamos = () => {
+export const usePrestamos = (filters = {}) => {
+  const { limit = 25, offset = 0, estado, search } = filters;
+  const queryFilters = {
+    limit,
+    offset,
+    ...(estado ? { estado } : {}),
+    ...(search?.trim() ? { search: search.trim() } : {}),
+  };
+
   return useQuery({
-    queryKey: [QUERY_KEYS.prestamos],
-    queryFn: async () => {
-      const response = await apiServices.prestamosApi.getAll();
-      return response.list || response || [];
-    },
+    queryKey: [QUERY_KEYS.prestamos, queryFilters],
+    queryFn: () => apiServices.prestamosApi.getAll(queryFilters),
     staleTime: 60 * 1000,
   });
 };

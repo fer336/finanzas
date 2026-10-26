@@ -270,9 +270,15 @@ const pagosPendientesApi = {
 // 💸 PRÉSTAMOS API
 // ═══════════════════════════════════════════════════════════════
 const prestamosApi = {
-  async getAll(limit = 100, offset = 0) {
-    debugLog('💸 prestamosApi.getAll called:', { limit, offset });
+  async getAll(options = {}, legacyOffset = 0) {
+    const normalizedOptions = typeof options === 'number'
+      ? { limit: options, offset: legacyOffset }
+      : options;
+    const { limit = 100, offset = 0, estado, search } = normalizedOptions;
     const params = { limit, offset };
+    if (estado?.trim()) params.estado = estado.trim();
+    if (search?.trim()) params.search = search.trim();
+    debugLog('💸 prestamosApi.getAll called:', params);
     return await apiRequest('/prestamos', { params });
   },
 

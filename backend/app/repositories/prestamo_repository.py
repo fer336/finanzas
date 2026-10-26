@@ -1,6 +1,7 @@
 """
 Prestamo Repository - PostgreSQL with SQLAlchemy
 """
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 from datetime import datetime
@@ -23,7 +24,8 @@ class PrestamoRepository:
         usuario_id: Optional[UUID] = None,
         limit: int = 100,
         offset: int = 0,
-        estado: Optional[str] = None
+        estado: Optional[str] = None,
+        search: Optional[str] = None
     ) -> Dict[str, Any]:
         """Get all préstamos with filters"""
         query = self.db.query(Prestamo)
@@ -31,8 +33,17 @@ class PrestamoRepository:
         if usuario_id:
             query = query.filter(Prestamo.usuario_id == usuario_id)
 
-        if estado:
-            query = query.filter(Prestamo.estado == estado)
+        normalized_estado = estado.strip().lower() if estado else None
+        if normalized_estado:
+            query = query.filter(Prestamo.estado == normalized_estado)
+
+        normalized_search = search.strip() if search else ''
+        if normalized_search:
+            pattern = f'%{normalized_search}%'
+            query = query.filter(or_(
+                Prestamo.nombre_fuente.ilike(pattern),
+                Prestamo.notas.ilike(pattern),
+            ))
 
         query = query.order_by(Prestamo.fecha_vencimiento.asc())
 

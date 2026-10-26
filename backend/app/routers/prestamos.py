@@ -15,6 +15,18 @@ from app.core.dependencies import CurrentUser
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+SUPPORTED_ESTADOS = {'pendiente', 'pagado'}
+
+
+def _normalize_estado(estado: Optional[str]) -> Optional[str]:
+    if estado is None:
+        return None
+    normalized = estado.strip().lower()
+    if not normalized:
+        return None
+    if normalized not in SUPPORTED_ESTADOS:
+        raise ValueError('estado debe ser pendiente o pagado')
+    return normalized
 
 
 @router.get("/")
@@ -23,6 +35,7 @@ async def get_prestamos(
     limit: int = Query(500, ge=1, le=2000),
     offset: int = Query(0, ge=0),
     estado: Optional[str] = Query(None),
+    search: Optional[str] = Query(None, max_length=200),
     db: Session = Depends(get_db)
 ):
     """Obtener todos los préstamos del usuario autenticado"""
@@ -32,8 +45,11 @@ async def get_prestamos(
             usuario_id=current_user.id,
             limit=limit,
             offset=offset,
-            estado=estado
+            estado=_normalize_estado(estado),
+            search=search.strip() if search else None,
         )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error obteniendo préstamos: {str(e)}")
 

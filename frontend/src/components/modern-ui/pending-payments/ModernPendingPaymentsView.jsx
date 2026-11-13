@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { Fragment, useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Search, Check, ChevronLeft, ChevronRight, RefreshCw, Plus } from 'lucide-react';
 import { Badge } from '../../ui/badge';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../../ui/dialog';
 import KpiCard from '../common/KpiCard';
 import ConfirmModal from '../common/ConfirmModal';
 import ModernPrestamosSection from './ModernPrestamosSection';
@@ -15,6 +16,7 @@ import { normalizePaymentDocument } from '../../../utils/documentPreviewUrl';
 import {
   PENDING_PAYMENT_STATUS,
   compareLocalDateOnly,
+  daysUntilLocalDate,
   derivePendingPaymentStatus,
   formatLocalDateDisplay,
   getSecondDueDateValue,
@@ -110,6 +112,8 @@ const ModernPendingPaymentsView = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [pagoToDelete, setPagoToDelete] = useState(null);
   const [previewDocument, setPreviewDocument] = useState(null);
+  const [detailPayment, setDetailPayment] = useState(null);
+  const detailTrigger = useRef(null);
   const itemsPerPage = 20;
   const controlIds = {
     mobileViewMode: 'pending-payments-mobile-view-mode',
@@ -179,8 +183,25 @@ const ModernPendingPaymentsView = ({
   const pendientes = baseFilteredData.filter((p) => !isPagoPaid(p));
   const vencidos = pendientes.filter((p) => p.temporalStatus === PENDING_PAYMENT_STATUS.OVERDUE);
   const enMora = pendientes.filter((p) => p.temporalStatus === PENDING_PAYMENT_STATUS.IN_ARREARS);
-  const totalPendiente = pendientes.reduce((sum, p) => sum + p.monto, 0);
-  const totalVencido = vencidos.reduce((sum, p) => sum + p.monto, 0);
+  const formatPaymentAmount = (payment) => payment.moneda === 'ARS'
+    ? formatAmount(payment.monto, { decimals: 0 })
+    : `${payment.moneda} ${formatAmount(payment.monto, { decimals: 0, currency: false })}`;
+  const formatSummary = (items) => {
+    const totals = items.reduce((result, p) => {
+      result[p.moneda] = (result[p.moneda] || 0) + p.monto;
+      return result;
+    }, {});
+    return Object.entries(totals).map(([moneda, monto]) => formatPaymentAmount({ moneda, monto })).join(' · ') || formatAmount(0, { decimals: 0 });
+  };
+  // Hoy y los seis días siguientes; la segunda fecha no cambia de significado.
+  const urgencyGroup = (p) => {
+    if (isPagoPaid(p)) return 'Pagados';
+    if (p.temporalStatus === PENDING_PAYMENT_STATUS.OVERDUE) return 'Vencidos';
+    if (p.temporalStatus === PENDING_PAYMENT_STATUS.IN_ARREARS) return 'En mora';
+    if (!parseLocalDateOnly(p.fechaVencimiento)) return 'Fecha a confirmar';
+    return daysUntilLocalDate(p.fechaVencimiento) <= 6 ? 'Próximos 7 días' : 'Más adelante';
+  };
+  const proximos = pendientes.filter((p) => urgencyGroup(p) === 'Próximos 7 días');
 
   let filteredData = baseFilteredData;
 
@@ -349,10 +370,49 @@ const ModernPendingPaymentsView = ({
     if (pagoToDelete) onDeletePago && onDeletePago(pagoToDelete.id);
   };
 
+  const renderDetailDialog = () => (
+    <Dialog open={!!detailPayment} onOpenChange={(open) => !open && setDetailPayment(null)}>
+      <DialogContent className="bg-popover text-foreground rounded-lg max-w-[calc(100%-2rem)] sm:max-w-lg motion-reduce:animate-none"
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          detailTrigger.current?.focus();
+        }}>
+        <DialogTitle>Detalle del vencimiento</DialogTitle>
+        <DialogDescription>Consultar no registra un pago ni modifica el vencimiento.</DialogDescription>
+        {detailPayment && <>
+          <h3 className="font-semibold break-words">{detailPayment.nombre}</h3>
+          <p className="text-sm text-muted-foreground break-words">{detailPayment.descripcion || 'Sin descripción adicional.'}</p>
+          <dl className="grid grid-cols-2 gap-3 text-sm">
+            <dt>Importe · {detailPayment.moneda}</dt><dd className="font-mono">{formatPaymentAmount(detailPayment)}</dd>
+            <dt>Vencimientos</dt><dd>{renderFecha(detailPayment.fechaVencimiento, detailPayment.segundaFechaVencimiento)}</dd>
+            <dt>Estado</dt><dd><EstadoPill status={detailPayment.temporalStatus} /></dd>
+            <dt>Categoría</dt><dd>{detailPayment.categoria}</dd>
+          </dl>
+          {!isPagoPaid(detailPayment) && <button type="button" className="min-h-11 rounded-sm bg-primary px-4 text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring hover:bg-primary-hover" onClick={() => {
+            const payment = detailPayment;
+            setDetailPayment(null);
+            onMarcarPagado?.(payment);
+          }}>Registrar pago</button>}
+        </>}
+      </DialogContent>
+    </Dialog>
+  );
+  const renderDetailButton = (payment) => <button type="button"
+    aria-label={`Ver detalle de ${payment.nombre}`}
+    onClick={(event) => {
+      detailTrigger.current = event.currentTarget;
+      setDetailPayment(payment);
+    }}
+    className="min-h-11 rounded-sm border border-border bg-secondary px-3 text-xs text-foreground hover:bg-card-hover focus-visible:ring-2 focus-visible:ring-ring">Ver detalle</button>;
+  const PeriodNote = () => <p className="mb-4 text-sm text-muted-foreground">
+    Consultar no registra un pago. Resumen del período y búsqueda actuales, antes del filtro de estado.
+    {' '}Próximos 7 días: {formatLocalDateDisplay(new Date())} al {formatLocalDateDisplay(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 6))}.
+  </p>;
+
   // ── Render mobile ────────────────────────────────────────────────────────
   if (isMobile) {
     return (
-      <div className="min-h-screen pb-8">
+      <div className="min-h-screen pb-8 [&_button]:min-h-11 [&_input]:min-h-11 [&_select]:min-h-11 [&_button:focus-visible]:ring-2 [&_button:focus-visible]:ring-ring">
         <div className="px-4 pt-4 pb-3">
           <div className="mb-3 flex items-end justify-between gap-2 border-b-[3px] border-double border-[#b8ad78] pb-3 dark:border-border">
             <h1 className="min-w-0 flex-1 truncate font-serif text-[26px] font-bold leading-none text-foreground">Vencimientos</h1>
@@ -366,18 +426,20 @@ const ModernPendingPaymentsView = ({
             <SectionToggle />
           </div>
 
+          <PeriodNote />
           <div className="mb-3">
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
+              <KpiCard label="Próximos 7 días" value={formatSummary(proximos)} subtext={`${proximos.length} pendientes · incluye hoy`} borderColor="var(--primary)" valueColor="var(--foreground)" />
               <KpiCard
                 label="Total pendiente"
-                value={formatAmount(totalPendiente, { decimals: 0 })}
+                value={formatSummary(pendientes)}
                 subtext={`${pendientes.length} sin pagar · ${enMora.length} en mora`}
                 borderColor="#f9d791"
                 valueColor="var(--warning)"
               />
               <KpiCard
                 label="Vencidos"
-                value={formatAmount(totalVencido, { decimals: 0 })}
+                value={formatSummary(vencidos)}
                 subtext={`${vencidos.length} vencido${vencidos.length !== 1 ? 's' : ''}`}
                 borderColor="var(--destructive)"
                 valueColor="var(--destructive)"
@@ -443,9 +505,12 @@ const ModernPendingPaymentsView = ({
               </EmptyState>
             </div>
           ) : (
-            paginatedData.map((p) => {
+            paginatedData.map((p, index) => {
+              const group = urgencyGroup(p);
               return (
-                <div key={p.id} className={`rounded-md border px-3.5 py-3 ${rowToneClassName(p.temporalStatus)}`}>
+                <Fragment key={p.id}>
+                {(index === 0 || urgencyGroup(paginatedData[index - 1]) !== group) && <h2 className="mt-4 text-base font-semibold text-foreground">{group}</h2>}
+                <div data-urgency-group={group} className={`rounded-md border px-3.5 py-3 ${rowToneClassName(p.temporalStatus)}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="text-[13.5px] text-foreground truncate">{p.nombre}</p>
@@ -457,14 +522,15 @@ const ModernPendingPaymentsView = ({
                     </div>
                     <div className="shrink-0 text-right">
                       <p className="font-mono text-[13.5px] font-semibold text-foreground">
-                        {formatAmount(p.monto, { decimals: 0 })}
+                        {formatPaymentAmount(p)}
                       </p>
                       <div className="mt-1">
                         <EstadoPill status={p.temporalStatus} />
                       </div>
                     </div>
                   </div>
-                  <div className="mt-2.5 flex items-center justify-between border-t border-dashed border-[#d5cea3] pt-2 dark:border-muted">
+                  <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-2">
+                    {renderDetailButton(p)}
                     <PaymentRowActions
                       entityName={p.nombre}
                       entityType="vencimiento"
@@ -476,14 +542,15 @@ const ModernPendingPaymentsView = ({
                       <button
                         onClick={() => onMarcarPagado && onMarcarPagado(p)}
                         className="flex items-center gap-1.5 rounded-sm bg-primary px-3 py-1.5 font-sans text-[12.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:bg-primary-active"
-                        aria-label={`Marcar vencimiento ${p.nombre} como pagado`}
+                        aria-label={`Registrar pago de ${p.nombre}`}
                       >
                         <Check className="h-3.5 w-3.5" />
-                        Marcar pagado
+                        Registrar pago
                       </button>
                     )}
                   </div>
                 </div>
+                </Fragment>
               );
             })
           )}
@@ -513,6 +580,7 @@ const ModernPendingPaymentsView = ({
           )}
         </div>
 
+        {renderDetailDialog()}
         <ConfirmModal
           isOpen={showDeleteConfirm}
           onClose={() => { setShowDeleteConfirm(false); setPagoToDelete(null); }}
@@ -535,7 +603,7 @@ const ModernPendingPaymentsView = ({
 
   // ── Render desktop ───────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen [&_button]:min-h-11 [&_input]:min-h-11 [&_select]:min-h-11 [&_button:focus-visible]:ring-2 [&_button:focus-visible]:ring-ring">
       <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
         <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#b8ad78] pb-[18px] dark:border-border">
           <h1 className="font-serif text-[42px] font-bold leading-none text-foreground">Vencimientos</h1>
@@ -594,17 +662,19 @@ const ModernPendingPaymentsView = ({
           </FilterSelect>
         </div>
 
-        <div className="mb-5 grid max-w-2xl grid-cols-2 gap-3">
+        <PeriodNote />
+        <div className="mb-5 grid grid-cols-3 gap-3">
+          <KpiCard label="Próximos 7 días" value={formatSummary(proximos)} subtext={`${proximos.length} pendientes · incluye hoy`} borderColor="var(--primary)" valueColor="var(--foreground)" />
           <KpiCard
             label="Total pendiente"
-            value={formatAmount(totalPendiente, { decimals: 0 })}
+            value={formatSummary(pendientes)}
             subtext={`${pendientes.length} sin pagar · ${enMora.length} en mora`}
             borderColor="#f9d791"
             valueColor="var(--warning)"
           />
           <KpiCard
             label="Vencidos"
-            value={formatAmount(totalVencido, { decimals: 0 })}
+            value={formatSummary(vencidos)}
             subtext={`${vencidos.length} vencido${vencidos.length !== 1 ? 's' : ''}`}
             borderColor="var(--destructive)"
             valueColor="var(--destructive)"
@@ -633,30 +703,34 @@ const ModernPendingPaymentsView = ({
                   </td>
                 </tr>
               ) : (
-                paginatedData.map((p) => {
+                paginatedData.map((p, index) => {
+                  const group = urgencyGroup(p);
                   return (
-                    <tr key={p.id} className={`group border-b transition-colors ${tableRowToneClassName(p.temporalStatus)}`}>
+                    <Fragment key={p.id}>
+                    {(index === 0 || urgencyGroup(paginatedData[index - 1]) !== group) && <tr><th colSpan={6} scope="colgroup" className="bg-secondary px-3.5 py-3 text-left text-base font-semibold text-foreground">{group}</th></tr>}
+                    <tr data-urgency-group={group} className={`group border-b transition-colors ${tableRowToneClassName(p.temporalStatus)}`}>
                       <td className="px-3.5 py-2.5">{renderFecha(p.fechaVencimiento, p.segundaFechaVencimiento)}</td>
                       <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">{p.nombre}</td>
                       <td className="px-3.5 py-2.5">
                         <Badge variant="outline">{p.categoria}</Badge>
                       </td>
                       <td className="px-3.5 py-2.5 text-right font-mono font-semibold text-foreground">
-                        {formatAmount(p.monto, { decimals: 0 })}
+                        {formatPaymentAmount(p)}
                       </td>
                       <td className="px-3.5 py-2.5">
                         <EstadoPill status={p.temporalStatus} />
                       </td>
                       <td className="px-3.5 py-2.5">
-                        <div className="flex items-center justify-end gap-1.5">
+                        <div className="flex flex-wrap items-center justify-end gap-1.5">
+                          {renderDetailButton(p)}
                           {!isPagoPaid(p) && (
                             <button
                               onClick={() => onMarcarPagado && onMarcarPagado(p)}
                               className="flex items-center gap-1.5 rounded-sm bg-primary px-2.5 py-1.5 font-sans text-[12px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-primary-hover active:bg-primary-active"
-                              aria-label={`Marcar vencimiento ${p.nombre} como pagado`}
+                              aria-label={`Registrar pago de ${p.nombre}`}
                             >
                               <Check className="h-3.5 w-3.5" />
-                              Marcar pagado
+                              Registrar pago
                             </button>
                           )}
                           <PaymentRowActions
@@ -669,6 +743,7 @@ const ModernPendingPaymentsView = ({
                         </div>
                       </td>
                     </tr>
+                    </Fragment>
                   );
                 })
               )}
@@ -704,6 +779,7 @@ const ModernPendingPaymentsView = ({
         </div>
       </div>
 
+      {renderDetailDialog()}
       <ConfirmModal
         isOpen={showDeleteConfirm}
         onClose={() => { setShowDeleteConfirm(false); setPagoToDelete(null); }}

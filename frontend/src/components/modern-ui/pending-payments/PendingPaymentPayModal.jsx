@@ -1,18 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Calendar, FileUp, Loader2, Upload, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '../../ui/dialog';
+import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
+import { formatLocalDateOnly, formatLocalDateDisplay, isPagoPaid, parseLocalDateOnly } from '../../../utils/pendingPaymentStatus';
 import { normalizeUploadFile, isAllowedUploadType } from '../../../utils/normalizeUploadFile';
 
 const PendingPaymentPayModal = ({
   isOpen,
   payment,
-  categories,
-  paymentMethods,
+  categories = [],
+  paymentMethods = [],
   onClose,
   onConfirm
 }) => {
+  const { formatAmount } = useAmountVisibility();
+  const [reviewing, setReviewing] = useState(false);
+  const reviewSection = useRef(null);
+  const returnFocus = useRef(null);
+  const [normalizingFile, setNormalizingFile] = useState(false);
   const [formData, setFormData] = useState({
-    fecha_pago: new Date().toISOString().split('T')[0],
+    fecha_pago: formatLocalDateOnly(new Date()),
     categoria_id: '',
     metodo_pago_id: '',
     notas: '',
@@ -29,23 +37,24 @@ const PendingPaymentPayModal = ({
     const categoriaId =
       payment?.categoria_id ||
       payment?.categorias_id ||
-      categories?.[0]?.id ||
+      categories?.[0]?.id || categories?.[0]?.Id ||
       '';
 
     const metodoPagoId =
       payment?.metodo_pago_id ||
       payment?.metodos_pago_id ||
-      paymentMethods?.[0]?.id ||
+      paymentMethods?.[0]?.id || paymentMethods?.[0]?.Id ||
       '';
 
     setFormData({
-      fecha_pago: new Date().toISOString().split('T')[0],
+      fecha_pago: formatLocalDateOnly(new Date()),
       categoria_id: categoriaId,
       metodo_pago_id: metodoPagoId,
       notas: `Pago de ${payment?.nombre || 'servicio'}`,
       comprobante: ''
     });
     setSelectedFile(null);
+    setReviewing(false);
     setError('');
   }, [isOpen, payment, categories, paymentMethods]);
 
@@ -58,6 +67,10 @@ const PendingPaymentPayModal = ({
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (reviewing) reviewSection.current?.focus();
+  }, [reviewing]);
+
   if (!isOpen || !payment) return null;
 
   const handleFileSelect = async (event) => {
@@ -68,12 +81,15 @@ const PendingPaymentPayModal = ({
     }
 
     let file;
+    setNormalizingFile(true);
     try {
       file = await normalizeUploadFile(rawFile);
     } catch (err) {
       setError(err.message || 'No se pudo convertir la foto HEIC. Probá con JPG o PNG.');
       setSelectedFile(null);
       return;
+    } finally {
+      setNormalizingFile(false);
     }
 
     if (!isAllowedUploadType(file)) {
@@ -125,10 +141,21 @@ const PendingPaymentPayModal = ({
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (saving || uploadingProof || normalizingFile) return;
     setError('');
 
-    if (!formData.categoria_id || !formData.metodo_pago_id) {
-      setError('Seleccioná categoría y método de pago para registrar el pago.');
+    const category = categories.find((item) => String(item.id || item.Id) === String(formData.categoria_id));
+    const method = paymentMethods.find((item) => String(item.id || item.Id) === String(formData.metodo_pago_id));
+    if (!category || !method || !parseLocalDateOnly(formData.fecha_pago)) {
+      setError('Seleccioná una fecha válida, categoría y método de pago para registrar el pago.');
+      return;
+    }
+    if (isPagoPaid(payment) || !(payment.id || payment.Id) || !Number.isFinite(Number(payment.monto || payment.Monto)) || Number(payment.monto || payment.Monto) <= 0) {
+      setError('Revisá el vencimiento: debe estar sin pagar y tener un importe válido.');
+      return;
+    }
+    if (!reviewing) {
+      setReviewing(true);
       return;
     }
 
@@ -153,133 +180,92 @@ const PendingPaymentPayModal = ({
     }
   };
 
+  const busy = saving || uploadingProof || normalizingFile;
+  const displayAmount = formatAmount(Number(payment.monto || payment.Monto || 0), { decimals: 2, currency: false });
+  const controlClass = 'min-h-11 w-full rounded-sm border border-border bg-secondary px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+  const category = categories.find((item) => String(item.id || item.Id) === String(formData.categoria_id));
+  const method = paymentMethods.find((item) => String(item.id || item.Id) === String(formData.metodo_pago_id));
+
   return (
-    <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
-      style={{ background: 'rgba(32,36,44,.4)' }}
-      onClick={(event) => event.target === event.currentTarget && onClose()}
-    >
-      <div className="w-full max-w-2xl rounded-[12px] border border-[#c8bf91] bg-[#e5ddb0]">
-        <div className="flex items-center justify-between border-b border-[#d5cea3] p-5">
-          <div>
-            <h2 className="font-serif text-[20px] font-bold text-foreground">Registrar pago</h2>
-            <p className="mt-0.5 text-[12.5px] text-[#43436c]">
-              {payment.nombre} · <span className="font-mono">{(payment.monto || 0).toLocaleString('es-AR')}</span>
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="rounded-sm p-2 transition-colors duration-150 hover:bg-black/5"
-            type="button"
-          >
-            <X className="w-5 h-5 text-[#625f55]" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label className="text-[12.5px] text-[#43436c]">
-              <span className="block mb-1">Fecha de pago</span>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#625f55]" />
-                <input
-                  type="date"
-                  value={formData.fecha_pago}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, fecha_pago: e.target.value }))}
-                  className="w-full pl-10 pr-3 py-2.5 bg-white border border-[#c8bf91] rounded-sm text-foreground font-mono text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
-                />
+    <Dialog open={isOpen} onOpenChange={(open) => !open && !busy && onClose()}>
+      <DialogContent className="max-w-[calc(100%-2rem)] rounded-lg bg-popover text-foreground sm:max-w-xl motion-reduce:animate-none"
+        onOpenAutoFocus={() => { returnFocus.current = document.activeElement; }}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          returnFocus.current?.focus();
+        }}
+        onEscapeKeyDown={(event) => busy && event.preventDefault()}
+        onInteractOutside={(event) => busy && event.preventDefault()}>
+        <DialogTitle>{reviewing ? 'Confirmar registro de pago' : 'Registrar pago'}</DialogTitle>
+        <DialogDescription>
+          Registrás un pago en tus finanzas. No se envía dinero ni se realiza un débito desde esta pantalla.
+        </DialogDescription>
+        <p className="break-words font-semibold">{payment.nombre || payment.Nombre} · {payment.moneda || payment.Moneda || 'ARS'} {displayAmount}</p>
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
+          {reviewing ? (
+            <section aria-label="Revisión del registro" className="space-y-3 rounded-md border border-border bg-secondary p-4 text-sm" tabIndex={-1} ref={reviewSection}>
+              <p>Se registrará un pago por {payment.moneda || payment.Moneda || 'ARS'} {displayAmount}.</p>
+              <p>Fecha: {formatLocalDateDisplay(formData.fecha_pago)}</p>
+              <p>{method?.nombre || method?.Nombre} · {category?.nombre || category?.Nombre}</p>
+              <p className="break-words">Notas: {formData.notas || 'Sin notas'}</p>
+              <p className="break-words">Comprobante: {selectedFile?.name || (formData.comprobante ? 'Archivo subido' : 'Sin comprobante')}</p>
+              <button type="button" disabled={busy} onClick={() => { setReviewing(false); setError(''); }} className={`${controlClass} hover:bg-card-hover disabled:opacity-50`}>Volver a editar</button>
+            </section>
+          ) : (
+            <fieldset disabled={busy} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <label className="block text-sm">
+                  <span className="mb-1 block">Fecha de pago</span>
+                  <input type="date" value={formData.fecha_pago}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, fecha_pago: e.target.value }))}
+                    className={controlClass} />
+                </label>
+                <label className="block text-sm">
+                  <span className="mb-1 block">Método de pago</span>
+                  <select value={formData.metodo_pago_id}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, metodo_pago_id: e.target.value }))}
+                    className={controlClass}>
+                    <option value="">Seleccionar...</option>
+                    {paymentMethods.map((item) => <option key={item.id || item.Id} value={item.id || item.Id}>{item.nombre || item.Nombre}</option>)}
+                  </select>
+                </label>
               </div>
-            </label>
-
-            <label className="text-[12.5px] text-[#43436c]">
-              <span className="block mb-1">Método de pago</span>
-              <select
-                value={formData.metodo_pago_id}
-                onChange={(e) => setFormData((prev) => ({ ...prev, metodo_pago_id: e.target.value }))}
-                className="w-full px-3 py-2.5 bg-white border border-[#c8bf91] rounded-sm text-foreground text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="">Seleccionar...</option>
-                {paymentMethods.map((method) => (
-                  <option key={method.id || method.Id} value={method.id || method.Id}>
-                    {method.nombre || method.Nombre}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          <label className="text-[12.5px] text-[#43436c] block">
-            <span className="block mb-1">Categoría</span>
-            <select
-              value={formData.categoria_id}
-              onChange={(e) => setFormData((prev) => ({ ...prev, categoria_id: e.target.value }))}
-              className="w-full px-3 py-2.5 bg-white border border-[#c8bf91] rounded-sm text-foreground text-[13px] focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              <option value="">Seleccionar...</option>
-              {categories.map((category) => (
-                <option key={category.id || category.Id} value={category.id || category.Id}>
-                  {category.nombre || category.Nombre}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="text-[12.5px] text-[#43436c] block">
-            <span className="block mb-1">Comprobante (se sube a MinIO)</span>
-            <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#c8bf91] rounded-sm cursor-pointer transition-colors duration-150 hover:bg-[#e4d794]">
-                <Upload className="w-4 h-4 text-[#526a3a]" />
-                <span className="text-[13px] text-foreground">Seleccionar archivo</span>
-                <input
-                  type="file"
-                  accept="image/*,.pdf,.heic,.heif,image/heic,image/heif"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
+              <label className="block text-sm">
+                <span className="mb-1 block">Categoría</span>
+                <select value={formData.categoria_id}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, categoria_id: e.target.value }))}
+                  className={controlClass}>
+                  <option value="">Seleccionar...</option>
+                  {categories.map((item) => <option key={item.id || item.Id} value={item.id || item.Id}>{item.nombre || item.Nombre}</option>)}
+                </select>
               </label>
-              {selectedFile && (
-                <span className="text-[12px] text-[#625f55] truncate max-w-xs">{selectedFile.name}</span>
-              )}
-            </div>
-          </label>
-
-          <label className="text-[12.5px] text-[#43436c] block">
-            <span className="block mb-1">Notas</span>
-            <textarea
-              value={formData.notas}
-              onChange={(e) => setFormData((prev) => ({ ...prev, notas: e.target.value }))}
-              rows={3}
-              className="w-full px-3 py-2.5 bg-white border border-[#c8bf91] rounded-sm text-foreground text-[13.5px] focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </label>
-
-          {error && (
-            <div className="text-[12.5px] text-[#b83245] bg-[#f9d791] border border-[#de9800] rounded-sm px-3 py-2">
-              {error}
-            </div>
+              <label className="block text-sm">
+                <span className="mb-1 block">Seleccionar archivo</span>
+                <input type="file" accept="image/*,.pdf,.heic,.heif,image/heic,image/heif"
+                  onChange={handleFileSelect} className={controlClass} />
+              </label>
+              <p className="text-sm text-muted-foreground break-words">{normalizingFile ? 'Preparando comprobante…' : selectedFile?.name || 'Comprobante opcional. Se sube al confirmar el registro.'}</p>
+              <label className="block text-sm">
+                <span className="mb-1 block">Notas</span>
+                <textarea value={formData.notas} rows={3}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, notas: e.target.value }))}
+                  className={controlClass} />
+              </label>
+            </fieldset>
           )}
-
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-sm border border-[#c8bf91] bg-white px-[15px] py-[8px] text-[13px] text-foreground transition-colors duration-150 hover:bg-[#e4d794] disabled:opacity-50"
-              disabled={saving || uploadingProof}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={saving || uploadingProof}
-              className="flex items-center gap-2 rounded-sm bg-primary px-[15px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] disabled:opacity-50"
-            >
-              {(saving || uploadingProof) ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
-              {uploadingProof ? 'Subiendo comprobante a MinIO...' : saving ? 'Guardando...' : 'Confirmar pago'}
+          {error && <p role="alert" className="rounded-sm border border-destructive bg-accent px-3 py-2 text-sm text-accent-foreground">{error}</p>}
+          <div className="flex flex-wrap justify-end gap-3">
+            <button type="button" onClick={onClose} disabled={busy}
+              className="min-h-11 rounded-sm border border-border bg-secondary px-4 text-sm hover:bg-card-hover focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50">Cancelar</button>
+            <button type="submit" disabled={busy}
+              className="flex min-h-11 items-center gap-2 rounded-sm bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50">
+              {busy && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin motion-reduce:animate-none" />}
+              {uploadingProof ? 'Subiendo comprobante…' : saving ? 'Guardando…' : reviewing ? 'Confirmar registro' : 'Revisar registro'}
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

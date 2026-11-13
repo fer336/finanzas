@@ -1,4 +1,4 @@
-import { useId, useState, useEffect } from 'react';
+import { useId, useState, useEffect, useRef } from 'react';
 import {
   Plus,
   DollarSign,
@@ -61,6 +61,44 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
   const [cotizaciones, setCotizaciones] = useState([]);
   const [loadingCotizaciones, setLoadingCotizaciones] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
+  const advancedRef = useRef(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [feedback, setFeedback] = useState('');
+  const feedbackRef = useRef(null);
+
+  useEffect(() => {
+    const firstField = Object.keys(fieldErrors)[0];
+    if (!firstField) return;
+    const input = document.getElementById(`transaction-${firstField}`);
+    if (input && advancedRef.current?.contains(input)) {
+      advancedRef.current.open = true;
+      setAdvancedOpen(true);
+    }
+    input?.focus();
+  }, [fieldErrors]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
+  }, [isOpen]);
+
+  const errorAttributes = (field) => ({
+    'aria-invalid': Boolean(fieldErrors[field]),
+    'aria-describedby': fieldErrors[field] ? `transaction-${field}-error` : undefined,
+  });
+  const renderFieldError = (field) => fieldErrors[field] && (
+    <span id={`transaction-${field}-error`} className="mt-1 block text-sm text-foreground">
+      {fieldErrors[field]}
+    </span>
+  );
 
   const fieldClassName = 'w-full px-3.5 py-2.5 bg-secondary border border-border rounded-sm text-[13.5px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring transition-colors duration-150';
   const selectClassName = 'w-full px-3.5 py-2.5 pr-9 bg-secondary border border-border rounded-sm text-[13.5px] text-foreground appearance-none cursor-pointer focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring transition-colors duration-150';
@@ -106,6 +144,15 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
     };
 
     if (isOpen) {
+      setFieldErrors({});
+      setFeedback('');
+      setShowCreateCategory(false);
+      setNewCategoryName('');
+      setAdvancedOpen(Boolean(editingTransaction && (
+        editingTransaction.notas || editingTransaction.objetivo_id ||
+        editingTransaction.es_credito || editingTransaction.archivo_adjunto ||
+        editingTransaction.es_aporte_objetivo === false
+      )));
       loadData();
       
       if (editingTransaction) {
@@ -212,35 +259,27 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
     if (onClose) onClose();
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (submittingRef.current) return;
+
+    // Preserve the existing description/positive-amount rules and parsing.
+    const errors = {};
+    if (!formData.description.trim()) errors.description = 'La descripción es requerida';
+    const amount = parseFloat(formData.amount);
+    if (!formData.amount || isNaN(amount)) errors.amount = 'El monto es requerido';
+    else if (amount <= 0) errors.amount = 'El monto debe ser mayor que cero. No se permiten valores negativos o cero.';
+    setFieldErrors(errors);
+    if (Object.keys(errors).length) {
+      setFeedback('Revisá los campos marcados. Tus datos siguen en el formulario.');
+      return;
+    }
+
     try {
-      if (isSubmitting) return;
+      submittingRef.current = true;
       setIsSubmitting(true);
       setLoading(true);
-
-      // Validación de descripción
-      if (!formData.description.trim()) {
-        alert('La descripción es requerida');
-        setLoading(false);
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Validación de monto (debe ser positivo)
-      const amount = parseFloat(formData.amount);
-      if (!formData.amount || isNaN(amount)) {
-        alert('El monto es requerido');
-        setLoading(false);
-        setIsSubmitting(false);
-        return;
-      }
-      
-      if (amount <= 0) {
-        alert('El monto debe ser mayor que cero.\nNo se permiten valores negativos o cero.');
-        setLoading(false);
-        setIsSubmitting(false);
-        return;
-      }
+      setFeedback('');
 
       const transactionData = {
         descripcion: formData.description.trim(),
@@ -263,11 +302,9 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
       };
 
       if (editingTransaction && editingTransaction.id) {
-        console.log('Editing transaction:', transactionData);
         await transaccionesApi.update(editingTransaction.id, transactionData);
         if (onSuccess) onSuccess({ ...transactionData, id: editingTransaction.id });
       } else {
-        console.log('Creating new transaction:', transactionData);
         const result = await transaccionesApi.create(transactionData);
         if (onSuccess) onSuccess({ ...transactionData, id: result.id });
 
@@ -296,8 +333,10 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
       handleCancel();
     } catch (error) {
       console.error('Error saving transaction:', error);
-      alert('Error saving transaction: ' + error.message);
+      setFeedback('No se pudo guardar la transacción. Tus datos se conservaron; intentá nuevamente.');
+      feedbackRef.current?.focus();
     } finally {
+      submittingRef.current = false;
       setLoading(false);
       setIsSubmitting(false);
     }
@@ -330,10 +369,13 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
       // Clear new category form
       setNewCategoryName('');
       setShowCreateCategory(false);
+      setFieldErrors({});
+      setFeedback('');
       
     } catch (error) {
       console.error('Error creating category:', error);
-      alert('Error creating category: ' + error.message);
+      setFieldErrors({ 'new-category': 'No se pudo crear la categoría. Intentá nuevamente.' });
+      setFeedback('No se pudo crear la categoría. Tus datos se conservaron.');
     }
   };
   if (!isOpen) return null;
@@ -354,14 +396,17 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
         aria-labelledby={modalTitleId}
         className="relative flex h-[92dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-[12px] border border-border bg-popover text-popover-foreground md:h-auto md:max-h-[90vh] md:rounded-[12px]"
       >
-        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-popover px-8 py-5">
+        <div className="shrink-0 flex items-center justify-between border-b border-border bg-popover px-4 py-4 md:px-8">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-sm border border-border bg-muted">
               {editingTransaction ? <FileText className="h-5 w-5 text-primary" /> : <Plus className="h-5 w-5 text-primary" />}
             </div>
-            <h2 id={modalTitleId} className="font-serif text-[20px] font-bold text-foreground">
-              {editingTransaction ? 'Editar transacción' : 'Nueva transacción'}
-            </h2>
+            <div>
+              <h2 id={modalTitleId} className="text-xl font-semibold text-foreground">
+                {editingTransaction ? 'Editar transacción' : 'Nueva transacción'}
+              </h2>
+              <p className="text-sm text-muted-foreground">Empezá por lo esencial. El resto es opcional.</p>
+            </div>
           </div>
           <button
             onClick={handleCancel}
@@ -372,17 +417,20 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
           </button>
         </div>
 
-        <div className="flex-1 space-y-8 overflow-y-auto bg-popover px-8 py-7 text-popover-foreground">
+        <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto bg-popover px-4 py-5 text-popover-foreground md:px-8">
+          <p className="text-sm text-muted-foreground">Descripción y monto son obligatorios. El tipo define el signo del importe.</p>
           <section className="space-y-4">
             <div className="mb-2 flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />
               <h3 className="font-serif text-[17px] font-semibold text-foreground">Información básica</h3>
             </div>
 
-            <div className="flex w-fit gap-2.5">
+            <div role="group" aria-label="Tipo de movimiento" className="flex gap-3 [&>button]:min-h-11 [&>button]:flex-1">
               <button
                 type="button"
                 onClick={() => setTransactionType('ingreso')}
+                aria-pressed={transactionType === 'ingreso'}
                 className={`rounded-sm border px-4 py-2 text-[13px] font-medium transition-colors duration-150 ${
                   transactionType === 'ingreso'
                     ? selectedIncomeControlClassName
@@ -394,6 +442,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
               <button
                 type="button"
                 onClick={() => setTransactionType('gasto')}
+                aria-pressed={transactionType === 'gasto'}
                 className={`rounded-sm border px-4 py-2 text-[13px] font-medium transition-colors duration-150 ${
                   transactionType === 'gasto'
                     ? selectedExpenseControlClassName
@@ -409,6 +458,8 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                 <span className="mb-1.5 block">Descripción</span>
                 <input
                   id={fieldIds.description}
+                  required
+                  {...errorAttributes('description')}
                   type="text"
                   name="description"
                   value={formData.description}
@@ -417,19 +468,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                   className={fieldClassName}
                 />
               </label>
-
-              <label htmlFor={fieldIds.notes} className="block text-[12.5px] font-medium text-muted-foreground">
-                <span className="mb-1.5 block">Notas</span>
-                <textarea
-                  id={fieldIds.notes}
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleInputChange}
-                  placeholder="Detalles adicionales (opcional)..."
-                  rows={3}
-                  className={`${fieldClassName} resize-none`}
-                />
-              </label>
+              {renderFieldError('description')}
             </div>
           </section>
 
@@ -443,11 +482,14 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
               <div className="flex flex-col gap-1.5">
                 <div className="text-[12.5px] font-medium text-muted-foreground">Monto y moneda</div>
                 <div className="flex gap-2">
-                  <div className="relative flex-1">
+                  <div className="relative min-w-0 flex-1">
                     <label htmlFor={fieldIds.amount} className="sr-only">Monto</label>
                     <span className={`pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[13.5px] font-semibold ${transactionType === 'gasto' ? 'text-destructive' : 'text-primary'}`}>$</span>
                     <input
                       id={fieldIds.amount}
+                      required
+                      {...errorAttributes('amount')}
+                      inputMode="decimal"
                       type="number"
                       name="amount"
                       value={formData.amount}
@@ -476,9 +518,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                     <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                   </div>
                 </div>
-                {formData.amount && parseFloat(formData.amount) <= 0 && (
-                  <p className="ml-1 text-[12px] text-destructive">El monto debe ser mayor que 0</p>
-                )}
+                {renderFieldError('amount')}
               </div>
 
               <label htmlFor={fieldIds.date} className="block text-[12.5px] font-medium text-muted-foreground">
@@ -515,7 +555,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                   <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 </div>
                 <div className="flex justify-between border-t border-muted pt-3 font-mono text-[12.5px]">
-                  <span className="text-muted-foreground">Cotización: ${formData.cotizacionDolar}</span>
+                  <span className="text-muted-foreground">{loadingCotizaciones ? 'Cargando cotizaciones…' : `Cotización: $${formData.cotizacionDolar ?? ''}`}</span>
                   <span className="font-semibold text-foreground">ARS: ${parseFloat(formData.montoArs || 0).toLocaleString('es-AR')}</span>
                 </div>
               </div>
@@ -571,6 +611,8 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                 <div className="flex gap-2">
                   <input
                     id={fieldIds.newCategory}
+                    aria-label="Nueva categoría"
+                    {...errorAttributes('new-category')}
                     type="text"
                     value={newCategoryName}
                     onChange={(e) => setNewCategoryName(e.target.value)}
@@ -593,9 +635,28 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                     Cancelar
                   </button>
                 </div>
+                {renderFieldError('new-category')}
               </div>
             )}
+          </section>
 
+          <details ref={advancedRef} open={advancedOpen} onToggle={(event) => setAdvancedOpen(event.currentTarget.open)} className="border-t border-border pt-2">
+            <summary className="min-h-11 cursor-pointer py-3 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">
+              Más opciones · notas, objetivos, crédito, recurrencia y comprobantes
+            </summary>
+            <section className="space-y-4 pt-4">
+              <label htmlFor={fieldIds.notes} className="block text-[12.5px] font-medium text-muted-foreground">
+                <span className="mb-1.5 block">Notas</span>
+                <textarea
+                  id={fieldIds.notes}
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                  placeholder="Detalles adicionales (opcional)..."
+                  rows={3}
+                  className={fieldClassName}
+                />
+              </label>
             <label htmlFor={fieldIds.objetivo} className="block text-[12.5px] font-medium text-muted-foreground">
               <span className="mb-1.5 block">Objetivo de ahorro (opcional)</span>
               <div className="relative">
@@ -653,7 +714,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                     aria-label="Marcar como gasto con tarjeta de crédito"
                     aria-describedby="credit-card-expense-description"
                   />
-                  <div className="h-6 w-11 rounded-full bg-muted transition-colors duration-150 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-secondary after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full" />
+                  <div className="h-6 w-11 rounded-full bg-muted transition-colors duration-150 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-secondary after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2" />
                 </label>
               </div>
             )}
@@ -674,7 +735,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
                       aria-label="Marcar como gasto fijo o recurrente"
                       aria-describedby="recurring-expense-description"
                     />
-                    <div className="h-6 w-11 rounded-full bg-muted transition-colors duration-150 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-secondary after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full" />
+                    <div className="h-6 w-11 rounded-full bg-muted transition-colors duration-150 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-secondary after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2" />
                   </label>
                 </div>
 
@@ -703,12 +764,17 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
             )}
           </section>
 
-          <section className="space-y-4 pb-4">
+          <section className="space-y-4 pb-4 pt-6">
             <div className="mb-2 flex items-center gap-2">
               <Paperclip className="h-4 w-4 text-primary" />
               <h3 className="font-serif text-[17px] font-semibold text-foreground">Documentos</h3>
             </div>
 
+            {/* Legacy upload buttons omit type="button". Keep their own actions
+                without allowing the native click default to submit this form. */}
+            <div onClickCapture={(event) => {
+              if (event.target.closest('button')) event.preventDefault();
+            }}>
             <FileUpload
               onFileUploaded={(fileData) => setFormData(prev => ({ ...prev, archivoAdjunto: fileData.url }))}
               onFileRemoved={() => setFormData(prev => ({ ...prev, archivoAdjunto: '' }))}
@@ -717,6 +783,7 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
               maxSizeMB={10}
               showPreview={true}
             />
+            </div>
 
             {formData.archivoAdjunto && (
               <div className="space-y-3 rounded-sm border border-border bg-secondary p-4">
@@ -767,24 +834,32 @@ const ModernTransactionForm = ({ isOpen, onClose, onSuccess, editingTransaction 
               </div>
             )}
           </section>
+          </details>
         </div>
 
-        <div className="sticky bottom-0 z-20 flex items-center justify-end gap-3 border-t border-border bg-background px-8 py-5">
+        <div className="shrink-0 border-t border-border bg-popover px-4 py-4 md:px-8">
+          <div ref={feedbackRef} tabIndex={-1} role="alert" aria-live="assertive" aria-atomic="true" className={feedback ? 'mb-3 rounded-sm border border-border bg-accent p-3 text-sm text-accent-foreground' : 'sr-only'}>
+            {feedback}
+          </div>
+          <div className="flex justify-end gap-3 [&>button]:min-h-11 [&>button]:flex-1 md:[&>button]:flex-none">
           <button
+            type="button"
             onClick={handleCancel}
             className="rounded-sm border border-border bg-secondary px-[15px] py-[8px] text-[13px] font-medium text-muted-foreground transition-colors duration-150 hover:bg-card-hover hover:text-foreground"
           >
             Cancelar
           </button>
           <button
-            onClick={handleSubmit}
-            disabled={loading || isSubmitting || !formData.description.trim() || !formData.amount}
+            type="submit"
+            disabled={loading || isSubmitting}
             className={`flex items-center gap-2 rounded-sm px-[18px] py-[8px] text-[13px] font-semibold transition-colors duration-150 ${primaryButtonClassName}`}
           >
             {loading || isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save size={16} />}
             {editingTransaction ? 'Guardar cambios' : 'Registrar'}
           </button>
+          </div>
         </div>
+        </form>
       </div>
     </div>
   );

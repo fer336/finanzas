@@ -15,6 +15,7 @@ import { QUERY_KEYS } from '../../../hooks/useFinancialData';
 import { useIsMobile } from '../../../hooks/use-mobile';
 import { normalizeDocumentPreviewUrl } from '../../../utils/documentPreviewUrl';
 import DocumentPreviewModal from '../pending-payments/DocumentPreviewModal';
+import TransactionDetailPanel from './TransactionDetailPanel';
 
 // ─── Constantes de meses ─────────────────────────────────────────────────────
 const MESES = [
@@ -108,6 +109,9 @@ const ModernTransactionsView = ({
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentPage, setCurrentPage]     = useState(1);
   const [previewDocumentUrl, setPreviewDocumentUrl] = useState('');
+  const [sortOrder, setSortOrder] = useState('date');
+  const [detailTransaction, setDetailTransaction] = useState(null);
+  const detailTriggerRef = useRef(null);
 
   // Vista: mensual (un mes con flechas) vs acumulado (multi-mes con checkboxes)
   const [viewMode, setViewMode]           = useState(loadViewMode);
@@ -177,7 +181,7 @@ const ModernTransactionsView = ({
 
   // Reset página en cualquier cambio de filtro
   useEffect(() => { setCurrentPage(1); },
-    [searchQuery, selectedType, selectedCategory, viewMode, selectedMonth, selectedMonths, range]);
+    [searchQuery, selectedType, selectedCategory, viewMode, selectedMonth, selectedMonths, range, sortOrder]);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
   const getTransactionDate = (t) => {
@@ -251,8 +255,12 @@ const ModernTransactionsView = ({
     return matchSearch && matchType && matchCategory;
   });
 
-  const totalPages = Math.ceil(filtered.length / itemsPerPage);
-  const paginated  = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const sorted = [...filtered].sort((a, b) => sortOrder === 'amount'
+    ? Math.abs(b.monto || b.monto_ars || 0) - Math.abs(a.monto || a.monto_ars || 0)
+    : (getTransactionDate(b)?.getTime() || 0) - (getTransactionDate(a)?.getTime() || 0));
+  const totalPages = Math.ceil(sorted.length / itemsPerPage);
+  const page = Math.min(currentPage, Math.max(1, totalPages));
+  const paginated = sorted.slice((page - 1) * itemsPerPage, page * itemsPerPage);
 
   // ── Totales ──────────────────────────────────────────────────────────────
   const totales = filtered.reduce(
@@ -337,19 +345,21 @@ const ModernTransactionsView = ({
         variant="outline"
         size="sm"
         onClick={refresh}
+        aria-label={isRefreshing ? 'Actualizando…' : 'Actualizar'}
+        className="min-h-11"
         disabled={isRefreshing}
       >
         <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
         {!compact && (isRefreshing ? 'Actualizando…' : 'Actualizar')}
       </Button>
       {onBulkUpload && (
-        <Button type="button" variant="outline" size="sm" onClick={onBulkUpload}>
+        <Button type="button" variant="outline" size="sm" className="min-h-11" aria-label="Importar" onClick={onBulkUpload}>
           <Upload className="h-3.5 w-3.5" />
           {!compact && 'Importar'}
         </Button>
       )}
       {onExportCSV && (
-        <Button type="button" variant="outline" size="sm" onClick={onExportCSV} title="Exportar CSV">
+        <Button type="button" variant="outline" size="sm" className="min-h-11" onClick={onExportCSV} title="Exportar CSV">
           <Download className="h-3.5 w-3.5" />
         </Button>
       )}
@@ -366,7 +376,7 @@ const ModernTransactionsView = ({
         </Button>
       )}
       {onNewTransaction && (
-        <Button type="button" size="sm" onClick={onNewTransaction}>
+        <Button type="button" size="sm" className="min-h-11 hover:bg-primary/90" onClick={onNewTransaction}>
           <Plus className="h-3.5 w-3.5" />
           Nueva
         </Button>
@@ -374,6 +384,91 @@ const ModernTransactionsView = ({
     </div>
   );
   HeaderActions.propTypes = { compact: PropTypes.bool };
+
+  const openDetail = (event, transaction) => {
+    detailTriggerRef.current = event.currentTarget;
+    setDetailTransaction(transaction);
+  };
+
+  const activeFilters = [
+    searchQuery && { label: `Búsqueda: ${searchQuery}`, clear: () => setSearchQuery('') },
+    selectedType !== 'all' && { label: `Tipo: ${selectedType === 'ingreso' ? 'Ingresos' : 'Gastos'}`, clear: () => setSelectedType('all') },
+    selectedCategory !== 'all' && { label: `Categoría: ${selectedCategory}`, clear: () => setSelectedCategory('all') },
+  ].filter(Boolean);
+
+  const filterControls = (
+    <div className="mb-4 rounded-lg border border-border bg-card p-4">
+      <label htmlFor="tx-search" className="mb-2 block text-sm font-medium">Buscar movimientos</label>
+      <div className="relative">
+        <Search aria-hidden="true" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <input
+          id="tx-search"
+          type="search"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          placeholder="Descripción o categoría"
+          className="min-h-11 w-full rounded-md border border-border bg-secondary pl-9 pr-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        />
+      </div>
+      <details className="mt-2">
+        <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium focus-visible:outline focus-visible:outline-ring">Más filtros</summary>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <label className="grid gap-2 text-sm">Tipo
+            <FilterSelect aria-label="Tipo" value={selectedType} onChange={e => setSelectedType(e.target.value)} className="min-h-11">
+              <option value="all">Todos los tipos</option>
+              <option value="ingreso">Ingresos</option>
+              <option value="gasto">Gastos</option>
+            </FilterSelect>
+          </label>
+          <label className="grid gap-2 text-sm">Categoría
+            <FilterSelect aria-label="Categoría" value={selectedCategory} onChange={e => setSelectedCategory(e.target.value)} className="min-h-11">
+              <option value="all">Todas las categorías</option>
+              {availableCategories.map(c => <option key={c} value={c}>{c}</option>)}
+            </FilterSelect>
+          </label>
+          <label className="grid gap-2 text-sm">Ordenar por
+            <FilterSelect aria-label="Ordenar por" value={sortOrder} onChange={e => setSortOrder(e.target.value)} className="min-h-11">
+              <option value="date">Fecha: recientes primero</option>
+              <option value="amount">Importe: mayor primero</option>
+            </FilterSelect>
+          </label>
+        </div>
+      </details>
+      {activeFilters.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-2" aria-label="Filtros aplicados">
+          {activeFilters.map(filter => (
+            <button
+              key={filter.label}
+              type="button"
+              aria-label={`Quitar filtro ${filter.label}`}
+              onClick={filter.clear}
+              className="min-h-11 max-w-full break-words rounded-full border border-border bg-secondary px-3 text-sm hover:bg-card-hover focus-visible:outline focus-visible:outline-ring"
+            >
+              {filter.label} <span aria-hidden="true">×</span>
+            </button>
+          ))}
+        </div>
+      )}
+      <p role="status" className="mt-3 text-sm text-muted-foreground">{filtered.length} movimientos · {periodoTitle} · ARS</p>
+    </div>
+  );
+
+  const detailPanel = detailTransaction && (
+    <TransactionDetailPanel
+      transaction={detailTransaction}
+      categoryName={getCategoryName(detailTransaction)}
+      displayDate={getTransactionDate(detailTransaction)?.toLocaleDateString('es-AR') || '-'}
+      isMobile={isMobile}
+      onClose={() => setDetailTransaction(null)}
+      returnFocusRef={detailTriggerRef}
+      onEdit={onEditTransaction}
+      onDelete={onDeleteTransaction}
+      onPreview={(url) => {
+        setDetailTransaction(null);
+        setPreviewDocumentUrl(url);
+      }}
+    />
+  );
 
   // ── Render Mobile ─────────────────────────────────────────────────────────
   if (isMobile) {
@@ -383,13 +478,12 @@ const ModernTransactionsView = ({
         <div className="px-4 pt-4 pb-3">
 
           {/* Cabecera de período */}
-          <div className="mb-3 border-b-[3px] border-double border-[#b8ad78] pb-3 dark:border-border">
+          <div className="mb-3 border-b border-border pb-3">
             <div className="font-mono text-[10px] uppercase text-[#4d699b]" style={{ letterSpacing: '.14em' }}>
               {periodoEyebrow}
             </div>
-            <h1 className="mt-1 font-serif text-[26px] font-bold leading-none text-foreground capitalize">
-              {periodoTitle}
-            </h1>
+            <h1 className="text-[28px] font-semibold leading-tight text-foreground">Movimientos</h1>
+            <p className="mt-1 text-sm capitalize text-muted-foreground">{periodoTitle}</p>
             <div className="mt-3">
               <HeaderActions compact />
             </div>
@@ -418,13 +512,14 @@ const ModernTransactionsView = ({
           {/* Navegación mes (solo mensual) */}
           {viewMode === 'monthly' && (
             <div className="mb-3 flex items-center justify-between rounded-sm border border-border bg-card px-3 py-2">
-              <button onClick={goToPrevMonth} className="p-1.5 rounded-sm hover:bg-black/5 transition-colors">
+              <button aria-label="Mes anterior" onClick={goToPrevMonth} className="min-h-11 min-w-11 rounded-md hover:bg-card-hover focus-visible:outline focus-visible:outline-ring">
                 <ChevronLeft className="w-4 h-4 text-[#625f55]" />
               </button>
               <button onClick={goToToday} className="font-mono text-[12px] text-[#43436c] hover:text-foreground">
                 hoy
               </button>
               <button
+                aria-label="Mes siguiente"
                 onClick={goToNextMonth}
                 disabled={isCurrentMonth}
                 className="p-1.5 rounded-sm hover:bg-black/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
@@ -482,39 +577,7 @@ const ModernTransactionsView = ({
             </div>
           )}
 
-          {/* Buscador */}
-          <div className="relative mb-2.5">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#625f55]" />
-            <input
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Buscar…"
-              className="w-full pl-9 pr-3 py-2 bg-secondary text-foreground text-[13px] border border-border rounded-sm placeholder:text-[#625f55] dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-          </div>
-
-          {/* Filtros tipo / categoría */}
-          <div className="grid grid-cols-2 gap-2 mb-3">
-            <FilterSelect
-              value={selectedType}
-              onChange={e => setSelectedType(e.target.value)}
-              className="w-full py-2"
-            >
-              <option value="all">Todos los tipos</option>
-              <option value="ingreso">Ingresos</option>
-              <option value="gasto">Gastos</option>
-            </FilterSelect>
-            <FilterSelect
-              value={selectedCategory}
-              onChange={e => setSelectedCategory(e.target.value)}
-              className="w-full py-2"
-            >
-              <option value="all">Todas las categorías</option>
-              {availableCategories.map(c => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </FilterSelect>
-          </div>
+          {filterControls}
         </div>
 
         {/* KPIs */}
@@ -567,7 +630,9 @@ const ModernTransactionsView = ({
                 <div key={rowId} className="rounded-md border border-border bg-card px-3.5 py-3">
                   <div className="flex min-w-0 items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-[13.5px] text-foreground">{descripcion}</p>
+                      <button type="button" aria-label={`Ver detalle de ${descripcion}`} onClick={event => openDetail(event, t)}
+                        className="min-h-11 w-full truncate text-left text-sm font-medium text-foreground hover:underline focus-visible:outline focus-visible:outline-ring">{descripcion}</button>
+                      <p className="text-xs text-muted-foreground">{esIngreso ? 'Ingreso' : 'Gasto'}</p>
                       <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2">
                         <span className="shrink-0 font-mono text-[11.5px] text-[#625f55]">{displayDate}</span>
                         <Badge
@@ -623,19 +688,21 @@ const ModernTransactionsView = ({
           {totalPages > 1 && (
             <div className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-3 mt-2">
               <button
-                onClick={() => currentPage > 1 && setCurrentPage(p => p - 1)}
-                disabled={currentPage === 1}
-                className="p-2 rounded-sm disabled:opacity-30 hover:bg-black/5"
+                aria-label="Página anterior"
+                onClick={() => page > 1 && setCurrentPage(page - 1)}
+                disabled={page === 1}
+                className="min-h-11 min-w-11 rounded-md disabled:opacity-30 hover:bg-card-hover focus-visible:outline focus-visible:outline-ring"
               >
                 <ChevronLeft className="w-4 h-4 text-[#625f55]" />
               </button>
               <span className="font-mono text-[12px] text-[#43436c]">
-                {currentPage} / {totalPages} <span className="text-[#625f55]">({filtered.length})</span>
+                {page} / {totalPages} <span className="text-[#625f55]">({filtered.length})</span>
               </span>
               <button
-                onClick={() => currentPage < totalPages && setCurrentPage(p => p + 1)}
-                disabled={currentPage >= totalPages}
-                className="p-2 rounded-sm disabled:opacity-30 hover:bg-black/5"
+                aria-label="Página siguiente"
+                onClick={() => page < totalPages && setCurrentPage(page + 1)}
+                disabled={page >= totalPages}
+                className="min-h-11 min-w-11 rounded-md disabled:opacity-30 hover:bg-card-hover focus-visible:outline focus-visible:outline-ring"
               >
                 <ChevronRight className="w-4 h-4 text-[#625f55]" />
               </button>
@@ -643,6 +710,7 @@ const ModernTransactionsView = ({
           )}
         </div>
         </div>
+        {detailPanel}
         <DocumentPreviewModal
           isOpen={!!previewDocumentUrl}
           onClose={() => setPreviewDocumentUrl('')}
@@ -660,7 +728,7 @@ const ModernTransactionsView = ({
       <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
 
         {/* ── Cabecera de período (mismo patrón que Inicio) ── */}
-        <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#b8ad78] pb-[18px] dark:border-border">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
           <div>
             <div
               className="font-mono text-[11px] uppercase text-[#4d699b]"
@@ -668,9 +736,8 @@ const ModernTransactionsView = ({
             >
               {periodoEyebrow}
             </div>
-            <h1 className="mt-1 font-serif text-[42px] font-bold leading-none text-foreground capitalize">
-              {periodoTitle}
-            </h1>
+            <h1 className="text-[28px] font-semibold leading-tight text-foreground">Movimientos</h1>
+            <p className="mt-1 text-sm capitalize text-muted-foreground">{periodoTitle}</p>
           </div>
           <HeaderActions />
         </div>
@@ -775,35 +842,7 @@ const ModernTransactionsView = ({
           />
         </div>
 
-        {/* ── Filtros ── */}
-        <div className="flex gap-2.5 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#625f55]" />
-            <input
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Buscar…"
-              className="w-full pl-9 pr-3 py-[7px] bg-secondary text-foreground font-mono text-[12px] border border-border rounded-sm placeholder:text-[#625f55] dark:placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
-            />
-          </div>
-          <FilterSelect
-            value={selectedType}
-            onChange={e => setSelectedType(e.target.value)}
-          >
-            <option value="all">Todos los tipos</option>
-            <option value="ingreso">Ingresos</option>
-            <option value="gasto">Gastos</option>
-          </FilterSelect>
-          <FilterSelect
-            value={selectedCategory}
-            onChange={e => setSelectedCategory(e.target.value)}
-          >
-            <option value="all">Todas las categorías</option>
-            {availableCategories.map(c => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </FilterSelect>
-        </div>
+        {filterControls}
 
         {/* ── KPIs del rango filtrado ── */}
         <div className="mb-5 grid grid-cols-3 gap-3.5">
@@ -835,6 +874,7 @@ const ModernTransactionsView = ({
         {/* ── Tabla ── */}
         <div className="rounded-md border border-border bg-card overflow-hidden">
           <table className="w-full">
+            <caption className="sr-only">Movimientos del período seleccionado, importes en ARS</caption>
             <thead>
               <tr className="border-b border-border">
                 <th
@@ -892,8 +932,12 @@ const ModernTransactionsView = ({
                   return (
                     <tr key={rowId} className="group border-b border-muted hover:bg-card-hover transition-colors last:border-b-0">
                       <td className="px-3.5 py-2.5 font-mono text-[12px] text-[#43436c] dark:text-muted-foreground">{displayDate}</td>
-                      <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">{descripcion}</td>
+                      <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">
+                        <button type="button" aria-label={`Ver detalle de ${descripcion}`} onClick={event => openDetail(event, t)}
+                          className="min-h-11 text-left font-medium hover:underline focus-visible:outline focus-visible:outline-ring">{descripcion}</button>
+                      </td>
                       <td className="px-3.5 py-2.5">
+                        <span className="mr-2 text-xs text-muted-foreground">{esIngreso ? 'Ingreso' : 'Gasto'}</span>
                         <Badge
                           variant="outline"
                           style={{ borderColor: pillColor, color: pillColor }}
@@ -905,7 +949,7 @@ const ModernTransactionsView = ({
                         {esIngreso ? '+' : '−'} {formatAmount(monto, { decimals: 0 })}
                       </td>
                       <td className="px-3.5 py-2.5">
-                        <div className="flex justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                        <div className="flex justify-end gap-1">
                           {attachedDocument.isValid && (
                             <button
                               type="button"
@@ -948,21 +992,23 @@ const ModernTransactionsView = ({
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-5 py-3.5 border-t border-muted">
               <p className="font-mono text-[12px] text-[#625f55] dark:text-muted-foreground">
-                Página {currentPage} de {totalPages} ({filtered.length} resultados)
+                Página {page} de {totalPages} ({filtered.length} resultados)
               </p>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => currentPage > 1 && setCurrentPage(p => p - 1)}
-                  disabled={currentPage === 1}
-                  className="p-1.5 rounded-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black/5"
+                  aria-label="Página anterior"
+                  onClick={() => page > 1 && setCurrentPage(page - 1)}
+                  disabled={page === 1}
+                  className="min-h-11 min-w-11 rounded-md disabled:opacity-30 hover:bg-card-hover focus-visible:outline focus-visible:outline-ring"
                 >
                   <ChevronLeft className="w-4 h-4 text-[#625f55]" />
                 </button>
-                <span className="font-mono text-[12px] text-foreground px-2">{currentPage}</span>
+                <span className="font-mono text-[12px] text-foreground px-2">{page}</span>
                 <button
-                  onClick={() => currentPage < totalPages && setCurrentPage(p => p + 1)}
-                  disabled={currentPage >= totalPages}
-                  className="p-1.5 rounded-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:bg-black/5"
+                  aria-label="Página siguiente"
+                  onClick={() => page < totalPages && setCurrentPage(page + 1)}
+                  disabled={page >= totalPages}
+                  className="min-h-11 min-w-11 rounded-md disabled:opacity-30 hover:bg-card-hover focus-visible:outline focus-visible:outline-ring"
                 >
                   <ChevronRight className="w-4 h-4 text-[#625f55]" />
                 </button>
@@ -972,6 +1018,7 @@ const ModernTransactionsView = ({
         </div>
       </div>
       </div>
+      {detailPanel}
       <DocumentPreviewModal
         isOpen={!!previewDocumentUrl}
         onClose={() => setPreviewDocumentUrl('')}

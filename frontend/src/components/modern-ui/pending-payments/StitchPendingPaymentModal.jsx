@@ -24,6 +24,7 @@ import {
   PENDING_PAYMENT_RECEIPT_FIELDS,
 } from '../../../utils/documentPreviewUrl';
 import { normalizeUploadFile, isAllowedUploadType } from '../../../utils/normalizeUploadFile';
+import { DEFAULT_PAYMENT_TYPE, PAYMENT_TYPES, normalizePaymentType } from '../../../utils/pendingPaymentTypes';
 import {
   formatLocalDateOnly,
   getSecondDueDateValue,
@@ -381,7 +382,7 @@ const StitchPendingPaymentModal = ({
     segunda_fecha_vencimiento: '',
     fecha_emision: '',
     Estado: 'pendiente',
-    Tipo: 'factura',
+    Tipo: DEFAULT_PAYMENT_TYPE,
     Prioridad: 'media',
     Recurrente: false,
     FrecuenciaRecurrencia: '',
@@ -426,7 +427,7 @@ const StitchPendingPaymentModal = ({
         segunda_fecha_vencimiento: formatLocalDateOnly(secondDueDate),
         fecha_emision: (payment.fecha_emision || '').split('T')[0] || '',
         Estado: payment.Estado || payment.estado || 'pendiente',
-        Tipo: payment.Tipo || payment.tipo || 'factura',
+        Tipo: normalizePaymentType(payment.Tipo || payment.tipo),
         Prioridad: payment.Prioridad || payment.prioridad || 'media',
         Recurrente: payment.Recurrente || payment.recurrente || false,
         FrecuenciaRecurrencia: payment.FrecuenciaRecurrencia || payment.frecuencia_recurrencia || '',
@@ -448,7 +449,7 @@ const StitchPendingPaymentModal = ({
         segunda_fecha_vencimiento: '',
         fecha_emision: '',
         Estado: 'pendiente',
-        Tipo: 'factura',
+        Tipo: DEFAULT_PAYMENT_TYPE,
         Prioridad: 'media',
         Recurrente: false,
         FrecuenciaRecurrencia: '',
@@ -744,15 +745,16 @@ const StitchPendingPaymentModal = ({
                 </div>
               </div>
 
-              {/* Tipo de Gasto (Radio Buttons Pills) */}
+              {/* Tipo de pago (Radio Buttons Pills) */}
               <fieldset className="space-y-3">
-                <legend className={labelClassName}>Tipo de gasto</legend>
+                <legend className={labelClassName}>¿Qué tipo de pago es?</legend>
+                <p className="text-[12px] text-muted-foreground">No hace falta que sea una factura: sirve para colegio, actividades, seguros o lo que necesites.</p>
                 <div className="flex flex-wrap gap-2">
-                  {['Servicio', 'Factura', 'Alquiler', 'Otro'].map((tipo) => (
+                  {PAYMENT_TYPES.map((tipo) => (
                     <label
-                      key={tipo}
-                      className={`flex cursor-pointer items-center gap-2 rounded-full border px-3.5 py-1.5 transition-colors focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-popover ${
-                        formData.Tipo.toLowerCase() === tipo.toLowerCase()
+                      key={tipo.value}
+                      className={`flex min-h-[44px] cursor-pointer items-center gap-2 rounded-full border px-3.5 py-1.5 transition-colors focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-popover ${
+                        formData.Tipo === tipo.value
                           ? selectedPillClassName
                           : inactivePillClassName
                       }`}
@@ -760,12 +762,12 @@ const StitchPendingPaymentModal = ({
                       <input
                         type="radio"
                         name="tipo"
-                        value={tipo.toLowerCase()}
-                        checked={formData.Tipo.toLowerCase() === tipo.toLowerCase()}
-                        onChange={() => setFormData(prev => ({...prev, Tipo: tipo.toLowerCase()}))}
+                        value={tipo.value}
+                        checked={formData.Tipo === tipo.value}
+                        onChange={() => setFormData(prev => ({...prev, Tipo: tipo.value}))}
                         className="sr-only"
                       />
-                      <span className="text-[12.5px] font-medium">{tipo}</span>
+                      <span className="text-[12.5px] font-medium">{tipo.label}</span>
                     </label>
                   ))}
                 </div>

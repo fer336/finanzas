@@ -1,0 +1,20 @@
+{
+  "title": "Finanzas · detalle y vencimientos",
+  "brief": "Segunda propuesta, una dirección Kanagawa Violet coherente con las tres pantallas originales. Detalle lateral en desktop y de pantalla completa en móvil; vencimientos con fecha fija del 15 de noviembre de 2026. Datos de ejemplo, edición y pagos simulados sin persistencia ni conexión a cuentas.",
+  "artboards": [
+    {
+      "file": "01-transaction-detail.html",
+      "title": "Movimientos · detalle sin perder contexto",
+      "tradeoff": "El panel modal conserva filtros y lista visible en desktop; bloquea la lista durante la consulta. En móvil ocupa toda la pantalla. Cerrar descarta cambios no guardados; eliminar exige confirmación aparte. Ediciones solo en memoria.",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "02-due-dates.html",
+      "title": "Vencimientos · urgencia y registro deliberado",
+      "tradeoff": "Agrupa pendientes por urgencia y separa consulta de registro simulado. Esta semana es una ventana explícita de siete días (15–21 nov), no la semana calendario. Sin intereses, movimientos reales ni comprobantes; el estado local se reinicia al recargar.",
+      "width": 1440,
+      "height": 1000
+    }
+  ]
+}

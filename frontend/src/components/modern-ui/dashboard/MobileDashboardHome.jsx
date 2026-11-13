@@ -1,12 +1,15 @@
-import { Fragment, useState } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Skeleton } from '../../ui/skeleton';
 import CategoriaDonut from './CategoriaDonut';
-import PillToggle from '../common/PillToggle';
-import KpiCard from '../common/KpiCard';
 import { useDashboardHomeData } from './useDashboardHomeData';
 import { useBalanceNeto } from '../../../hooks/useFinancialData';
+import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
+
+const panelClass = 'min-w-0 rounded-[10px] border border-border bg-card p-4 md:p-5';
+const controlClass = 'min-h-11 rounded-md border border-border px-3 text-sm hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-40';
+const headingClass = 'text-xl font-semibold text-foreground';
 
 function mesActualStr() {
   const now = new Date();
@@ -14,325 +17,247 @@ function mesActualStr() {
 }
 
 const EmptyState = ({ children }) => (
-  <p className="text-[13.5px] italic text-muted-foreground">{children}</p>
+  <p className="py-4 text-sm italic text-muted-foreground">{children}</p>
 );
-
 EmptyState.propTypes = { children: PropTypes.node };
 
-const MobileSkeleton = () => (
-  <div className="min-h-screen space-y-4 px-4 pb-28 pt-6">
-    <Skeleton className="h-[11px] w-32" />
-    <Skeleton className="h-9 w-48" />
-    <Skeleton className="h-[13px] w-full" />
-    <Skeleton className="h-[76px] rounded-md" />
-    <div className="space-y-3">
-      {[0, 1, 2].map((i) => (
-        <Skeleton key={i} className="h-[84px] rounded-md" />
+function ModeSelector({ label, options, value, onChange }) {
+  return (
+    <div role="group" aria-label={label} className="flex flex-wrap gap-2">
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          aria-pressed={value === option.value}
+          onClick={() => onChange(option.value)}
+          className={`${controlClass} ${value === option.value ? 'border-primary bg-primary text-primary-foreground hover:bg-primary-hover' : 'bg-secondary text-foreground'}`}
+        >
+          {option.label}
+        </button>
       ))}
     </div>
-    <Skeleton className="h-[220px] rounded-md" />
-    <Skeleton className="h-[170px] rounded-md" />
-    <Skeleton className="h-[90px] rounded-md" />
-  </div>
-);
+  );
+}
+ModeSelector.propTypes = {
+  label: PropTypes.string.isRequired,
+  options: PropTypes.array.isRequired,
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+};
 
-/**
- * MobileDashboardHome — vista "Inicio" del tema Kanagawa en mobile (<768px).
- * Mismo contenido que ModernDashboard (desktop), en una sola columna. Ver
- * design_handoff_rediseno_papel/README.md sección "2. Inicio (dashboard)" y
- * "Responsive" — el FAB verde flotante desapareció: la acción primaria es
- * "+ Nuevo" en ModernTopNav.
- */
+/** Resumen compartido: el período nunca se confunde con el saldo acumulado. */
 const MobileDashboardHome = ({
-  user,
   transactions = [],
   pendingPayments = [],
   prestamos = [],
   dollarQuotes,
   loading = false,
   onNavigate,
-  // onNewTransaction ya no se usa acá: el FAB verde flotante se sacó (ver
-  // README "Mapa de migración" — la acción primaria es "+ Nuevo" en
-  // ModernTopNav). Se mantiene en las props/PropTypes por compatibilidad.
+  onNewTransaction,
+  compact = true,
 }) => {
-  const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(mesActualStr);
-  const [balanceMode, setBalanceMode] = useState('acumulado');
+  const [balanceMode, setBalanceMode] = useState('mensual');
   const [donutMode, setDonutMode] = useState('gastos');
+  const { isAmountVisible } = useAmountVisibility();
   const { data: balanceNetoData } = useBalanceNeto(selectedMonth);
   const {
-    formatAmount,
-    periodoLabel,
-    tituloMes,
-    veredicto,
-    balanceDisponible,
-    apartadoObjetivos,
-    usdEquivalent,
-    kpis,
-    resultadoMes,
-    movimientosRecientes,
-    categoriasOrdenadas,
-    categoriasIngresosOrdenadas,
-    totalPendiente,
-    pendientesActivos,
-    proximoVencimiento,
-    proximoVencimientoLabel,
-    prestamosActivos,
-    totalPrestamosADevolver,
-    proximoPrestamo,
-    proximoPrestamoLabel,
+    formatAmount, periodoLabel, tituloMes, veredicto,
+    balanceDisponible, apartadoObjetivos, usdEquivalent, kpis, resultadoMes,
+    movimientosRecientes, categoriasOrdenadas, categoriasIngresosOrdenadas,
+    evolucionMensual, totalPendiente, pendientesActivos,
+    proximoVencimiento, proximoVencimientoLabel,
+    prestamosActivos, totalPrestamosADevolver, proximoPrestamo, proximoPrestamoLabel,
   } = useDashboardHomeData({
-    transactions,
-    pendingPayments,
-    prestamos,
-    dollarQuotes,
+    transactions, pendingPayments, prestamos, dollarQuotes,
     balanceNeto: balanceNetoData?.balance_neto,
     balanceDisponible: balanceNetoData?.balance_disponible,
     apartadoObjetivos: balanceNetoData?.apartado_objetivos,
     mes: selectedMonth,
   });
 
-  const goToPrevMonth = () => {
-    const [yr, mo] = selectedMonth.split('-').map(Number);
-    const d = new Date(yr, mo - 2, 1);
-    setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-  };
-  const goToNextMonth = () => {
-    const [yr, mo] = selectedMonth.split('-').map(Number);
-    const d = new Date(yr, mo, 1);
-    if (d <= now) setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
-  };
-  const goToToday = () => setSelectedMonth(mesActualStr());
-  const isCurrentMonth = selectedMonth >= mesActualStr();
-
+  function changeMonth(offset) {
+    const [year, month] = selectedMonth.split('-').map(Number);
+    const date = new Date(year, month - 1 + offset, 1);
+    const next = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    if (next <= mesActualStr()) setSelectedMonth(next);
+  }
+  function navigatePayments(section) {
+    try { localStorage.setItem('vencimientos_section', section); } catch { /* La navegación funciona sin almacenamiento. */ }
+    onNavigate?.('pending-payments-full');
+  }
+  const amount = (value) => formatAmount(value, { decimals: 0 });
+  const signedAmount = (value) => `${value < 0 ? '−' : '+'} ${amount(Math.abs(value))}`;
   const donutData = donutMode === 'gastos' ? categoriasOrdenadas : categoriasIngresosOrdenadas;
-  const donutTotal = donutData.reduce((sum, c) => sum + c.monto, 0);
-  const balanceMostrado = balanceMode === 'mensual' ? resultadoMes : balanceDisponible;
-  const goToVencimientos = () => {
-    try { localStorage.setItem('vencimientos_section', 'vencimientos'); } catch { /* ignore */ }
-    onNavigate && onNavigate('pending-payments-full');
-  };
-  const goToPrestamos = () => {
-    try { localStorage.setItem('vencimientos_section', 'prestamos'); } catch { /* ignore */ }
-    onNavigate && onNavigate('pending-payments-full');
-  };
+  const donutTotal = donutData.reduce((sum, category) => sum + category.monto, 0);
+  const selectedBalance = balanceMode === 'mensual' ? resultadoMes : balanceDisponible;
+  const maxEvolution = Math.max(1, ...evolucionMensual.flatMap((month) => [month.ingresos, month.gastos]));
+  const pageClass = compact
+    ? 'mx-auto max-w-[1100px] space-y-6 px-4 pb-28 pt-6 text-foreground'
+    : 'mx-auto max-w-[1100px] space-y-6 px-[34px] py-7 text-foreground';
 
   if (loading) {
-    return <MobileSkeleton />;
+    return (
+      <div role="status" aria-label="Cargando resumen" className={pageClass}>
+        <Skeleton className="h-11 w-48 motion-reduce:animate-none" />
+        <Skeleton className="h-40 w-full motion-reduce:animate-none" />
+        <Skeleton className="h-64 w-full motion-reduce:animate-none" />
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen space-y-5 px-4 pb-28 pt-6">
-
-      {/* ── Cabecera de período ── */}
-      <div>
-        <div className="flex items-center justify-between gap-2">
-          <div className="font-mono text-[10px] uppercase" style={{ color: 'var(--info)', letterSpacing: '.16em' }}>
-            Período {periodoLabel}
-          </div>
-          <div className="flex items-center gap-1 rounded-full border border-border bg-card px-1.5 py-1">
-            <button onClick={goToPrevMonth} className="p-1 rounded-full hover:bg-black/5 transition-colors dark:hover:bg-card-hover" title="Mes anterior">
-              <ChevronLeft className="w-3.5 h-3.5 text-muted-foreground" />
-            </button>
-            <button onClick={goToToday} className="px-1.5 font-mono text-[11px] text-muted-foreground transition-colors hover:text-foreground">
-              hoy
-            </button>
-            <button
-              onClick={goToNextMonth}
-              disabled={isCurrentMonth}
-              className="p-1 rounded-full hover:bg-black/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed dark:hover:bg-card-hover"
-              title="Mes siguiente"
-            >
-              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-            </button>
-          </div>
+    <div className={pageClass}>
+      <header className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-[28px] font-semibold tracking-tight">Tu mes, en claro</h1>
+          <p className="mt-1 text-secondary-foreground">{tituloMes} · Resumen en ARS</p>
+          <p className="mt-2 max-w-[65ch] text-sm text-muted-foreground">{veredicto}</p>
         </div>
-        <h1 className="mt-1 font-serif text-[30px] font-bold leading-tight text-foreground">
-          {tituloMes}
-        </h1>
-        <p className="mt-1.5 text-[13.5px] text-secondary-foreground dark:text-muted-foreground">{veredicto}</p>
-      </div>
-
-      {/* Sello de saldo */}
-      <div className="kanagawa-card rounded-md px-[18px] py-3">
-        <div className="flex items-center justify-between gap-2">
-          <div className="font-mono text-[10px] uppercase tracking-[.1em] text-muted-foreground">
-            {balanceMode === 'mensual' ? 'Resultado del mes' : 'Balance disponible'}
-          </div>
-          <PillToggle
-            options={[{ value: 'mensual', label: 'Mensual' }, { value: 'acumulado', label: 'Acumulado' }]}
-            value={balanceMode}
-            onChange={setBalanceMode}
-            activeClassName="bg-foreground text-background"
-          />
-        </div>
-        <div className="mt-1 font-mono text-[24px] font-semibold text-foreground">
-          {balanceMostrado < 0 ? '− ' : ''}{formatAmount(Math.abs(balanceMostrado), { decimals: 0 })}
-        </div>
-        {balanceMode === 'acumulado' && (
-          <div className="font-mono text-[11px] text-muted-foreground">{usdEquivalent}</div>
+        {onNewTransaction && (
+          <button type="button" onClick={onNewTransaction} className={`${controlClass} flex items-center gap-2 border-primary bg-primary text-primary-foreground hover:bg-primary-hover`}>
+            <Plus aria-hidden="true" className="h-4 w-4" /> Nuevo movimiento
+          </button>
         )}
-        {balanceMode === 'acumulado' && apartadoObjetivos > 0 && (
-          <div className="font-mono text-[11px] text-muted-foreground">
-            Apartado en objetivos: {formatAmount(apartadoObjetivos, { decimals: 0 })}
-          </div>
-        )}
-      </div>
+        <nav aria-label="Período del resumen" className="flex w-full flex-wrap items-center gap-2">
+          <button type="button" aria-label="Mes anterior" onClick={() => changeMonth(-1)} className={controlClass}>
+            <ChevronLeft aria-hidden="true" className="h-4 w-4" />
+          </button>
+          <span className="font-mono text-sm">{periodoLabel}</span>
+          <button type="button" aria-label="Mes siguiente" disabled={selectedMonth >= mesActualStr()} onClick={() => changeMonth(1)} className={controlClass}>
+            <ChevronRight aria-hidden="true" className="h-4 w-4" />
+          </button>
+          <button type="button" onClick={() => setSelectedMonth(mesActualStr())} className={controlClass}>Hoy</button>
+        </nav>
+      </header>
 
-      {/* ── KPIs (1 columna en mobile) ── */}
-      <div className="space-y-3">
-        {kpis.map((kpi) => (
-          <KpiCard
-            key={kpi.key}
-            kpiKey={kpi.key}
-            label={kpi.label}
-            value={kpi.value}
-            subtext={kpi.subtext}
-            borderColor={kpi.borderColor}
-            valueColor={kpi.valueColor}
-          />
+      <section aria-label="Resumen financiero del período" className={`${panelClass} grid gap-4 md:grid-cols-[1.3fr_1fr_1fr]`}>
+        <div className="min-w-0 border-b border-border pb-4 md:border-b-0 md:border-r md:pb-0 md:pr-5">
+          <h2 className="text-base font-medium">Balance del período</h2>
+          <p className="my-2 break-words text-[32px] font-semibold tabular-nums">{signedAmount(resultadoMes)}</p>
+          <p className="text-sm text-muted-foreground">Ingresos menos gastos. No es saldo bancario.</p>
+        </div>
+        {kpis.filter((kpi) => kpi.key !== 'resultado').map((kpi) => (
+          <div key={kpi.key} className="min-w-0">
+            <h2 className="text-base font-medium">{kpi.label}</h2>
+            <p className="my-2 break-words text-2xl font-semibold tabular-nums">
+              {kpi.key === 'ingresos' ? '+' : '−'} {kpi.value}
+            </p>
+            <p className="text-sm text-muted-foreground">{kpi.subtext}</p>
+          </div>
         ))}
-      </div>
+      </section>
 
-      {/* ── Movimientos recientes ── */}
-      <div className="kanagawa-card rounded-md px-5 py-[18px]">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-serif text-[17px] font-semibold text-foreground">Movimientos recientes</h2>
-          <button
-            type="button"
-            onClick={() => onNavigate && onNavigate('transactions-full')}
-            className="text-[13px] hover:underline"
-            style={{ color: 'var(--info)' }}
-          >
-            ver todos
+      <section aria-labelledby="due-heading" className={panelClass}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="due-heading" className={headingClass}>Próximos vencimientos</h2>
+          <button type="button" onClick={() => navigatePayments('vencimientos')} className={controlClass} aria-label="Ver próximos vencimientos">
+            Ver vencimientos ({pendientesActivos.length})
           </button>
         </div>
-
-        {movimientosRecientes.length === 0 ? (
-          <EmptyState>Sin movimientos en esta vista.</EmptyState>
-        ) : (
-          <div className="grid min-w-0 grid-cols-[46px_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-[9px] text-[13.5px]">
-            {movimientosRecientes.map((m, i) => (
-              <Fragment key={m.id ?? `${m.fechaMMDD}-${m.descripcion}-${i}`}>
-                <span
-                  className={`font-mono text-[11px] text-muted-foreground ${i > 0 ? 'border-t border-dashed border-muted pt-[9px]' : ''}`}
-                >
-                  {m.fechaMMDD}
-                </span>
-                <span className={`min-w-0 ${i > 0 ? 'border-t border-dashed border-muted pt-[9px]' : ''}`}>
-                  <span className="block truncate">{m.descripcion}</span>
-                  <span
-                    className="block truncate font-mono text-[10px] uppercase"
-                    style={{ color: m.esIngreso ? 'var(--success)' : 'var(--destructive)' }}
-                  >
-                    {m.categoria}
-                  </span>
-                </span>
-                <span
-                  className={`shrink-0 whitespace-nowrap text-right font-mono font-semibold ${i > 0 ? 'border-t border-dashed border-muted pt-[9px]' : ''}`}
-                  style={{ color: m.esIngreso ? 'var(--success)' : 'var(--destructive)' }}
-                >
-                  {m.montoFormatted}
-                </span>
-              </Fragment>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* ── Gastos / Ingresos por categoría ── */}
-      <div className="kanagawa-card rounded-md px-5 py-[18px]">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <h2 className="font-serif text-[17px] font-semibold text-foreground">
-            {donutMode === 'gastos' ? 'Gastos por categoría' : 'Ingresos por categoría'}
-          </h2>
-          <PillToggle
-            options={[{ value: 'gastos', label: 'Gastos' }, { value: 'ingresos', label: 'Ingresos' }]}
-            value={donutMode}
-            onChange={setDonutMode}
-            activeClassName="bg-foreground text-background"
-          />
-        </div>
-        {donutData.length === 0 ? (
-          <EmptyState>Sin {donutMode === 'gastos' ? 'gastos' : 'ingresos'} en esta vista.</EmptyState>
-        ) : (
-          <div className="flex min-w-0 items-center gap-4">
-            <CategoriaDonut
-              categorias={donutData}
-              total={donutTotal}
-              formatAmount={formatAmount}
-              size={96}
-            />
-            <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] gap-x-3.5 gap-y-[5px] text-[12.5px]">
-              {donutData.map((c) => (
-                <Fragment key={c.nombre}>
-                  <span className="flex min-w-0 items-center gap-[7px] text-foreground">
-                    <span className="h-[9px] w-[9px] shrink-0 rounded-sm" style={{ background: c.color }} />
-                    <span className="min-w-0 truncate">{c.nombre}</span>
-                  </span>
-                  <span className="shrink-0 whitespace-nowrap text-right font-mono text-secondary-foreground dark:text-muted-foreground">{c.pct}%</span>
-                </Fragment>
-              ))}
+        <p className="mt-2 text-sm text-muted-foreground">Importes por pagar; este listado no los registra como gastos.</p>
+        {pendientesActivos.length === 0 ? <EmptyState>Sin vencimientos pendientes.</EmptyState> : (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4">
+            <div>
+              <h3 className="font-medium">{proximoVencimiento?.nombre || 'Pendientes sin próximo vencimiento confirmado'}</h3>
+              <p className="text-sm text-muted-foreground">{proximoVencimientoLabel || 'Revisá fechas y pagos vencidos en Vencimientos.'}</p>
             </div>
+            {proximoVencimiento && <p className="font-mono tabular-nums">{amount(proximoVencimiento.monto)}</p>}
           </div>
         )}
-      </div>
-
-      {/* ── Aviso vencimientos ── */}
-      <button
-        type="button"
-        onClick={goToVencimientos}
-        className="kanagawa-callout-warning kanagawa-interactive w-full rounded-md border px-5 py-4 text-left"
-      >
-        <div className="flex items-baseline justify-between">
-          <span className="font-serif text-[15px] font-semibold text-foreground">Vencimientos</span>
-          <span className="font-mono text-[12px] font-semibold text-accent-foreground">
-            {formatAmount(totalPendiente, { decimals: 0 })}
-          </span>
+        <div className="mt-3 flex flex-wrap justify-between gap-2 border-t border-border pt-3 text-sm">
+          <span>Total pendiente · ARS</span><strong className="tabular-nums">{amount(totalPendiente)}</strong>
         </div>
-        {pendientesActivos.length === 0 ? (
-          <p className="mt-1.5 text-[12.5px] italic text-muted-foreground">Sin vencimientos pendientes.</p>
-        ) : (
-          <p className="mt-1.5 text-[12.5px] text-secondary-foreground dark:text-muted-foreground">
-            {pendientesActivos.length} pendiente{pendientesActivos.length === 1 ? '' : 's'}
-            {proximoVencimiento && proximoVencimientoLabel ? (
-              <>
-                {' '}· el más próximo vence el <strong>{proximoVencimientoLabel}</strong> ({proximoVencimiento.nombre}, {formatAmount(proximoVencimiento.monto, { decimals: 0 })})
-              </>
-            ) : (
-              ' · sin fecha confirmada para el más próximo'
-            )}
-          </p>
-        )}
-      </button>
+      </section>
 
-      {/* ── Aviso préstamos ── */}
-      <button
-        type="button"
-        onClick={goToPrestamos}
-        className="kanagawa-callout-info kanagawa-interactive w-full rounded-md border px-5 py-4 text-left"
-      >
-        <div className="flex items-baseline justify-between">
-          <span className="font-serif text-[15px] font-semibold text-foreground">Préstamos</span>
-          <span className="font-mono text-[12px] font-semibold" style={{ color: 'var(--result-positive)' }}>
-            {formatAmount(totalPrestamosADevolver, { decimals: 0 })}
-          </span>
+      <section aria-labelledby="recent-heading" className={panelClass}>
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 id="recent-heading" className={headingClass}>Movimientos recientes</h2>
+          <button type="button" onClick={() => onNavigate?.('transactions-full')} className={controlClass}>Ver movimientos →</button>
         </div>
-        {prestamosActivos.length === 0 ? (
-          <p className="mt-1.5 text-[12.5px] italic text-muted-foreground">Sin préstamos pendientes.</p>
-        ) : (
-          <p className="mt-1.5 text-[12.5px] text-secondary-foreground dark:text-muted-foreground">
-            {prestamosActivos.length} préstamo{prestamosActivos.length === 1 ? '' : 's'} activo{prestamosActivos.length === 1 ? '' : 's'}
-            {proximoPrestamo && proximoPrestamoLabel ? (
-              <>
-                {' '}· el más próximo vence el <strong>{proximoPrestamoLabel}</strong> ({proximoPrestamo.nombre}, {formatAmount(proximoPrestamo.montoADevolver, { decimals: 0 })})
-              </>
-            ) : (
-              ' · sin fecha confirmada para el más próximo'
-            )}
-          </p>
+        <p className="text-sm text-muted-foreground">{tituloMes} · Importes en ARS</p>
+        {movimientosRecientes.length === 0 ? <EmptyState>Sin movimientos en esta vista.</EmptyState> : (
+          <ul className="mt-3 divide-y divide-border">
+            {movimientosRecientes.map((movement, index) => (
+              <li key={movement.id ?? index} className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2 py-4">
+                <div className="min-w-0 flex-1 basis-36">
+                  <p className="break-words font-medium">{movement.descripcion}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{movement.fechaMMDD} · {movement.categoria}</p>
+                </div>
+                <div className="max-w-full text-right">
+                  <p className="break-words font-mono font-semibold tabular-nums">{movement.montoFormatted}</p>
+                  <p className="text-sm text-muted-foreground">{movement.esIngreso ? 'Ingreso' : 'Gasto'}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
-      </button>
+      </section>
+
+      <details className={panelClass}>
+        <summary className="min-h-11 cursor-pointer rounded-md py-2 text-lg font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">Más seguimiento</summary>
+        <p className="mb-5 text-sm text-muted-foreground">Balance acumulado, categorías, préstamos y evolución del período seleccionado.</p>
+        <div className="grid min-w-0 gap-6 md:grid-cols-2">
+          <section aria-label="Consulta de balance" className="min-w-0">
+            <h2 className={`${headingClass} mb-3`}>Consulta de balance</h2>
+            <ModeSelector label="Tipo de balance" value={balanceMode} onChange={setBalanceMode} options={[{ value: 'mensual', label: 'Mensual' }, { value: 'acumulado', label: 'Acumulado' }]} />
+            <h3 className="mt-4 text-sm text-muted-foreground">{balanceMode === 'mensual' ? 'Resultado del mes' : 'Balance acumulado disponible'}</h3>
+            <p className="my-2 break-words text-2xl font-semibold tabular-nums">{signedAmount(selectedBalance)}</p>
+            {balanceMode === 'acumulado' && (
+              <>
+                <p className="text-sm text-muted-foreground">{isAmountVisible ? usdEquivalent : '≈ USD ****'}</p>
+                {apartadoObjetivos > 0 && <p className="mt-1 text-sm text-muted-foreground">Apartado en objetivos: {amount(apartadoObjetivos)}</p>}
+              </>
+            )}
+          </section>
+          <section className="min-w-0">
+            <h2 className={`${headingClass} mb-3`}>{donutMode === 'gastos' ? 'Gastos por categoría' : 'Ingresos por categoría'}</h2>
+            <ModeSelector label="Tipo de categorías" value={donutMode} onChange={setDonutMode} options={[{ value: 'gastos', label: 'Gastos' }, { value: 'ingresos', label: 'Ingresos' }]} />
+            {donutData.length === 0 ? <EmptyState>Sin {donutMode} en esta vista.</EmptyState> : (
+              <div className="mt-4 flex flex-wrap items-center gap-4">
+                <CategoriaDonut categorias={donutData} total={donutTotal} formatAmount={formatAmount} size={96} />
+                <ul className="min-w-0 flex-1 space-y-2 text-sm">
+                  {donutData.map((category) => (
+                    <li key={category.nombre} className="flex justify-between gap-3"><span className="break-words">{category.nombre}</span><span>{category.pct}%</span></li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </section>
+          <section>
+            <h2 className={headingClass}>Préstamos</h2>
+            <p className="my-2 font-mono tabular-nums">{amount(totalPrestamosADevolver)}</p>
+            <p className="mb-3 text-sm text-muted-foreground">
+              {prestamosActivos.length === 0 ? 'Sin préstamos pendientes.' : `${prestamosActivos.length} préstamos activos`}
+              {proximoPrestamo && proximoPrestamoLabel && ` · ${proximoPrestamo.nombre}, ${proximoPrestamoLabel}, ${amount(proximoPrestamo.montoADevolver)}`}
+            </p>
+            <button type="button" onClick={() => navigatePayments('prestamos')} className={controlClass}>Ver préstamos</button>
+          </section>
+          <section className="min-w-0">
+            <h2 className={headingClass}>Evolución mensual</h2>
+            <p className="mt-2 text-sm text-muted-foreground">Últimos seis meses en ARS. El mes en curso es parcial; no es una proyección.</p>
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full text-left text-sm tabular-nums">
+                <caption className="sr-only">Ingresos y gastos registrados por mes</caption>
+                <thead><tr><th scope="col" className="py-2">Mes</th><th scope="col" className="px-2 text-right">Ingresos</th><th scope="col" className="text-right">Gastos</th></tr></thead>
+                <tbody>
+                  {evolucionMensual.map((month) => (
+                    <tr key={month.mes} className="border-t border-border">
+                      <th scope="row" className="py-2 font-normal">{month.mes}</th>
+                      {['ingresos', 'gastos'].map((type) => (
+                        <td key={type} className="px-1 py-2 text-right">
+                          {amount(month[type])}
+                          {isAmountVisible && <span aria-hidden="true" className={`ml-auto mt-1 block h-1 rounded-full ${type === 'ingresos' ? 'bg-primary' : 'bg-muted-foreground'}`} style={{ width: `${month[type] / maxEvolution * 100}%` }} />}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </details>
     </div>
   );
 };
@@ -346,6 +271,7 @@ MobileDashboardHome.propTypes = {
   loading: PropTypes.bool,
   onNavigate: PropTypes.func,
   onNewTransaction: PropTypes.func,
+  compact: PropTypes.bool,
 };
 
 export default MobileDashboardHome;

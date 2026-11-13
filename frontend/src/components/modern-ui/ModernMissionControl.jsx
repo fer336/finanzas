@@ -1056,6 +1056,9 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
             onDeleteTransaction={handleDeleteTransaction}
             onBulkUpload={handleBulkUpload}
             onExportCSV={handleExportCSV}
+            pendingPayments={pendingPayments}
+            onPayPending={handleMarkPendingPaymentAsPaid}
+            onGoToDueDates={() => handleNavigate('pending-payments')}
             loading={loadingStats}
           />
         );

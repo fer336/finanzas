@@ -129,3 +129,32 @@ describe('StitchPendingPaymentModal document initial state', () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe('StitchPendingPaymentModal payment type', () => {
+  afterEach(cleanup);
+
+  it('offers the five payment types, not only invoices', () => {
+    renderModal(basePayment);
+
+    ['Servicio o factura', 'Colegio y comedor', 'Actividad', 'Seguro', 'Otro'].forEach((label) => {
+      expect(screen.getByRole('radio', { name: label })).toBeInTheDocument();
+    });
+  });
+
+  it('shows a legacy factura payment as Servicio o factura', () => {
+    renderModal({ ...basePayment, tipo: 'factura' });
+
+    expect(screen.getByRole('radio', { name: 'Servicio o factura' })).toBeChecked();
+  });
+
+  it('saves the chosen type as a slug', async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    renderModal({ ...basePayment, tipo: 'factura' }, onSave);
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Actividad' }));
+    fireEvent.click(screen.getByRole('button', { name: /guardar cambios/i }));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalled());
+    expect(onSave.mock.calls[0][0]).toMatchObject({ Tipo: 'actividad' });
+  });
+});

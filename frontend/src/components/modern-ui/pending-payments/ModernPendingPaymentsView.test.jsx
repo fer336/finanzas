@@ -283,3 +283,80 @@ describe('ModernPendingPaymentsView document actions', () => {
     expect(screen.getByText('Factura vencida').closest('.rounded-md').className).toContain('bg-[#f9e1e3]');
   });
 });
+
+describe('ModernPendingPaymentsView payment types', () => {
+  const typedPayments = () => [
+    { ...createPaymentBase(), id: 'p-seguro', nombre: 'Seguro del auto', tipo: 'seguro' },
+    { ...createPaymentBase(), id: 'p-gym', nombre: 'Gimnasia de mi hija', tipo: 'actividad' },
+    { ...createPaymentBase(), id: 'p-luz', nombre: 'Factura de luz', tipo: 'factura' },
+    { ...createPaymentBase(), id: 'p-sin-tipo', nombre: 'Cosa suelta' },
+  ];
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(FROZEN_NOW);
+    const store = new Map();
+    vi.stubGlobal('localStorage', {
+      getItem: vi.fn((key) => store.get(key) || null),
+      setItem: vi.fn((key, value) => store.set(key, String(value))),
+      removeItem: vi.fn((key) => store.delete(key)),
+      clear: vi.fn(() => store.clear()),
+    });
+  });
+
+  afterEach(() => {
+    cleanup();
+    pendingPaymentsData = [];
+    isMobile = false;
+    amountsVisible = true;
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it('shows one chip per payment type with counts; legacy and missing types fall into their group', () => {
+    renderView(typedPayments());
+
+    const chips = within(screen.getByRole('group', { name: /tipo de pago/i }));
+    expect(chips.getByRole('button', { name: /^Todos\s*4$/ })).toBeInTheDocument();
+    expect(chips.getByRole('button', { name: /^Servicios\s*1$/ })).toBeInTheDocument();
+    expect(chips.getByRole('button', { name: /^Colegio y comedor\s*0$/ })).toBeInTheDocument();
+    expect(chips.getByRole('button', { name: /^Actividades\s*1$/ })).toBeInTheDocument();
+    expect(chips.getByRole('button', { name: /^Seguros\s*1$/ })).toBeInTheDocument();
+    expect(chips.getByRole('button', { name: /^Otros\s*1$/ })).toBeInTheDocument();
+  });
+
+  it('filters the list by the selected type and goes back to all', () => {
+    renderView(typedPayments());
+
+    fireEvent.click(screen.getByRole('button', { name: /^Actividades\s*1$/ }));
+    expect(screen.getByText('Gimnasia de mi hija')).toBeInTheDocument();
+    expect(screen.queryByText('Seguro del auto')).not.toBeInTheDocument();
+    expect(screen.queryByText('Factura de luz')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Actividades\s*1$/ })).toHaveAttribute('aria-pressed', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: /^Todos\s*4$/ }));
+    expect(screen.getByText('Seguro del auto')).toBeInTheDocument();
+    expect(screen.getByText('Factura de luz')).toBeInTheDocument();
+  });
+
+  it('explains an empty type instead of showing a blank list', () => {
+    renderView(typedPayments());
+
+    fireEvent.click(screen.getByRole('button', { name: /^Colegio y comedor\s*0$/ }));
+    expect(screen.getByText(/no hay pagos de este tipo/i)).toBeInTheDocument();
+  });
+
+  it('offers the same type chips on mobile', () => {
+    renderView(typedPayments(), true);
+
+    fireEvent.click(screen.getByRole('button', { name: /^Seguros\s*1$/ }));
+    expect(screen.getByText('Seguro del auto')).toBeInTheDocument();
+    expect(screen.queryByText('Gimnasia de mi hija')).not.toBeInTheDocument();
+  });
+
+  it('labels each row with its payment type', () => {
+    renderView(typedPayments());
+
+    expect(screen.getAllByText('Actividad').length).toBeGreaterThan(0);
+  });
+});

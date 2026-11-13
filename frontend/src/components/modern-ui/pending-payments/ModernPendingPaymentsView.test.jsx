@@ -6,6 +6,7 @@ import ModernPendingPaymentsView from './ModernPendingPaymentsView';
 const FROZEN_NOW = new Date(2026, 6, 15, 12, 0, 0);
 let pendingPaymentsData = [];
 let isMobile = false;
+let amountsVisible = true;
 
 vi.mock('../../../hooks/useFinancialData', () => ({
   QUERY_KEYS: { pendingPayments: 'pendingPayments' },
@@ -22,7 +23,10 @@ vi.mock('../../../hooks/use-mobile', () => ({
 
 vi.mock('../../../contexts/AmountVisibilityContext', () => ({
   useAmountVisibility: () => ({
-    formatAmount: (value) => `$${Number(value).toLocaleString('es-AR')}`,
+    formatAmount: (value, options = {}) => {
+      if (!amountsVisible) return '****';
+      return `${options.currency === false ? '' : '$'}${Number(value).toLocaleString('es-AR')}`;
+    },
   }),
 }));
 
@@ -68,8 +72,98 @@ describe('ModernPendingPaymentsView document actions', () => {
     cleanup();
     pendingPaymentsData = [];
     isMobile = false;
+    amountsVisible = true;
     vi.unstubAllGlobals();
     vi.useRealTimers();
+  });
+
+  it.each([false, true])('groups local-date boundaries without treating arrears or paid as overdue (mobile=%s)', (mobile) => {
+    renderView([
+      { ...createPaymentBase(), id: 'today', nombre: 'Hoy', fechavencimiento: '2026-07-15' },
+      { ...createPaymentBase(), id: 'six', nombre: 'Día seis', fechavencimiento: '2026-07-21' },
+      { ...createPaymentBase(), id: 'seven', nombre: 'Día siete', fechavencimiento: '2026-07-22' },
+      { ...createPaymentBase(), id: 'overdue', nombre: 'Ayer', fechavencimiento: '2026-07-14' },
+      { ...createPaymentBase(), id: 'arrears', nombre: 'Segunda fecha hoy', fechavencimiento: '2026-07-14', segunda_fecha_vencimiento: '2026-07-15' },
+      { ...createPaymentBase(), id: 'paid', nombre: 'Ya pagado', fechavencimiento: '2026-07-14', estado: 'pagado' },
+    ], mobile);
+    fireEvent.change(screen.getByLabelText(/filtrar vencimientos por estado/i), { target: { value: 'all' } });
+    const groupOf = (name) => screen.getByText(name).closest('[data-urgency-group]').dataset.urgencyGroup;
+    expect(groupOf('Hoy')).toBe('Próximos 7 días');
+    expect(groupOf('Día seis')).toBe('Próximos 7 días');
+    expect(groupOf('Día siete')).toBe('Más adelante');
+    expect(groupOf('Ayer')).toBe('Vencidos');
+    expect(groupOf('Segunda fecha hoy')).toBe('En mora');
+    expect(groupOf('Ya pagado')).toBe('Pagados');
+  });
+
+  it.each([false, true])('keeps detail read-only and payment preparation deliberate (mobile=%s)', (mobile) => {
+    pendingPaymentsData = [createPaymentBase()];
+    isMobile = mobile;
+    const onMarcarPagado = vi.fn();
+    render(<ModernPendingPaymentsView onMarcarPagado={onMarcarPagado} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Ver detalle de Seguro del auto' }));
+    const dialog = screen.getByRole('dialog', { name: 'Detalle del vencimiento' });
+    expect(within(dialog).getByText('Póliza mensual')).toBeInTheDocument();
+    expect(onMarcarPagado).not.toHaveBeenCalled();
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Registrar pago' }));
+    expect(onMarcarPagado).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ id: 'pending-payment-1', monto: 1200 }));
+  });
+
+  it('retains pagination before grouping and resets the page when searching', () => {
+    renderView(Array.from({ length: 21 }, (_, index) => ({ ...createPaymentBase(), id: String(index), nombre: `Servicio ${index}` })));
+    expect(screen.queryByText('Servicio 20')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Página siguiente' }));
+    expect(screen.getByText('Servicio 20')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Buscar vencimientos'), { target: { value: 'Servicio 0' } });
+    expect(screen.getByText('Servicio 0')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Página siguiente' })).not.toBeInTheDocument();
+  });
+
+  it('groups across a local month boundary in accumulated mode', () => {
+    vi.setSystemTime(new Date(2026, 6, 30, 23, 30));
+    renderView([
+      { ...createPaymentBase(), id: 'six', nombre: 'Dentro del rango', fechavencimiento: '2026-08-05' },
+      { ...createPaymentBase(), id: 'seven', nombre: 'Fuera del rango', fechavencimiento: '2026-08-06' },
+    ]);
+    fireEvent.click(screen.getByRole('button', { name: 'Acumulado' }));
+    expect(screen.getByText('Dentro del rango').closest('[data-urgency-group]')).toHaveAttribute('data-urgency-group', 'Próximos 7 días');
+    expect(screen.getByText('Fuera del rango').closest('[data-urgency-group]')).toHaveAttribute('data-urgency-group', 'Más adelante');
+  });
+
+  it('does not sum different currencies into an ARS amount', () => {
+    renderView([
+      { ...createPaymentBase(), id: 'ars', monto: 1000 },
+      { ...createPaymentBase(), id: 'usd', moneda: 'USD', monto: 50 },
+    ]);
+    expect(screen.getAllByText('$1.000 · USD 50')).toHaveLength(2);
+    expect(screen.queryByText('$1.050')).not.toBeInTheDocument();
+  });
+
+  it('honors amount privacy in summaries, rows and read-only detail', () => {
+    amountsVisible = false;
+    renderView(createPaymentBase());
+    fireEvent.click(screen.getByRole('button', { name: 'Ver detalle de Seguro del auto' }));
+    expect(within(screen.getByRole('dialog')).getByText('****')).toBeInTheDocument();
+    expect(screen.queryByText(/1[.,]?200/)).not.toBeInTheDocument();
+  });
+
+  it('retains month filtering and supports aliases and unknown dates in accumulated mode', () => {
+    renderView([
+      { Id: 'alias', Nombre: 'Alias agosto', Monto: 45, FechaVencimiento: '2026-08-01', Estado: 'pendiente' },
+      { ...createPaymentBase(), id: 'unknown', nombre: 'Sin fecha', fechavencimiento: null },
+    ]);
+    expect(screen.queryByText('Alias agosto')).not.toBeInTheDocument();
+    expect(screen.queryByText('Sin fecha')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Acumulado' }));
+    expect(screen.getByText('Alias agosto').closest('[data-urgency-group]')).toHaveAttribute('data-urgency-group', 'Más adelante');
+    expect(screen.getByText('Sin fecha').closest('[data-urgency-group]')).toHaveAttribute('data-urgency-group', 'Fecha a confirmar');
+  });
+
+  it('never offers registration from an already paid detail', () => {
+    renderView({ ...createPaymentBase(), estado: 'pagado' });
+    fireEvent.change(screen.getByLabelText(/filtrar vencimientos por estado/i), { target: { value: 'pagado' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Ver detalle de Seguro del auto' }));
+    expect(within(screen.getByRole('dialog')).queryByRole('button', { name: 'Registrar pago' })).not.toBeInTheDocument();
   });
 
   it('shows the desktop Eye and opens the valid comprobante when url_pdf is invalid', () => {

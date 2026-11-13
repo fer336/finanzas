@@ -1,0 +1,27 @@
+{
+  "title": "Finanzas, con menos fricción",
+  "brief": "Una dirección visual coherente para Inicio, Movimientos y Nuevo movimiento. Conserva Kanagawa Violet y prioriza claridad, registro progresivo y consulta rápida. Datos de ejemplo, sin backend. Cada pantalla se adapta a desktop y mobile.",
+  "artboards": [
+    {
+      "file": "01-overview.html",
+      "title": "Inicio · situación del mes",
+      "tradeoff": "Prioriza balance, próximos pagos y actividad; desplaza el análisis avanzado a sus secciones.",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "02-transactions.html",
+      "title": "Movimientos · consulta enfocada",
+      "tradeoff": "Filtros avanzados plegados y búsqueda inmediata; las acciones de edición quedan fuera de esta demo.",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "file": "03-new-transaction.html",
+      "title": "Nuevo movimiento · registro progresivo",
+      "tradeoff": "Datos esenciales visibles y opciones avanzadas plegadas; validación local sin guardado real.",
+      "width": 1440,
+      "height": 1000
+    }
+  ]
+}

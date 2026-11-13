@@ -25,3 +25,9 @@ El panel usa las instalaciones Radix de `ui/sheet`: nombre y descripción accesi
 Las pruebas enfocadas cubren chips, búsqueda/tipo/categoría, ambos órdenes, selección anual de meses, rangos temporales, campos alternativos, callbacks, estado retenido, foco al cerrar, privacidad de importes y seguridad/preview de comprobantes en desktop y mobile. Las comprobaciones de estructura no sustituyen una inspección visual en navegador ni una auditoría de contraste.
 
 T2 cubre S1 y S2 en movimientos/detalle y preserva los límites de S3. Para S4, comportamiento, pruebas y esta guía forman una sola unidad de revisión; no se realizan commits desde el escritor delegado. La extensión del archivo preexistente se conserva para evitar una refactorización ajena a esta unidad. Las skills antiguas referenciadas por `frontend/AGENTS.md` no están disponibles en `skills/`; prevalece el sistema Kanagawa aprobado de `DESIGN.md` y `design/system.md`.
+
+## Pestañas y pagos pendientes
+
+Movimientos suma pestañas Todos, Ingresos, Gastos y Pagos pendientes, con contadores. Los tres primeros reutilizan el filtro de tipo existente (el selector de “Más filtros” sigue sincronizado); sus contadores respetan período, búsqueda y categoría. “Pagos pendientes” (`PendingPaymentsTab`) lista solo los pagos sin pagar que recibe por la prop `pendingPayments`, agrupados como en Vencimientos (Vencidos, En mora, Próximos 7 días, Más adelante, Fecha a confirmar), con su tipo, el total por moneda sin mezclar divisas y el botón “Registrar pago”, que llama a `onPayPending` y reutiliza el flujo de pago existente. “Administrar en Vencimientos” llama a `onGoToDueDates`. Una tarjeta “Por pagar” en la lista abre la misma pestaña. `ModernMissionControl` conecta ambos callbacks; no hay cambios de backend ni de API.
+
+Sin inspección visual en navegador: la verificación fue por pruebas de comportamiento, lint y build.

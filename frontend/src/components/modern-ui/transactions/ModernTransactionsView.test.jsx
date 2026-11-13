@@ -185,3 +185,123 @@ describe('ModernTransactionsView document actions', () => {
     expect(screen.getByTitle('seguro.pdf')).toHaveAttribute('src', 'https://s3.qeva.xyz/facturas/seguro.pdf');
   });
 });
+
+describe('ModernTransactionsView tabs and pending payments', () => {
+  const isoDay = (offsetDays) => {
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  };
+
+  const transactions = [
+    { ...transactionBase, id: 1, descripcion: 'Supermercado', tipo: 'gasto', monto: 500 },
+    { ...transactionBase, id: 2, descripcion: 'Cobro freelance', tipo: 'ingreso', monto: 9000, categoria: 'Extra' },
+    { ...transactionBase, id: 3, descripcion: 'Nafta', tipo: 'gasto', monto: 700 },
+  ];
+
+  const pendingPayments = [
+    { id: 'pp-overdue', nombre: 'Seguro del auto', tipo: 'seguro', monto: 42300, moneda: 'ARS', fechavencimiento: isoDay(-5), estado: 'pendiente' },
+    { id: 'pp-week', nombre: 'Gimnasia de mi hija', tipo: 'actividad', monto: 35000, moneda: 'ARS', fechavencimiento: isoDay(3), estado: 'pendiente' },
+    { id: 'pp-later', nombre: 'Internet', tipo: 'servicio', monto: 24900, moneda: 'ARS', fechavencimiento: isoDay(40), estado: 'pendiente' },
+    { id: 'pp-paid', nombre: 'Luz ya pagada', tipo: 'servicio', monto: 1000, moneda: 'ARS', fechavencimiento: isoDay(-2), estado: 'pagado' },
+  ];
+
+  const renderTabs = (props = {}) => render(
+    <ModernTransactionsView
+      transactions={transactions}
+      pendingPayments={pendingPayments}
+      onPayPending={vi.fn()}
+      onGoToDueDates={vi.fn()}
+      {...props}
+    />,
+  );
+
+  beforeEach(() => {
+    useIsMobile.mockReturnValue(false);
+    const store = new Map();
+    vi.stubGlobal('localStorage', {
+      getItem: vi.fn((key) => store.get(key) || null),
+      setItem: vi.fn((key, value) => store.set(key, String(value))),
+      removeItem: vi.fn((key) => store.delete(key)),
+      clear: vi.fn(() => store.clear()),
+    });
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
+
+  it('offers Todos, Ingresos, Gastos and Pagos pendientes tabs with counts', () => {
+    renderTabs();
+
+    const tabs = within(screen.getByRole('group', { name: /qué querés ver/i }));
+    expect(tabs.getByRole('button', { name: /^Todos\s*3$/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(tabs.getByRole('button', { name: /^Ingresos\s*1$/ })).toBeInTheDocument();
+    expect(tabs.getByRole('button', { name: /^Gastos\s*2$/ })).toBeInTheDocument();
+    expect(tabs.getByRole('button', { name: /^Pagos pendientes\s*3$/ })).toBeInTheDocument();
+  });
+
+  it('filters movements by the Ingresos and Gastos tabs', () => {
+    renderTabs();
+
+    fireEvent.click(screen.getByRole('button', { name: /^Ingresos\s*1$/ }));
+    expect(screen.getByText('Cobro freelance')).toBeInTheDocument();
+    expect(screen.queryByText('Supermercado')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /^Gastos\s*2$/ }));
+    expect(screen.getByText('Supermercado')).toBeInTheDocument();
+    expect(screen.queryByText('Cobro freelance')).not.toBeInTheDocument();
+  });
+
+  it('lists only unpaid payments grouped by urgency in the Pagos pendientes tab', () => {
+    renderTabs();
+
+    fireEvent.click(screen.getByRole('button', { name: /^Pagos pendientes\s*3$/ }));
+
+    expect(screen.getByText('Seguro del auto')).toBeInTheDocument();
+    expect(screen.getByText('Gimnasia de mi hija')).toBeInTheDocument();
+    expect(screen.getByText('Internet')).toBeInTheDocument();
+    expect(screen.queryByText('Luz ya pagada')).not.toBeInTheDocument();
+    expect(screen.queryByText('Supermercado')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Vencidos' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Próximos 7 días' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Más adelante' })).toBeInTheDocument();
+  });
+
+  it('registers a payment through the existing flow with the original payment', () => {
+    const onPayPending = vi.fn();
+    renderTabs({ onPayPending });
+
+    fireEvent.click(screen.getByRole('button', { name: /^Pagos pendientes\s*3$/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Registrar pago de Gimnasia de mi hija' }));
+
+    expect(onPayPending).toHaveBeenCalledWith(pendingPayments[1]);
+  });
+
+  it('opens the pending tab from the Por pagar summary and links to Vencimientos', () => {
+    const onGoToDueDates = vi.fn();
+    renderTabs({ onGoToDueDates });
+
+    fireEvent.click(screen.getByRole('button', { name: /por pagar/i }));
+    expect(screen.getByText('Gimnasia de mi hija')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /administrar en vencimientos/i }));
+    expect(onGoToDueDates).toHaveBeenCalled();
+  });
+
+  it('explains an empty pending tab', () => {
+    renderTabs({ pendingPayments: [] });
+
+    fireEvent.click(screen.getByRole('button', { name: /^Pagos pendientes\s*0$/ }));
+    expect(screen.getByText(/no tenés pagos pendientes/i)).toBeInTheDocument();
+  });
+
+  it('keeps the tabs on mobile too', () => {
+    useIsMobile.mockReturnValue(true);
+    renderTabs();
+
+    fireEvent.click(screen.getByRole('button', { name: /^Pagos pendientes\s*3$/ }));
+    expect(screen.getByText('Seguro del auto')).toBeInTheDocument();
+  });
+});

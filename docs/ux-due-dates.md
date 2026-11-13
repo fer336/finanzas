@@ -32,3 +32,10 @@ Errores de subida o registro se anuncian sin éxito ficticio. Durante preparaci�
 RED: 13 fallos esperados por agrupación/detalle/revisión ausentes; 21 pruebas previas pasaron. GREEN inicial: 34 pruebas; triangulación: 40 pruebas en los tres archivos requeridos, incluyendo límites locales y de mes, estado pagado/mora, privacidad/monedas, filtros/paginación, URL seguras, payload exacto y rechazo de subida/registro.
 
 No se realizó prueba visual en navegador, ni se instalaron navegadores. La suite completa y build corresponden al seam T5 del padre. El slice supera las 400 líneas orientativas al incluir los dos componentes, pruebas de mutación/recibos y esta documentación; no se comprimió código para reducirlo. Solo estos cinco archivos forman la unidad reversible; no se modificaron helpers de negocio, diseño, tracking ni archivos de otros escritores.
+
+## Tipos de pago
+
+No todo vencimiento es una factura: también hay colegio y comedor, actividades (gimnasia), seguros y otros. El tipo se guarda en la columna existente `tipo` (texto libre, sin migración) con los valores `servicio`, `colegio`, `actividad`, `seguro` y `otro`. `frontend/src/utils/pendingPaymentTypes.js` define etiquetas y la lectura retrocompatible: `factura` se muestra como Servicio o factura; `alquiler`, vacío o desconocido como Otro.
+
+- El formulario pregunta “¿Qué tipo de pago es?” con las cinco opciones; el valor por defecto es Servicio o factura.
+- La vista de Vencimientos suma chips por tipo (Todos, Servicios, Colegio y comedor, Actividades, Seguros, Otros) con contadores. Los contadores respetan período, búsqueda y estado, pero no el tipo elegido; el filtro se combina con los existentes. Cada fila muestra su tipo y un tipo vacío explica “No hay pagos de este tipo.”.

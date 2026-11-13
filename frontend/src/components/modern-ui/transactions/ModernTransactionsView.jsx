@@ -16,6 +16,9 @@ import { useIsMobile } from '../../../hooks/use-mobile';
 import { normalizeDocumentPreviewUrl } from '../../../utils/documentPreviewUrl';
 import DocumentPreviewModal from '../pending-payments/DocumentPreviewModal';
 import TransactionDetailPanel from './TransactionDetailPanel';
+import PendingPaymentsTab from './PendingPaymentsTab';
+import { PENDING_PAYMENT_STATUS, derivePendingPaymentStatus } from '../../../utils/pendingPaymentStatus';
+import { formatCurrencyTotals, getUnpaidPayments, sumByCurrency } from '../../../utils/pendingPaymentSummary';
 
 // ─── Constantes de meses ─────────────────────────────────────────────────────
 const MESES = [
@@ -99,6 +102,9 @@ const ModernTransactionsView = ({
   onDeleteTransaction,
   onBulkUpload,
   onExportCSV,
+  pendingPayments = [],
+  onPayPending,
+  onGoToDueDates,
 }) => {
   const { refresh, isRefreshing } = useRefresh([QUERY_KEYS.transactions, QUERY_KEYS.dashboardStats]);
   const isMobile = useIsMobile();
@@ -106,6 +112,7 @@ const ModernTransactionsView = ({
 
   const [searchQuery, setSearchQuery]     = useState('');
   const [selectedType, setSelectedType]   = useState('all');
+  const [showPending, setShowPending]   = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [currentPage, setCurrentPage]     = useState(1);
   const [previewDocumentUrl, setPreviewDocumentUrl] = useState('');
@@ -245,15 +252,16 @@ const ModernTransactionsView = ({
   });
 
   // ── Filtrado por búsqueda / tipo / categoría ─────────────────────────────
-  const filtered = rangeFiltered.filter(t => {
+  // `scoped` aplica búsqueda y categoría pero no el tipo: sus conteos alimentan las pestañas.
+  const scoped = rangeFiltered.filter(t => {
     const desc = t.descripcion || t.Descripcion || '';
     const cat  = getCategoryName(t);
     const matchSearch   = desc.toLowerCase().includes(searchQuery.toLowerCase())
                        || cat.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchType     = selectedType === 'all' || t.tipo === selectedType;
     const matchCategory = selectedCategory === 'all' || cat === selectedCategory;
-    return matchSearch && matchType && matchCategory;
+    return matchSearch && matchCategory;
   });
+  const filtered = scoped.filter(t => selectedType === 'all' || t.tipo === selectedType);
 
   const sorted = [...filtered].sort((a, b) => sortOrder === 'amount'
     ? Math.abs(b.monto || b.monto_ars || 0) - Math.abs(a.monto || a.monto_ars || 0)
@@ -396,8 +404,70 @@ const ModernTransactionsView = ({
     selectedCategory !== 'all' && { label: `Categoría: ${selectedCategory}`, clear: () => setSelectedCategory('all') },
   ].filter(Boolean);
 
+  // ── Pestañas (Todos / Ingresos / Gastos / Pagos pendientes) ─────────────
+  const unpaidPayments = getUnpaidPayments(pendingPayments);
+  const overduePayments = unpaidPayments.filter(p => derivePendingPaymentStatus(p) === PENDING_PAYMENT_STATUS.OVERDUE);
+  const tabDefs = [
+    { id: 'all', label: 'Todos', count: scoped.length, active: !showPending && selectedType === 'all' },
+    { id: 'ingreso', label: 'Ingresos', count: scoped.filter(t => t.tipo === 'ingreso').length, active: !showPending && selectedType === 'ingreso' },
+    { id: 'gasto', label: 'Gastos', count: scoped.filter(t => t.tipo === 'gasto').length, active: !showPending && selectedType === 'gasto' },
+    { id: 'pendientes', label: 'Pagos pendientes', count: unpaidPayments.length, active: showPending },
+  ];
+  const selectTab = (id) => {
+    if (id === 'pendientes') { setShowPending(true); return; }
+    setShowPending(false);
+    setSelectedType(id);
+  };
+  const typeTabs = (
+    <div role="group" aria-label="Qué querés ver" className="flex gap-2 overflow-x-auto pb-1">
+      {tabDefs.map(tab => (
+        <button
+          key={tab.id}
+          type="button"
+          aria-pressed={tab.active}
+          onClick={() => selectTab(tab.id)}
+          className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-ring ${
+            tab.active
+              ? 'border-primary bg-primary text-primary-foreground'
+              : 'border-border bg-card text-foreground hover:bg-secondary'
+          }`}
+        >
+          {tab.label}
+          <span className={`rounded-full px-2 py-px font-mono text-xs ${tab.active ? 'bg-white/25' : 'bg-secondary'}`}>{tab.count}</span>
+        </button>
+      ))}
+    </div>
+  );
+
+  const porPagarCard = unpaidPayments.length > 0 && (
+    <button
+      type="button"
+      onClick={() => setShowPending(true)}
+      className="mb-4 flex min-h-16 w-full items-center justify-between gap-3 rounded-lg border-2 border-primary-soft bg-primary-surface px-4 py-3 text-left text-foreground focus-visible:outline focus-visible:outline-ring"
+    >
+      <span>
+        <span className="block text-xs font-semibold">Por pagar</span>
+        <span className="block font-mono text-xl font-semibold">{formatCurrencyTotals(sumByCurrency(unpaidPayments), formatAmount)}</span>
+        <span className="block text-xs">
+          {unpaidPayments.length} {unpaidPayments.length === 1 ? 'pago' : 'pagos'} · {overduePayments.length} {overduePayments.length === 1 ? 'vencido' : 'vencidos'}
+        </span>
+      </span>
+      <span aria-hidden="true" className="text-sm font-semibold">Ver →</span>
+    </button>
+  );
+
+  const pendingTabNode = (
+    <PendingPaymentsTab
+      payments={pendingPayments}
+      formatAmount={formatAmount}
+      onPay={onPayPending}
+      onGoToDueDates={onGoToDueDates}
+    />
+  );
+
   const filterControls = (
     <div className="mb-4 rounded-lg border border-border bg-card p-4">
+      <div className="mb-4">{typeTabs}</div>
       <label htmlFor="tx-search" className="mb-2 block text-sm font-medium">Buscar movimientos</label>
       <div className="relative">
         <Search aria-hidden="true" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -452,6 +522,10 @@ const ModernTransactionsView = ({
       <p role="status" className="mt-3 text-sm text-muted-foreground">{filtered.length} movimientos · {periodoTitle} · ARS</p>
     </div>
   );
+
+  const filterBlock = showPending
+    ? <div className="mb-4 rounded-lg border border-border bg-card p-4">{typeTabs}</div>
+    : filterControls;
 
   const detailPanel = detailTransaction && (
     <TransactionDetailPanel
@@ -577,9 +651,13 @@ const ModernTransactionsView = ({
             </div>
           )}
 
-          {filterControls}
+          {filterBlock}
         </div>
 
+        {showPending ? (
+          <div className="px-4">{pendingTabNode}</div>
+        ) : (
+        <>
         {/* KPIs */}
         <div className="grid grid-cols-3 gap-2 px-4 mb-4">
           <KpiCard
@@ -606,6 +684,8 @@ const ModernTransactionsView = ({
             valueColor={balance >= 0 ? 'var(--success)' : 'var(--destructive)'}
           />
         </div>
+
+        {porPagarCard && <div className="px-4">{porPagarCard}</div>}
 
         {/* Lista de transacciones como cards */}
         <div className="px-4 flex flex-col gap-2">
@@ -709,6 +789,8 @@ const ModernTransactionsView = ({
             </div>
           )}
         </div>
+        </>
+        )}
         </div>
         {detailPanel}
         <DocumentPreviewModal
@@ -842,8 +924,10 @@ const ModernTransactionsView = ({
           />
         </div>
 
-        {filterControls}
+        {filterBlock}
 
+        {showPending ? pendingTabNode : (
+        <>
         {/* ── KPIs del rango filtrado ── */}
         <div className="mb-5 grid grid-cols-3 gap-3.5">
           <KpiCard
@@ -870,6 +954,8 @@ const ModernTransactionsView = ({
             valueColor={balance >= 0 ? 'var(--success)' : 'var(--destructive)'}
           />
         </div>
+
+        {porPagarCard}
 
         {/* ── Tabla ── */}
         <div className="rounded-md border border-border bg-card overflow-hidden">
@@ -1016,6 +1102,8 @@ const ModernTransactionsView = ({
             </div>
           )}
         </div>
+        </>
+        )}
       </div>
       </div>
       {detailPanel}
@@ -1036,6 +1124,9 @@ ModernTransactionsView.propTypes = {
   onDeleteTransaction: PropTypes.func,
   onBulkUpload:        PropTypes.func,
   onExportCSV:         PropTypes.func,
+  pendingPayments:     PropTypes.array,
+  onPayPending:        PropTypes.func,
+  onGoToDueDates:      PropTypes.func,
 };
 
 export default ModernTransactionsView;

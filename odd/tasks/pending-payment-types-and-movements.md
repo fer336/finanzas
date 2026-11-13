@@ -12,10 +12,10 @@ Branch: `feat/pending-payment-types` from `origin/main` (7f63bdf). Delivery: sin
 
 ## Tasks
 
-- T1 [S3,S4] pending; route: inline; surface: new `frontend/src/utils/pendingPaymentTypes.js` + test, StitchPendingPaymentModal type selector + test.
-- T2 [S4] pending; route: inline; surface: ModernPendingPaymentsView type chips/row chip + test.
-- T3 [S5] pending; route: inline; surface: ModernTransactionsView tabs + pending tab + test, MissionControl wiring.
-- T4 [S1-S6] pending; route: inline; full suite, lint, build, docs (`docs/ux-due-dates.md`, `docs/ux-transactions.md`).
+- T1 [S3,S4] done (commit 2d0c84a); route: inline; surface: new `frontend/src/utils/pendingPaymentTypes.js` + test, StitchPendingPaymentModal type selector + test.
+- T2 [S4] done (commit a5c34f9); route: inline; surface: ModernPendingPaymentsView type chips/row chip + test.
+- T3 [S5] done (commit: this slice); route: inline; surface: ModernTransactionsView tabs + pending tab + test, MissionControl wiring.
+- T4 [S1-S6] done: npm test 182 passed, lint 0 errors, build ok; no browser visual check; route: inline; full suite, lint, build, docs (`docs/ux-due-dates.md`, `docs/ux-transactions.md`).
 
 ## Log
 

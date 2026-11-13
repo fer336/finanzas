@@ -13,6 +13,7 @@ import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
 import { useRefresh } from '../../../hooks/useRefresh';
 import { useIsMobile } from '../../../hooks/use-mobile';
 import { normalizePaymentDocument } from '../../../utils/documentPreviewUrl';
+import { PAYMENT_TYPES, countByPaymentType, getPaymentType } from '../../../utils/pendingPaymentTypes';
 import {
   PENDING_PAYMENT_STATUS,
   compareLocalDateOnly,
@@ -106,6 +107,7 @@ const ModernPendingPaymentsView = ({
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState(PENDING_PAYMENT_STATUS.PENDING);
+  const [selectedType, setSelectedType] = useState('all');
   const [viewMode, setViewMode] = useState('monthly'); // 'monthly' | 'accumulated'
   const [selectedMonthFilter, setSelectedMonthFilter] = useState(getCurrentMonthValue());
   const [currentPage, setCurrentPage] = useState(1);
@@ -154,10 +156,11 @@ const ModernPendingPaymentsView = ({
       temporalStatus,
       categoria: categoriaNombre,
       document: normalizePaymentDocument(p),
+      tipoInfo: getPaymentType(p),
     };
   });
 
-  useEffect(() => { setCurrentPage(1); }, [searchQuery, selectedStatus, viewMode, selectedMonthFilter]);
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, selectedStatus, selectedType, viewMode, selectedMonthFilter]);
 
   // ── Filtros ──────────────────────────────────────────────────────────────
   let baseFilteredData = pagos;
@@ -203,11 +206,22 @@ const ModernPendingPaymentsView = ({
   };
   const proximos = pendientes.filter((p) => urgencyGroup(p) === 'Próximos 7 días');
 
-  let filteredData = baseFilteredData;
+  let statusScopedData = baseFilteredData;
 
   if (selectedStatus !== 'all') {
-    filteredData = filteredData.filter((p) => p.temporalStatus === selectedStatus);
+    statusScopedData = statusScopedData.filter((p) => p.temporalStatus === selectedStatus);
   }
+
+  // Los contadores de tipo respetan período, búsqueda y estado, pero no el tipo elegido.
+  const typeCounts = countByPaymentType(statusScopedData);
+  const filteredData = selectedType === 'all'
+    ? statusScopedData
+    : statusScopedData.filter((p) => p.tipoInfo.value === selectedType);
+  const emptyMessage = searchQuery
+    ? `Sin resultados para "${searchQuery}".`
+    : selectedType !== 'all'
+      ? 'No hay pagos de este tipo.'
+      : 'Sin vencimientos en esta vista.';
 
   const sortedData = [...filteredData].sort(
     (a, b) => compareLocalDateOnly(a.fechaVencimiento, b.fechaVencimiento)
@@ -215,6 +229,30 @@ const ModernPendingPaymentsView = ({
 
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const paginatedData = sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const renderTypeChips = (className) => (
+    <div role="group" aria-label="Tipo de pago" className={className}>
+      {[{ value: 'all', chipLabel: 'Todos', count: statusScopedData.length }, ...PAYMENT_TYPES.map((t) => ({ ...t, count: typeCounts[t.value] }))].map((t) => {
+        const active = selectedType === t.value;
+        return (
+          <button
+            key={t.value}
+            type="button"
+            aria-pressed={active}
+            onClick={() => setSelectedType(t.value)}
+            className={`flex min-h-[44px] shrink-0 items-center gap-2 rounded-full border px-3.5 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+              active
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border bg-card text-foreground hover:bg-secondary'
+            }`}
+          >
+            {t.chipLabel}
+            <span className={`rounded-full px-2 py-px font-mono text-[11.5px] ${active ? 'bg-white/25' : 'bg-secondary'}`}>{t.count}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
 
   // ── Render de celda de fecha ("a confirmar" en itálica si no hay fecha) ──
   const renderFecha = (fechaVencimiento, segundaFechaVencimiento) => {
@@ -495,13 +533,14 @@ const ModernPendingPaymentsView = ({
             <option value={PENDING_PAYMENT_STATUS.OVERDUE}>Vencidos</option>
             <option value={PENDING_PAYMENT_STATUS.PAID}>Pagados</option>
           </FilterSelect>
+          <div className="mt-2.5">{renderTypeChips('flex gap-2 overflow-x-auto pb-1')}</div>
         </div>
 
         <div className="flex flex-col gap-2 px-4">
           {paginatedData.length === 0 ? (
             <div className="flex items-center justify-center rounded-md border border-border bg-card py-10">
               <EmptyState>
-                {searchQuery ? `Sin resultados para "${searchQuery}".` : 'Sin vencimientos en esta vista.'}
+                {emptyMessage}
               </EmptyState>
             </div>
           ) : (
@@ -517,6 +556,7 @@ const ModernPendingPaymentsView = ({
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         {renderFecha(p.fechaVencimiento, p.segundaFechaVencimiento)}
                         <Badge variant="outline">{p.categoria}</Badge>
+                        <span className="rounded-full bg-primary-surface px-2.5 py-0.5 text-[11.5px] font-semibold text-foreground">{p.tipoInfo.shortLabel}</span>
 
                       </div>
                     </div>
@@ -662,6 +702,8 @@ const ModernPendingPaymentsView = ({
           </FilterSelect>
         </div>
 
+        <div className="mb-4">{renderTypeChips('flex flex-wrap gap-2')}</div>
+
         <PeriodNote />
         <div className="mb-5 grid grid-cols-3 gap-3">
           <KpiCard label="Próximos 7 días" value={formatSummary(proximos)} subtext={`${proximos.length} pendientes · incluye hoy`} borderColor="var(--primary)" valueColor="var(--foreground)" />
@@ -698,7 +740,7 @@ const ModernPendingPaymentsView = ({
                 <tr>
                   <td colSpan={6} className="py-14 text-center">
                     <EmptyState>
-                      {searchQuery ? `Sin resultados para "${searchQuery}".` : 'Sin vencimientos en esta vista.'}
+                      {emptyMessage}
                     </EmptyState>
                   </td>
                 </tr>
@@ -713,6 +755,7 @@ const ModernPendingPaymentsView = ({
                       <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">{p.nombre}</td>
                       <td className="px-3.5 py-2.5">
                         <Badge variant="outline">{p.categoria}</Badge>
+                        <span className="rounded-full bg-primary-surface px-2.5 py-0.5 text-[11.5px] font-semibold text-foreground">{p.tipoInfo.shortLabel}</span>
                       </td>
                       <td className="px-3.5 py-2.5 text-right font-mono font-semibold text-foreground">
                         {formatPaymentAmount(p)}

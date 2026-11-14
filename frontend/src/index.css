@@ -94,32 +94,51 @@
     --ring: var(--primary-soft);
     --info: var(--result-positive-dark);
     --warning: #6b572f;
+    --warning-border: #f9d791;
     --violet: var(--primary-soft);
+
+    /* Due-date status tones */
+    --surface-deep: var(--background-deep);
+    --title-rule: #b8ad78;
+    --skeleton: #d5cea3;
+    --overdue-border: #b83245;
+    --overdue-surface: #f9e1e3;
+    --overdue-surface-hover: #f4cdd1;
+    --overdue-pill: #f5d0d3;
+    --overdue-text: #822d33;
+    --arrears-border: #d6a546;
+    --arrears-surface: #f5ebcf;
+    --arrears-surface-hover: #efe1ba;
+    --arrears-pill: #efe1ba;
+    --arrears-text: #5e441a;
+    --pending-border: #de9800;
+    --pending-text: #6b572f;
+    --paid-text: #526a3a;
 
     --radius: 0.5rem;
     /* 8px — radio de card, ver tailwind.config.js para escala completa */
   }
 
-  /* Kanagawa Violet Dark. */
+  /* Green-black dark: lime accent, coral for danger. */
   .dark {
     color-scheme: dark;
-    --background-deep: #030411;
-    --background-alt: #090b1b;
-    --surface: #0d0d1f;
-    --surface-elevated: #111124;
-    --surface-violet: #191727;
-    --border-subtle: #2f2d45;
-    --border-strong: #4f4c6a;
-    --divider: rgba(138, 123, 145, 0.28);
-    --text-primary: #f0e6e0;
-    --text-secondary: #c9b9bd;
-    --text-muted: #9a8ca0;
-    --text-violet-soft: #a99ac4;
-    --primary-hover: #685496;
-    --primary-active: #604b8b;
-    --primary-soft: #957fb8;
-    --primary-dark: #383058;
-    --primary-surface: #302858;
+    --background-deep: #030704;
+    --background-alt: #101211;
+    --surface: #151814;
+    --surface-elevated: #181b18;
+    --surface-violet: #181b18;
+    --border-subtle: #2d332c;
+    --border-strong: #4a5448;
+    --divider: rgba(141, 150, 137, 0.28);
+    --text-primary: #eef1e8;
+    --text-secondary: #bcc4b7;
+    --text-muted: #8d9689;
+    --text-violet-soft: #8d9689;
+    --primary-hover: #b5e566;
+    --primary-active: #a3d454;
+    --primary-soft: #c7f57a;
+    --primary-dark: #2a3a14;
+    --primary-surface: #232b1a;
     --income: #4e913f;
     --income-light: #6faf55;
     --income-dark: #315c2d;
@@ -143,7 +162,7 @@
     --category-health: #d27e99;
 
     /* Fondos */
-    --background: #050717;
+    --background: #101211;
     --foreground: var(--text-primary);
 
     /* Card/Panel */
@@ -155,9 +174,9 @@
     --popover: var(--surface-elevated);
     --popover-foreground: var(--text-primary);
 
-    --primary: #574582;
-    --primary-foreground: #f0e6e0;
-    --primary-glow: rgba(87, 69, 130, 0);
+    --primary: #c7f57a;
+    --primary-foreground: #101211;
+    --primary-glow: rgba(199, 245, 122, 0);
 
     /* Secondary - Botón/superficie secundaria */
     --secondary: var(--surface-violet);
@@ -169,24 +188,43 @@
     --muted-foreground: var(--text-muted);
 
     /* Accent - Dorado (avisos / pendiente) */
-    --accent: #3f3544;
-    --accent-foreground: #e6c384;
+    --accent: #232b1a;
+    --accent-foreground: #c7f57a;
 
-    /* Destructive - Arcilla (gastos) */
-    --destructive: var(--expense-dark);
-    --destructive-foreground: #f0e6e0;
+    /* Destructive - Coral */
+    --destructive: #ff766d;
+    --destructive-foreground: #101211;
 
     /* Success - Verde (mismo acento que ingresos/primario) */
     --success: var(--income-dark);
-    --success-foreground: #f0e6e0;
+    --success-foreground: #eef1e8;
 
     /* Bordes & Inputs */
-    --border: #393550;
-    --input: #393550;
+    --border: #2d332c;
+    --input: #2d332c;
     --ring: var(--primary-soft);
     --info: var(--result-positive);
     --warning: #e6c384;
+    --warning-border: #e6c384;
     --violet: var(--primary-soft);
+
+    /* Due-date status tones */
+    --surface-deep: #030704;
+    --title-rule: var(--border);
+    --skeleton: var(--muted);
+    --overdue-border: #ff766d;
+    --overdue-surface: rgba(255, 118, 109, 0.1);
+    --overdue-surface-hover: rgba(255, 118, 109, 0.16);
+    --overdue-pill: rgba(255, 118, 109, 0.14);
+    --overdue-text: #ff766d;
+    --arrears-border: #e6c384;
+    --arrears-surface: rgba(230, 195, 132, 0.08);
+    --arrears-surface-hover: rgba(230, 195, 132, 0.14);
+    --arrears-pill: rgba(230, 195, 132, 0.14);
+    --arrears-text: #e6c384;
+    --pending-border: #c7f57a;
+    --pending-text: #c7f57a;
+    --paid-text: #8d9689;
   }
 }
 

@@ -13,7 +13,7 @@ import { useAmountVisibility } from '../../../contexts/AmountVisibilityContext';
 import { useRefresh } from '../../../hooks/useRefresh';
 import { useIsMobile } from '../../../hooks/use-mobile';
 import { normalizePaymentDocument } from '../../../utils/documentPreviewUrl';
-import { PAYMENT_TYPES, countByPaymentType, getPaymentType } from '../../../utils/pendingPaymentTypes';
+import { buildCategoryChips, getPaymentCategory } from '../../../utils/pendingPaymentCategories';
 import {
   PENDING_PAYMENT_STATUS,
   compareLocalDateOnly,
@@ -35,20 +35,20 @@ const loadSection = () => {
   }
 };
 
-const getCurrentMonthValue = () => {
+// The only period choice: every unpaid due date, or just this calendar month.
+const VIEW_MODES = [
+  { value: 'all', label: 'Todos los vencimientos' },
+  { value: 'month', label: 'Vencimientos del mes' },
+];
+
+const isInCurrentMonth = (dateValue) => {
+  const fecha = parseLocalDateOnly(dateValue);
+  if (!fecha) return false;
   const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  return fecha.getMonth() === now.getMonth() && fecha.getFullYear() === now.getFullYear();
 };
 
 // ─── Piezas de UI compartidas con el patrón Kanagawa (ver ModernTransactionsView) ──
-const FilterSelect = ({ className = '', ...props }) => (
-  <select
-    {...props}
-    className={`rounded-sm border border-border bg-secondary px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring ${className}`}
-  />
-);
-FilterSelect.propTypes = { className: PropTypes.string };
-
 const EmptyState = ({ children }) => (
   <p className="text-[13.5px] italic text-muted-foreground">{children}</p>
 );
@@ -62,6 +62,7 @@ const PillToggle = ({ options, value, onChange, activeClassName, idPrefix, ariaL
         id={idPrefix ? `${idPrefix}-${opt.value}` : undefined}
         key={opt.value}
         type="button"
+        aria-pressed={value === opt.value}
         onClick={() => onChange(opt.value)}
         className={`rounded-full px-3 py-1 font-mono text-[12px] transition-colors duration-150 ${
           value === opt.value ? `${activeClassName} font-semibold` : 'text-muted-foreground hover:bg-card-hover hover:text-foreground'
@@ -106,10 +107,8 @@ const ModernPendingPaymentsView = ({
   }, [section]);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState(PENDING_PAYMENT_STATUS.PENDING);
-  const [selectedType, setSelectedType] = useState('all');
-  const [viewMode, setViewMode] = useState('monthly'); // 'monthly' | 'accumulated'
-  const [selectedMonthFilter, setSelectedMonthFilter] = useState(getCurrentMonthValue());
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [viewMode, setViewMode] = useState('all'); // 'all' | 'month'
   const [currentPage, setCurrentPage] = useState(1);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [pagoToDelete, setPagoToDelete] = useState(null);
@@ -119,20 +118,15 @@ const ModernPendingPaymentsView = ({
   const itemsPerPage = 20;
   const controlIds = {
     mobileViewMode: 'pending-payments-mobile-view-mode',
-    mobileMonth: 'pending-payments-mobile-month',
     mobileSearch: 'pending-payments-mobile-search',
-    mobileStatus: 'pending-payments-mobile-status',
     desktopViewMode: 'pending-payments-desktop-view-mode',
-    desktopMonth: 'pending-payments-desktop-month',
     desktopSearch: 'pending-payments-desktop-search',
-    desktopStatus: 'pending-payments-desktop-status',
     section: 'pending-payments-section',
   };
 
   // Normalizar datos del backend (misma lógica que la versión anterior de esta vista).
   const pagos = (pagosData?.list || pagosData || []).map((p) => {
-    const categoriaObj = p.Categorias || p.categorias1 || p.categoria || null;
-    const categoriaNombre = categoriaObj?.nombre || categoriaObj?.Nombre || 'Sin categoría';
+    const categoriaNombre = getPaymentCategory(p);
     const fechaVencimiento = p.fecha_vencimiento || p.FechaVencimiento || p.fechavencimiento || p.Fechavencimiento;
     const segundaFechaVencimiento = getSecondDueDateValue(p);
     const normalizedDates = normalizePendingPaymentDueDates({ ...p, fechaVencimiento, segunda_fecha_vencimiento: segundaFechaVencimiento });
@@ -156,22 +150,17 @@ const ModernPendingPaymentsView = ({
       temporalStatus,
       categoria: categoriaNombre,
       document: normalizePaymentDocument(p),
-      tipoInfo: getPaymentType(p),
     };
   });
 
-  useEffect(() => { setCurrentPage(1); }, [searchQuery, selectedStatus, selectedType, viewMode, selectedMonthFilter]);
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, selectedCategory, viewMode]);
 
   // ── Filtros ──────────────────────────────────────────────────────────────
-  let baseFilteredData = pagos;
+  // Only unpaid due dates are listed: pending, en mora and vencidos.
+  let baseFilteredData = pagos.filter((p) => !isPagoPaid(p));
 
-  if (viewMode === 'monthly') {
-    const [selYear, selMonth] = selectedMonthFilter.split('-').map(Number);
-    baseFilteredData = baseFilteredData.filter((p) => {
-      const fecha = parseLocalDateOnly(p.fechaVencimiento);
-      if (!fecha) return false;
-      return fecha.getMonth() === selMonth - 1 && fecha.getFullYear() === selYear;
-    });
+  if (viewMode === 'month') {
+    baseFilteredData = baseFilteredData.filter((p) => isInCurrentMonth(p.fechaVencimiento));
   }
 
   if (searchQuery) {
@@ -183,7 +172,7 @@ const ModernPendingPaymentsView = ({
     );
   }
 
-  const pendientes = baseFilteredData.filter((p) => !isPagoPaid(p));
+  const pendientes = baseFilteredData;
   const vencidos = pendientes.filter((p) => p.temporalStatus === PENDING_PAYMENT_STATUS.OVERDUE);
   const enMora = pendientes.filter((p) => p.temporalStatus === PENDING_PAYMENT_STATUS.IN_ARREARS);
   const formatPaymentAmount = (payment) => payment.moneda === 'ARS'
@@ -198,7 +187,6 @@ const ModernPendingPaymentsView = ({
   };
   // Hoy y los seis días siguientes; la segunda fecha no cambia de significado.
   const urgencyGroup = (p) => {
-    if (isPagoPaid(p)) return 'Pagados';
     if (p.temporalStatus === PENDING_PAYMENT_STATUS.OVERDUE) return 'Vencidos';
     if (p.temporalStatus === PENDING_PAYMENT_STATUS.IN_ARREARS) return 'En mora';
     if (!parseLocalDateOnly(p.fechaVencimiento)) return 'Fecha a confirmar';
@@ -206,22 +194,24 @@ const ModernPendingPaymentsView = ({
   };
   const proximos = pendientes.filter((p) => urgencyGroup(p) === 'Próximos 7 días');
 
-  let statusScopedData = baseFilteredData;
+  // One chip per category present in the period and search, so each due date
+  // sits in the chip of the category shown on its own row.
+  const categoryChips = buildCategoryChips(baseFilteredData);
+  const activeCategory = selectedCategory === 'all' || categoryChips.some((c) => c.key === selectedCategory)
+    ? selectedCategory
+    : 'all';
+  useEffect(() => {
+    if (activeCategory !== selectedCategory) setSelectedCategory('all');
+  }, [activeCategory, selectedCategory]);
 
-  if (selectedStatus !== 'all') {
-    statusScopedData = statusScopedData.filter((p) => p.temporalStatus === selectedStatus);
-  }
-
-  // Los contadores de tipo respetan período, búsqueda y estado, pero no el tipo elegido.
-  const typeCounts = countByPaymentType(statusScopedData);
-  const filteredData = selectedType === 'all'
-    ? statusScopedData
-    : statusScopedData.filter((p) => p.tipoInfo.value === selectedType);
+  const filteredData = activeCategory === 'all'
+    ? baseFilteredData
+    : baseFilteredData.filter((p) => p.categoria === activeCategory);
   const emptyMessage = searchQuery
     ? `Sin resultados para "${searchQuery}".`
-    : selectedType !== 'all'
-      ? 'No hay pagos de este tipo.'
-      : 'Sin vencimientos en esta vista.';
+    : viewMode === 'month'
+      ? 'No hay vencimientos pendientes este mes.'
+      : 'No hay vencimientos pendientes.';
 
   const sortedData = [...filteredData].sort(
     (a, b) => compareLocalDateOnly(a.fechaVencimiento, b.fechaVencimiento)
@@ -230,24 +220,24 @@ const ModernPendingPaymentsView = ({
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const paginatedData = sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  const renderTypeChips = (className) => (
-    <div role="group" aria-label="Tipo de pago" className={className}>
-      {[{ value: 'all', chipLabel: 'Todos', count: statusScopedData.length }, ...PAYMENT_TYPES.map((t) => ({ ...t, count: typeCounts[t.value] }))].map((t) => {
-        const active = selectedType === t.value;
+  const renderCategoryChips = (className) => (
+    <div role="group" aria-label="Filtrar por categoría" className={className}>
+      {[{ key: 'all', label: 'Todos', count: baseFilteredData.length }, ...categoryChips].map((t) => {
+        const active = activeCategory === t.key;
         return (
           <button
-            key={t.value}
+            key={t.key}
             type="button"
             aria-pressed={active}
-            onClick={() => setSelectedType(t.value)}
+            onClick={() => setSelectedCategory(t.key)}
             className={`flex min-h-[44px] shrink-0 items-center gap-2 rounded-full border px-3.5 text-[13px] font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
               active
                 ? 'border-primary bg-primary text-primary-foreground'
                 : 'border-border bg-card text-foreground hover:bg-secondary'
             }`}
           >
-            {t.chipLabel}
-            <span className={`rounded-full px-2 py-px font-mono text-[11.5px] ${active ? 'bg-white/25' : 'bg-secondary'}`}>{t.count}</span>
+            {t.label}
+            <span className={`rounded-full px-2 py-px font-mono text-[11.5px] ${active ? 'bg-black/15' : 'bg-secondary'}`}>{t.count}</span>
           </button>
         );
       })}
@@ -264,7 +254,7 @@ const ModernPendingPaymentsView = ({
     return (
       <span className="inline-flex flex-col gap-0.5 font-mono text-[12px] text-muted-foreground" aria-label={secondDisplay ? `Primer vencimiento ${firstDisplay}. Segundo vencimiento ${secondDisplay}.` : `Primer vencimiento ${firstDisplay}.`}>
         <span>1° {firstDisplay}</span>
-        {secondDisplay && <span className="text-[11px] text-[#6b572f] dark:text-[#e6c384]">2° {secondDisplay}</span>}
+        {secondDisplay && <span className="text-[11px] text-[var(--warning)]">2° {secondDisplay}</span>}
       </span>
     );
   };
@@ -273,23 +263,23 @@ const ModernPendingPaymentsView = ({
     const config = {
       [PENDING_PAYMENT_STATUS.PAID]: {
         label: 'Pagado',
-        className: 'border-[#526a3a] text-[#526a3a] dark:border-[#98bb6c] dark:text-[#98bb6c]',
+        className: 'border-[var(--paid-text)] text-[var(--paid-text)]',
       },
       [PENDING_PAYMENT_STATUS.IN_ARREARS]: {
         label: 'En mora',
-        className: 'border-[#a36a00] bg-[#efe1ba] text-[#5e441a] dark:border-[#e6c384] dark:bg-[#3f3544] dark:text-[#e6c384]',
+        className: 'border-[var(--arrears-border)] bg-[var(--arrears-pill)] text-[var(--arrears-text)]',
       },
       [PENDING_PAYMENT_STATUS.OVERDUE]: {
         label: 'Vencido',
-        className: 'border-[#822d33] bg-[#f5d0d3] text-[#822d33] dark:border-[#d33e48] dark:bg-[#351417] dark:text-[#ff9aa2]',
+        className: 'border-[var(--overdue-text)] bg-[var(--overdue-pill)] text-[var(--overdue-text)]',
       },
       [PENDING_PAYMENT_STATUS.PENDING]: {
         label: 'Pendiente',
-        className: 'border-[#de9800] text-[#6b572f] dark:border-[#e6c384] dark:text-[#e6c384]',
+        className: 'border-[var(--pending-border)] text-[var(--pending-text)]',
       },
     }[status] || {
       label: 'Pendiente',
-      className: 'border-[#de9800] text-[#6b572f] dark:border-[#e6c384] dark:text-[#e6c384]',
+      className: 'border-[var(--pending-border)] text-[var(--pending-text)]',
     };
     return (
       <Badge variant="outline" className={config.className}>
@@ -301,20 +291,20 @@ const ModernPendingPaymentsView = ({
 
   const rowToneClassName = (status) => {
     if (status === PENDING_PAYMENT_STATUS.OVERDUE) {
-      return 'border-[#b83245] bg-[#f9e1e3] text-foreground dark:border-[#d33e48] dark:bg-[#2a1014]';
+      return 'border-[var(--overdue-border)] bg-[var(--overdue-surface)] text-foreground';
     }
     if (status === PENDING_PAYMENT_STATUS.IN_ARREARS) {
-      return 'border-[#d6a546] bg-[#f5ebcf] text-foreground dark:border-[#e6c384] dark:bg-[#231d24]';
+      return 'border-[var(--arrears-border)] bg-[var(--arrears-surface)] text-foreground';
     }
     return 'border-border bg-card';
   };
 
   const tableRowToneClassName = (status) => {
     if (status === PENDING_PAYMENT_STATUS.OVERDUE) {
-      return 'border-[#b83245] bg-[#f9e1e3] hover:bg-[#f4cdd1] dark:border-[#d33e48] dark:bg-[#2a1014] dark:hover:bg-[#351417]';
+      return 'border-[var(--overdue-border)] bg-[var(--overdue-surface)] hover:bg-[var(--overdue-surface-hover)]';
     }
     if (status === PENDING_PAYMENT_STATUS.IN_ARREARS) {
-      return 'border-[#d6a546] bg-[#f5ebcf] hover:bg-[#efe1ba] dark:border-[#e6c384] dark:bg-[#231d24] dark:hover:bg-[#2f2731]';
+      return 'border-[var(--arrears-border)] bg-[var(--arrears-surface)] hover:bg-[var(--arrears-surface-hover)]';
     }
     return 'border-muted hover:bg-card-hover';
   };
@@ -362,7 +352,7 @@ const ModernPendingPaymentsView = ({
     return (
       <div className="min-h-screen">
         <div className="mx-auto max-w-[1100px] px-4 py-4 sm:px-[34px] sm:py-[28px]">
-          <div className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#b8ad78] dark:border-border ${isMobile ? 'mb-3 pb-3' : 'mb-[22px] pb-[18px]'}`}>
+          <div className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[var(--title-rule)] ${isMobile ? 'mb-3 pb-3' : 'mb-[22px] pb-[18px]'}`}>
             <h1 className={`font-serif font-bold leading-none text-foreground ${isMobile ? 'text-[26px]' : 'text-[42px]'}`}>Vencimientos</h1>
           </div>
           <div className="mb-4">
@@ -384,9 +374,9 @@ const ModernPendingPaymentsView = ({
     return (
       <div className="min-h-screen">
         <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
-          <div className="h-8 w-56 animate-pulse rounded-sm bg-[#d5cea3] dark:bg-muted" />
-          <div className="mt-4 h-24 w-full max-w-xs animate-pulse rounded-md bg-[#d5cea3] dark:bg-muted" />
-          <div className="mt-5 h-64 w-full animate-pulse rounded-md bg-[#d5cea3] dark:bg-muted" />
+          <div className="h-8 w-56 animate-pulse rounded-sm bg-[var(--skeleton)]" />
+          <div className="mt-4 h-24 w-full max-w-xs animate-pulse rounded-md bg-[var(--skeleton)]" />
+          <div className="mt-5 h-64 w-full animate-pulse rounded-md bg-[var(--skeleton)]" />
         </div>
       </div>
     );
@@ -395,7 +385,7 @@ const ModernPendingPaymentsView = ({
   if (error) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-[13.5px] text-[#b83245]">Error al cargar vencimientos: {error.message}</p>
+        <p className="text-[13.5px] text-[var(--overdue-border)]">Error al cargar vencimientos: {error.message}</p>
       </div>
     );
   }
@@ -443,7 +433,7 @@ const ModernPendingPaymentsView = ({
     }}
     className="min-h-11 rounded-sm border border-border bg-secondary px-3 text-xs text-foreground hover:bg-card-hover focus-visible:ring-2 focus-visible:ring-ring">Ver detalle</button>;
   const PeriodNote = () => <p className="mb-4 text-sm text-muted-foreground">
-    Consultar no registra un pago. Resumen del período y búsqueda actuales, antes del filtro de estado.
+    Consultar no registra un pago. Resumen de los vencimientos sin pagar del período y la búsqueda actuales.
     {' '}Próximos 7 días: {formatLocalDateDisplay(new Date())} al {formatLocalDateDisplay(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 6))}.
   </p>;
 
@@ -452,7 +442,7 @@ const ModernPendingPaymentsView = ({
     return (
       <div className="min-h-screen pb-8 [&_button]:min-h-11 [&_input]:min-h-11 [&_select]:min-h-11 [&_button:focus-visible]:ring-2 [&_button:focus-visible]:ring-ring">
         <div className="px-4 pt-4 pb-3">
-          <div className="mb-3 flex items-end justify-between gap-2 border-b-[3px] border-double border-[#b8ad78] pb-3 dark:border-border">
+          <div className="mb-3 flex items-end justify-between gap-2 border-b-[3px] border-double border-[var(--title-rule)] pb-3">
             <h1 className="min-w-0 flex-1 truncate font-serif text-[26px] font-bold leading-none text-foreground">Vencimientos</h1>
             <div className="flex shrink-0 items-center gap-2">
               <RefreshButton />
@@ -472,7 +462,7 @@ const ModernPendingPaymentsView = ({
                 label="Total pendiente"
                 value={formatSummary(pendientes)}
                 subtext={`${pendientes.length} sin pagar · ${enMora.length} en mora`}
-                borderColor="#f9d791"
+                borderColor="var(--warning-border)"
                 valueColor="var(--warning)"
               />
               <KpiCard
@@ -485,27 +475,15 @@ const ModernPendingPaymentsView = ({
             </div>
           </div>
 
-          <div className="mb-2.5 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-2">
+          <div className="mb-2.5">
             <PillToggle
-              options={[{ value: 'monthly', label: 'Mensual' }, { value: 'accumulated', label: 'Acumulado' }]}
+              options={VIEW_MODES}
               value={viewMode}
               onChange={setViewMode}
               activeClassName="bg-primary text-primary-foreground"
               idPrefix={controlIds.mobileViewMode}
-              ariaLabel="Modo de período"
+              ariaLabel="Período de vencimientos"
             />
-            {viewMode === 'monthly' && (
-              <div className="min-w-0">
-                <label htmlFor={controlIds.mobileMonth} className="sr-only">Mes de vencimientos</label>
-                <input
-                  id={controlIds.mobileMonth}
-                  type="month"
-                  value={selectedMonthFilter}
-                  onChange={(e) => setSelectedMonthFilter(e.target.value)}
-                  className="min-w-0 rounded-sm border border-border bg-secondary px-2 py-1.5 font-mono text-[11.5px] text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring"
-                />
-              </div>
-            )}
           </div>
 
           <div className="relative mb-2.5">
@@ -520,20 +498,7 @@ const ModernPendingPaymentsView = ({
             />
           </div>
 
-          <label htmlFor={controlIds.mobileStatus} className="sr-only">Filtrar vencimientos por estado</label>
-          <FilterSelect
-            id={controlIds.mobileStatus}
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="w-full py-2"
-          >
-            <option value="all">Todos los estados</option>
-            <option value={PENDING_PAYMENT_STATUS.PENDING}>Pendientes</option>
-            <option value={PENDING_PAYMENT_STATUS.IN_ARREARS}>En mora</option>
-            <option value={PENDING_PAYMENT_STATUS.OVERDUE}>Vencidos</option>
-            <option value={PENDING_PAYMENT_STATUS.PAID}>Pagados</option>
-          </FilterSelect>
-          <div className="mt-2.5">{renderTypeChips('flex gap-2 overflow-x-auto pb-1')}</div>
+          {renderCategoryChips('flex gap-2 overflow-x-auto pb-1')}
         </div>
 
         <div className="flex flex-col gap-2 px-4">
@@ -556,7 +521,6 @@ const ModernPendingPaymentsView = ({
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         {renderFecha(p.fechaVencimiento, p.segundaFechaVencimiento)}
                         <Badge variant="outline">{p.categoria}</Badge>
-                        <span className="rounded-full bg-primary-surface px-2.5 py-0.5 text-[11.5px] font-semibold text-foreground">{p.tipoInfo.shortLabel}</span>
 
                       </div>
                     </div>
@@ -645,7 +609,7 @@ const ModernPendingPaymentsView = ({
   return (
     <div className="min-h-screen [&_button]:min-h-11 [&_input]:min-h-11 [&_select]:min-h-11 [&_button:focus-visible]:ring-2 [&_button:focus-visible]:ring-ring">
       <div className="mx-auto max-w-[1100px] px-[34px] py-[28px]">
-        <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[#b8ad78] pb-[18px] dark:border-border">
+        <div className="mb-[22px] flex items-end justify-between gap-5 border-b-[3px] border-double border-[var(--title-rule)] pb-[18px]">
           <h1 className="font-serif text-[42px] font-bold leading-none text-foreground">Vencimientos</h1>
           <div className="flex items-center gap-2">
             <RefreshButton />
@@ -659,25 +623,13 @@ const ModernPendingPaymentsView = ({
 
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <PillToggle
-            options={[{ value: 'monthly', label: 'Mensual' }, { value: 'accumulated', label: 'Acumulado' }]}
+            options={VIEW_MODES}
             value={viewMode}
             onChange={setViewMode}
             activeClassName="bg-primary text-primary-foreground"
             idPrefix={controlIds.desktopViewMode}
-            ariaLabel="Modo de período"
+            ariaLabel="Período de vencimientos"
           />
-          {viewMode === 'monthly' && (
-            <div>
-              <label htmlFor={controlIds.desktopMonth} className="sr-only">Mes de vencimientos</label>
-              <input
-                id={controlIds.desktopMonth}
-                type="month"
-                value={selectedMonthFilter}
-                onChange={(e) => setSelectedMonthFilter(e.target.value)}
-                className="rounded-sm border border-border bg-secondary px-3 py-[7px] font-mono text-[12px] text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring"
-              />
-            </div>
-          )}
         </div>
 
         <div className="mb-4 flex gap-2.5">
@@ -692,17 +644,9 @@ const ModernPendingPaymentsView = ({
               className="w-full rounded-sm border border-border bg-secondary py-[7px] pl-9 pr-3 font-mono text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-ring transition-colors"
             />
           </div>
-          <label htmlFor={controlIds.desktopStatus} className="sr-only">Filtrar vencimientos por estado</label>
-          <FilterSelect id={controlIds.desktopStatus} value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}>
-            <option value="all">Todos los estados</option>
-            <option value={PENDING_PAYMENT_STATUS.PENDING}>Pendientes</option>
-            <option value={PENDING_PAYMENT_STATUS.IN_ARREARS}>En mora</option>
-            <option value={PENDING_PAYMENT_STATUS.OVERDUE}>Vencidos</option>
-            <option value={PENDING_PAYMENT_STATUS.PAID}>Pagados</option>
-          </FilterSelect>
         </div>
 
-        <div className="mb-4">{renderTypeChips('flex flex-wrap gap-2')}</div>
+        <div className="mb-4">{renderCategoryChips('flex flex-wrap gap-2')}</div>
 
         <PeriodNote />
         <div className="mb-5 grid grid-cols-3 gap-3">
@@ -711,7 +655,7 @@ const ModernPendingPaymentsView = ({
             label="Total pendiente"
             value={formatSummary(pendientes)}
             subtext={`${pendientes.length} sin pagar · ${enMora.length} en mora`}
-            borderColor="#f9d791"
+            borderColor="var(--warning-border)"
             valueColor="var(--warning)"
           />
           <KpiCard
@@ -755,7 +699,6 @@ const ModernPendingPaymentsView = ({
                       <td className="px-3.5 py-2.5 text-[13.5px] text-foreground">{p.nombre}</td>
                       <td className="px-3.5 py-2.5">
                         <Badge variant="outline">{p.categoria}</Badge>
-                        <span className="rounded-full bg-primary-surface px-2.5 py-0.5 text-[11.5px] font-semibold text-foreground">{p.tipoInfo.shortLabel}</span>
                       </td>
                       <td className="px-3.5 py-2.5 text-right font-mono font-semibold text-foreground">
                         {formatPaymentAmount(p)}

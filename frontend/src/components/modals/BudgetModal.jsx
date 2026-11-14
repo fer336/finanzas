@@ -148,20 +148,20 @@ const BudgetModal = ({ isOpen, onClose, onSuccess, editingBudget = null }) => {
 
   return (
     <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[1000] flex items-center justify-center p-4">
-      <div className="relative w-full max-w-2xl bg-[#09090b] rounded-xl shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-2xl bg-[#09090b] dark:bg-[var(--background)] rounded-xl shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-[#09090b]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-[#09090b] dark:bg-[var(--background)]">
           <div>
-            <h2 className="text-lg font-bold text-white tracking-tight">
+            <h2 className="text-lg font-bold text-white dark:text-[var(--foreground)] tracking-tight">
               {editingBudget ? 'Editar Presupuesto' : 'Nuevo Presupuesto'}
             </h2>
-            <p className="text-zinc-400 mt-0.5 text-sm">Define límites de gasto para mantener el control</p>
+            <p className="text-zinc-400 dark:text-[var(--muted-foreground)] mt-0.5 text-sm">Define límites de gasto para mantener el control</p>
           </div>
           <button 
             onClick={onClose}
             className="p-2 hover:bg-white/5 rounded-full transition-colors group"
           >
-            <X className="w-5 h-5 text-zinc-400 group-hover:text-white transition-colors" />
+            <X className="w-5 h-5 text-zinc-400 dark:text-[var(--muted-foreground)] group-hover:text-white dark:group-hover:text-[var(--foreground)] transition-colors" />
           </button>
         </div>
 
@@ -170,27 +170,27 @@ const BudgetModal = ({ isOpen, onClose, onSuccess, editingBudget = null }) => {
           <div className="space-y-4">
             {/* Nombre */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-400">Nombre del Presupuesto *</label>
+              <label className="text-xs font-medium text-zinc-400 dark:text-[var(--muted-foreground)]">Nombre del Presupuesto *</label>
               <input
                 type="text"
                 value={formData.nombre}
                 onChange={(e) => setFormData(prev => ({ ...prev, nombre: e.target.value }))}
                 placeholder="ej: Alimentación Enero 2024"
-                className="w-full p-2.5 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none"
+                className="w-full p-2.5 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white dark:text-[var(--foreground)] placeholder-zinc-600 dark:placeholder-[var(--muted-foreground)] focus:border-purple-500 dark:focus:border-[var(--primary)] focus:outline-none"
               />
             </div>
 
             {/* Monto Límite */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-400">Monto Límite *</label>
+              <label className="text-xs font-medium text-zinc-400 dark:text-[var(--muted-foreground)]">Monto Límite *</label>
               <div className="relative">
-                <span className="absolute left-3 top-2.5 text-base font-bold text-purple-400">$</span>
+                <span className="absolute left-3 top-2.5 text-base font-bold text-purple-400 dark:text-[var(--primary)]">$</span>
                 <input
                   type="number"
                   value={formData.monto_limite}
                   onChange={(e) => setFormData(prev => ({ ...prev, monto_limite: e.target.value }))}
                   placeholder="0.00"
-                  className="w-full pl-8 pr-3 py-2.5 bg-zinc-900/50 border border-white/10 rounded-lg text-lg font-bold text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none"
+                  className="w-full pl-8 pr-3 py-2.5 bg-zinc-900/50 border border-white/10 rounded-lg text-lg font-bold text-white dark:text-[var(--foreground)] placeholder-zinc-600 dark:placeholder-[var(--muted-foreground)] focus:border-purple-500 dark:focus:border-[var(--primary)] focus:outline-none"
                   step="0.01"
                 />
               </div>
@@ -198,23 +198,23 @@ const BudgetModal = ({ isOpen, onClose, onSuccess, editingBudget = null }) => {
 
             {/* Categoría (opcional) */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-400">Categoría (opcional)</label>
+              <label className="text-xs font-medium text-zinc-400 dark:text-[var(--muted-foreground)]">Categoría (opcional)</label>
               <select
                 value={formData.categoria_id}
                 onChange={(e) => setFormData(prev => ({ ...prev, categoria_id: e.target.value }))}
-                className="w-full p-2.5 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white focus:border-purple-500 focus:outline-none"
+                className="w-full p-2.5 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white dark:text-[var(--foreground)] focus:border-purple-500 dark:focus:border-[var(--primary)] focus:outline-none"
               >
                 <option value="">Presupuesto General (todas las categorías)</option>
                 {categorias.filter(c => c.tipo === 'gasto').map(c => (
                   <option key={c.id} value={c.id}>{c.icono} {c.nombre}</option>
                 ))}
               </select>
-              <p className="text-xs text-zinc-500 mt-1">Si no seleccionas categoría, será un presupuesto general</p>
+              <p className="text-xs text-zinc-500 dark:text-[var(--muted-foreground)] mt-1">Si no seleccionas categoría, será un presupuesto general</p>
             </div>
 
             {/* Período */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-400">Período</label>
+              <label className="text-xs font-medium text-zinc-400 dark:text-[var(--muted-foreground)]">Período</label>
               <div className="grid grid-cols-4 gap-2">
                 {['semanal', 'mensual', 'anual', 'personalizado'].map((periodo) => (
                   <button
@@ -222,8 +222,8 @@ const BudgetModal = ({ isOpen, onClose, onSuccess, editingBudget = null }) => {
                     onClick={() => handlePeriodoChange(periodo)}
                     className={`py-2 rounded-lg text-xs font-medium transition-all ${
                       formData.periodo === periodo
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-zinc-900/50 text-zinc-400 hover:bg-zinc-800 hover:text-white'
+                        ? 'bg-purple-600 dark:bg-[var(--primary)] text-white dark:text-[var(--primary-foreground)]'
+                        : 'bg-zinc-900/50 text-zinc-400 dark:text-[var(--primary-foreground)] hover:bg-zinc-800 dark:hover:bg-[var(--secondary)] hover:text-white dark:hover:text-[var(--primary-foreground)]'
                     }`}
                   >
                     {periodo.charAt(0).toUpperCase() + periodo.slice(1)}
@@ -235,29 +235,29 @@ const BudgetModal = ({ isOpen, onClose, onSuccess, editingBudget = null }) => {
             {/* Fechas */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-400">Fecha Inicio</label>
+                <label className="text-xs font-medium text-zinc-400 dark:text-[var(--muted-foreground)]">Fecha Inicio</label>
                 <input
                   type="date"
                   value={formData.fecha_inicio}
                   onChange={(e) => handleFechaInicioChange(e.target.value)}
-                  className="w-full p-2 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white focus:border-purple-500 focus:outline-none"
+                  className="w-full p-2 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white dark:text-[var(--foreground)] focus:border-purple-500 dark:focus:border-[var(--primary)] focus:outline-none"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-medium text-zinc-400">Fecha Fin</label>
+                <label className="text-xs font-medium text-zinc-400 dark:text-[var(--muted-foreground)]">Fecha Fin</label>
                 <input
                   type="date"
                   value={formData.fecha_fin}
                   onChange={(e) => setFormData(prev => ({ ...prev, fecha_fin: e.target.value }))}
                   disabled={formData.periodo !== 'personalizado'}
-                  className="w-full p-2 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white focus:border-purple-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full p-2 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white dark:text-[var(--foreground)] focus:border-purple-500 dark:focus:border-[var(--primary)] focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
 
             {/* Alerta */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-400">Alerta al alcanzar {formData.alerta_porcentaje}%</label>
+              <label className="text-xs font-medium text-zinc-400 dark:text-[var(--muted-foreground)]">Alerta al alcanzar {formData.alerta_porcentaje}%</label>
               <input
                 type="range"
                 min="50"
@@ -265,9 +265,9 @@ const BudgetModal = ({ isOpen, onClose, onSuccess, editingBudget = null }) => {
                 step="5"
                 value={formData.alerta_porcentaje}
                 onChange={(e) => setFormData(prev => ({ ...prev, alerta_porcentaje: e.target.value }))}
-                className="w-full h-2 bg-zinc-700 rounded-lg appearance-none cursor-pointer"
+                className="w-full h-2 bg-zinc-700 dark:bg-[var(--secondary)] rounded-lg appearance-none cursor-pointer"
               />
-              <div className="flex justify-between text-xs text-zinc-500">
+              <div className="flex justify-between text-xs text-zinc-500 dark:text-[var(--muted-foreground)]">
                 <span>50%</span>
                 <span>75%</span>
                 <span>100%</span>
@@ -276,30 +276,30 @@ const BudgetModal = ({ isOpen, onClose, onSuccess, editingBudget = null }) => {
 
             {/* Descripción */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-400">Descripción (opcional)</label>
+              <label className="text-xs font-medium text-zinc-400 dark:text-[var(--muted-foreground)]">Descripción (opcional)</label>
               <textarea
                 value={formData.descripcion}
                 onChange={(e) => setFormData(prev => ({ ...prev, descripcion: e.target.value }))}
                 placeholder="Detalles adicionales..."
                 rows={2}
-                className="w-full p-2.5 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white placeholder-zinc-600 focus:border-purple-500 focus:outline-none resize-none"
+                className="w-full p-2.5 bg-zinc-900/50 border border-white/10 rounded-lg text-sm text-white dark:text-[var(--foreground)] placeholder-zinc-600 dark:placeholder-[var(--muted-foreground)] focus:border-purple-500 dark:focus:border-[var(--primary)] focus:outline-none resize-none"
               />
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-white/5 bg-[#09090b] flex justify-end gap-3">
+        <div className="px-6 py-4 border-t border-white/5 bg-[#09090b] dark:bg-[var(--background)] flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm text-zinc-400 hover:text-white font-medium hover:bg-white/5 rounded-lg transition-all"
+            className="px-4 py-2 text-sm text-zinc-400 dark:text-[var(--muted-foreground)] hover:text-white dark:hover:text-[var(--foreground)] font-medium hover:bg-white/5 rounded-lg transition-all"
           >
             Cancelar
           </button>
           <button
             onClick={handleSubmit}
             disabled={loading || !formData.nombre.trim() || !formData.monto_limite}
-            className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-bold rounded-lg shadow-lg disabled:opacity-50 flex items-center gap-2"
+            className="px-6 py-2 bg-gradient-to-r from-purple-600 dark:from-[var(--primary)] to-pink-600 dark:to-[var(--primary)] hover:from-purple-500 dark:hover:from-[var(--primary)] hover:to-pink-500 dark:hover:to-[var(--primary)] text-white dark:text-[var(--primary-foreground)] text-sm font-bold rounded-lg shadow-lg disabled:opacity-50 flex items-center gap-2"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save size={16} />}
             {editingBudget ? 'Guardar' : 'Crear Presupuesto'}

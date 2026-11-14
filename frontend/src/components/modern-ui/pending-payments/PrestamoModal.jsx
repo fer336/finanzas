@@ -60,10 +60,10 @@ const PrestamoModal = ({ isOpen, onClose, onSave, prestamo = null }) => {
       <div className="fixed inset-0 z-[9998]" style={{ background: 'rgba(32,36,44,.4)' }} onClick={onClose} />
 
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-        <div className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-[#c8bf91] bg-[#e5ddb0] dark:border-[#363646] dark:bg-[#181820]">
-          <div className="flex items-center justify-between border-b border-[#c8bf91] bg-[#e5ddb0] px-6 py-5 sm:px-8 dark:border-[#363646] dark:bg-[#181820]">
+        <div className="relative flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-[#c8bf91] bg-[#e5ddb0] dark:border-[var(--border)] dark:bg-[var(--background)]">
+          <div className="flex items-center justify-between border-b border-[#c8bf91] bg-[#e5ddb0] px-6 py-5 sm:px-8 dark:border-[var(--border)] dark:bg-[var(--background)]">
             <div className="flex items-center gap-3">
-              <div className="rounded-sm bg-[#e4d794] p-2 dark:bg-[#2a2a37]">
+              <div className="rounded-sm bg-[#e4d794] p-2 dark:bg-[var(--card)]">
                 <Landmark className="h-5 w-5 text-primary" />
               </div>
               <h2 className="font-serif text-[19px] font-bold text-foreground sm:text-[21px]">
@@ -73,7 +73,7 @@ const PrestamoModal = ({ isOpen, onClose, onSave, prestamo = null }) => {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-sm p-2 text-[#625f55] transition-colors hover:bg-black/5 hover:text-foreground dark:text-[#c8c093]"
+              className="rounded-sm p-2 text-[#625f55] transition-colors hover:bg-black/5 hover:text-foreground dark:text-[var(--foreground)]"
             >
               <X className="h-5 w-5" />
             </button>
@@ -81,12 +81,12 @@ const PrestamoModal = ({ isOpen, onClose, onSave, prestamo = null }) => {
 
           <form onSubmit={handleSubmit} className="flex-1 space-y-5 overflow-y-auto p-6 sm:p-8">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">¿Quién te prestó?</label>
+              <label className="text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">¿Quién te prestó?</label>
               <input
                 type="text"
                 value={formData.nombre_fuente}
                 onChange={(e) => setFormData({ ...formData, nombre_fuente: e.target.value })}
-                className="rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#363646] dark:bg-[#2a2a37] dark:placeholder:text-[#c8c093]"
+                className="rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[var(--border)] dark:bg-[var(--card)] dark:placeholder:text-[var(--foreground)]"
                 placeholder="Ej: Banco Nación, Juan Pérez..."
                 required
               />
@@ -99,39 +99,39 @@ const PrestamoModal = ({ isOpen, onClose, onSave, prestamo = null }) => {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Monto prestado</label>
+                <label className="text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Monto prestado</label>
                 <input
                   type="number"
                   step="0.01"
                   value={formData.monto_prestado}
                   onChange={(e) => setFormData({ ...formData, monto_prestado: e.target.value })}
-                  className="rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 font-mono text-[13.5px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#363646] dark:bg-[#2a2a37] dark:placeholder:text-[#c8c093]"
+                  className="rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 font-mono text-[13.5px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[var(--border)] dark:bg-[var(--card)] dark:placeholder:text-[var(--foreground)]"
                   placeholder="0.00"
                   required
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Monto a devolver</label>
+                <label className="text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Monto a devolver</label>
                 <input
                   type="number"
                   step="0.01"
                   value={formData.monto_a_devolver}
                   onChange={(e) => setFormData({ ...formData, monto_a_devolver: e.target.value })}
-                  className="rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 font-mono text-[13.5px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#363646] dark:bg-[#2a2a37] dark:placeholder:text-[#c8c093]"
+                  className="rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 font-mono text-[13.5px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[var(--border)] dark:bg-[var(--card)] dark:placeholder:text-[var(--foreground)]"
                   placeholder="0.00"
                   required
                 />
               </div>
             </div>
-            <p className="-mt-3 text-[11.5px] text-[#625f55] dark:text-[#c8c093]">Puede diferir del monto prestado si hay interés.</p>
+            <p className="-mt-3 text-[11.5px] text-[#625f55] dark:text-[var(--foreground)]">Puede diferir del monto prestado si hay interés.</p>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Moneda</label>
+                <label className="text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Moneda</label>
                 <select
                   value={formData.moneda}
                   onChange={(e) => setFormData({ ...formData, moneda: e.target.value })}
-                  className="rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#363646] dark:bg-[#2a2a37]"
+                  className="rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring dark:border-[var(--border)] dark:bg-[var(--card)]"
                 >
                   <option value="ARS">ARS - Pesos Argentinos</option>
                   <option value="USD">USD - Dólares</option>
@@ -139,46 +139,46 @@ const PrestamoModal = ({ isOpen, onClose, onSave, prestamo = null }) => {
                 </select>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Fecha del préstamo</label>
+                <label className="text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Fecha del préstamo</label>
                 <input
                   type="date"
                   value={formData.fecha_prestamo}
                   onChange={(e) => setFormData({ ...formData, fecha_prestamo: e.target.value })}
-                  className="rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 font-mono text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#363646] dark:bg-[#2a2a37]"
+                  className="rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 font-mono text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring dark:border-[var(--border)] dark:bg-[var(--card)]"
                   required
                 />
-                <p className="text-[11px] text-[#625f55] dark:text-[#c8c093]">Cuándo recibiste el dinero — se registra como ingreso en Movimientos.</p>
+                <p className="text-[11px] text-[#625f55] dark:text-[var(--foreground)]">Cuándo recibiste el dinero — se registra como ingreso en Movimientos.</p>
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Fecha de vencimiento</label>
+                <label className="text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Fecha de vencimiento</label>
                 <input
                   type="date"
                   value={formData.fecha_vencimiento}
                   onChange={(e) => setFormData({ ...formData, fecha_vencimiento: e.target.value })}
-                  className="rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 font-mono text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#363646] dark:bg-[#2a2a37]"
+                  className="rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 font-mono text-[13px] text-foreground focus:outline-none focus:ring-2 focus:ring-ring dark:border-[var(--border)] dark:bg-[var(--card)]"
                   required
                 />
               </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Notas (opcional)</label>
+              <label className="text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Notas (opcional)</label>
               <textarea
                 value={formData.notas}
                 onChange={(e) => setFormData({ ...formData, notas: e.target.value })}
-                className="resize-none rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#363646] dark:bg-[#2a2a37] dark:placeholder:text-[#c8c093]"
+                className="resize-none rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[var(--border)] dark:bg-[var(--card)] dark:placeholder:text-[var(--foreground)]"
                 placeholder="Añadir una nota..."
                 rows={3}
               />
             </div>
           </form>
 
-          <div className="flex items-center justify-end gap-3 border-t border-[#c8bf91] bg-[#e5ddb0] px-6 py-5 sm:px-8 dark:border-[#363646] dark:bg-[#181820]">
+          <div className="flex items-center justify-end gap-3 border-t border-[#c8bf91] bg-[#e5ddb0] px-6 py-5 sm:px-8 dark:border-[var(--border)] dark:bg-[var(--background)]">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="rounded-sm border border-[#c8bf91] bg-white px-5 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#e4d794] disabled:opacity-50 dark:border-[#363646] dark:bg-[#2a2a37] dark:hover:bg-[#2a2a37]"
+              className="rounded-sm border border-[#c8bf91] bg-white px-5 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#e4d794] disabled:opacity-50 dark:border-[var(--border)] dark:bg-[var(--card)] dark:hover:bg-[var(--card)]"
             >
               Cancelar
             </button>
@@ -186,7 +186,7 @@ const PrestamoModal = ({ isOpen, onClose, onSave, prestamo = null }) => {
               type="button"
               onClick={handleSubmit}
               disabled={saving}
-              className="flex items-center gap-2 rounded-sm bg-primary px-5 py-2.5 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] disabled:opacity-50 dark:hover:bg-[#76946a]"
+              className="flex items-center gap-2 rounded-sm bg-primary px-5 py-2.5 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] disabled:opacity-50 dark:hover:bg-[var(--primary-hover)]"
             >
               <Save className="h-4 w-4" />
               {saving ? 'Guardando…' : 'Guardar'}

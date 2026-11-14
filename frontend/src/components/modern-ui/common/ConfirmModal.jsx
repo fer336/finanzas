@@ -19,9 +19,9 @@ const ConfirmModal = ({
   if (!isOpen) return null;
 
   const colors = {
-    danger: { icon: 'var(--destructive)', bg: 'var(--accent)', button: 'bg-destructive hover:bg-[#8f4230] dark:hover:bg-[#a85a44]' },
-    warning: { icon: 'var(--warning)', bg: '#f9d791', button: 'bg-[#6b572f] hover:bg-[#795b1a]' },
-    info: { icon: 'var(--info)', bg: '#e4d794', button: 'bg-[#4d699b] hover:bg-[#354e6d]' },
+    danger: { icon: 'var(--destructive)', bg: 'var(--accent)', button: 'bg-destructive hover:bg-[#8f4230] dark:hover:bg-[var(--destructive)] text-[#e5ddb0] dark:text-[var(--destructive-foreground)]' },
+    warning: { icon: 'var(--warning)', bg: 'var(--icon-tile-warning)', button: 'bg-[#6b572f] dark:bg-[var(--warning)] hover:bg-[#795b1a] dark:hover:bg-[var(--warning)] text-[#e5ddb0] dark:text-[var(--primary-foreground)]' },
+    info: { icon: 'var(--info)', bg: 'var(--icon-tile-info)', button: 'bg-[#4d699b] dark:bg-[var(--primary)] hover:bg-[#354e6d] dark:hover:bg-[var(--primary-hover)] text-[#e5ddb0] dark:text-[var(--primary-foreground)]' },
   };
 
   const color = colors[type];
@@ -32,7 +32,7 @@ const ConfirmModal = ({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-lg border border-[#c8bf91] bg-card dark:border-[#363646]"
+        className="w-full max-w-md rounded-lg border border-[#c8bf91] bg-card dark:border-[var(--border)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Icon */}
@@ -54,7 +54,7 @@ const ConfirmModal = ({
           <h3 className="mb-2 font-serif text-xl font-semibold text-foreground">
             {title}
           </h3>
-          <p className="text-[13.5px] leading-relaxed text-[#43436c] dark:text-[#c8c093]">
+          <p className="text-[13.5px] leading-relaxed text-[#43436c] dark:text-[var(--foreground)]">
             {message}
           </p>
         </div>
@@ -63,7 +63,7 @@ const ConfirmModal = ({
         <div className="flex gap-3 p-6 pt-0">
           <button
             onClick={onClose}
-            className="flex-1 rounded-sm border border-[#c8bf91] bg-white px-4 py-[9px] text-[13px] font-medium text-foreground transition-colors duration-150 hover:bg-[#e4d794] dark:border-[#363646] dark:bg-[#2a2a37] dark:hover:bg-[#363646]"
+            className="flex-1 rounded-sm border border-[#c8bf91] bg-white px-4 py-[9px] text-[13px] font-medium text-foreground transition-colors duration-150 hover:bg-[#e4d794] dark:border-[var(--border)] dark:bg-[var(--card)] dark:hover:bg-[var(--secondary)]"
           >
             {cancelText}
           </button>
@@ -72,7 +72,7 @@ const ConfirmModal = ({
               onConfirm();
               onClose();
             }}
-            className={`flex-1 rounded-sm px-4 py-[9px] text-[13px] font-semibold text-[#e5ddb0] transition-colors duration-150 ${color.button}`}
+            className={`flex-1 rounded-sm px-4 py-[9px] text-[13px] font-semibold transition-colors duration-150 ${color.button}`}
           >
             {confirmText}
           </button>

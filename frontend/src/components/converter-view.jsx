@@ -198,16 +198,16 @@ export function ConverterView() {
   };
 
   return (
-    <div className="min-h-screen p-0 pb-32 md:pb-0" style={{background: '#000000'}}>
+    <div className="min-h-screen p-0 pb-32 md:pb-0" style={{background: 'var(--page-ink)'}}>
       <div className="min-h-screen w-full p-4 md:p-6">
         {/* Header - Full Width */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl md:text-3xl font-black uppercase text-white tracking-tight">
+              <h1 className="text-2xl md:text-3xl font-black uppercase text-white dark:text-[var(--foreground)] tracking-tight">
                 💰 CONVERSOR DE MONEDAS
               </h1>
-              <p className="text-zinc-400 text-sm md:text-base font-bold mt-1">
+              <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm md:text-base font-bold mt-1">
                 Convertí entre pesos y dólares con cotizaciones en tiempo real
               </p>
             </div>
@@ -216,13 +216,13 @@ export function ConverterView() {
               <button 
                 onClick={fetchRates}
                 disabled={isRefreshing}
-                className="px-4 py-3 bg-green-500 hover:bg-green-600 text-black font-bold rounded-lg transition-all flex items-center justify-center disabled:opacity-50 shadow-lg"
+                className="px-4 py-3 bg-green-500 dark:bg-[var(--primary)] hover:bg-green-600 dark:hover:bg-[var(--primary-hover)] text-black dark:text-[var(--primary-foreground)] font-bold rounded-lg transition-all flex items-center justify-center disabled:opacity-50 shadow-lg"
                 title={isRefreshing ? 'Actualizando...' : 'Actualizar'}
               >
                 <RefreshCw size={20} className={isRefreshing ? 'animate-spin' : ''} />
               </button>
               {lastUpdate && (
-                <p className="text-xs text-zinc-400 mt-2 font-semibold">
+                <p className="text-xs text-zinc-400 dark:text-[var(--muted-foreground)] mt-2 font-semibold">
                   Actualizado: {lastUpdate.toLocaleTimeString('es-AR')}
                 </p>
               )}
@@ -233,20 +233,20 @@ export function ConverterView() {
         {/* Full Width Container */}
         <div className="w-full">
           {/* Conversor Principal */}
-          <div className="bg-zinc-900 border-2 border-zinc-800 rounded-2xl p-6 mb-6 shadow-xl">
+          <div className="bg-zinc-900 dark:bg-[var(--card)] border-2 border-zinc-800 dark:border-[var(--border)] rounded-2xl p-6 mb-6 shadow-xl">
             <div className="flex items-center gap-2 mb-6">
-              <Calculator className="h-6 w-6 text-green-400" strokeWidth={2.5} />
-              <h2 className="text-xl font-black text-white uppercase">Calculadora de Conversión</h2>
+              <Calculator className="h-6 w-6 text-green-400 dark:text-[var(--primary)]" strokeWidth={2.5} />
+              <h2 className="text-xl font-black text-white dark:text-[var(--foreground)] uppercase">Calculadora de Conversión</h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
               {/* Moneda Origen */}
               <div className="space-y-3">
-                <label className="block text-zinc-400 text-sm font-bold uppercase">Desde:</label>
+                <label className="block text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold uppercase">Desde:</label>
                 <select
                   value={fromCurrency}
                   onChange={(e) => setFromCurrency(e.target.value)}
-                  className="w-full p-3 bg-zinc-800 border-2 border-zinc-700 rounded-xl text-white text-base font-semibold focus:border-green-500 focus:outline-none transition-all"
+                  className="w-full p-3 bg-zinc-800 dark:bg-[var(--secondary)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-xl text-white dark:text-[var(--foreground)] text-base font-semibold focus:border-green-500 dark:focus:border-[var(--primary)] focus:outline-none transition-all"
                 >
                   {currencies.map((currency) => {
                     const rate = rates[currency.id];
@@ -269,7 +269,7 @@ export function ConverterView() {
                   type="number"
                   value={amount}
                   onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-                  className="w-full p-4 bg-zinc-800 border-2 border-zinc-700 rounded-xl text-white font-black text-2xl focus:border-green-500 focus:outline-none transition-all"
+                  className="w-full p-4 bg-zinc-800 dark:bg-[var(--secondary)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-xl text-white dark:text-[var(--foreground)] font-black text-2xl focus:border-green-500 dark:focus:border-[var(--primary)] focus:outline-none transition-all"
                   placeholder="0"
                 />
               </div>
@@ -278,19 +278,19 @@ export function ConverterView() {
               <div className="flex justify-center">
                 <button
                   onClick={swapCurrencies}
-                  className="p-4 bg-zinc-800 hover:bg-zinc-700 border-2 border-zinc-700 rounded-xl transition-all hover:scale-110 active:scale-95"
+                  className="p-4 bg-zinc-800 dark:bg-[var(--secondary)] hover:bg-zinc-700 dark:hover:bg-[var(--secondary)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-xl transition-all hover:scale-110 active:scale-95"
                 >
-                  <ArrowRightLeft className="h-6 w-6 text-green-400" strokeWidth={2.5} />
+                  <ArrowRightLeft className="h-6 w-6 text-green-400 dark:text-[var(--primary)]" strokeWidth={2.5} />
                 </button>
               </div>
 
               {/* Moneda Destino */}
               <div className="space-y-3">
-                <label className="block text-zinc-400 text-sm font-bold uppercase">Hacia:</label>
+                <label className="block text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold uppercase">Hacia:</label>
                 <select
                   value={toCurrency}
                   onChange={(e) => setToCurrency(e.target.value)}
-                  className="w-full p-3 bg-zinc-800 border-2 border-zinc-700 rounded-xl text-white text-base font-semibold focus:border-blue-500 focus:outline-none transition-all"
+                  className="w-full p-3 bg-zinc-800 dark:bg-[var(--secondary)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-xl text-white dark:text-[var(--foreground)] text-base font-semibold focus:border-blue-500 dark:focus:border-[var(--primary)] focus:outline-none transition-all"
                 >
                   {currencies.map((currency) => {
                     const rate = rates[currency.id];
@@ -309,26 +309,26 @@ export function ConverterView() {
                     );
                   })}
                 </select>
-                <div className="p-5 bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-2 border-green-700 rounded-xl shadow-lg">
-                  <div className="text-green-400 font-black text-2xl mb-2">
+                <div className="p-5 bg-gradient-to-br from-green-900/30 dark:from-[var(--accent)] to-emerald-900/30 dark:to-[var(--accent)] border-2 border-green-700 dark:border-[var(--primary)] rounded-xl shadow-lg">
+                  <div className="text-green-400 dark:text-[var(--primary)] font-black text-2xl mb-2">
                     {getCurrencyInfo(toCurrency)?.symbol} {formatNumber(result)}
                   </div>
-                  <div className="text-zinc-400 text-xs font-semibold uppercase">Sin comisión</div>
+                  <div className="text-zinc-400 dark:text-[var(--muted-foreground)] text-xs font-semibold uppercase">Sin comisión</div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Configuración de Comisión */}
-          <div className="bg-zinc-900 border-2 border-zinc-800 rounded-2xl p-6 mb-6 shadow-xl">
+          <div className="bg-zinc-900 dark:bg-[var(--card)] border-2 border-zinc-800 dark:border-[var(--border)] rounded-2xl p-6 mb-6 shadow-xl">
             <div className="flex items-center gap-2 mb-6">
-              <Percent className="h-6 w-6 text-yellow-400" strokeWidth={2.5} />
-              <h3 className="text-xl font-black text-white uppercase">Comisión Bancaria</h3>
+              <Percent className="h-6 w-6 text-yellow-400 dark:text-[var(--warning)]" strokeWidth={2.5} />
+              <h3 className="text-xl font-black text-white dark:text-[var(--foreground)] uppercase">Comisión Bancaria</h3>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-zinc-400 text-sm font-bold uppercase mb-3">
+                <label className="block text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold uppercase mb-3">
                   Comisión del banco (%):
                 </label>
                 <input
@@ -338,25 +338,25 @@ export function ConverterView() {
                   step="0.1"
                   min="0"
                   max="20"
-                  className="w-full p-4 bg-zinc-800 border-2 border-zinc-700 rounded-xl text-white text-xl font-black focus:border-yellow-500 focus:outline-none transition-all"
+                  className="w-full p-4 bg-zinc-800 dark:bg-[var(--secondary)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-xl text-white dark:text-[var(--foreground)] text-xl font-black focus:border-yellow-500 dark:focus:border-[var(--warning)] focus:outline-none transition-all"
                 />
                 <div className="mt-3 flex gap-2 flex-wrap">
-                  <button onClick={() => setCommission(0)} className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border-2 border-zinc-700 rounded-lg text-white text-xs font-bold transition-all">0%</button>
-                  <button onClick={() => setCommission(1.5)} className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border-2 border-zinc-700 rounded-lg text-white text-xs font-bold transition-all">1.5%</button>
-                  <button onClick={() => setCommission(3)} className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border-2 border-zinc-700 rounded-lg text-white text-xs font-bold transition-all">3%</button>
-                  <button onClick={() => setCommission(5)} className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 border-2 border-zinc-700 rounded-lg text-white text-xs font-bold transition-all">5%</button>
+                  <button onClick={() => setCommission(0)} className="px-3 py-1.5 bg-zinc-800 dark:bg-[var(--secondary)] hover:bg-zinc-700 dark:hover:bg-[var(--secondary)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-lg text-white dark:text-[var(--foreground)] text-xs font-bold transition-all">0%</button>
+                  <button onClick={() => setCommission(1.5)} className="px-3 py-1.5 bg-zinc-800 dark:bg-[var(--secondary)] hover:bg-zinc-700 dark:hover:bg-[var(--secondary)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-lg text-white dark:text-[var(--foreground)] text-xs font-bold transition-all">1.5%</button>
+                  <button onClick={() => setCommission(3)} className="px-3 py-1.5 bg-zinc-800 dark:bg-[var(--secondary)] hover:bg-zinc-700 dark:hover:bg-[var(--secondary)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-lg text-white dark:text-[var(--foreground)] text-xs font-bold transition-all">3%</button>
+                  <button onClick={() => setCommission(5)} className="px-3 py-1.5 bg-zinc-800 dark:bg-[var(--secondary)] hover:bg-zinc-700 dark:hover:bg-[var(--secondary)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-lg text-white dark:text-[var(--foreground)] text-xs font-bold transition-all">5%</button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-zinc-400 text-sm font-bold uppercase mb-3">
+                <label className="block text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold uppercase mb-3">
                   Resultado con comisión:
                 </label>
-                <div className="p-5 bg-gradient-to-br from-red-900/30 to-orange-900/30 border-2 border-red-700 rounded-xl shadow-lg">
-                  <div className="text-red-400 font-black text-2xl mb-2">
+                <div className="p-5 bg-gradient-to-br from-red-900/30 dark:from-[var(--overdue-pill)] to-orange-900/30 dark:to-[var(--arrears-pill)] border-2 border-red-700 dark:border-[var(--destructive)] rounded-xl shadow-lg">
+                  <div className="text-red-400 dark:text-[var(--destructive)] font-black text-2xl mb-2">
                     {getCurrencyInfo(toCurrency)?.symbol} {formatNumber(resultWithCommission)}
                   </div>
-                  <div className="text-red-300 text-sm font-semibold">
+                  <div className="text-red-300 dark:text-[var(--destructive)] text-sm font-semibold">
                     -{getCurrencyInfo(toCurrency)?.symbol} {formatNumber(result - resultWithCommission)} en comisión
                   </div>
                 </div>
@@ -365,11 +365,11 @@ export function ConverterView() {
           </div>
 
           {/* Tabla de Cotizaciones */}
-          <div className="bg-zinc-900 border-2 border-zinc-800 rounded-2xl p-6 shadow-xl">
+          <div className="bg-zinc-900 dark:bg-[var(--card)] border-2 border-zinc-800 dark:border-[var(--border)] rounded-2xl p-6 shadow-xl">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-black text-white uppercase">📊 Cotizaciones Actuales</h3>
+              <h3 className="text-xl font-black text-white dark:text-[var(--foreground)] uppercase">📊 Cotizaciones Actuales</h3>
               {lastUpdate && (
-                <span className="text-xs text-green-400 bg-green-500/20 px-3 py-1.5 rounded-lg font-bold border border-green-500/30">
+                <span className="text-xs text-green-400 dark:text-[var(--primary)] bg-green-500/20 dark:bg-[var(--accent)] px-3 py-1.5 rounded-lg font-bold border border-green-500/30 dark:border-[var(--accent)]">
                   Actualizado: {lastUpdate.toLocaleTimeString('es-AR')}
                 </span>
               )}
@@ -377,20 +377,20 @@ export function ConverterView() {
             
             {loading ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-3 border-green-500 mx-auto"></div>
-                <p className="text-zinc-400 mt-3 text-base font-semibold">Cargando cotizaciones...</p>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-3 border-green-500 dark:border-[var(--primary)] mx-auto"></div>
+                <p className="text-zinc-400 dark:text-[var(--muted-foreground)] mt-3 text-base font-semibold">Cargando cotizaciones...</p>
               </div>
             ) : (
               <div className={`overflow-x-auto transition-opacity ${isRefreshing ? 'opacity-50' : ''}`}>
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b-2 border-zinc-700">
-                      <th className="text-left py-3 px-3 text-zinc-400 font-black uppercase text-sm">Moneda</th>
-                      <th className="text-right py-3 px-3 text-zinc-400 font-black uppercase text-sm">Compra</th>
-                      <th className="text-right py-3 px-3 text-zinc-400 font-black uppercase text-sm">Venta</th>
-                      <th className="text-right py-3 px-3 text-zinc-400 font-black uppercase text-sm">Promedio</th>
-                      <th className="text-center py-3 px-3 text-zinc-400 font-black uppercase text-sm">Variación</th>
-                      <th className="text-center py-3 px-3 text-zinc-400 font-black uppercase text-sm">Estado</th>
+                    <tr className="border-b-2 border-zinc-700 dark:border-[var(--border)]">
+                      <th className="text-left py-3 px-3 text-zinc-400 dark:text-[var(--muted-foreground)] font-black uppercase text-sm">Moneda</th>
+                      <th className="text-right py-3 px-3 text-zinc-400 dark:text-[var(--muted-foreground)] font-black uppercase text-sm">Compra</th>
+                      <th className="text-right py-3 px-3 text-zinc-400 dark:text-[var(--muted-foreground)] font-black uppercase text-sm">Venta</th>
+                      <th className="text-right py-3 px-3 text-zinc-400 dark:text-[var(--muted-foreground)] font-black uppercase text-sm">Promedio</th>
+                      <th className="text-center py-3 px-3 text-zinc-400 dark:text-[var(--muted-foreground)] font-black uppercase text-sm">Variación</th>
+                      <th className="text-center py-3 px-3 text-zinc-400 dark:text-[var(--muted-foreground)] font-black uppercase text-sm">Estado</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -410,48 +410,48 @@ export function ConverterView() {
                             <div className="flex items-center gap-2">
                               <span className="text-2xl">{currency.flag}</span>
                               <div>
-                                <div className="text-white font-bold text-base">{currency.name}</div>
-                                <div className="text-zinc-500 text-xs">{dollarType.description}</div>
+                                <div className="text-white dark:text-[var(--foreground)] font-bold text-base">{currency.name}</div>
+                                <div className="text-zinc-500 dark:text-[var(--muted-foreground)] text-xs">{dollarType.description}</div>
                               </div>
                             </div>
                           </td>
                           <td className="py-3 px-3 text-right">
-                            <span className={`font-mono font-bold text-base ${hasError ? 'text-zinc-600' : 'text-green-400'}`}>
+                            <span className={`font-mono font-bold text-base ${hasError ? 'text-zinc-600 dark:text-[var(--muted-foreground)]' : 'text-green-400 dark:text-[var(--primary)]'}`}>
                               ${hasError ? '--' : formatNumber(rate.compra)}
                             </span>
                           </td>
                           <td className="py-3 px-3 text-right">
-                            <span className={`font-mono font-bold text-base ${hasError ? 'text-zinc-600' : 'text-red-400'}`}>
+                            <span className={`font-mono font-bold text-base ${hasError ? 'text-zinc-600 dark:text-[var(--muted-foreground)]' : 'text-red-400 dark:text-[var(--destructive)]'}`}>
                               ${hasError ? '--' : formatNumber(rate.venta)}
                             </span>
                           </td>
                           <td className="py-3 px-3 text-right">
-                            <span className={`font-mono font-bold text-base ${hasError ? 'text-zinc-600' : 'text-white'}`}>
+                            <span className={`font-mono font-bold text-base ${hasError ? 'text-zinc-600 dark:text-[var(--muted-foreground)]' : 'text-white dark:text-[var(--foreground)]'}`}>
                               ${hasError ? '--' : formatNumber(rate.promedio)}
                             </span>
                           </td>
                           <td className="py-3 px-3 text-center">
                             {hasError ? (
-                              <span className="text-zinc-600 text-sm">--</span>
+                              <span className="text-zinc-600 dark:text-[var(--muted-foreground)] text-sm">--</span>
                             ) : rate.variacion !== undefined && rate.variacion !== 0 ? (
                               <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold ${
                                 isPositiveVariation
-                                  ? 'bg-green-500/20 text-green-400 border border-green-500/40'
-                                  : 'bg-red-500/20 text-red-400 border border-red-500/40'
+                                  ? 'bg-green-500/20 dark:bg-[var(--accent)] text-green-400 dark:text-[var(--primary)] border border-green-500/40 dark:border-[var(--accent)]'
+                                  : 'bg-red-500/20 dark:bg-[var(--overdue-pill)] text-red-400 dark:text-[var(--destructive)] border border-red-500/40 dark:border-[var(--overdue-pill)]'
                               }`}>
                                 {isPositiveVariation ? '↑' : '↓'} {Math.abs(rate.variacion).toFixed(2)}%
                               </span>
                             ) : (
-                              <span className="text-zinc-500 text-sm">--</span>
+                              <span className="text-zinc-500 dark:text-[var(--muted-foreground)] text-sm">--</span>
                             )}
                           </td>
                           <td className="py-3 px-3 text-center">
                             {hasError ? (
-                              <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/40">
+                              <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-red-500/20 dark:bg-[var(--overdue-pill)] text-red-400 dark:text-[var(--destructive)] border border-red-500/40 dark:border-[var(--overdue-pill)]">
                                 ERROR
                               </span>
                             ) : (
-                              <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/40">
+                              <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-green-500/20 dark:bg-[var(--accent)] text-green-400 dark:text-[var(--primary)] border border-green-500/40 dark:border-[var(--accent)]">
                                 ✓ ONLINE
                               </span>
                             )}
@@ -466,35 +466,35 @@ export function ConverterView() {
           </div>
 
           {/* Información adicional */}
-          <div className="mt-6 p-4 bg-blue-500/10 border-2 border-blue-500/30 rounded-xl">
-            <h4 className="text-blue-400 font-bold text-sm mb-3 uppercase">📋 Información sobre las cotizaciones:</h4>
-            <ul className="text-blue-300 text-sm space-y-2 list-none">
+          <div className="mt-6 p-4 bg-blue-500/10 dark:bg-[var(--accent)] border-2 border-blue-500/30 dark:border-[var(--accent)] rounded-xl">
+            <h4 className="text-blue-400 dark:text-[var(--primary)] font-bold text-sm mb-3 uppercase">📋 Información sobre las cotizaciones:</h4>
+            <ul className="text-blue-300 dark:text-[var(--primary)] text-sm space-y-2 list-none">
               <li className="flex items-start gap-2">
-                <span className="text-blue-500 font-bold">▸</span>
+                <span className="text-blue-500 dark:text-[var(--primary)] font-bold">▸</span>
                 <span><strong className="font-bold">Compra:</strong> Precio al que puedes vender esa moneda (lo que recibes)</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-blue-500 font-bold">▸</span>
+                <span className="text-blue-500 dark:text-[var(--primary)] font-bold">▸</span>
                 <span><strong className="font-bold">Venta:</strong> Precio al que puedes comprar esa moneda (lo que pagas)</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-blue-500 font-bold">▸</span>
+                <span className="text-blue-500 dark:text-[var(--primary)] font-bold">▸</span>
                 <span><strong className="font-bold">Promedio:</strong> Valor de referencia entre compra y venta</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-blue-500 font-bold">▸</span>
+                <span className="text-blue-500 dark:text-[var(--primary)] font-bold">▸</span>
                 <span><strong className="font-bold">Variación:</strong> Cambio porcentual respecto al día anterior</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-blue-500 font-bold">▸</span>
+                <span className="text-blue-500 dark:text-[var(--primary)] font-bold">▸</span>
                 <span><strong className="font-bold">Estado:</strong> Disponibilidad actual de la cotización</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-blue-500 font-bold">▸</span>
+                <span className="text-blue-500 dark:text-[var(--primary)] font-bold">▸</span>
                 <span><strong className="font-bold">Comisión:</strong> Se aplica sobre el resultado final de la conversión</span>
               </li>
             </ul>
-            <p className="text-blue-400 text-xs mt-3 font-semibold">
+            <p className="text-blue-400 dark:text-[var(--primary)] text-xs mt-3 font-semibold">
               💡 <strong className="font-bold">Tip:</strong> Los precios se actualizan en tiempo real desde CriptoYa.com
             </p>
           </div>

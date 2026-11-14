@@ -224,14 +224,14 @@ export function ComprobanteUploader({ onFileUpload, existingFile, transaccionId,
   if (existingFile) {
     const existingDocument = normalizeDocumentPreviewUrl(existingFile.url || existingFile.data || '');
     return (
-      <Card className="border-green-200 bg-green-50/10">
+      <Card className="border-green-200 dark:border-[var(--primary)] bg-green-50/10 dark:bg-[var(--accent)]">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <CheckCircle className="h-5 w-5 text-green-500" />
+              <CheckCircle className="h-5 w-5 text-green-500 dark:text-[var(--primary)]" />
               <div>
-                <p className="text-sm font-medium text-green-700">Comprobante subido</p>
-                <p className="text-xs text-green-600">
+                <p className="text-sm font-medium text-green-700 dark:text-[var(--primary)]">Comprobante subido</p>
+                <p className="text-xs text-green-600 dark:text-[var(--primary)]">
                   {existingFile.name || 'Archivo adjunto'} 
                   {existingFile.size && ` • ${formatFileSize(existingFile.size)}`}
                 </p>

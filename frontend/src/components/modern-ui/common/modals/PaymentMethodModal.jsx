@@ -95,10 +95,10 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: 'rgba(32,36,44,.4)' }}>
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-[#c8bf91] dark:border-[#363646] bg-[#e5ddb0] dark:bg-[#181820]">
-        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#c8bf91] dark:border-[#363646] bg-[#e5ddb0] dark:bg-[#181820] px-5 py-4 sm:px-6">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-[#c8bf91] dark:border-[var(--border)] bg-[#e5ddb0] dark:bg-[var(--background)]">
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#c8bf91] dark:border-[var(--border)] bg-[#e5ddb0] dark:bg-[var(--background)] px-5 py-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="rounded-sm bg-[#e4d794] dark:bg-[#2a2a37] p-2">
+            <div className="rounded-sm bg-[#e4d794] dark:bg-[var(--card)] p-2">
               <Wallet className="h-5 w-5 text-primary" />
             </div>
             <h2 className="font-serif text-[19px] font-bold text-foreground sm:text-[21px]">
@@ -108,7 +108,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
           <button
             type="button"
             onClick={onClose}
-            className="rounded-sm p-2 text-[#625f55] dark:text-[#c8c093] transition-colors hover:bg-black/5 hover:text-foreground"
+            className="rounded-sm p-2 text-[#625f55] dark:text-[var(--foreground)] transition-colors hover:bg-black/5 hover:text-foreground"
           >
             <X className="h-5 w-5" />
           </button>
@@ -116,25 +116,25 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
 
         <form onSubmit={handleSubmit} className="space-y-5 p-5 sm:p-6">
           {errors.general && (
-            <div className="rounded-sm border border-[#b83245]/40 dark:border-[#e46876]/40 bg-[#b83245]/5 dark:bg-[#e46876]/5 p-3.5 text-[12.5px] text-[#b83245] dark:text-[#e46876]">
+            <div className="rounded-sm border border-[#b83245]/40 dark:border-[var(--overdue-pill)] bg-[#b83245]/5 dark:bg-[var(--overdue-pill)] p-3.5 text-[12.5px] text-[#b83245] dark:text-[var(--destructive)]">
               {errors.general}
             </div>
           )}
 
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Nombre *</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Nombre *</label>
             <input
               type="text"
               value={formData.nombre}
               onChange={(e) => handleChange('nombre', e.target.value)}
-              className="w-full rounded-sm border border-[#c8bf91] dark:border-[#363646] bg-white dark:bg-[#2a2a37] px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] dark:placeholder:text-[#c8c093] focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full rounded-sm border border-[#c8bf91] dark:border-[var(--border)] bg-white dark:bg-[var(--card)] px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] dark:placeholder:text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="Ej: Tarjeta Visa, Efectivo, Transferencia"
             />
-            {errors.nombre && <p className="mt-1 text-[11.5px] text-[#b83245] dark:text-[#e46876]">{errors.nombre}</p>}
+            {errors.nombre && <p className="mt-1 text-[11.5px] text-[#b83245] dark:text-[var(--destructive)]">{errors.nombre}</p>}
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Tipo</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Tipo</label>
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {TYPE_OPTIONS.map((option) => {
                 const isSelected = formData.tipo === option.value;
@@ -151,7 +151,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
                     }
                   >
                     <span className="text-lg leading-none">{option.icon}</span>
-                    <span className="text-[11px] leading-tight text-[#43436c] dark:text-[#c8c093]">{option.label}</span>
+                    <span className="text-[11px] leading-tight text-[#43436c] dark:text-[var(--foreground)]">{option.label}</span>
                   </button>
                 );
               })}
@@ -159,7 +159,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Ícono</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Ícono</label>
             <div className="grid grid-cols-5 gap-2 sm:grid-cols-10">
               {ICON_OPTIONS.map((icon) => {
                 const isSelected = formData.icono === icon;
@@ -183,7 +183,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Color</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Color</label>
             <div className="grid grid-cols-8 gap-2 sm:grid-cols-10">
               {COLOR_OPTIONS.map((color) => (
                 <button
@@ -191,7 +191,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
                   type="button"
                   onClick={() => handleChange('color', color)}
                   className={`h-8 rounded-sm border-2 transition-all ${
-                    formData.color === color ? 'scale-105 border-[#545464] dark:border-[#dcd7ba]' : 'border-transparent'
+                    formData.color === color ? 'scale-105 border-[#545464] dark:border-[var(--border)]' : 'border-transparent'
                   }`}
                   style={{ backgroundColor: color }}
                 />
@@ -200,12 +200,12 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Descripción</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Descripción</label>
             <textarea
               value={formData.descripcion}
               onChange={(e) => handleChange('descripcion', e.target.value)}
               rows={3}
-              className="w-full resize-none rounded-sm border border-[#c8bf91] dark:border-[#363646] bg-white dark:bg-[#2a2a37] px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] dark:placeholder:text-[#c8c093] focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full resize-none rounded-sm border border-[#c8bf91] dark:border-[var(--border)] bg-white dark:bg-[var(--card)] px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] dark:placeholder:text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="Descripción opcional"
             />
           </div>
@@ -216,9 +216,9 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
               type="checkbox"
               checked={formData.activo}
               onChange={(e) => handleChange('activo', e.target.checked)}
-              className="h-4 w-4 rounded-sm border-[#c8bf91] dark:border-[#363646] text-primary focus:ring-ring"
+              className="h-4 w-4 rounded-sm border-[#c8bf91] dark:border-[var(--border)] text-primary focus:ring-ring"
             />
-            <label htmlFor="metodo-pago-activo" className="text-[13px] text-[#43436c] dark:text-[#c8c093]">
+            <label htmlFor="metodo-pago-activo" className="text-[13px] text-[#43436c] dark:text-[var(--foreground)]">
               Método activo
             </label>
           </div>
@@ -227,13 +227,13 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSave, paymentMethod = nu
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-sm border border-[#c8bf91] dark:border-[#363646] bg-white dark:bg-[#2a2a37] px-4 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#e4d794] dark:hover:bg-[#2a2a37]"
+              className="flex-1 rounded-sm border border-[#c8bf91] dark:border-[var(--border)] bg-white dark:bg-[var(--card)] px-4 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#e4d794] dark:hover:bg-[var(--card)]"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex flex-1 items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2.5 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[#76946a]"
+              className="flex flex-1 items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2.5 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[var(--primary-hover)]"
             >
               <Save className="h-4 w-4" />
               Guardar

@@ -282,7 +282,7 @@ const FileUpload = ({
         <div
           className={`relative rounded-md border-2 border-dashed p-6 transition-colors focus-within:outline-none focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background ${
             dragActive
-              ? 'border-primary bg-[#526a3a]/10 dark:bg-[#98bb6c]/10'
+              ? 'border-primary bg-[#526a3a]/10 dark:bg-[var(--accent)]'
               : 'border-border bg-muted hover:border-muted-foreground'
           }`}
           onDragEnter={handleDrag}
@@ -354,7 +354,7 @@ const FileUpload = ({
           {!uploading && (
             <button
               onClick={uploadFile}
-              className="w-full mt-3 px-4 py-[7px] bg-primary hover:bg-[#5f7841] rounded-sm text-primary-foreground text-[13px] font-semibold transition-colors duration-150 flex items-center justify-center gap-2 dark:hover:bg-[#76946a]"
+              className="w-full mt-3 px-4 py-[7px] bg-primary hover:bg-[#5f7841] rounded-sm text-primary-foreground text-[13px] font-semibold transition-colors duration-150 flex items-center justify-center gap-2 dark:hover:bg-[var(--primary-hover)]"
             >
               <Upload className="w-3.5 h-3.5" />
               Subir archivo
@@ -381,7 +381,7 @@ const FileUpload = ({
 
       {/* Uploaded File Display */}
       {uploadedFileUrl && (
-        <div className="rounded-md border border-primary bg-[#526a3a]/10 p-4 dark:bg-[#98bb6c]/10">
+        <div className="rounded-md border border-primary bg-[#526a3a]/10 p-4 dark:bg-[var(--accent)]">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3 flex-1 min-w-0">
               <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
@@ -429,7 +429,7 @@ const FileUpload = ({
 
       {/* Error Message */}
       {error && (
-        <div className="rounded-md border border-destructive bg-[#b83245]/5 p-4 dark:bg-[#e46876]/10">
+        <div className="rounded-md border border-destructive bg-[#b83245]/5 p-4 dark:bg-[var(--overdue-pill)]">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
             <p className="text-[12.5px] text-destructive">{error}</p>

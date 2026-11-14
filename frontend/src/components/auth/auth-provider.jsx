@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
       console.warn('⏰ Sesión expirada por inactividad');
       // Crear notificación temporal
       const notification = document.createElement('div');
-      notification.className = 'fixed top-4 right-4 z-[10000] bg-yellow-500/90 text-black px-6 py-4 rounded-xl shadow-2xl animate-in slide-in-from-top-4 duration-300';
+      notification.className = 'fixed top-4 right-4 z-[10000] bg-yellow-500/90 dark:bg-[var(--arrears-pill)] text-black dark:text-[var(--foreground)] px-6 py-4 rounded-xl shadow-2xl animate-in slide-in-from-top-4 duration-300';
       notification.innerHTML = `
         <div class="flex items-center gap-3">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

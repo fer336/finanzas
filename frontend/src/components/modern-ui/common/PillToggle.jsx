@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
  * reusar en Inicio (Dashboard).
  */
 const PillToggle = ({ options, value, onChange, activeClassName }) => (
-  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#c8bf91] dark:border-[#363646] bg-card p-[3px]">
+  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#c8bf91] dark:border-[var(--border)] bg-card p-[3px]">
     {options.map((opt) => (
       <button
         key={opt.value}
@@ -15,7 +15,7 @@ const PillToggle = ({ options, value, onChange, activeClassName }) => (
         className={`rounded-full px-3 py-1 font-mono text-[12px] transition-colors duration-150 ${
           value === opt.value
             ? `${activeClassName} font-semibold`
-            : 'text-[#43436c] dark:text-[#c8c093] hover:text-foreground'
+            : 'text-[#43436c] dark:text-[var(--foreground)] hover:text-foreground'
         }`}
       >
         {opt.label}

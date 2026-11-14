@@ -14,33 +14,33 @@ const ModernReportesView = ({ onGenerateReport, onExportPDF }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] p-6">
+    <div className="min-h-screen bg-[#0a0a0a] dark:bg-[var(--background)] p-6">
       
       {/* Configuración */}
-      <div className="bg-[#18181b] rounded-3xl p-6 border border-white/5 mb-6">
+      <div className="bg-[#18181b] dark:bg-[var(--card)] rounded-3xl p-6 border border-white/5 mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#10b981]/10 flex items-center justify-center">
-              <BarChart3 className="w-5 h-5 text-[#10b981]" />
+            <div className="w-10 h-10 rounded-xl bg-[#10b981]/10 dark:bg-[var(--accent)] flex items-center justify-center">
+              <BarChart3 className="w-5 h-5 text-[#10b981] dark:text-[var(--primary)]" />
             </div>
-            <h2 className="text-base font-semibold text-white">Configuración del Reporte</h2>
+            <h2 className="text-base font-semibold text-white dark:text-[var(--foreground)]">Configuración del Reporte</h2>
           </div>
-          <button onClick={onExportPDF} className="px-4 py-2 bg-[#18181b] text-white border border-white/5 rounded-xl hover:bg-white/5 transition-colors flex items-center gap-2 text-sm">
+          <button onClick={onExportPDF} className="px-4 py-2 bg-[#18181b] dark:bg-[var(--card)] text-white dark:text-[var(--foreground)] border border-white/5 rounded-xl hover:bg-white/5 transition-colors flex items-center gap-2 text-sm">
             <Download className="w-4 h-4" />
             Exportar PDF
           </button>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <select value={selectedPeriodo} onChange={(e) => setSelectedPeriodo(e.target.value)} className="px-4 py-2.5 rounded-xl bg-[#0a0a0a] text-white border border-white/5 focus:outline-none focus:border-[#10b981]/30 transition-colors">
+          <select value={selectedPeriodo} onChange={(e) => setSelectedPeriodo(e.target.value)} className="px-4 py-2.5 rounded-xl bg-[#0a0a0a] dark:bg-[var(--background)] text-white dark:text-[var(--foreground)] border border-white/5 focus:outline-none focus:border-[#10b981]/30 dark:focus:border-[var(--accent)] transition-colors">
             <option value="mes">Este mes</option>
             <option value="trimestre">Este trimestre</option>
             <option value="año">Este año</option>
           </select>
-          <select value={selectedTipo} onChange={(e) => setSelectedTipo(e.target.value)} className="px-4 py-2.5 rounded-xl bg-[#0a0a0a] text-white border border-white/5 focus:outline-none focus:border-[#10b981]/30 transition-colors">
+          <select value={selectedTipo} onChange={(e) => setSelectedTipo(e.target.value)} className="px-4 py-2.5 rounded-xl bg-[#0a0a0a] dark:bg-[var(--background)] text-white dark:text-[var(--foreground)] border border-white/5 focus:outline-none focus:border-[#10b981]/30 dark:focus:border-[var(--accent)] transition-colors">
             {reportTypes.map(rt => <option key={rt.id} value={rt.id}>{rt.nombre}</option>)}
           </select>
-          <button onClick={() => onGenerateReport && onGenerateReport(selectedTipo, selectedPeriodo)} className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#10b981] to-[#34d399] text-white font-medium hover:shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2">
+          <button onClick={() => onGenerateReport && onGenerateReport(selectedTipo, selectedPeriodo)} className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#10b981] dark:from-[var(--primary)] to-[#34d399] dark:to-[var(--primary)] text-white dark:text-[var(--primary-foreground)] font-medium hover:shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2">
             <BarChart3 className="w-4 h-4" />
             Generar Reporte
           </button>
@@ -52,14 +52,14 @@ const ModernReportesView = ({ onGenerateReport, onExportPDF }) => {
         {reportTypes.map((report) => {
           const Icon = report.icon;
           return (
-            <div key={report.id} className="bg-[#18181b] rounded-3xl p-6 border border-white/5 cursor-pointer hover:border-[#10b981]/30 transition-all" onClick={() => { setSelectedTipo(report.id); onGenerateReport && onGenerateReport(report.id, selectedPeriodo); }}>
+            <div key={report.id} className="bg-[#18181b] dark:bg-[var(--card)] rounded-3xl p-6 border border-white/5 cursor-pointer hover:border-[#10b981]/30 dark:hover:border-[var(--accent)] transition-all" onClick={() => { setSelectedTipo(report.id); onGenerateReport && onGenerateReport(report.id, selectedPeriodo); }}>
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${report.color}20` }}>
                   <Icon className="w-6 h-6" style={{ color: report.color }} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-white mb-1">{report.nombre}</h3>
-                  <p className="text-sm text-gray-400">{report.descripcion}</p>
+                  <h3 className="text-lg font-bold text-white dark:text-[var(--foreground)] mb-1">{report.nombre}</h3>
+                  <p className="text-sm text-gray-400 dark:text-[var(--muted-foreground)]">{report.descripcion}</p>
                 </div>
               </div>
             </div>

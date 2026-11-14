@@ -5,11 +5,11 @@ T4 · S2, S3, S4 · Referencia visual: `design/finance-workflows-proposal/02-due
 ## Lectura de urgencia
 
 - Desktop conserva la tabla; mobile conserva tarjetas y controles táctiles de 44 px.
-- El resumen incluye total pendiente, vencidos y próximos siete días. Respeta período y búsqueda, antes del filtro de estado. Los importes se separan por moneda, sin conversión implícita, y usan la preferencia de privacidad.
+- El resumen incluye total pendiente, vencidos y próximos siete días. Respeta período y búsqueda, y cuenta solo vencimientos sin pagar. Los importes se separan por moneda, sin conversión implícita, y usan la preferencia de privacidad.
 - “Próximos 7 días” incluye hoy y los seis días locales siguientes. El rango real aparece en pantalla; no significa semana calendario.
-- Los encabezados identifican Vencidos, En mora, Próximos 7 días, Más adelante, Pagados o Fecha a confirmar. Se añaden sobre tramos consecutivos de la página existente: no se reordena, repagina ni oculta ningún registro adicional. Con todos los estados pueden repetirse encabezados para preservar el orden cronológico previo.
+- Los encabezados identifican Vencidos, En mora, Próximos 7 días, Más adelante o Fecha a confirmar. Se añaden sobre tramos consecutivos de la página existente: no se reordena, repagina ni oculta ningún registro adicional. Pueden repetirse encabezados para preservar el orden cronológico.
 - En mora no se convierte en vencido: la segunda fecha y el estado pagado siguen las reglas de `pendingPaymentStatus.js`. Una fecha desconocida no se presenta como futura.
-- Se mantienen el filtro inicial Pendientes, Mensual/Acumulado, búsqueda, orden, veinte registros por página, pestaña de préstamos y callbacks CRUD existentes.
+- La lista muestra solo vencimientos sin pagar (pendientes, en mora y vencidos); los pagados no se listan. No hay filtro de estado ni selector de mes: la única opción es «Todos los vencimientos» (por defecto, cualquier mes) o «Vencimientos del mes» (mes calendario actual, según la primera fecha). Se mantienen búsqueda, orden, veinte registros por página, pestaña de préstamos y callbacks CRUD existentes.
 
 ## Consulta y pago
 
@@ -38,4 +38,4 @@ No se realizó prueba visual en navegador, ni se instalaron navegadores. La suit
 No todo vencimiento es una factura: también hay colegio y comedor, actividades (gimnasia), seguros y otros. El tipo se guarda en la columna existente `tipo` (texto libre, sin migración) con los valores `servicio`, `colegio`, `actividad`, `seguro` y `otro`. `frontend/src/utils/pendingPaymentTypes.js` define etiquetas y la lectura retrocompatible: `factura` se muestra como Servicio o factura; `alquiler`, vacío o desconocido como Otro.
 
 - El formulario pregunta “¿Qué tipo de pago es?” con las cinco opciones; el valor por defecto es Servicio o factura.
-- La vista de Vencimientos suma chips por tipo (Todos, Servicios, Colegio y comedor, Actividades, Seguros, Otros) con contadores. Los contadores respetan período, búsqueda y estado, pero no el tipo elegido; el filtro se combina con los existentes. Cada fila muestra su tipo y un tipo vacío explica “No hay pagos de este tipo.”.
+- La vista de Vencimientos ya no filtra por tipo ni muestra el tipo en las filas. Los chips se arman con las categorías presentes en la lista sin pagar (`frontend/src/utils/pendingPaymentCategories.js`): Todos más un chip por categoría con su contador, ordenados por cantidad. Cada vencimiento cae en el chip de la categoría que muestra su fila; sin categoría va a «Sin categoría». Si la categoría elegida deja de aparecer, la selección vuelve a Todos.

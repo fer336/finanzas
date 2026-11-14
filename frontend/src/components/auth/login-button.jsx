@@ -35,18 +35,18 @@ export function LoginButton({ className = "" }) {
       <button
         onClick={handleGoogleLogin}
         disabled={isLoading}
-        className="group relative w-full inline-flex items-center justify-center gap-3 px-8 py-3.5 bg-primary hover:bg-[#5f7841] text-primary-foreground font-sans font-semibold text-[14px] rounded-sm transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="group relative w-full inline-flex items-center justify-center gap-3 px-8 py-3.5 bg-primary hover:bg-[#5f7841] dark:hover:bg-[var(--primary-hover)] text-primary-foreground font-sans font-semibold text-[14px] rounded-sm transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
         type="button"
       >
         {isLoading ? (
           <>
-            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white"></div>
+            <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white dark:border-t-[var(--border)]"></div>
             <span>Conectando...</span>
           </>
         ) : (
           <>
             {/* Logo de Google con fondo blanco */}
-            <div className="flex items-center justify-center w-6 h-6 bg-white rounded-md">
+            <div className="flex items-center justify-center w-6 h-6 bg-white dark:bg-[var(--card)] rounded-md">
               <svg className="w-4 h-4" viewBox="0 0 24 24">
               <path
                 fill="#4285F4"

@@ -713,7 +713,7 @@ export function ExportadorCuotaAlimentaria({ data }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="w-full sm:w-auto gap-2 bg-white text-black border-gray-300 hover:bg-gray-50 hover:text-black">
+        <Button variant="outline" size="sm" className="w-full sm:w-auto gap-2 bg-white dark:bg-[var(--card)] text-black dark:text-[var(--foreground)] border-gray-300 dark:border-[var(--border)] hover:bg-gray-50 dark:hover:bg-[var(--card)] hover:text-black dark:hover:text-[var(--foreground)]">
           <Download className="h-4 w-4 mr-2" />
           Exportar Reporte
         </Button>
@@ -802,7 +802,7 @@ export function ExportadorCuotaAlimentaria({ data }) {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="bg-white text-black border-gray-300 hover:bg-blue-50 hover:text-blue-700"
+                className="bg-white dark:bg-[var(--card)] text-black dark:text-[var(--foreground)] border-gray-300 dark:border-[var(--border)] hover:bg-blue-50 dark:hover:bg-[var(--accent)] hover:text-blue-700 dark:hover:text-[var(--primary)]"
                 onClick={() => setExportConfig(prev => ({ 
                   ...prev, 
                   mesesSeleccionados: Array.from({length: 12}, (_, i) => i) 
@@ -814,7 +814,7 @@ export function ExportadorCuotaAlimentaria({ data }) {
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="bg-white text-black border-gray-300 hover:bg-blue-50 hover:text-blue-700"
+                className="bg-white dark:bg-[var(--card)] text-black dark:text-[var(--foreground)] border-gray-300 dark:border-[var(--border)] hover:bg-blue-50 dark:hover:bg-[var(--accent)] hover:text-blue-700 dark:hover:text-[var(--primary)]"
                 onClick={() => setExportConfig(prev => ({ 
                   ...prev, 
                   mesesSeleccionados: [selectedMonth] 
@@ -910,10 +910,10 @@ export function ExportadorCuotaAlimentaria({ data }) {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} className="bg-white text-black border-gray-300 hover:bg-gray-50">
+          <Button variant="outline" onClick={() => setOpen(false)} className="bg-white dark:bg-[var(--card)] text-black dark:text-[var(--foreground)] border-gray-300 dark:border-[var(--border)] hover:bg-gray-50 dark:hover:bg-[var(--card)]">
             Cancelar
           </Button>
-          <Button onClick={handleExportar} className="gap-2 bg-green-600 text-white hover:bg-green-700">
+          <Button onClick={handleExportar} className="gap-2 bg-green-600 dark:bg-[var(--primary)] text-white dark:text-[var(--primary-foreground)] hover:bg-green-700 dark:hover:bg-[var(--primary-hover)]">
             <Download className="h-4 w-4" />
             Exportar
           </Button>

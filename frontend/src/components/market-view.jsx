@@ -110,7 +110,7 @@ export function MarketView() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <RefreshCw className="h-12 w-12 animate-spin text-green-400 mx-auto mb-4" />
+          <RefreshCw className="h-12 w-12 animate-spin text-green-400 dark:text-[var(--primary)] mx-auto mb-4" />
           <p className="text-text-secondary">Cargando datos del mercado...</p>
         </div>
       </div>
@@ -121,7 +121,7 @@ export function MarketView() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="card-retro max-w-md text-center">
-          <Activity className="h-12 w-12 text-red-400 mx-auto mb-4" />
+          <Activity className="h-12 w-12 text-red-400 dark:text-[var(--destructive)] mx-auto mb-4" />
           <h2 className="text-xl font-bold text-text-main mb-2">Error al cargar datos</h2>
           <p className="text-text-secondary mb-4">{error}</p>
           <Button onClick={loadDashboard} variant="default">
@@ -139,7 +139,7 @@ export function MarketView() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-text-main mb-2 flex items-center gap-3">
-            <BarChart3 className="h-8 w-8 text-green-400" />
+            <BarChart3 className="h-8 w-8 text-green-400 dark:text-[var(--primary)]" />
             Mercado Financiero
           </h1>
           <p className="text-text-secondary">
@@ -167,7 +167,7 @@ export function MarketView() {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Buscar acciones (ej: Apple, Microsoft, Tesla)..."
-              className="w-full pl-10 pr-4 py-3 bg-black/30 border-2 border-white/20 rounded text-text-main placeholder-text-secondary focus:border-green-400 transition-colors"
+              className="w-full pl-10 pr-4 py-3 bg-black/30 border-2 border-white/20 rounded text-text-main placeholder-text-secondary focus:border-green-400 dark:focus:border-[var(--primary)] transition-colors"
             />
           </div>
           <Button onClick={handleSearch} variant="default">
@@ -216,7 +216,7 @@ export function MarketView() {
             onClick={() => setActiveTab(id)}
             className={`flex items-center gap-2 px-4 py-3 font-medium transition-colors relative ${
               activeTab === id
-                ? 'text-green-400 border-b-2 border-green-400'
+                ? 'text-green-400 dark:text-[var(--primary)] border-b-2 border-green-400 dark:border-[var(--primary)]'
                 : 'text-text-secondary hover:text-text-main'
             }`}
           >
@@ -232,7 +232,7 @@ export function MarketView() {
           {/* Stocks Section */}
           <div className="card-retro">
             <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="h-5 w-5 text-green-400" />
+              <TrendingUp className="h-5 w-5 text-green-400 dark:text-[var(--primary)]" />
               <h3 className="font-bold text-text-main">Top Acciones Tech</h3>
             </div>
             <div className="space-y-3">
@@ -245,7 +245,7 @@ export function MarketView() {
                   />
                 ))
               ) : (
-                <p className="text-zinc-400 text-sm">No hay datos de acciones disponibles</p>
+                <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm">No hay datos de acciones disponibles</p>
               )}
             </div>
           </div>
@@ -253,7 +253,7 @@ export function MarketView() {
           {/* Crypto Section */}
           <div className="card-retro">
             <div className="flex items-center gap-2 mb-4">
-              <Bitcoin className="h-5 w-5 text-green-400" />
+              <Bitcoin className="h-5 w-5 text-green-400 dark:text-[var(--primary)]" />
               <h3 className="font-bold text-text-main">Criptomonedas</h3>
             </div>
             <div className="space-y-3">
@@ -262,7 +262,7 @@ export function MarketView() {
                   <CryptoCard key={crypto.symbol} crypto={crypto} />
                 ))
               ) : (
-                <p className="text-zinc-400 text-sm">No hay datos de criptomonedas disponibles</p>
+                <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm">No hay datos de criptomonedas disponibles</p>
               )}
             </div>
           </div>
@@ -270,7 +270,7 @@ export function MarketView() {
           {/* Forex Section */}
           <div className="card-retro">
             <div className="flex items-center gap-2 mb-4">
-              <DollarSign className="h-5 w-5 text-green-400" />
+              <DollarSign className="h-5 w-5 text-green-400 dark:text-[var(--primary)]" />
               <h3 className="font-bold text-text-main">Divisas</h3>
             </div>
             <div className="space-y-3">
@@ -279,7 +279,7 @@ export function MarketView() {
                   <ForexCard key={idx} forex={forex} />
                 ))
               ) : (
-                <p className="text-zinc-400 text-sm">No hay datos de divisas disponibles</p>
+                <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm">No hay datos de divisas disponibles</p>
               )}
             </div>
           </div>
@@ -298,7 +298,7 @@ export function MarketView() {
                   key={cedear.ticker}
                   onClick={() => handleStockSelect(cedear.ticker)}
                   className={`p-4 bg-black/20 hover:bg-black/40 border-2 rounded transition-colors ${
-                    selectedStock === cedear.ticker ? 'border-green-400' : 'border-white/10'
+                    selectedStock === cedear.ticker ? 'border-green-400 dark:border-[var(--primary)]' : 'border-white/10'
                   }`}
                 >
                   <span className="font-mono font-bold text-text-main">{cedear.ticker}</span>
@@ -312,7 +312,7 @@ export function MarketView() {
             <div className="card-retro">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-text-main flex items-center gap-2">
-                  <LineChartIcon className="h-5 w-5 text-green-400" />
+                  <LineChartIcon className="h-5 w-5 text-green-400 dark:text-[var(--primary)]" />
                   Gráfico de {selectedStock}
                 </h3>
                 <div className="flex gap-2">
@@ -325,7 +325,7 @@ export function MarketView() {
                       }}
                       className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
                         chartInterval === interval
-                          ? 'bg-green-400 text-black'
+                          ? 'bg-green-400 dark:bg-[var(--primary)] text-black dark:text-[var(--primary-foreground)]'
                           : 'bg-black/20 text-text-secondary hover:bg-black/40'
                       }`}
                     >
@@ -338,39 +338,39 @@ export function MarketView() {
                 <AreaChart data={stockChartData.data}>
                   <defs>
                     <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="var(--chart-positive)" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="var(--chart-positive)" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#dcd5ac20" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" />
                   <XAxis 
                     dataKey="timestamp" 
-                    stroke="#dcd5ac60"
-                    tick={{ fill: '#dcd5ac80', fontSize: 12 }}
+                    stroke="var(--chart-axis-line)"
+                    tick={{ fill: 'var(--chart-axis-text)', fontSize: 12 }}
                     tickFormatter={(value) => {
                       const date = new Date(value);
                       return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                     }}
                   />
                   <YAxis 
-                    stroke="#dcd5ac60"
-                    tick={{ fill: '#dcd5ac80', fontSize: 12 }}
+                    stroke="var(--chart-axis-line)"
+                    tick={{ fill: 'var(--chart-axis-text)', fontSize: 12 }}
                     domain={['auto', 'auto']}
                     tickFormatter={(value) => `$${value.toFixed(2)}`}
                   />
                   <Tooltip 
                     contentStyle={{ 
-                      backgroundColor: '#000000dd', 
-                      border: '1px solid #dcd5ac20',
+                      backgroundColor: 'var(--chart-tooltip-bg)', 
+                      border: '1px solid var(--chart-grid)',
                       borderRadius: '8px',
-                      color: '#dcd5ac'
+                      color: 'var(--chart-tooltip-text)'
                     }}
                     formatter={(value) => [`$${value.toFixed(2)}`, 'Precio']}
                   />
                   <Area 
                     type="monotone" 
                     dataKey="close" 
-                    stroke="#10b981" 
+                    stroke="var(--chart-positive)" 
                     strokeWidth={2}
                     fill="url(#colorPrice)" 
                   />
@@ -435,11 +435,11 @@ function StockCard({ stock, onClick }) {
           <div className="text-lg font-bold text-text-main">
             ${stock.price.toFixed(2)}
           </div>
-          <div className={`text-sm ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
+          <div className={`text-sm ${isPositive ? 'text-green-400 dark:text-[var(--primary)]' : 'text-red-400 dark:text-[var(--destructive)]'}`}>
             {isPositive ? '+' : ''}{stock.change.toFixed(2)}%
           </div>
         </div>
-        <TrendingUp className={`h-5 w-5 ${isPositive ? 'text-green-400' : 'text-red-400 rotate-180'}`} />
+        <TrendingUp className={`h-5 w-5 ${isPositive ? 'text-green-400 dark:text-[var(--primary)]' : 'text-red-400 dark:text-[var(--destructive)] rotate-180'}`} />
       </div>
     </button>
   );
@@ -451,7 +451,7 @@ function CryptoCard({ crypto }) {
     <div className="p-3 bg-black/20 border border-white/10 rounded">
       <div className="flex items-center justify-between mb-2">
         <span className="font-mono font-bold text-text-main">{crypto.symbol}</span>
-        <Bitcoin className="h-4 w-4 text-green-400" />
+        <Bitcoin className="h-4 w-4 text-green-400 dark:text-[var(--primary)]" />
       </div>
       <div className="text-lg font-bold text-text-main">
         ${crypto.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
@@ -469,7 +469,7 @@ function ForexCard({ forex }) {
         <span className="font-mono font-bold text-text-main">
           {forex.fromCurrency}/{forex.toCurrency}
         </span>
-        <DollarSign className="h-4 w-4 text-green-400" />
+        <DollarSign className="h-4 w-4 text-green-400 dark:text-[var(--primary)]" />
       </div>
       <div className="text-lg font-bold text-text-main">
         {forex.exchangeRate.toFixed(4)}

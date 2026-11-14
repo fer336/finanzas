@@ -58,35 +58,35 @@ const ModernPresupuestosView = ({
   const data = normalizedData;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] p-4 pb-32 sm:p-6">
+    <div className="min-h-screen bg-[#0a0a0a] dark:bg-[var(--background)] p-4 pb-32 sm:p-6">
       {/* Barra superior */}
       <div className="mb-4 flex items-center justify-end gap-2">
         <button
           onClick={refresh}
           disabled={isRefreshing}
-          className="flex items-center gap-2 px-3 py-2 bg-[#18181b] hover:bg-white/5 border border-white/10 rounded-xl text-sm text-gray-300 hover:text-white transition-all disabled:opacity-50"
+          className="flex items-center gap-2 px-3 py-2 bg-[#18181b] dark:bg-[var(--card)] hover:bg-white/5 border border-white/10 rounded-xl text-sm text-gray-300 dark:text-[var(--foreground)] hover:text-white dark:hover:text-[var(--foreground)] transition-all disabled:opacity-50"
           title="Actualizar presupuestos"
         >
           <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           <span className="hidden sm:inline">{isRefreshing ? 'Actualizando...' : 'Actualizar'}</span>
         </button>
-        <button onClick={onNewPresupuesto} className="flex items-center gap-2 px-4 py-2 bg-[#10b981] hover:bg-[#0ea572] rounded-xl text-sm text-white font-semibold transition-all active:scale-[0.98]">
+        <button onClick={onNewPresupuesto} className="flex items-center gap-2 px-4 py-2 bg-[#10b981] dark:bg-[var(--primary)] hover:bg-[#0ea572] dark:hover:bg-[var(--primary-hover)] rounded-xl text-sm text-white dark:text-[var(--primary-foreground)] font-semibold transition-all active:scale-[0.98]">
           <Plus className="w-4 h-4" />
           <span>Nuevo</span>
         </button>
       </div>
       {data.length === 0 ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 bg-purple-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-purple-500/10 dark:bg-[var(--accent)] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <span className="text-4xl">💰</span>
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">No hay presupuestos activos</h3>
-          <p className="text-gray-400 mb-6">
+          <h3 className="text-xl font-bold text-white dark:text-[var(--foreground)] mb-2">No hay presupuestos activos</h3>
+          <p className="text-gray-400 dark:text-[var(--muted-foreground)] mb-6">
             Crea presupuestos para controlar tus gastos mensuales
           </p>
           <button 
             onClick={onNewPresupuesto}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#10b981] to-[#34d399] text-white font-medium hover:shadow-lg transition-all"
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#10b981] dark:from-[var(--primary)] to-[#34d399] dark:to-[var(--primary)] text-white dark:text-[var(--primary-foreground)] font-medium hover:shadow-lg transition-all"
           >
             Crear Primer Presupuesto
           </button>
@@ -98,34 +98,34 @@ const ModernPresupuestosView = ({
           const isAlerta = p.porcentaje >= 80;
           const disponible = p.montoLimite - p.montoGastado;
           return (
-            <div key={p.id} className={`bg-[#18181b] rounded-3xl p-4 border-2 ${isExcedido ? 'border-[#ec4899]' : isAlerta ? 'border-[#ffd60a]' : 'border-white/5'} sm:p-6`}>
+            <div key={p.id} className={`bg-[#18181b] dark:bg-[var(--card)] rounded-3xl p-4 border-2 ${isExcedido ? 'border-[#ec4899] dark:border-[var(--destructive)]' : isAlerta ? 'border-[#ffd60a] dark:border-[var(--warning)]' : 'border-white/5'} sm:p-6`}>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-base font-bold text-white mb-1 sm:text-lg">{p.nombre}</h3>
-                  <p className="text-xs text-gray-400">{p.categoria}</p>
+                  <h3 className="text-base font-bold text-white dark:text-[var(--foreground)] mb-1 sm:text-lg">{p.nombre}</h3>
+                  <p className="text-xs text-gray-400 dark:text-[var(--muted-foreground)]">{p.categoria}</p>
                 </div>
                 <div className="flex gap-1">
                   <button onClick={() => onEditPresupuesto && onEditPresupuesto(p)} className="p-2 hover:bg-white/5 rounded-lg transition-colors">
-                    <Edit className="w-4 h-4 text-gray-400" />
+                    <Edit className="w-4 h-4 text-gray-400 dark:text-[var(--muted-foreground)]" />
                   </button>
-                  <button onClick={() => onDeletePresupuesto && onDeletePresupuesto(p.id)} className="p-2 hover:bg-red-500/10 rounded-lg transition-colors">
-                    <Trash2 className="w-4 h-4 text-red-500" />
+                  <button onClick={() => onDeletePresupuesto && onDeletePresupuesto(p.id)} className="p-2 hover:bg-red-500/10 dark:hover:bg-[var(--overdue-pill)] rounded-lg transition-colors">
+                    <Trash2 className="w-4 h-4 text-red-500 dark:text-[var(--destructive)]" />
                   </button>
                 </div>
               </div>
               <div className="mb-4">
                 <div className="flex justify-between mb-2">
-                  <span className="text-sm text-gray-400">Progreso</span>
-                  <span className={`text-lg font-bold ${isExcedido ? 'text-[#ec4899]' : isAlerta ? 'text-[#ffd60a]' : 'text-[#10b981]'} sm:text-xl`}>{p.porcentaje}%</span>
+                  <span className="text-sm text-gray-400 dark:text-[var(--muted-foreground)]">Progreso</span>
+                  <span className={`text-lg font-bold ${isExcedido ? 'text-[#ec4899] dark:text-[var(--destructive)]' : isAlerta ? 'text-[#ffd60a] dark:text-[var(--warning)]' : 'text-[#10b981] dark:text-[var(--primary)]'} sm:text-xl`}>{p.porcentaje}%</span>
                 </div>
-                <div className="w-full bg-[#0a0a0a] rounded-full h-3 overflow-hidden">
-                  <div className={`h-full ${isExcedido ? 'bg-[#ec4899]' : isAlerta ? 'bg-[#ffd60a]' : 'bg-gradient-to-r from-[#10b981] to-[#34d399]'}`} style={{ width: `${Math.min(p.porcentaje, 100)}%` }} />
+                <div className="w-full bg-[#0a0a0a] dark:bg-[var(--background)] rounded-full h-3 overflow-hidden">
+                  <div className={`h-full ${isExcedido ? 'bg-[#ec4899] dark:bg-[var(--destructive)]' : isAlerta ? 'bg-[#ffd60a] dark:bg-[var(--warning)]' : 'bg-gradient-to-r from-[#10b981] dark:from-[var(--primary)] to-[#34d399] dark:to-[var(--primary)]'}`} style={{ width: `${Math.min(p.porcentaje, 100)}%` }} />
                 </div>
               </div>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3">
-                <div className="text-center p-3 bg-[#0a0a0a] rounded-xl"><p className="text-xs text-gray-500 mb-1">Gastado</p><p className="text-sm font-bold text-white">${p.montoGastado.toLocaleString()}</p></div>
-                <div className="text-center p-3 bg-[#0a0a0a] rounded-xl"><p className="text-xs text-gray-500 mb-1">Límite</p><p className="text-sm font-bold text-white">${p.montoLimite.toLocaleString()}</p></div>
-                <div className="text-center p-3 bg-[#0a0a0a] rounded-xl"><p className="text-xs text-gray-500 mb-1">Disponible</p><p className={`text-sm font-bold ${disponible >= 0 ? 'text-[#10b981]' : 'text-[#ec4899]'}`}>${Math.abs(disponible).toLocaleString()}</p></div>
+                <div className="text-center p-3 bg-[#0a0a0a] dark:bg-[var(--background)] rounded-xl"><p className="text-xs text-gray-500 dark:text-[var(--muted-foreground)] mb-1">Gastado</p><p className="text-sm font-bold text-white dark:text-[var(--foreground)]">${p.montoGastado.toLocaleString()}</p></div>
+                <div className="text-center p-3 bg-[#0a0a0a] dark:bg-[var(--background)] rounded-xl"><p className="text-xs text-gray-500 dark:text-[var(--muted-foreground)] mb-1">Límite</p><p className="text-sm font-bold text-white dark:text-[var(--foreground)]">${p.montoLimite.toLocaleString()}</p></div>
+                <div className="text-center p-3 bg-[#0a0a0a] dark:bg-[var(--background)] rounded-xl"><p className="text-xs text-gray-500 dark:text-[var(--muted-foreground)] mb-1">Disponible</p><p className={`text-sm font-bold ${disponible >= 0 ? 'text-[#10b981] dark:text-[var(--primary)]' : 'text-[#ec4899] dark:text-[var(--destructive)]'}`}>${Math.abs(disponible).toLocaleString()}</p></div>
               </div>
             </div>
           );

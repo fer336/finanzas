@@ -138,19 +138,19 @@ export function GestionPagosCuota({
 
   const getEstadoColor = (estado) => {
     switch (estado) {
-      case 'completo': return 'text-green-400';
-      case 'parcial': return 'text-yellow-400';
-      case 'pendiente': return 'text-red-400';
-      default: return 'text-gray-400';
+      case 'completo': return 'text-green-400 dark:text-[var(--primary)]';
+      case 'parcial': return 'text-yellow-400 dark:text-[var(--warning)]';
+      case 'pendiente': return 'text-red-400 dark:text-[var(--destructive)]';
+      default: return 'text-gray-400 dark:text-[var(--muted-foreground)]';
     }
   };
 
   const getEstadoIcon = (estado) => {
     switch (estado) {
-      case 'completo': return <CheckCircle className="h-5 w-5 text-green-400" />;
-      case 'parcial': return <Clock className="h-5 w-5 text-yellow-400" />;
-      case 'pendiente': return <XCircle className="h-5 w-5 text-red-400" />;
-      default: return <Clock className="h-5 w-5 text-gray-400" />;
+      case 'completo': return <CheckCircle className="h-5 w-5 text-green-400 dark:text-[var(--primary)]" />;
+      case 'parcial': return <Clock className="h-5 w-5 text-yellow-400 dark:text-[var(--warning)]" />;
+      case 'pendiente': return <XCircle className="h-5 w-5 text-red-400 dark:text-[var(--destructive)]" />;
+      default: return <Clock className="h-5 w-5 text-gray-400 dark:text-[var(--muted-foreground)]" />;
     }
   };
 
@@ -261,7 +261,7 @@ export function GestionPagosCuota({
                       </div>
                       <div className="flex justify-between font-medium">
                         <span>Diferencia:</span>
-                        <span className={parseFloat(formPago.monto || 0) >= cuotaMensualCalculada ? 'text-green-600' : 'text-red-600'}>
+                        <span className={parseFloat(formPago.monto || 0) >= cuotaMensualCalculada ? 'text-green-600 dark:text-[var(--primary)]' : 'text-red-600 dark:text-[var(--destructive)]'}>
                           ${Math.abs(parseFloat(formPago.monto || 0) - cuotaMensualCalculada).toLocaleString()}
                           {parseFloat(formPago.monto || 0) >= cuotaMensualCalculada ? ' (excedente)' : ' (faltante)'}
                         </span>
@@ -300,7 +300,7 @@ export function GestionPagosCuota({
                 {estadoPago === 'completo' ? 'Completo' : estadoPago === 'parcial' ? 'Parcial' : 'Pendiente'}
               </Badge>
               {diferencia !== 0 && (
-                <p className={`text-sm ${diferencia > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <p className={`text-sm ${diferencia > 0 ? 'text-green-600 dark:text-[var(--primary)]' : 'text-red-600 dark:text-[var(--destructive)]'}`}>
                   {diferencia > 0 ? `+$${diferencia.toLocaleString()} excedente` : `$${Math.abs(diferencia).toLocaleString()} faltante`}
                 </p>
               )}
@@ -323,7 +323,7 @@ export function GestionPagosCuota({
               {pagosRealizados.map((pago, index) => (
                 <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-3">
-                    <CreditCard className="h-5 w-5 text-blue-400" />
+                    <CreditCard className="h-5 w-5 text-blue-400 dark:text-[var(--primary)]" />
                     <div>
                       <p className="font-medium">{pago.Descripcion}</p>
                       <p className="text-sm text-muted-foreground">

@@ -553,7 +553,7 @@ const ModernTransactionsView = ({
 
           {/* Cabecera de período */}
           <div className="mb-3 border-b border-border pb-3">
-            <div className="font-mono text-[10px] uppercase text-[#4d699b]" style={{ letterSpacing: '.14em' }}>
+            <div className="font-mono text-[10px] uppercase text-[#4d699b] dark:text-[var(--primary)]" style={{ letterSpacing: '.14em' }}>
               {periodoEyebrow}
             </div>
             <h1 className="text-[28px] font-semibold leading-tight text-foreground">Movimientos</h1>
@@ -569,7 +569,7 @@ const ModernTransactionsView = ({
               options={[{ value: 'monthly', label: 'Mensual' }, { value: 'accumulated', label: 'Acumulado' }]}
               value={viewMode}
               onChange={handleViewModeChange}
-              activeClassName="bg-[#545464] text-[#f2ecbc]"
+              activeClassName="bg-[#545464] dark:bg-[var(--border)] text-[#f2ecbc] dark:text-[var(--foreground)]"
             />
           </div>
 
@@ -579,7 +579,7 @@ const ModernTransactionsView = ({
               options={RANGE_OPTIONS}
               value={range}
               onChange={setRange}
-              activeClassName="bg-[#4d699b] text-[#e5ddb0]"
+              activeClassName="bg-[#4d699b] dark:bg-[var(--primary)] text-[#e5ddb0] dark:text-[var(--primary-foreground)]"
             />
           </div>
 
@@ -587,9 +587,9 @@ const ModernTransactionsView = ({
           {viewMode === 'monthly' && (
             <div className="mb-3 flex items-center justify-between rounded-sm border border-border bg-card px-3 py-2">
               <button aria-label="Mes anterior" onClick={goToPrevMonth} className="min-h-11 min-w-11 rounded-md hover:bg-card-hover focus-visible:outline focus-visible:outline-ring">
-                <ChevronLeft className="w-4 h-4 text-[#625f55]" />
+                <ChevronLeft className="w-4 h-4 text-[#625f55] dark:text-[var(--muted-foreground)]" />
               </button>
-              <button onClick={goToToday} className="font-mono text-[12px] text-[#43436c] hover:text-foreground">
+              <button onClick={goToToday} className="font-mono text-[12px] text-[#43436c] dark:text-[var(--muted-foreground)] hover:text-foreground">
                 hoy
               </button>
               <button
@@ -598,7 +598,7 @@ const ModernTransactionsView = ({
                 disabled={isCurrentMonth}
                 className="p-1.5 rounded-sm hover:bg-black/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                <ChevronRight className="w-4 h-4 text-[#625f55]" />
+                <ChevronRight className="w-4 h-4 text-[#625f55] dark:text-[var(--muted-foreground)]" />
               </button>
             </div>
           )}
@@ -611,18 +611,18 @@ const ModernTransactionsView = ({
                 className="w-full flex items-center justify-between px-3 py-2 bg-card border border-border rounded-sm text-[13px] text-foreground"
               >
                 <div className="flex items-center gap-2">
-                  <CalendarDays className="w-4 h-4 text-[#4d699b]" />
+                  <CalendarDays className="w-4 h-4 text-[#4d699b] dark:text-[var(--primary)]" />
                   <span>{monthsLabel}</span>
                 </div>
-                <ChevronDown className={`w-4 h-4 text-[#625f55] transition-transform ${showMonthPicker ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 text-[#625f55] dark:text-[var(--muted-foreground)] transition-transform ${showMonthPicker ? 'rotate-180' : ''}`} />
               </button>
               {showMonthPicker && (
                 <div className="absolute left-0 right-0 top-full mt-2 z-[9999] bg-card border border-border rounded-md p-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-[13.5px] font-semibold text-foreground">Seleccionar meses</span>
                     <div className="flex gap-3">
-                      <button onClick={selectCurrent} className="text-[12px] text-[#43436c]">Solo actual</button>
-                      <button onClick={selectAll} className="text-[12px] text-[#4d699b]">Todos</button>
+                      <button onClick={selectCurrent} className="text-[12px] text-[#43436c] dark:text-[var(--muted-foreground)]">Solo actual</button>
+                      <button onClick={selectAll} className="text-[12px] text-[#4d699b] dark:text-[var(--primary)]">Todos</button>
                     </div>
                   </div>
                   <div className="grid grid-cols-4 gap-2">
@@ -635,13 +635,13 @@ const ModernTransactionsView = ({
                           onClick={() => toggleMonth(mes.key)}
                           className={`relative flex items-center justify-center gap-1 px-2 py-2 rounded-sm font-mono text-[12px] font-medium transition-colors ${
                             isSelected
-                              ? 'bg-[#526a3a]/10 text-[#526a3a] border border-[#526a3a]/40'
+                              ? 'bg-[#526a3a]/10 dark:bg-[var(--accent)] text-[#526a3a] border border-[#526a3a]/40 dark:border-[var(--accent)]'
                               : 'bg-transparent text-[#43436c] border border-border dark:text-muted-foreground'
                           }`}
                         >
                           {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
                           <span>{mes.label}</span>
-                          {isCurrent && <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#4d699b] rounded-full" />}
+                          {isCurrent && <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#4d699b] dark:bg-[var(--primary)] rounded-full" />}
                         </button>
                       );
                     })}
@@ -714,7 +714,7 @@ const ModernTransactionsView = ({
                         className="min-h-11 w-full truncate text-left text-sm font-medium text-foreground hover:underline focus-visible:outline focus-visible:outline-ring">{descripcion}</button>
                       <p className="text-xs text-muted-foreground">{esIngreso ? 'Ingreso' : 'Gasto'}</p>
                       <div className="mt-1 flex min-w-0 flex-wrap items-center gap-2">
-                        <span className="shrink-0 font-mono text-[11.5px] text-[#625f55]">{displayDate}</span>
+                        <span className="shrink-0 font-mono text-[11.5px] text-[#625f55] dark:text-[var(--muted-foreground)]">{displayDate}</span>
                         <Badge
                           variant="outline"
                           className="max-w-full min-w-0 truncate"
@@ -736,7 +736,7 @@ const ModernTransactionsView = ({
                         type="button"
                         onClick={(e) => openDocumentPreview(e, attachedDocument.rawUrl)}
                         aria-label={`Ver comprobante de ${descripcion}`}
-                        className="p-1 text-[#625f55] hover:text-foreground"
+                        className="p-1 text-[#625f55] dark:text-[var(--muted-foreground)] hover:text-foreground"
                         title="Ver comprobante"
                       >
                         <Eye className="w-4 h-4" />
@@ -746,7 +746,7 @@ const ModernTransactionsView = ({
                       type="button"
                       onClick={() => onEditTransaction && onEditTransaction(t)}
                       aria-label={`Editar movimiento ${descripcion}`}
-                      className="p-1 text-[#625f55] hover:text-foreground"
+                      className="p-1 text-[#625f55] dark:text-[var(--muted-foreground)] hover:text-foreground"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
@@ -754,7 +754,7 @@ const ModernTransactionsView = ({
                       type="button"
                       onClick={e => { e.stopPropagation(); onDeleteTransaction && onDeleteTransaction(t); }}
                       aria-label={`Eliminar movimiento ${descripcion}`}
-                      className="p-1 text-[#625f55] hover:text-[#b83245]"
+                      className="p-1 text-[#625f55] dark:text-[var(--muted-foreground)] hover:text-[#b83245] dark:hover:text-[var(--destructive)]"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -773,10 +773,10 @@ const ModernTransactionsView = ({
                 disabled={page === 1}
                 className="min-h-11 min-w-11 rounded-md disabled:opacity-30 hover:bg-card-hover focus-visible:outline focus-visible:outline-ring"
               >
-                <ChevronLeft className="w-4 h-4 text-[#625f55]" />
+                <ChevronLeft className="w-4 h-4 text-[#625f55] dark:text-[var(--muted-foreground)]" />
               </button>
-              <span className="font-mono text-[12px] text-[#43436c]">
-                {page} / {totalPages} <span className="text-[#625f55]">({filtered.length})</span>
+              <span className="font-mono text-[12px] text-[#43436c] dark:text-[var(--muted-foreground)]">
+                {page} / {totalPages} <span className="text-[#625f55] dark:text-[var(--muted-foreground)]">({filtered.length})</span>
               </span>
               <button
                 aria-label="Página siguiente"
@@ -784,7 +784,7 @@ const ModernTransactionsView = ({
                 disabled={page >= totalPages}
                 className="min-h-11 min-w-11 rounded-md disabled:opacity-30 hover:bg-card-hover focus-visible:outline focus-visible:outline-ring"
               >
-                <ChevronRight className="w-4 h-4 text-[#625f55]" />
+                <ChevronRight className="w-4 h-4 text-[#625f55] dark:text-[var(--muted-foreground)]" />
               </button>
             </div>
           )}
@@ -813,7 +813,7 @@ const ModernTransactionsView = ({
         <div className="mb-4 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
           <div>
             <div
-              className="font-mono text-[11px] uppercase text-[#4d699b]"
+              className="font-mono text-[11px] uppercase text-[#4d699b] dark:text-[var(--primary)]"
               style={{ letterSpacing: '.16em' }}
             >
               {periodoEyebrow}
@@ -831,15 +831,15 @@ const ModernTransactionsView = ({
               options={[{ value: 'monthly', label: 'Mensual' }, { value: 'accumulated', label: 'Acumulado' }]}
               value={viewMode}
               onChange={handleViewModeChange}
-              activeClassName="bg-[#545464] text-[#f2ecbc]"
+              activeClassName="bg-[#545464] dark:bg-[var(--border)] text-[#f2ecbc] dark:text-[var(--foreground)]"
             />
 
             {viewMode === 'monthly' && (
               <div className="flex items-center gap-1 rounded-full border border-border bg-card px-1.5 py-1">
                 <button onClick={goToPrevMonth} className="p-1 rounded-full hover:bg-black/5 transition-colors" title="Mes anterior">
-                  <ChevronLeft className="w-4 h-4 text-[#625f55]" />
+                  <ChevronLeft className="w-4 h-4 text-[#625f55] dark:text-[var(--muted-foreground)]" />
                 </button>
-                <button onClick={goToToday} className="px-1.5 font-mono text-[12px] text-[#43436c] hover:text-foreground transition-colors">
+                <button onClick={goToToday} className="px-1.5 font-mono text-[12px] text-[#43436c] dark:text-[var(--muted-foreground)] hover:text-foreground transition-colors">
                   hoy
                 </button>
                 <button
@@ -848,7 +848,7 @@ const ModernTransactionsView = ({
                   className="p-1 rounded-full hover:bg-black/5 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   title="Mes siguiente"
                 >
-                  <ChevronRight className="w-4 h-4 text-[#625f55]" />
+                  <ChevronRight className="w-4 h-4 text-[#625f55] dark:text-[var(--muted-foreground)]" />
                 </button>
               </div>
             )}
@@ -859,9 +859,9 @@ const ModernTransactionsView = ({
                   onClick={() => setShowMonthPicker(p => !p)}
                   className="flex items-center gap-1.5 px-3 py-[7px] bg-card hover:bg-card-hover border border-border rounded-sm text-[13px] text-foreground transition-colors"
                 >
-                  <CalendarDays className="w-4 h-4 text-[#4d699b]" />
+                  <CalendarDays className="w-4 h-4 text-[#4d699b] dark:text-[var(--primary)]" />
                   <span>{monthsLabel}</span>
-                  <ChevronDown className={`w-3 h-3 text-[#625f55] transition-transform ${showMonthPicker ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-3 h-3 text-[#625f55] dark:text-[var(--muted-foreground)] transition-transform ${showMonthPicker ? 'rotate-180' : ''}`} />
                 </button>
 
                 {showMonthPicker && (
@@ -869,11 +869,11 @@ const ModernTransactionsView = ({
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-[13.5px] font-semibold text-foreground">Seleccionar meses</span>
                       <div className="flex gap-3">
-                        <button onClick={selectCurrent} className="text-[12px] text-[#43436c] hover:text-foreground transition-colors">
+                        <button onClick={selectCurrent} className="text-[12px] text-[#43436c] dark:text-[var(--muted-foreground)] hover:text-foreground transition-colors">
                           Solo actual
                         </button>
                         <span className="text-muted">·</span>
-                        <button onClick={selectAll} className="text-[12px] text-[#4d699b] hover:underline transition-colors">
+                        <button onClick={selectAll} className="text-[12px] text-[#4d699b] dark:text-[var(--primary)] hover:underline transition-colors">
                           Todos
                         </button>
                       </div>
@@ -889,14 +889,14 @@ const ModernTransactionsView = ({
                             onClick={() => toggleMonth(mes.key)}
                             className={`relative flex items-center justify-center gap-1 px-2 py-2 rounded-sm font-mono text-[12px] font-medium transition-colors duration-150 ${
                               isSelected
-                                ? 'bg-[#526a3a]/10 text-[#526a3a] border border-[#526a3a]/40'
+                                ? 'bg-[#526a3a]/10 dark:bg-[var(--accent)] text-[#526a3a] border border-[#526a3a]/40 dark:border-[var(--accent)]'
                                 : 'bg-transparent text-[#43436c] border border-border hover:bg-card-hover dark:text-muted-foreground'
                             }`}
                           >
                             {isSelected && <Check className="w-3 h-3 flex-shrink-0" />}
                             <span>{mes.label}</span>
                             {isCurrent && (
-                              <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#4d699b] rounded-full" />
+                              <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#4d699b] dark:bg-[var(--primary)] rounded-full" />
                             )}
                           </button>
                         );
@@ -920,7 +920,7 @@ const ModernTransactionsView = ({
             options={RANGE_OPTIONS}
             value={range}
             onChange={setRange}
-            activeClassName="bg-[#4d699b] text-[#e5ddb0]"
+            activeClassName="bg-[#4d699b] dark:bg-[var(--primary)] text-[#e5ddb0] dark:text-[var(--primary-foreground)]"
           />
         </div>
 
@@ -1044,7 +1044,7 @@ const ModernTransactionsView = ({
                               className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
                               title="Ver comprobante"
                             >
-                              <Eye className="w-4 h-4 text-[#625f55]" />
+                              <Eye className="w-4 h-4 text-[#625f55] dark:text-[var(--muted-foreground)]" />
                             </button>
                           )}
                           <button
@@ -1054,7 +1054,7 @@ const ModernTransactionsView = ({
                             className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
                             title="Editar"
                           >
-                            <Edit className="w-4 h-4 text-[#625f55]" />
+                            <Edit className="w-4 h-4 text-[#625f55] dark:text-[var(--muted-foreground)]" />
                           </button>
                           <button
                             type="button"
@@ -1063,7 +1063,7 @@ const ModernTransactionsView = ({
                             className="p-1.5 rounded-sm hover:bg-black/5 transition-colors"
                             title="Eliminar"
                           >
-                            <Trash2 className="w-4 h-4 text-[#625f55] hover:text-[#b83245]" />
+                            <Trash2 className="w-4 h-4 text-[#625f55] dark:text-[var(--muted-foreground)] hover:text-[#b83245] dark:hover:text-[var(--destructive)]" />
                           </button>
                         </div>
                       </td>
@@ -1087,7 +1087,7 @@ const ModernTransactionsView = ({
                   disabled={page === 1}
                   className="min-h-11 min-w-11 rounded-md disabled:opacity-30 hover:bg-card-hover focus-visible:outline focus-visible:outline-ring"
                 >
-                  <ChevronLeft className="w-4 h-4 text-[#625f55]" />
+                  <ChevronLeft className="w-4 h-4 text-[#625f55] dark:text-[var(--muted-foreground)]" />
                 </button>
                 <span className="font-mono text-[12px] text-foreground px-2">{page}</span>
                 <button
@@ -1096,7 +1096,7 @@ const ModernTransactionsView = ({
                   disabled={page >= totalPages}
                   className="min-h-11 min-w-11 rounded-md disabled:opacity-30 hover:bg-card-hover focus-visible:outline focus-visible:outline-ring"
                 >
-                  <ChevronRight className="w-4 h-4 text-[#625f55]" />
+                  <ChevronRight className="w-4 h-4 text-[#625f55] dark:text-[var(--muted-foreground)]" />
                 </button>
               </div>
             </div>

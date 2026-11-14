@@ -28,9 +28,9 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
   if (error) {
     return (
       <div className="flex flex-col items-center gap-2 py-10 text-center">
-        <AlertCircle className="h-8 w-8 text-[#b83245] dark:text-[#e46876]" />
+        <AlertCircle className="h-8 w-8 text-[#b83245] dark:text-[var(--destructive)]" />
         <p className="font-serif text-[15px] font-semibold text-foreground">Error al cargar categorías</p>
-        <p className="text-[12.5px] text-[#625f55] dark:text-[#c8c093]">{error.message}</p>
+        <p className="text-[12.5px] text-[#625f55] dark:text-[var(--foreground)]">{error.message}</p>
       </div>
     );
   }
@@ -53,13 +53,13 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
   return (
     <div>
       <div className="mb-4 flex items-start justify-between gap-3">
-        <p className="text-[12.5px] text-[#625f55] dark:text-[#c8c093]">Dale orden visual a tus gastos e ingresos.</p>
+        <p className="text-[12.5px] text-[#625f55] dark:text-[var(--foreground)]">Dale orden visual a tus gastos e ingresos.</p>
         <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={refresh}
             disabled={isRefreshing}
-            className="flex items-center gap-1.5 rounded-sm border border-[#c8bf91] bg-white px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#e4d794] disabled:opacity-50 dark:border-[#363646] dark:bg-[#2a2a37] dark:hover:bg-[#363646]"
+            className="flex items-center gap-1.5 rounded-sm border border-[#c8bf91] bg-white px-3 py-[7px] font-sans text-[13px] text-foreground transition-colors duration-150 hover:bg-[#e4d794] disabled:opacity-50 dark:border-[var(--border)] dark:bg-[var(--card)] dark:hover:bg-[var(--secondary)]"
             title="Actualizar categorías"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -68,7 +68,7 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
           <button
             type="button"
             onClick={onNewCategory}
-            className="flex items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[#76946a]"
+            className="flex items-center gap-1.5 rounded-sm bg-primary px-3.5 py-[7px] font-sans text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[var(--primary-hover)]"
           >
             <Plus className="h-3.5 w-3.5" />
             <span>Nueva</span>
@@ -77,33 +77,33 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
       </div>
 
       <div className="mb-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-        <div className="rounded-sm border border-[#c8bf91] bg-white p-3 dark:border-[#363646] dark:bg-[#2a2a37]">
-          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#625f55] dark:text-[#c8c093]">Total</p>
+        <div className="rounded-sm border border-[#c8bf91] bg-white p-3 dark:border-[var(--border)] dark:bg-[var(--card)]">
+          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#625f55] dark:text-[var(--foreground)]">Total</p>
           <p className="mt-1 font-mono text-[20px] font-semibold text-foreground">{total}</p>
         </div>
-        <div className="rounded-sm border border-[#c8bf91] bg-white p-3 dark:border-[#363646] dark:bg-[#2a2a37]">
-          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#625f55] dark:text-[#c8c093]">Gastos</p>
-          <p className="mt-1 font-mono text-[20px] font-semibold text-[#b83245] dark:text-[#e46876]">{gastos}</p>
+        <div className="rounded-sm border border-[#c8bf91] bg-white p-3 dark:border-[var(--border)] dark:bg-[var(--card)]">
+          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#625f55] dark:text-[var(--foreground)]">Gastos</p>
+          <p className="mt-1 font-mono text-[20px] font-semibold text-[#b83245] dark:text-[var(--destructive)]">{gastos}</p>
         </div>
-        <div className="rounded-sm border border-[#c8bf91] bg-white p-3 dark:border-[#363646] dark:bg-[#2a2a37]">
-          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#625f55] dark:text-[#c8c093]">Ingresos</p>
-          <p className="mt-1 font-mono text-[20px] font-semibold text-[#526a3a] dark:text-[#98bb6c]">{ingresos}</p>
+        <div className="rounded-sm border border-[#c8bf91] bg-white p-3 dark:border-[var(--border)] dark:bg-[var(--card)]">
+          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#625f55] dark:text-[var(--foreground)]">Ingresos</p>
+          <p className="mt-1 font-mono text-[20px] font-semibold text-[#526a3a] dark:text-[var(--primary)]">{ingresos}</p>
         </div>
-        <div className="rounded-sm border border-[#c8bf91] bg-white p-3 dark:border-[#363646] dark:bg-[#2a2a37]">
-          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#625f55] dark:text-[#c8c093]">Activas</p>
+        <div className="rounded-sm border border-[#c8bf91] bg-white p-3 dark:border-[var(--border)] dark:bg-[var(--card)]">
+          <p className="text-[10.5px] uppercase tracking-[.06em] text-[#625f55] dark:text-[var(--foreground)]">Activas</p>
           <p className="mt-1 font-mono text-[20px] font-semibold text-primary">{activas}</p>
         </div>
       </div>
 
-      <div className="overflow-hidden overflow-x-auto rounded-md border border-[#c8bf91] bg-card dark:border-[#363646]">
+      <div className="overflow-hidden overflow-x-auto rounded-md border border-[#c8bf91] bg-card dark:border-[var(--border)]">
         <table className="w-full min-w-[640px]">
           <thead>
-            <tr className="border-b-2 border-[#c8bf91] dark:border-[#363646]">
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Categoría</th>
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Tipo</th>
-              <th className="hidden px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#625f55] sm:table-cell dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Descripción</th>
-              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Estado</th>
-              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[#c8c093]" style={{ letterSpacing: '.08em' }}>Acciones</th>
+            <tr className="border-b-2 border-[#c8bf91] dark:border-[var(--border)]">
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[var(--foreground)]" style={{ letterSpacing: '.08em' }}>Categoría</th>
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[var(--foreground)]" style={{ letterSpacing: '.08em' }}>Tipo</th>
+              <th className="hidden px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#625f55] sm:table-cell dark:text-[var(--foreground)]" style={{ letterSpacing: '.08em' }}>Descripción</th>
+              <th className="px-3.5 py-2.5 text-left font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[var(--foreground)]" style={{ letterSpacing: '.08em' }}>Estado</th>
+              <th className="px-3.5 py-2.5 text-right font-mono text-[10.5px] uppercase text-[#625f55] dark:text-[var(--foreground)]" style={{ letterSpacing: '.08em' }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -118,7 +118,7 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
                 const Icon = getCategoryIcon(cat.icono);
                 const isIngreso = cat.tipo === 'ingreso';
                 return (
-                  <tr key={cat.id} className="group border-b border-[#d5cea3] transition-colors hover:bg-[#e4d794] dark:border-[#363646] dark:hover:bg-[#2a2a37]">
+                  <tr key={cat.id} className="group border-b border-[#d5cea3] transition-colors hover:bg-[#e4d794] dark:border-[var(--border)] dark:hover:bg-[var(--card)]">
                     <td className="px-3.5 py-2.5">
                       <div className="flex min-w-0 items-center gap-2.5">
                         <div
@@ -141,13 +141,13 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
                         {cat.tipo}
                       </span>
                     </td>
-                    <td className="hidden max-w-[240px] px-3.5 py-2.5 text-[12.5px] text-[#625f55] sm:table-cell dark:text-[#c8c093]">
+                    <td className="hidden max-w-[240px] px-3.5 py-2.5 text-[12.5px] text-[#625f55] sm:table-cell dark:text-[var(--foreground)]">
                       <span className="line-clamp-1">{cat.descripcion || '—'}</span>
                     </td>
                     <td className="px-3.5 py-2.5">
                       <span
                         className={`inline-flex rounded-full border px-2 py-[2px] font-mono text-[10.5px] uppercase tracking-[.04em] ${
-                          cat.activa ? 'border-[#526a3a] text-[#526a3a] dark:border-[#98bb6c] dark:text-[#98bb6c]' : 'border-[#c8bf91] text-[#625f55] dark:border-[#363646] dark:text-[#c8c093]'
+                          cat.activa ? 'border-[#526a3a] text-[#526a3a] dark:border-[var(--primary)] dark:text-[var(--primary)]' : 'border-[#c8bf91] text-[#625f55] dark:border-[var(--border)] dark:text-[var(--foreground)]'
                         }`}
                       >
                         {cat.activa ? 'Activa' : 'Inactiva'}
@@ -158,7 +158,7 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
                         <button
                           type="button"
                           onClick={() => onEditCategory && onEditCategory(cat)}
-                          className="rounded-sm p-1.5 text-[#625f55] transition-colors hover:bg-black/5 hover:text-foreground dark:text-[#c8c093] dark:hover:bg-white/5"
+                          className="rounded-sm p-1.5 text-[#625f55] transition-colors hover:bg-black/5 hover:text-foreground dark:text-[var(--foreground)] dark:hover:bg-white/5"
                           title="Editar categoría"
                         >
                           <Pencil className="h-3.5 w-3.5" />
@@ -166,7 +166,7 @@ const ModernCategoriesView = ({ onNewCategory, onEditCategory, onDeleteCategory 
                         <button
                           type="button"
                           onClick={() => onDeleteCategory && onDeleteCategory(cat.id)}
-                          className="rounded-sm p-1.5 text-[#625f55] transition-colors hover:bg-black/5 hover:text-[#b83245] dark:text-[#c8c093] dark:hover:bg-white/5 dark:hover:text-[#e46876]"
+                          className="rounded-sm p-1.5 text-[#625f55] transition-colors hover:bg-black/5 hover:text-[#b83245] dark:text-[var(--foreground)] dark:hover:bg-white/5 dark:hover:text-[var(--destructive)]"
                           title="Eliminar categoría"
                         >
                           <Trash2 className="h-3.5 w-3.5" />

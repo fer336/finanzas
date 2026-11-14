@@ -12,7 +12,7 @@ import { HistorialIngresosCuota } from './historial-ingresos-cuota';
 
 // Componentes custom con estilo dark/retro para reemplazar los eliminados
 const Card = ({ children, className = '' }) => (
-  <div className={`bg-zinc-900 border-2 border-zinc-800 rounded-2xl ${className}`}>
+  <div className={`bg-zinc-900 dark:bg-[var(--card)] border-2 border-zinc-800 dark:border-[var(--border)] rounded-2xl ${className}`}>
     {children}
   </div>
 );
@@ -24,7 +24,7 @@ const CardHeader = ({ children, className = '' }) => (
 );
 
 const CardTitle = ({ children, className = '' }) => (
-  <h3 className={`text-lg font-bold text-white ${className}`}>
+  <h3 className={`text-lg font-bold text-white dark:text-[var(--foreground)] ${className}`}>
     {children}
   </h3>
 );
@@ -139,24 +139,24 @@ export function CuotaAlimentariaView() {
   };
 
   return (
-    <div className="h-full p-0" style={{background: '#000000'}}>
+    <div className="h-full p-0" style={{background: 'var(--page-ink)'}}>
       <div className="h-full w-full p-4 md:p-6 space-y-6">
         {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-pink-500/20 border-2 border-pink-500/30 flex items-center justify-center rounded-lg">
-              <Heart className="h-6 w-6 text-pink-400" />
+            <div className="w-12 h-12 bg-pink-500/20 dark:bg-[var(--accent)] border-2 border-pink-500/30 dark:border-[var(--accent)] flex items-center justify-center rounded-lg">
+              <Heart className="h-6 w-6 text-pink-400 dark:text-[var(--primary)]" />
             </div>
             <div>
-              <h1 className="text-3xl font-black uppercase text-white tracking-tight">Cuota Alimentaria</h1>
-              <p className="text-zinc-400 text-sm font-bold mt-1">GESTIÓN DE GASTOS Y CUOTA PARA TU HIJA</p>
+              <h1 className="text-3xl font-black uppercase text-white dark:text-[var(--foreground)] tracking-tight">Cuota Alimentaria</h1>
+              <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold mt-1">GESTIÓN DE GASTOS Y CUOTA PARA TU HIJA</p>
             </div>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto">
             <select 
               value={selectedMonth} 
               onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="w-full sm:w-auto px-4 py-2.5 bg-zinc-900 border-2 border-zinc-700 rounded-lg text-white font-bold uppercase text-xs hover:bg-zinc-800 focus:outline-none"
+              className="w-full sm:w-auto px-4 py-2.5 bg-zinc-900 dark:bg-[var(--card)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-lg text-white dark:text-[var(--foreground)] font-bold uppercase text-xs hover:bg-zinc-800 dark:hover:bg-[var(--secondary)] focus:outline-none"
             >
                 {meses.map((mes, index) => (
                 <option key={index} value={index}>{mes}</option>
@@ -165,7 +165,7 @@ export function CuotaAlimentariaView() {
             <select 
               value={selectedYear} 
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="w-full sm:w-auto px-4 py-2.5 bg-zinc-900 border-2 border-zinc-700 rounded-lg text-white font-bold uppercase text-xs hover:bg-zinc-800 focus:outline-none"
+              className="w-full sm:w-auto px-4 py-2.5 bg-zinc-900 dark:bg-[var(--card)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-lg text-white dark:text-[var(--foreground)] font-bold uppercase text-xs hover:bg-zinc-800 dark:hover:bg-[var(--secondary)] focus:outline-none"
             >
                     {[2025, 2024, 2023].map(year => (
                 <option key={year} value={year}>{year}</option>
@@ -176,53 +176,53 @@ export function CuotaAlimentariaView() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-zinc-900 p-4 rounded-lg border-2 border-zinc-800">
-            <p className="text-zinc-400 text-sm font-bold uppercase">Ingresos Base</p>
-            <p className="text-3xl font-bold text-blue-400 mt-1">
+          <div className="bg-zinc-900 dark:bg-[var(--card)] p-4 rounded-lg border-2 border-zinc-800 dark:border-[var(--border)]">
+            <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold uppercase">Ingresos Base</p>
+            <p className="text-3xl font-bold text-blue-400 dark:text-[var(--primary)] mt-1">
               ${ingresosMensuales.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
             </div>
-          <div className="bg-zinc-900 p-4 rounded-lg border-2 border-zinc-800">
-            <p className="text-zinc-400 text-sm font-bold uppercase">Cuota Legal (30%)</p>
-            <p className="text-3xl font-bold text-green-400 mt-1">
+          <div className="bg-zinc-900 dark:bg-[var(--card)] p-4 rounded-lg border-2 border-zinc-800 dark:border-[var(--border)]">
+            <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold uppercase">Cuota Legal (30%)</p>
+            <p className="text-3xl font-bold text-green-400 dark:text-[var(--primary)] mt-1">
               ${cuotaMensual.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
             </div>
-          <div className="bg-zinc-900 p-4 rounded-lg border-2 border-zinc-800">
-            <p className="text-zinc-400 text-sm font-bold uppercase">Gastos Adicionales</p>
-            <p className="text-3xl font-bold text-pink-400 mt-1">
+          <div className="bg-zinc-900 dark:bg-[var(--card)] p-4 rounded-lg border-2 border-zinc-800 dark:border-[var(--border)]">
+            <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold uppercase">Gastos Adicionales</p>
+            <p className="text-3xl font-bold text-pink-400 dark:text-[var(--primary)] mt-1">
               ${gastosPorAnotar.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
             </div>
-          <div className="bg-zinc-900 p-4 rounded-lg border-2 border-zinc-800">
-            <p className="text-zinc-400 text-sm font-bold uppercase">Total Documentado</p>
-            <p className="text-3xl font-bold text-purple-400 mt-1">
+          <div className="bg-zinc-900 dark:bg-[var(--card)] p-4 rounded-lg border-2 border-zinc-800 dark:border-[var(--border)]">
+            <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold uppercase">Total Documentado</p>
+            <p className="text-3xl font-bold text-purple-400 dark:text-[var(--primary)] mt-1">
               ${(cuotaMensual + gastosPorAnotar).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
       </div>
-          <div className="bg-zinc-900 p-4 rounded-lg border-2 border-zinc-800">
-            <p className="text-zinc-400 text-sm font-bold uppercase">Cuotas Pagadas</p>
-            <p className="text-3xl font-bold text-orange-400 mt-1">
+          <div className="bg-zinc-900 dark:bg-[var(--card)] p-4 rounded-lg border-2 border-zinc-800 dark:border-[var(--border)]">
+            <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold uppercase">Cuotas Pagadas</p>
+            <p className="text-3xl font-bold text-orange-400 dark:text-[var(--warning)] mt-1">
               {cuotasPagadas.length}
             </p>
             </div>
       </div>
 
         {/* Progress Bar */}
-        <div className="bg-zinc-900 p-4 rounded-lg border-2 border-zinc-800">
+        <div className="bg-zinc-900 dark:bg-[var(--card)] p-4 rounded-lg border-2 border-zinc-800 dark:border-[var(--border)]">
             <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-bold text-white">Resumen Visual del Período</span>
-            <span className="text-sm text-zinc-400">Total: ${(cuotaMensual + gastosPorAnotar).toLocaleString()}</span>
+            <span className="text-sm font-bold text-white dark:text-[var(--foreground)]">Resumen Visual del Período</span>
+            <span className="text-sm text-zinc-400 dark:text-[var(--muted-foreground)]">Total: ${(cuotaMensual + gastosPorAnotar).toLocaleString()}</span>
             </div>
-          <div className="relative h-6 bg-zinc-800 rounded-full overflow-hidden border-2 border-zinc-700">
+          <div className="relative h-6 bg-zinc-800 dark:bg-[var(--secondary)] rounded-full overflow-hidden border-2 border-zinc-700 dark:border-[var(--border)]">
               <div 
-              className="absolute left-0 top-0 h-full bg-green-500/50 flex items-center justify-center text-white text-xs font-bold"
+              className="absolute left-0 top-0 h-full bg-green-500/50 dark:bg-[var(--accent)] flex items-center justify-center text-white dark:text-[var(--foreground)] text-xs font-bold"
                 style={{ width: `${Math.min((cuotaMensual / (cuotaMensual + gastosPorAnotar)) * 100, 100)}%` }}
               >
               {cuotaMensual > 0 && '30%'}
               </div>
               <div 
-              className="absolute top-0 h-full bg-pink-500/50 flex items-center justify-center text-white text-xs font-bold"
+              className="absolute top-0 h-full bg-pink-500/50 dark:bg-[var(--accent)] flex items-center justify-center text-white dark:text-[var(--foreground)] text-xs font-bold"
                 style={{ 
                   left: `${Math.min((cuotaMensual / (cuotaMensual + gastosPorAnotar)) * 100, 100)}%`,
                   width: `${Math.min((gastosPorAnotar / (cuotaMensual + gastosPorAnotar)) * 100, 100)}%` 
@@ -244,26 +244,26 @@ export function CuotaAlimentariaView() {
         </TabsList>
 
         <TabsContent value="gastos-hija" className="space-y-4">
-            <div className="bg-zinc-900 p-4 rounded-lg border-2 border-zinc-800">
+            <div className="bg-zinc-900 dark:bg-[var(--card)] p-4 rounded-lg border-2 border-zinc-800 dark:border-[var(--border)]">
               <div className="flex flex-row items-center justify-between mb-4">
               <div>
-                  <h3 className="text-lg font-bold text-white">Gastos con tu Hija</h3>
-                  <p className="text-zinc-400 text-sm">Registro detallado de todos los gastos relacionados</p>
+                  <h3 className="text-lg font-bold text-white dark:text-[var(--foreground)]">Gastos con tu Hija</h3>
+                  <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm">Registro detallado de todos los gastos relacionados</p>
                 </div>
                 <NuevoGastoHijaModal onGastoCreado={handleGastoCreado} />
               </div>
               <div>
                     {gastosConHija.length === 0 ? (
-                  <div className="text-center py-8 text-zinc-500">No hay gastos registrados para este mes.</div>
+                  <div className="text-center py-8 text-zinc-500 dark:text-[var(--muted-foreground)]">No hay gastos registrados para este mes.</div>
                     ) : (
                         <div className="space-y-2">
                             {gastosConHija.map((gasto, index) => (
                       <div key={index} className="bg-zinc-800/50 p-3 rounded-lg flex justify-between items-center">
                         <div>
-                          <p className="font-bold text-white">{gasto.Descripcion}</p>
-                          <p className="text-xs text-zinc-400">{new Date(gasto.FechaTransaccion).toLocaleDateString()}</p>
+                          <p className="font-bold text-white dark:text-[var(--foreground)]">{gasto.Descripcion}</p>
+                          <p className="text-xs text-zinc-400 dark:text-[var(--muted-foreground)]">{new Date(gasto.FechaTransaccion).toLocaleDateString()}</p>
                             </div>
-                        <p className="font-bold text-lg text-pink-400">${gasto.Monto.toLocaleString()}</p>
+                        <p className="font-bold text-lg text-pink-400 dark:text-[var(--primary)]">${gasto.Monto.toLocaleString()}</p>
                             </div>
                             ))}
                         </div>
@@ -308,7 +308,7 @@ export function CuotaAlimentariaView() {
 
         <TabsContent value="validacion" className="space-y-4">
               {/* <ValidadorCuotaAlimentaria ingresosMensuales={ingresosMensuales} gastosConHija={gastosConHija} cuotasPagadas={cuotasPagadas} selectedMonth={selectedMonth} selectedYear={selectedYear}/> */}
-              <div className="p-4 text-center text-gray-400">Validador temporalmente deshabilitado</div>
+              <div className="p-4 text-center text-gray-400 dark:text-[var(--muted-foreground)]">Validador temporalmente deshabilitado</div>
         </TabsContent>
 
         <TabsContent value="reportes" className="space-y-4">

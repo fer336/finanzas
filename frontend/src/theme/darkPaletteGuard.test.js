@@ -43,10 +43,10 @@ const liveFiles = () => {
 const isOverlay = (color, opacity) => Boolean(opacity) && NEUTRAL.test(color);
 
 // Solid dark-mode fills (lime, coral, amber) need the dark on-fill foreground.
-const SOLID_FILL = /(?<![\w\[\]:/-])dark:(?:bg|from|via|to)-\[var\(--(?:primary|primary-hover|destructive|warning)\)\]/;
-const LIGHT_DARK_TEXT = /(?<![\w\[\]:/-])dark:text-\[var\(--(?:foreground|muted-foreground|card-foreground)\)\]/g;
-const LIGHT_TOKEN_TEXT = /(?<![\w\[\]:/-])text-(?:foreground|muted-foreground|card-foreground)(?![\w-])/g;
-const HAS_DARK_TEXT = /(?<![\w\[\]:/-])dark:text-(?!\[?\d)/;
+const SOLID_FILL = /(?<![\w[\]:/-])dark:(?:bg|from|via|to)-\[var\(--(?:primary|primary-hover|destructive|warning)\)\]/;
+const LIGHT_DARK_TEXT = /(?<![\w[\]:/-])dark:text-\[var\(--(?:foreground|muted-foreground|card-foreground)\)\]/g;
+const LIGHT_TOKEN_TEXT = /(?<![\w[\]:/-])text-(?:foreground|muted-foreground|card-foreground)(?![\w-])/g;
+const HAS_DARK_TEXT = /(?<![\w[\]:/-])dark:text-(?!\[?\d)/;
 
 // Lines marked `dark-palette-ignore` hold data (e.g. values sent to the backend).
 const IGNORE_LINE = /^.*dark-palette-ignore.*$/gm;

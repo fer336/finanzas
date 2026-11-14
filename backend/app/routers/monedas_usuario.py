@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 @router.get("/", response_model=List[MonedaUsuarioResponse])
-async def get_user_currencies(
+def get_user_currencies(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     activa: Optional[bool] = Query(None, description="Filtrar por estado activo"),
     orden_by: str = Query("orden", description="Campo para ordenar: orden, codigo, nombre"),
@@ -52,7 +52,7 @@ async def get_user_currencies(
 
 
 @router.get("/{moneda_id}", response_model=MonedaUsuarioResponse)
-async def get_currency_by_id(
+def get_currency_by_id(
     moneda_id: UUID,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -78,7 +78,7 @@ async def get_currency_by_id(
 
 
 @router.get("/codigo/{codigo}", response_model=MonedaUsuarioResponse)
-async def get_currency_by_code(
+def get_currency_by_code(
     codigo: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -104,7 +104,7 @@ async def get_currency_by_code(
 
 
 @router.post("/", response_model=MonedaUsuarioResponse, status_code=201)
-async def create_currency(
+def create_currency(
     moneda_data: MonedaUsuarioCreate,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -134,7 +134,7 @@ async def create_currency(
 
 
 @router.put("/{moneda_id}", response_model=MonedaUsuarioResponse)
-async def update_currency(
+def update_currency(
     moneda_id: UUID,
     moneda_data: MonedaUsuarioUpdate,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
@@ -186,7 +186,7 @@ async def update_currency(
 
 
 @router.delete("/{moneda_id}", status_code=204)
-async def delete_currency(
+def delete_currency(
     moneda_id: UUID,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -220,7 +220,7 @@ async def delete_currency(
 
 
 @router.patch("/{moneda_id}/toggle-active", response_model=MonedaUsuarioResponse)
-async def toggle_currency_active(
+def toggle_currency_active(
     moneda_id: UUID,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -253,7 +253,7 @@ async def toggle_currency_active(
 
 
 @router.post("/reorder", status_code=200)
-async def reorder_currencies(
+def reorder_currencies(
     reorder_data: MonedaUsuarioReorderRequest,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -282,7 +282,7 @@ async def reorder_currencies(
 
 
 @router.post("/initialize-default", status_code=201)
-async def initialize_default_currencies(
+def initialize_default_currencies(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
 ):

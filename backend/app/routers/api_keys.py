@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 @router.post("/", response_model=ApiKeyCreated)
-async def create_api_key(
+def create_api_key(
     body: ApiKeyCreate,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -39,7 +39,7 @@ async def create_api_key(
 
 
 @router.get("/", response_model=List[ApiKeyPublic])
-async def get_api_keys(
+def get_api_keys(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
 ):
@@ -53,7 +53,7 @@ async def get_api_keys(
 
 
 @router.delete("/{key_id}")
-async def revoke_api_key(
+def revoke_api_key(
     key_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)

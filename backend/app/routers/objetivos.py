@@ -67,7 +67,7 @@ class AporteUpdate(BaseModel):
 
 
 @router.post("/")
-async def create_objetivo(
+def create_objetivo(
     objetivo_data: ObjetivoCreate,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -88,7 +88,7 @@ async def create_objetivo(
 
 
 @router.get("/")
-async def get_objetivos(
+def get_objetivos(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     estado: Optional[str] = None,
     db: Session = Depends(get_db)
@@ -111,7 +111,8 @@ async def get_objetivos(
 
 
 @router.get("/active")
-async def get_active_objetivos(
+@router.get("/active/", include_in_schema=False)
+def get_active_objetivos(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
 ):
@@ -132,7 +133,7 @@ async def get_active_objetivos(
 
 
 @router.get("/stats")
-async def get_stats(
+def get_stats(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
 ):
@@ -149,7 +150,7 @@ async def get_stats(
 
 
 @router.get("/{objetivo_id}")
-async def get_objetivo(
+def get_objetivo(
     objetivo_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -176,7 +177,7 @@ async def get_objetivo(
 
 
 @router.put("/{objetivo_id}")
-async def update_objetivo(
+def update_objetivo(
     objetivo_id: str,
     objetivo_data: ObjetivoUpdate,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
@@ -210,7 +211,7 @@ async def update_objetivo(
 
 
 @router.delete("/{objetivo_id}")
-async def delete_objetivo(
+def delete_objetivo(
     objetivo_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -247,7 +248,7 @@ async def delete_objetivo(
 
 # Contributions endpoints
 @router.post("/aportes")
-async def add_contribution(
+def add_contribution(
     aporte_data: AporteCreate,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -287,7 +288,7 @@ async def add_contribution(
 
 
 @router.get("/{objetivo_id}/aportes")
-async def get_contributions(
+def get_contributions(
     objetivo_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -332,7 +333,7 @@ async def get_contributions(
 
 
 @router.delete("/aportes/{aporte_id}")
-async def delete_contribution(
+def delete_contribution(
     aporte_id: int,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -360,7 +361,7 @@ async def delete_contribution(
 
 
 @router.put("/aportes/{aporte_id}")
-async def update_contribution(
+def update_contribution(
     aporte_id: int,
     aporte_data: AporteUpdate,
     current_user: CurrentUser,

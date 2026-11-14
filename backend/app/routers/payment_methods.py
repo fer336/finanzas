@@ -15,7 +15,7 @@ router = APIRouter()
 
 
 @router.get("/")
-async def get_payment_methods(
+def get_payment_methods(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     limit: int = Query(500, ge=1, le=1000),
     offset: int = Query(0, ge=0),
@@ -44,7 +44,7 @@ async def get_payment_methods(
 
 
 @router.get("/{metodo_id}")
-async def get_payment_method_by_id(
+def get_payment_method_by_id(
     metodo_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -71,7 +71,7 @@ async def get_payment_method_by_id(
 
 
 @router.post("/")
-async def create_payment_method(
+def create_payment_method(
     metodo_data: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -89,7 +89,7 @@ async def create_payment_method(
 
 
 @router.patch("/{metodo_id}")
-async def update_payment_method(
+def update_payment_method(
     metodo_id: str,
     metodo_data: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Requiere autenticación
@@ -127,7 +127,7 @@ async def update_payment_method(
 
 
 @router.delete("/{metodo_id}")
-async def delete_payment_method(
+def delete_payment_method(
     metodo_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)

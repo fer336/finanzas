@@ -51,3 +51,4 @@ Method: a scripted codemod rewrites only `dark:` color utilities in live files, 
   - B3: the guard now flags light text on a solid dark fill. The fixture was RED before the rule and GREEN after, and the guard caught 4 of the 5 live sites.
   Suite 194/194 and build OK.
 - L9: the verifier's recheck at 121622e found B1, B2 and B3 RESOLVED. Guard probes on a gradient site and on the ConfirmModal map entry both fail as expected. Suite 194/194.
+- L10 (2026-11-14): native review START stopped with lens_context_budget_exceeded (1751 lines); no authority was created. User: "dejala asi". The migration is left without native review, covered by the independent verifier and the guard test. Delivery follows ordinary repository policy.

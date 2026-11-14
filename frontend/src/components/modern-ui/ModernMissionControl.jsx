@@ -23,7 +23,7 @@ import {
 } from '../../hooks/useFinancialData';
 import { useQueryClient } from '@tanstack/react-query';
 import apiServices from '../../services/api';
-import yfinanceService from '../../services/yfinanceService';
+import { useCedearsForView } from '../../hooks/useCedearsForView';
 import { getSecondDueDateValue } from '../../utils/pendingPaymentStatus';
 import ErrorBoundary from './common/ErrorBoundary';
 
@@ -113,9 +113,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   const paymentMethods = paymentMethodsData || [];
   const notifications = []; // TODO: Implementar notificaciones con React Query
 
-  // Estado local sincronizado con React Query para permitir actualizaciones optimistas en modales
-  const [cedears, setCedears] = useState([]);
-
   // Función para refrescar datos (reemplaza loadDashboardData)
   const refreshData = async () => {
     // refetchQueries fuerza el fetch inmediato (no espera staleTime)
@@ -133,6 +130,8 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
 
   // ====== STATE (Solo UI state, NO datos del backend) ======
   const [currentView, setCurrentView] = useState(initialView);
+  // CEDEARs come from a slow Yahoo download: load them only on the views that show them.
+  const { cedears, refresh: refreshCedears } = useCedearsForView(currentView);
   const [dashboardSettings, setDashboardSettings] = useState(() => {
     const saved = localStorage.getItem('modernDashboardSettings');
     return saved ? JSON.parse(saved) : {
@@ -277,20 +276,6 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, [currentView, onNavigate, showBulkUpload]);
-
-  useEffect(() => {
-    const loadCedears = async () => {
-      try {
-        const data = await yfinanceService.getAllCedears(30);
-        setCedears(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error('❌ Error cargando CEDEARs:', error);
-        setCedears([]);
-      }
-    };
-
-    loadCedears();
-  }, []);
 
   // ====== HELPERS ======
   const getCategoryIcon = (categoriaNombre) => {
@@ -1306,14 +1291,7 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
         return (
           <ModernInversionesView
             cedears={cedears}
-            onRefreshCedears={async () => {
-              try {
-                const data = await yfinanceService.getAllCedears(30);
-                setCedears(data);
-              } catch (error) {
-                console.error('❌ Error actualizando CEDEARs:', error);
-              }
-            }}
+            onRefreshCedears={refreshCedears}
             onViewCedearDetails={(c) => console.log('Ver detalles:', c)}
             cotizaciones={dollarQuotes}
             onRefreshCotizaciones={refreshData}
@@ -1368,16 +1346,7 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
           <ModernCEDEARsView
             cedears={cedears}
             onSearch={(query) => console.log('Buscar:', query)}
-            onRefresh={async () => {
-              console.log('🔄 Refrescando CEDEARs...');
-              try {
-                const data = await yfinanceService.getAllCedears(30);
-                setCedears(data);
-                console.log('✅ CEDEARs actualizados');
-              } catch (error) {
-                console.error('❌ Error actualizando CEDEARs:', error);
-              }
-            }}
+            onRefresh={refreshCedears}
             onViewDetails={(c) => console.log('Ver detalles:', c)}
           />
         );

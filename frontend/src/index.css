@@ -406,9 +406,8 @@
 
 .dark .app-shell {
   background:
-    radial-gradient(circle at 70% 15%, rgba(87, 69, 130, 0.12), transparent 34%),
-    radial-gradient(circle at 15% 75%, rgba(49, 36, 86, 0.18), transparent 38%),
-    linear-gradient(145deg, #030411 0%, #050717 48%, #090b1b 100%);
+    radial-gradient(circle at 70% 15%, rgba(199, 245, 122, 0.05), transparent 34%),
+    linear-gradient(145deg, #030704 0%, #101211 48%, #151814 100%);
 }
 
 .dashboard-content {
@@ -446,11 +445,12 @@
 }
 
 .dark .kanagawa-card {
-  --kanagawa-card-background: linear-gradient(145deg, rgba(17, 17, 36, 0.94), rgba(9, 11, 27, 0.92));
+  /* Opaque enough to read over the fixed background; no backdrop blur, which
+     re-renders the full-screen image on every scroll frame. */
+  --kanagawa-card-background: linear-gradient(145deg, rgba(21, 24, 20, 0.96), rgba(16, 18, 17, 0.95));
   box-shadow:
-    0 18px 44px rgba(3, 4, 17, 0.3),
+    0 18px 44px rgba(3, 7, 4, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
 }
 
 .kanagawa-card.kanagawa-app-bar {
@@ -476,13 +476,13 @@
 
 .dark .kanagawa-card.kanagawa-app-bar {
   box-shadow:
-    0 8px 24px rgba(3, 4, 17, 0.22),
+    0 8px 24px rgba(3, 7, 4, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .dark .kanagawa-card.kanagawa-bottom-bar {
   box-shadow:
-    0 -10px 28px rgba(3, 4, 17, 0.26),
+    0 -10px 28px rgba(3, 7, 4, 0.26),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
@@ -528,7 +528,7 @@
 }
 
 .dark .kanagawa-callout-warning {
-  background: rgba(63, 53, 68, 0.82);
+  background: var(--arrears-pill);
 }
 
 .kanagawa-callout-info {
@@ -537,7 +537,7 @@
 }
 
 .dark .kanagawa-callout-info {
-  background: rgba(126, 156, 216, 0.14);
+  background: var(--accent);
 }
 
 .card-art {

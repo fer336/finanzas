@@ -26,7 +26,7 @@ Method: a scripted codemod rewrites only `dark:` color utilities in live files, 
 
 - [x] T1 S1-S3: codemod over the live files, mapping each color to a dark token by role (neutral lightness, or hue family). Route inline. 1,193 rewrites in 41 files.
 - [x] T2 S4: contrast pass for text on fills (inside the codemod), plus inline chrome moved to CSS variables (page ink, market chart, muted icon). Data colors kept. Route inline.
-- [ ] T3 S1-S4: audit grep (no dark-painting raw color left in live files), tests, build, and an independent verifier because Risk item 6 applies (no test catches a visual regression).
+- [x] T3 S1-S4: audit grep (no dark-painting raw color left in live files), tests, build, and an independent verifier because Risk item 6 applies (no test catches a visual regression).
 
 ## Log
 
@@ -50,3 +50,4 @@ Method: a scripted codemod rewrites only `dark:` color utilities in live files, 
   - B2: the persisted strings were restored exactly and marked `dark-palette-ignore`.
   - B3: the guard now flags light text on a solid dark fill. The fixture was RED before the rule and GREEN after, and the guard caught 4 of the 5 live sites.
   Suite 194/194 and build OK.
+- L9: the verifier's recheck at 121622e found B1, B2 and B3 RESOLVED. Guard probes on a gradient site and on the ConfirmModal map entry both fail as expected. Suite 194/194.

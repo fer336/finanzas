@@ -9,7 +9,7 @@ Runners: frontend `npx vitest run`, plus lint `eslint src --ext js,jsx --report-
 - S2 (measured cause): the backend never blocks its single uvicorn worker inside a request. Handlers that do sync DB or HTTP work run in the threadpool (`def`), so the dashboard's parallel requests are served concurrently.
 - S3 (measured cause): opening the app does not call the Yahoo CEDEARs endpoint. CEDEAR data loads only on the views that use it.
 - S4 (measured cause): no 307 redirect round trips for `/presupuestos/active`, `/objetivos/active` and `/balance-inicial/neto` as the frontend calls them, with a trailing slash.
-- S5 (measured cause): dark-mode cards do not blur the fixed background on every frame. `backdrop-filter` is removed from cards, and the leftover violet card gradient follows the palette.
+- S5 (measured cause): dark-mode cards do not blur the fixed background on every frame. `backdrop-filter` is removed from cards, and the leftover violet card gradient follows the palette. Scope widened per the earlier palette request ("si migra todos los colores", dark-palette-migration S1): the leftover violet `.dark .app-shell` background and `.dark` callout backgrounds also follow the palette.
 - S6 (measured cause): the dashboard's derived data is memoized, so a re-render does not rescan every transaction.
 - S7: `.webp` assets get the same long cache as other static assets.
 - Assumption: the Kanagawa images stay. They weigh about 150 KB per view and are cached; their render cost came from the blur (S5).
@@ -45,3 +45,8 @@ Runners: frontend `npx vitest run`, plus lint `eslint src --ext js,jsx --report-
   - The dark card has no backdrop blur and uses palette gradients. Only `.dark` rules changed.
   - nginx now caches `.webp`.
   - Suite 201/201. Lint shows the same 75 warnings as the base (0 errors). Build OK.
+- L6: independent verifier.
+  - PASS for S2, S3, S4, S6 and S7. OpenAPI is byte-identical between base and HEAD.
+  - Blocker: dark CSS changes outside S5 (app-shell and callouts). Resolved by recording them under the user's earlier palette request instead of reverting, because they are violet leftovers.
+  - Advisory addressed: threaded `get_cedears` could download from Yahoo twice and had a small `KeyError` window. RED: "Yahoo was hit 2 times". Fix: `_cedears_lock` plus single `.get()` cache lookups. GREEN: backend 26 passed. OpenAPI was rechecked as identical (84,259 bytes).
+  - Remaining advisories, deferred: the async `get_current_user` still runs a sync DB lookup on the loop; the threadpool (40) is larger than the DB pool (30); a failed first CEDEARs load does not retry.

@@ -7,6 +7,7 @@ import logging
 from datetime import datetime, timedelta
 import time
 import asyncio
+import threading
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +90,9 @@ CEDEARS_POPULARES = [
 
 # Cache global para evitar rate limiting
 _cache = {}
+# Handlers run in a threadpool: one CEDEARs download at a time, so concurrent
+# requests reuse the freshly filled cache instead of hitting Yahoo again.
+_cedears_lock = threading.Lock()
 CACHE_DURATION = timedelta(minutes=30)  # 30 minutos de caché (aumentado para reducir peticiones)
 
 # Configuración de rate limiting
@@ -104,8 +108,9 @@ def get_cedear_data_cached(ticker: str, ratio: int = 1) -> tuple[Optional[Dict],
     now = datetime.now()
     
     # Check cache
-    if ticker in _cache:
-        cached_data, cached_time = _cache[ticker]
+    cached = _cache.get(ticker)  # single lookup: _cache may be swapped by clear/reload
+    if cached:
+        cached_data, cached_time = cached
         if now - cached_time < CACHE_DURATION:
             logger.debug(f"📦 Cache HIT para {ticker}")
             return cached_data, True
@@ -277,8 +282,7 @@ def get_cedear_data_fallback(ticker: str, ratio: int = 1) -> Optional[Dict]:
     return None
 
 
-@router.get("/cedears")
-def get_cedears(
+def _get_cedears_unlocked(
     limite: int = Query(default=10, le=500, description="Cantidad máxima de CEDEARs"),
     sector: Optional[str] = Query(default=None, description="Filtrar por sector"),
     search: Optional[str] = Query(default=None, description="Buscar por ticker o nombre")
@@ -322,8 +326,9 @@ def get_cedears(
             ticker = cedear["ticker"]
             
             # Verificar si está en caché y es válido
-            if ticker in _cache:
-                cached_data, cached_time = _cache[ticker]
+            cached = _cache.get(ticker)  # single lookup: _cache may be swapped by clear/reload
+            if cached:
+                cached_data, cached_time = cached
                 if now - cached_time < CACHE_DURATION:
                     logger.debug(f"📦 Cache HIT para {ticker}")
                     cedears_from_cache.append({
@@ -384,6 +389,18 @@ def get_cedears(
         logger.error(f"❌ Error en get_cedears: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+def get_cedears(
+    limite: int = Query(default=10, le=500, description="Cantidad máxima de CEDEARs"),
+    sector: Optional[str] = Query(default=None, description="Filtrar por sector"),
+    search: Optional[str] = Query(default=None, description="Buscar por ticker o nombre")
+):
+    with _cedears_lock:
+        return _get_cedears_unlocked(limite=limite, sector=sector, search=search)
+
+
+get_cedears.__doc__ = _get_cedears_unlocked.__doc__
+router.get("/cedears")(get_cedears)
 
 @router.get("/sectores")
 def get_sectores():

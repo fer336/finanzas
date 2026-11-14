@@ -69,7 +69,35 @@ def test_slow_cedears_download_does_not_block_other_requests(monkeypatch):
     assert health_elapsed < 0.5, f"/health waited {health_elapsed:.2f}s behind the CEDEARs download"
 
 
-@pytest.mark.parametrize("path", ["/api/v1/presupuestos/active/", "/api/v1/objetivos/active/", "/api/v1/balance-inicial/neto/"])
+def test_concurrent_cedears_requests_download_from_yahoo_once(monkeypatch):
+    import main
+    from app.routers import yfinance_router
+
+    calls = []
+
+    def slow_download(batch):
+        calls.append([c["ticker"] for c in batch])
+        time.sleep(0.5)
+        return {c["ticker"]: {"ticker": c["ticker"], "precio": 1.0} for c in batch}
+
+    monkeypatch.setattr(yfinance_router, "get_multiple_cedears_data", slow_download)
+    monkeypatch.setattr(yfinance_router, "_cache", {})
+
+    async def scenario():
+        transport = httpx.ASGITransport(app=main.app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            return await asyncio.gather(
+                client.get("/api/yfinance/cedears", params={"limite": 1}),
+                client.get("/api/yfinance/cedears", params={"limite": 1}),
+            )
+
+    first, second = asyncio.run(scenario())
+
+    assert first.status_code == second.status_code == 200
+    assert len(calls) == 1, f"Yahoo was hit {len(calls)} times for the same ticker"
+
+
+@pytest.mark.parametrize("path",["/api/v1/presupuestos/active/", "/api/v1/objetivos/active/", "/api/v1/balance-inicial/neto/"])
 def test_trailing_slash_paths_used_by_the_frontend_do_not_redirect(path):
     import main
 

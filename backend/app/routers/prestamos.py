@@ -30,7 +30,7 @@ def _normalize_estado(estado: Optional[str]) -> Optional[str]:
 
 
 @router.get("/")
-async def get_prestamos(
+def get_prestamos(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     limit: int = Query(500, ge=1, le=2000),
     offset: int = Query(0, ge=0),
@@ -55,7 +55,7 @@ async def get_prestamos(
 
 
 @router.get("/{prestamo_id}")
-async def get_prestamo_by_id(
+def get_prestamo_by_id(
     prestamo_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -79,7 +79,7 @@ async def get_prestamo_by_id(
 
 
 @router.post("/")
-async def create_prestamo(
+def create_prestamo(
     prestamo_data: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -133,7 +133,7 @@ async def create_prestamo(
 
 
 @router.patch("/{prestamo_id}")
-async def update_prestamo(
+def update_prestamo(
     prestamo_id: str,
     prestamo_data: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Requiere autenticación
@@ -162,7 +162,7 @@ async def update_prestamo(
 
 
 @router.delete("/{prestamo_id}")
-async def delete_prestamo(
+def delete_prestamo(
     prestamo_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)

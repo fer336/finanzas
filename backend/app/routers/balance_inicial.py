@@ -30,7 +30,8 @@ def _mes_actual() -> str:
 
 
 @router.get("/neto")
-async def get_balance_neto(
+@router.get("/neto/", include_in_schema=False)
+def get_balance_neto(
     current_user: CurrentUser,
     mes: str = Query(default=None, description="Mes en formato YYYY-MM (default: mes actual)"),
     moneda: str = Query(default="ARS", description="Código de moneda"),
@@ -46,7 +47,7 @@ async def get_balance_neto(
 
 
 @router.get("/", response_model=list[BalanceInicialResponse])
-async def get_balances_iniciales(
+def get_balances_iniciales(
     current_user: CurrentUser,
     mes: Optional[str] = Query(default=None, description="Filtrar por mes (YYYY-MM)"),
     db: Session = Depends(get_db),
@@ -56,7 +57,7 @@ async def get_balances_iniciales(
 
 
 @router.get("/meses-disponibles")
-async def get_meses_disponibles(
+def get_meses_disponibles(
     current_user: CurrentUser,
     db: Session = Depends(get_db),
 ):
@@ -65,7 +66,7 @@ async def get_meses_disponibles(
 
 
 @router.put("/", response_model=BalanceInicialResponse)
-async def upsert_balance_inicial(
+def upsert_balance_inicial(
     current_user: CurrentUser,
     data: BalanceInicialCreate,
     db: Session = Depends(get_db),
@@ -76,7 +77,7 @@ async def upsert_balance_inicial(
 
 
 @router.patch("/{balance_id}", response_model=BalanceInicialResponse)
-async def update_balance_inicial(
+def update_balance_inicial(
     current_user: CurrentUser,
     balance_id: str,
     data: BalanceInicialUpdate,
@@ -95,7 +96,7 @@ async def update_balance_inicial(
 
 
 @router.delete("/{balance_id}")
-async def delete_balance_inicial(
+def delete_balance_inicial(
     current_user: CurrentUser,
     balance_id: str,
     db: Session = Depends(get_db),
@@ -113,7 +114,7 @@ async def delete_balance_inicial(
 
 
 @router.post("/copy-from-previous")
-async def copy_from_previous_month(
+def copy_from_previous_month(
     current_user: CurrentUser,
     data: BalanceInicialCopyFromPreviousRequest,
     db: Session = Depends(get_db),
@@ -131,7 +132,7 @@ async def copy_from_previous_month(
 
 
 @router.post("/bulk")
-async def bulk_create_balances(
+def bulk_create_balances(
     current_user: CurrentUser,
     data: BalanceInicialBulkCreateRequest,
     db: Session = Depends(get_db),

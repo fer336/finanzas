@@ -15,7 +15,7 @@ router = APIRouter()
 
 
 @router.get("/")
-async def get_categories(
+def get_categories(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     limit: int = Query(500, ge=1, le=1000),
     offset: int = Query(0, ge=0),
@@ -44,7 +44,7 @@ async def get_categories(
 
 
 @router.get("/{categoria_id}")
-async def get_category_by_id(
+def get_category_by_id(
     categoria_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -71,7 +71,7 @@ async def get_category_by_id(
 
 
 @router.post("/")
-async def create_category(
+def create_category(
     categoria_data: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -89,7 +89,7 @@ async def create_category(
 
 
 @router.patch("/{categoria_id}")
-async def update_category(
+def update_category(
     categoria_id: str,
     categoria_data: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Requiere autenticación
@@ -127,7 +127,7 @@ async def update_category(
 
 
 @router.delete("/{categoria_id}")
-async def delete_category(
+def delete_category(
     categoria_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)

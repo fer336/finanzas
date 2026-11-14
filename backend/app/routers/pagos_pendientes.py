@@ -77,7 +77,7 @@ def _validate_second_due_date_after_first(first_due_date: Optional[date], second
 
 
 @router.get("/")
-async def get_pending_payments(
+def get_pending_payments(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     limit: int = Query(500, ge=1, le=2000),
     offset: int = Query(0, ge=0),
@@ -102,7 +102,7 @@ async def get_pending_payments(
 
 
 @router.get("/{pago_id}")
-async def get_pending_payment_by_id(
+def get_pending_payment_by_id(
     pago_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -126,7 +126,7 @@ async def get_pending_payment_by_id(
 
 
 @router.post("/")
-async def create_pending_payment(
+def create_pending_payment(
     pago_data: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -197,7 +197,7 @@ async def create_pending_payment(
 
 
 @router.patch("/{pago_id}")
-async def update_pending_payment(
+def update_pending_payment(
     pago_id: str,
     pago_data: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Requiere autenticación
@@ -268,7 +268,7 @@ async def update_pending_payment(
 
 
 @router.delete("/{pago_id}")
-async def delete_pending_payment(
+def delete_pending_payment(
     pago_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)

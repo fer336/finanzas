@@ -116,7 +116,7 @@ async def upload_file(
 
 
 @router.delete("/delete")
-async def delete_file(
+def delete_file(
     current_user: CurrentUser,  # 🔒 Requiere autenticación (JWT o API key)
     object_name: str = Query(..., description="Nombre del objeto en MinIO (ej: comprobantes/archivo.png)"),
     db: Session = Depends(get_db)
@@ -155,7 +155,7 @@ async def delete_file(
 
 
 @router.get("/presigned-url")
-async def get_presigned_url(
+def get_presigned_url(
     current_user: CurrentUser,  # 🔒 Requiere autenticación (JWT o API key)
     object_name: str = Query(..., description="Nombre del objeto en MinIO"),
     expires_hours: int = Query(default=1, description="Horas de expiración (default: 1)"),
@@ -201,7 +201,7 @@ async def get_presigned_url(
 
 
 @router.get("/health")
-async def health_check():
+def health_check():
     """
     Verificar estado del servicio MinIO
     

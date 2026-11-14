@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
 @router.get("/me", response_model=User)
-async def get_current_user_info(current_user: CurrentUser):
+def get_current_user_info(current_user: CurrentUser):
     """Obtener información del usuario actual"""
     print(f"API /auth/me called successfully for user: {current_user.email}")
     return current_user
@@ -50,7 +50,7 @@ async def update_user_country(
     return updated_user
 
 @router.post("/test-auth")
-async def test_auth_endpoint(current_user: CurrentUser):
+def test_auth_endpoint(current_user: CurrentUser):
     """Endpoint de prueba para verificar autenticación"""
     return {
         "message": "Autenticación exitosa",
@@ -87,7 +87,7 @@ async def google_auth(request: Request):
         raise HTTPException(status_code=500, detail=f"Error iniciando OAuth: {str(e)}")
 
 @router.get("/google/dev")
-async def google_auth_dev(request: Request):
+def google_auth_dev(request: Request):
     """Endpoint de desarrollo para OAuth2"""
     print(f"🔐 Starting OAuth dev flow")
     print(f"🔐 Session before OAuth: {request.session}")
@@ -567,7 +567,7 @@ async def google_callback_dev(request: Request):
         raise HTTPException(status_code=400, detail=f"Error en autenticación: {str(e)}")
 
 @router.post("/logout")
-async def logout(current_user: CurrentUser):
+def logout(current_user: CurrentUser):
     """Cerrar sesión del usuario"""
     return JSONResponse(
         status_code=200,

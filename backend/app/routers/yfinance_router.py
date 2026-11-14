@@ -278,7 +278,7 @@ def get_cedear_data_fallback(ticker: str, ratio: int = 1) -> Optional[Dict]:
 
 
 @router.get("/cedears")
-async def get_cedears(
+def get_cedears(
     limite: int = Query(default=10, le=500, description="Cantidad máxima de CEDEARs"),
     sector: Optional[str] = Query(default=None, description="Filtrar por sector"),
     search: Optional[str] = Query(default=None, description="Buscar por ticker o nombre")
@@ -386,7 +386,7 @@ async def get_cedears(
 
 
 @router.get("/sectores")
-async def get_sectores():
+def get_sectores():
     """
     Obtiene lista de sectores disponibles
     """
@@ -406,7 +406,7 @@ async def get_sectores():
 
 
 @router.post("/cache/clear")
-async def clear_cache():
+def clear_cache():
     """
     Limpia el caché de CEDEARs
     """
@@ -417,7 +417,7 @@ async def clear_cache():
 
 
 @router.post("/reload")
-async def reload_cedears():
+def reload_cedears():
     """
     Fuerza la recarga de CEDEARs desde NocoDB
     """
@@ -586,7 +586,7 @@ async def get_cedear_history(
 
 
 @router.get("/health")
-async def health_check():
+def health_check():
     """
     Verificación de salud del servicio de CEDEARs
     """

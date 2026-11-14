@@ -52,7 +52,7 @@ class PagoRequest(BaseModel):
 
 
 @router.post("/registrar")
-async def registrar_pago(
+def registrar_pago(
     pago_data: PagoRequest,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -237,7 +237,7 @@ class DeshacerPagoRequest(BaseModel):
 
 
 @router.post("/deshacer/{item_id}")
-async def deshacer_pago(
+def deshacer_pago(
     item_id: str,
     request: DeshacerPagoRequest,
     current_user: CurrentUser,  # 🔒 Requiere autenticación

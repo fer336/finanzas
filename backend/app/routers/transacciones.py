@@ -20,7 +20,7 @@ router = APIRouter()
 
 
 @router.get("/")
-async def get_transactions(
+def get_transactions(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     limit: int = Query(1000, ge=1, le=5000, description="Límite de transacciones"),
     offset: int = Query(0, ge=0),
@@ -50,7 +50,7 @@ async def get_transactions(
 
 
 @router.get("/ingresos")
-async def get_ingresos(
+def get_ingresos(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     limit: int = Query(1000, ge=1, le=5000),
     offset: int = Query(0, ge=0),
@@ -74,7 +74,7 @@ async def get_ingresos(
 
 
 @router.get("/gastos")
-async def get_gastos(
+def get_gastos(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     limit: int = Query(1000, ge=1, le=5000),
     offset: int = Query(0, ge=0),
@@ -98,7 +98,7 @@ async def get_gastos(
 
 
 @router.get("/estadisticas")
-async def get_estadisticas(
+def get_estadisticas(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     fecha_desde: str = Query(..., description="Fecha desde (YYYY-MM-DD)"),
     fecha_hasta: str = Query(..., description="Fecha hasta (YYYY-MM-DD)"),
@@ -121,7 +121,7 @@ async def get_estadisticas(
 
 
 @router.get("/csv-template")
-async def download_csv_template():
+def download_csv_template():
     """Descarga plantilla CSV para importación masiva"""
     from fastapi.responses import Response
     
@@ -144,7 +144,7 @@ async def download_csv_template():
 
 
 @router.get("/{transaccion_id}")
-async def get_transaction_by_id(
+def get_transaction_by_id(
     transaccion_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -168,7 +168,7 @@ async def get_transaction_by_id(
 
 
 @router.post("/")
-async def create_transaction(
+def create_transaction(
     transaccion_data: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -263,7 +263,7 @@ async def create_transaction(
 
 
 @router.patch("/{transaccion_id}")
-async def update_transaction(
+def update_transaction(
     transaccion_id: str,
     transaccion_data: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Requiere autenticación
@@ -380,7 +380,7 @@ async def update_transaction(
 
 
 @router.delete("/{transaccion_id}")
-async def delete_transaction(
+def delete_transaction(
     transaccion_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -425,7 +425,7 @@ async def delete_transaction(
 
 
 @router.post("/bulk-delete")
-async def bulk_delete_transactions(
+def bulk_delete_transactions(
     request: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Agregar autenticación
     db: Session = Depends(get_db)
@@ -472,7 +472,7 @@ async def bulk_delete_transactions(
 
 
 @router.post("/bulk-create")
-async def bulk_create_transactions(
+def bulk_create_transactions(
     request: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Agregar autenticación
     db: Session = Depends(get_db)

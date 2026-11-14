@@ -15,7 +15,7 @@ router = APIRouter()
 
 
 @router.get("/")
-async def get_presupuestos(
+def get_presupuestos(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
@@ -40,7 +40,8 @@ async def get_presupuestos(
 
 
 @router.get("/active")
-async def get_active_presupuestos(
+@router.get("/active/", include_in_schema=False)
+def get_active_presupuestos(
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
 ):
@@ -59,7 +60,7 @@ async def get_active_presupuestos(
 
 
 @router.get("/{presupuesto_id}")
-async def get_presupuesto(
+def get_presupuesto(
     presupuesto_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -91,7 +92,7 @@ async def get_presupuesto(
 
 
 @router.post("/")
-async def create_presupuesto(
+def create_presupuesto(
     presupuesto_data: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -126,7 +127,7 @@ async def create_presupuesto(
 
 
 @router.patch("/{presupuesto_id}")
-async def update_presupuesto(
+def update_presupuesto(
     presupuesto_id: str,
     presupuesto_data: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Requiere autenticación
@@ -170,7 +171,7 @@ async def update_presupuesto(
 
 
 @router.delete("/{presupuesto_id}")
-async def delete_presupuesto(
+def delete_presupuesto(
     presupuesto_id: str,
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)
@@ -200,7 +201,7 @@ async def delete_presupuesto(
 
 
 @router.post("/analyze-purchase")
-async def analyze_purchase(
+def analyze_purchase(
     data: Dict[str, Any],
     current_user: CurrentUser,  # 🔒 Requiere autenticación
     db: Session = Depends(get_db)

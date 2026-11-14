@@ -321,7 +321,7 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
   };
 
   const getCategoryColor = (tipo) => {
-    return tipo === 'ingreso' ? 'bg-green-500' : 'bg-red-500';
+    return tipo === 'ingreso' ? 'bg-green-500 dark:bg-[var(--primary)]' : 'bg-red-500 dark:bg-[var(--destructive)]';
   };
 
   // Derivados directamente de React Query — se actualizan en el mismo render, sin useEffect middleman
@@ -1014,13 +1014,13 @@ const ModernMissionControl = ({ onNavigate, initialView = 'dashboard' }) => {
         <div className="flex items-center justify-center h-screen">
           <div className="text-center max-w-md">
             <div className="text-6xl mb-4">🔒</div>
-            <h2 className="text-2xl font-bold text-white mb-2">Sesión Expirada</h2>
+            <h2 className="text-2xl font-bold text-white dark:text-[var(--foreground)] mb-2">Sesión Expirada</h2>
             <p className="text-[var(--text-secondary)] mb-6">
               Tu sesión ha expirado o no has iniciado sesión. Por favor, recargá la página e iniciá sesión nuevamente.
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-3 bg-[var(--accent-green)] text-white rounded-xl hover:opacity-90 transition-opacity"
+              className="px-6 py-3 bg-[var(--accent-green)] text-white dark:text-[var(--foreground)] rounded-xl hover:opacity-90 transition-opacity"
             >
               Recargar Página
             </button>

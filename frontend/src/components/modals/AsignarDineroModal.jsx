@@ -64,25 +64,25 @@ export const AsignarDineroModal = ({
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="bg-[#e5ddb0] border border-[#c8bf91] rounded-xl w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-300 dark:bg-[#181820] dark:border-[#363646]"
+        className="bg-[#e5ddb0] border border-[#c8bf91] rounded-xl w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-300 dark:bg-[var(--background)] dark:border-[var(--border)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-[#d5cea3] dark:border-[#363646]">
+        <div className="flex items-center justify-between p-5 border-b border-[#d5cea3] dark:border-[var(--border)]">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-[#e4d794] rounded-lg dark:bg-[#2a2a37]">
+            <div className="p-2 bg-[#e4d794] rounded-lg dark:bg-[var(--card)]">
               <Target className="w-5 h-5 text-primary" />
             </div>
             <div>
               <h2 className="text-lg font-bold text-foreground">{aporte ? 'Editar aporte' : 'Asignar dinero'}</h2>
-              <p className="text-sm text-[#43436c] truncate max-w-[220px] dark:text-[#c8c093]">
+              <p className="text-sm text-[#43436c] truncate max-w-[220px] dark:text-[var(--foreground)]">
                 {objetivo.nombre || objetivo.Nombre || 'Objetivo'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-black/5 rounded-lg transition-colors text-[#625f55] hover:text-foreground dark:text-[#c8c093] dark:hover:bg-white/5"
+            className="p-2 hover:bg-black/5 rounded-lg transition-colors text-[#625f55] hover:text-foreground dark:text-[var(--foreground)] dark:hover:bg-white/5"
           >
             <X className="w-4 h-4" />
           </button>
@@ -91,8 +91,8 @@ export const AsignarDineroModal = ({
         {/* Body */}
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {/* Balance disponible */}
-          <div className="bg-[#e4d794] rounded-lg p-3 flex items-center justify-between dark:bg-[#2a2a37]">
-            <span className="text-sm text-[#43436c] dark:text-[#c8c093]">Balance disponible</span>
+          <div className="bg-[#e4d794] rounded-lg p-3 flex items-center justify-between dark:bg-[var(--card)]">
+            <span className="text-sm text-[#43436c] dark:text-[var(--foreground)]">Balance disponible</span>
             <span className="text-sm font-semibold text-primary">
               {formatAmount(balanceDisponible)}
             </span>
@@ -100,9 +100,9 @@ export const AsignarDineroModal = ({
 
           {/* Monto */}
           <div>
-            <label className="block text-sm text-[#43436c] mb-1.5 dark:text-[#c8c093]">Monto a asignar</label>
+            <label className="block text-sm text-[#43436c] mb-1.5 dark:text-[var(--foreground)]">Monto a asignar</label>
             <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#625f55] dark:text-[#c8c093]" />
+              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#625f55] dark:text-[var(--foreground)]" />
               <input
                 type="number"
                 min="1"
@@ -110,7 +110,7 @@ export const AsignarDineroModal = ({
                 value={monto}
                 onChange={(e) => setMonto(e.target.value)}
                 placeholder="0.00"
-                className="w-full pl-9 pr-4 py-2.5 bg-white border border-[#c8bf91] rounded-lg text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring transition-colors dark:bg-[#2a2a37] dark:border-[#363646] dark:placeholder:text-[#c8c093]"
+                className="w-full pl-9 pr-4 py-2.5 bg-white border border-[#c8bf91] rounded-lg text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring transition-colors dark:bg-[var(--card)] dark:border-[var(--border)] dark:placeholder:text-[var(--foreground)]"
                 autoFocus
               />
             </div>
@@ -118,18 +118,18 @@ export const AsignarDineroModal = ({
 
           {/* Nota opcional */}
           <div>
-            <label className="block text-sm text-[#43436c] mb-1.5 dark:text-[#c8c093]">Nota (opcional)</label>
+            <label className="block text-sm text-[#43436c] mb-1.5 dark:text-[var(--foreground)]">Nota (opcional)</label>
             <input
               type="text"
               value={nota}
               onChange={(e) => setNota(e.target.value)}
               placeholder="Ej: Ahorro de este mes"
-              className="w-full px-4 py-2.5 bg-white border border-[#c8bf91] rounded-lg text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring transition-colors dark:bg-[#2a2a37] dark:border-[#363646] dark:placeholder:text-[#c8c093]"
+              className="w-full px-4 py-2.5 bg-white border border-[#c8bf91] rounded-lg text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring transition-colors dark:bg-[var(--card)] dark:border-[var(--border)] dark:placeholder:text-[var(--foreground)]"
             />
           </div>
 
           {error && (
-            <p className="text-sm text-[#b83245] bg-[#f9d791] rounded-lg px-3 py-2 dark:text-[#e46876] dark:bg-[rgba(230,195,132,0.14)]">{error}</p>
+            <p className="text-sm text-[#b83245] bg-[#f9d791] rounded-lg px-3 py-2 dark:text-[var(--destructive)] dark:bg-[rgba(230,195,132,0.14)]">{error}</p>
           )}
 
           {/* Actions */}
@@ -137,14 +137,14 @@ export const AsignarDineroModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 bg-white hover:bg-[#e4d794] border border-[#c8bf91] rounded-lg text-foreground transition-colors dark:bg-[#2a2a37] dark:hover:bg-[#363646] dark:border-[#363646]"
+              className="flex-1 px-4 py-2.5 bg-white hover:bg-[#e4d794] border border-[#c8bf91] rounded-lg text-foreground transition-colors dark:bg-[var(--card)] dark:hover:bg-[var(--secondary)] dark:border-[var(--border)]"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading || !monto}
-              className="flex-1 px-4 py-2.5 bg-primary hover:bg-[#5f7841] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-primary-foreground font-medium transition-colors flex items-center justify-center gap-2 dark:hover:bg-[#76946a]"
+              className="flex-1 px-4 py-2.5 bg-primary hover:bg-[#5f7841] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-primary-foreground font-medium transition-colors flex items-center justify-center gap-2 dark:hover:bg-[var(--primary-hover)]"
             >
               {loading ? (
                 <>

@@ -11,23 +11,23 @@ const Field = ({ label, htmlFor, children }) => (
     {children}
   </div>
 );
-const Label = ({ htmlFor, children }) => <label htmlFor={htmlFor} className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{children}</label>;
-const Input = (props) => <input {...props} className={`w-full px-4 py-2.5 bg-zinc-800 border-2 border-zinc-700 rounded-lg font-medium text-sm text-white placeholder-zinc-500 focus:border-blue-500 focus:outline-none ${props.className}`} />;
-const Select = ({ children, ...props }) => <select {...props} className={`w-full px-4 py-2.5 bg-zinc-800 border-2 border-zinc-700 rounded-lg font-medium text-sm text-white focus:border-blue-500 focus:outline-none ${props.className}`}>{children}</select>;
-const Textarea = (props) => <textarea {...props} rows={3} className={`w-full px-4 py-2.5 bg-zinc-800 border-2 border-zinc-700 rounded-lg font-medium text-sm text-white placeholder-zinc-500 focus:border-blue-500 focus:outline-none ${props.className}`} />;
+const Label = ({ htmlFor, children }) => <label htmlFor={htmlFor} className="text-xs font-bold text-zinc-400 dark:text-[var(--muted-foreground)] uppercase tracking-wider">{children}</label>;
+const Input = (props) => <input {...props} className={`w-full px-4 py-2.5 bg-zinc-800 dark:bg-[var(--secondary)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-lg font-medium text-sm text-white dark:text-[var(--foreground)] placeholder-zinc-500 dark:placeholder-[var(--muted-foreground)] focus:border-blue-500 dark:focus:border-[var(--primary)] focus:outline-none ${props.className}`} />;
+const Select = ({ children, ...props }) => <select {...props} className={`w-full px-4 py-2.5 bg-zinc-800 dark:bg-[var(--secondary)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-lg font-medium text-sm text-white dark:text-[var(--foreground)] focus:border-blue-500 dark:focus:border-[var(--primary)] focus:outline-none ${props.className}`}>{children}</select>;
+const Textarea = (props) => <textarea {...props} rows={3} className={`w-full px-4 py-2.5 bg-zinc-800 dark:bg-[var(--secondary)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-lg font-medium text-sm text-white dark:text-[var(--foreground)] placeholder-zinc-500 dark:placeholder-[var(--muted-foreground)] focus:border-blue-500 dark:focus:border-[var(--primary)] focus:outline-none ${props.className}`} />;
 const Dialog = ({ open, onOpenChange, children }) => open ? <div className="fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4" onClick={() => onOpenChange(false)}><div onClick={e => e.stopPropagation()}>{children}</div></div> : null;
 const DialogTrigger = ({ children }) => children;
-const DialogContent = ({ children, className }) => <div className={`bg-zinc-900 border-2 border-zinc-800 rounded-2xl shadow-2xl ${className}`}>{children}</div>;
+const DialogContent = ({ children, className }) => <div className={`bg-zinc-900 dark:bg-[var(--card)] border-2 border-zinc-800 dark:border-[var(--border)] rounded-2xl shadow-2xl ${className}`}>{children}</div>;
 const DialogHeader = ({ children, className }) => <div className={`p-6 pb-4 ${className}`}>{children}</div>;
-const DialogTitle = ({ children, className }) => <h2 className={`flex items-center gap-3 text-white text-xl font-bold ${className}`}>{children}</h2>;
-const DialogDescription = ({ children, className }) => <p className={`text-zinc-400 text-sm ${className}`}>{children}</p>;
-const DialogFooter = ({ children, className }) => <div className={`p-6 bg-zinc-800/50 border-t-2 border-zinc-800 flex justify-end gap-3 ${className}`}>{children}</div>;
+const DialogTitle = ({ children, className }) => <h2 className={`flex items-center gap-3 text-white dark:text-[var(--foreground)] text-xl font-bold ${className}`}>{children}</h2>;
+const DialogDescription = ({ children, className }) => <p className={`text-zinc-400 dark:text-[var(--muted-foreground)] text-sm ${className}`}>{children}</p>;
+const DialogFooter = ({ children, className }) => <div className={`p-6 bg-zinc-800/50 border-t-2 border-zinc-800 dark:border-[var(--border)] flex justify-end gap-3 ${className}`}>{children}</div>;
 const Button = ({ children, variant, ...props }) => {
   const baseStyle = "px-4 py-2 rounded-lg font-bold text-sm transition-all";
   const variants = {
-    primary: "bg-green-500 text-black hover:bg-green-600",
-    secondary: "bg-zinc-700 text-zinc-200 hover:bg-zinc-600",
-    ghost: "bg-transparent text-zinc-400 hover:bg-zinc-800 hover:text-white"
+    primary: "bg-green-500 dark:bg-[var(--primary)] text-black dark:text-[var(--primary-foreground)] hover:bg-green-600 dark:hover:bg-[var(--primary-hover)]",
+    secondary: "bg-zinc-700 dark:bg-[var(--secondary)] text-zinc-200 dark:text-[var(--foreground)] hover:bg-zinc-600 dark:hover:bg-[var(--border)]",
+    ghost: "bg-transparent text-zinc-400 dark:text-[var(--muted-foreground)] hover:bg-zinc-800 dark:hover:bg-[var(--secondary)] hover:text-white dark:hover:text-[var(--foreground)]"
   };
   return <button {...props} className={`${baseStyle} ${variants[variant] || variants.secondary}`}>{children}</button>;
 };
@@ -268,7 +268,7 @@ export function NuevoGastoHijaModal({ onGastoCreado, trigger }) {
     <>
       <DialogTrigger asChild>
         {trigger || (
-          <button className="px-4 py-3 bg-pink-500 border-2 border-pink-600 rounded-lg text-white font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(219,39,119,0.3)] hover:bg-pink-600 transition-all flex items-center justify-center gap-2">
+          <button className="px-4 py-3 bg-pink-500 dark:bg-[var(--primary)] border-2 border-pink-600 dark:border-[var(--primary)] rounded-lg text-white dark:text-[var(--primary-foreground)] font-black uppercase text-sm shadow-[4px_4px_0px_0px_rgba(219,39,119,0.3)] hover:bg-pink-600 dark:hover:bg-[var(--primary-hover)] transition-all flex items-center justify-center gap-2">
             <Plus size={16} strokeWidth={3} />
             Nuevo Gasto
           </button>
@@ -278,7 +278,7 @@ export function NuevoGastoHijaModal({ onGastoCreado, trigger }) {
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
         <DialogHeader>
             <DialogTitle>
-              <Heart className="h-6 w-6 text-pink-400" />
+              <Heart className="h-6 w-6 text-pink-400 dark:text-[var(--primary)]" />
             Nuevo Gasto con tu Hija
           </DialogTitle>
           <DialogDescription>
@@ -360,16 +360,16 @@ export function NuevoGastoHijaModal({ onGastoCreado, trigger }) {
             />
             </Field>
 
-            <div className="space-y-4 p-4 bg-zinc-800/50 rounded-lg border-2 border-zinc-700">
+            <div className="space-y-4 p-4 bg-zinc-800/50 rounded-lg border-2 border-zinc-700 dark:border-[var(--border)]">
               <Label>Estado del Pago (Cuota Alimentaria)</Label>
               <div className="grid grid-cols-3 gap-2">
-                <button type="button" onClick={() => handleInputChange('estadoPago', 'total')} className={`p-3 rounded-lg border-2 text-sm font-bold transition-all flex items-center justify-center gap-2 ${formData.estadoPago === 'total' ? 'bg-green-500/20 border-green-500 text-green-300' : 'border-zinc-600 text-zinc-400 hover:bg-zinc-700'}`}>
+                <button type="button" onClick={() => handleInputChange('estadoPago', 'total')} className={`p-3 rounded-lg border-2 text-sm font-bold transition-all flex items-center justify-center gap-2 ${formData.estadoPago === 'total' ? 'bg-green-500/20 dark:bg-[var(--accent)] border-green-500 dark:border-[var(--primary)] text-green-300 dark:text-[var(--primary)]' : 'border-zinc-600 dark:border-[var(--border)] text-zinc-400 dark:text-[var(--muted-foreground)] hover:bg-zinc-700 dark:hover:bg-[var(--secondary)]'}`}>
                   <Check size={14} /> Pago Total
                 </button>
-                <button type="button" onClick={() => handleInputChange('estadoPago', 'parcial')} className={`p-3 rounded-lg border-2 text-sm font-bold transition-all flex items-center justify-center gap-2 ${formData.estadoPago === 'parcial' ? 'bg-yellow-500/20 border-yellow-500 text-yellow-300' : 'border-zinc-600 text-zinc-400 hover:bg-zinc-700'}`}>
+                <button type="button" onClick={() => handleInputChange('estadoPago', 'parcial')} className={`p-3 rounded-lg border-2 text-sm font-bold transition-all flex items-center justify-center gap-2 ${formData.estadoPago === 'parcial' ? 'bg-yellow-500/20 dark:bg-[var(--arrears-pill)] border-yellow-500 dark:border-[var(--warning)] text-yellow-300 dark:text-[var(--warning)]' : 'border-zinc-600 dark:border-[var(--border)] text-zinc-400 dark:text-[var(--muted-foreground)] hover:bg-zinc-700 dark:hover:bg-[var(--secondary)]'}`}>
                   <AlertTriangle size={14} /> Pago Parcial
                 </button>
-                <button type="button" onClick={() => handleInputChange('estadoPago', 'impago')} className={`p-3 rounded-lg border-2 text-sm font-bold transition-all flex items-center justify-center gap-2 ${formData.estadoPago === 'impago' ? 'bg-red-500/20 border-red-500 text-red-300' : 'border-zinc-600 text-zinc-400 hover:bg-zinc-700'}`}>
+                <button type="button" onClick={() => handleInputChange('estadoPago', 'impago')} className={`p-3 rounded-lg border-2 text-sm font-bold transition-all flex items-center justify-center gap-2 ${formData.estadoPago === 'impago' ? 'bg-red-500/20 dark:bg-[var(--overdue-pill)] border-red-500 dark:border-[var(--destructive)] text-red-300 dark:text-[var(--destructive)]' : 'border-zinc-600 dark:border-[var(--border)] text-zinc-400 dark:text-[var(--muted-foreground)] hover:bg-zinc-700 dark:hover:bg-[var(--secondary)]'}`}>
                   <IconX size={14} /> Impago
                 </button>
               </div>

@@ -115,6 +115,16 @@
     --pending-text: #6b572f;
     --paid-text: #526a3a;
 
+    /* Inline-style chrome (page ink, charts, icons) */
+    --page-ink: #000000;
+    --chart-grid: #dcd5ac20;
+    --chart-axis-line: #dcd5ac60;
+    --chart-axis-text: #dcd5ac80;
+    --chart-tooltip-bg: #000000dd;
+    --chart-tooltip-text: #dcd5ac;
+    --chart-positive: #10b981;
+    --icon-muted: #43436c;
+
     --radius: 0.5rem;
     /* 8px — radio de card, ver tailwind.config.js para escala completa */
   }
@@ -225,6 +235,16 @@
     --pending-border: #c7f57a;
     --pending-text: #c7f57a;
     --paid-text: #8d9689;
+
+    /* Inline-style chrome (page ink, charts, icons) */
+    --page-ink: var(--background);
+    --chart-grid: var(--border);
+    --chart-axis-line: var(--border);
+    --chart-axis-text: var(--text-muted);
+    --chart-tooltip-bg: var(--surface-elevated);
+    --chart-tooltip-text: var(--text-primary);
+    --chart-positive: var(--primary);
+    --icon-muted: var(--text-muted);
   }
 }
 

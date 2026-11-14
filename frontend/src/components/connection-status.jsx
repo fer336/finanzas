@@ -41,8 +41,8 @@ export function ConnectionStatus() {
     } max-w-[90vw] w-auto`}>
       <div className={`px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 backdrop-blur-xl border ${
         isOnline 
-          ? 'bg-emerald-500/80 border-emerald-400/50 text-white shadow-emerald-500/20' 
-          : 'bg-red-500/80 border-red-400/50 text-white shadow-red-500/20'
+          ? 'bg-emerald-500/80 dark:bg-[var(--accent)] border-emerald-400/50 dark:border-[var(--accent)] text-white dark:text-[var(--foreground)] shadow-emerald-500/20' 
+          : 'bg-red-500/80 dark:bg-[var(--overdue-pill)] border-red-400/50 dark:border-[var(--overdue-pill)] text-white dark:text-[var(--foreground)] shadow-red-500/20'
       }`}>
         {isOnline ? (
           <>
@@ -87,7 +87,7 @@ export function OfflineIndicator() {
   
   return (
     <div className="fixed bottom-6 left-6 z-[90] animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-amber-500/90 backdrop-blur-md border border-amber-400/50 text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2.5">
+      <div className="bg-amber-500/90 dark:bg-[var(--arrears-pill)] backdrop-blur-md border border-amber-400/50 dark:border-[var(--arrears-pill)] text-white dark:text-[var(--foreground)] px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2.5">
         <AlertCircle className="h-4 w-4" />
         <span className="text-sm font-bold">Sin conexión</span>
       </div>

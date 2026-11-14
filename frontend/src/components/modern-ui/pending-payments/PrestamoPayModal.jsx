@@ -80,7 +80,7 @@ const PrestamoPayModal = ({
     setSelectedFile(file);
   };
 
-  const fieldClassName = 'w-full rounded-sm border border-[#c8bf91] bg-white px-3 py-2.5 text-[13px] text-foreground transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#363646] dark:bg-[#2a2a37] dark:text-foreground dark:placeholder:text-[#c8c093]';
+  const fieldClassName = 'w-full rounded-sm border border-[#c8bf91] bg-white px-3 py-2.5 text-[13px] text-foreground transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-ring dark:border-[var(--border)] dark:bg-[var(--card)] dark:text-foreground dark:placeholder:text-[var(--foreground)]';
 
   const uploadToMinIO = async () => {
     if (!selectedFile) return formData.comprobante;
@@ -155,11 +155,11 @@ const PrestamoPayModal = ({
       style={{ background: 'rgba(32,36,44,.4)' }}
       onClick={(event) => event.target === event.currentTarget && onClose()}
     >
-      <div className="w-full max-w-2xl rounded-[12px] border border-[#c8bf91] dark:border-[#363646] bg-[#e5ddb0] dark:bg-[#181820]">
-        <div className="flex items-center justify-between border-b border-[#d5cea3] dark:border-[#363646] p-5">
+      <div className="w-full max-w-2xl rounded-[12px] border border-[#c8bf91] dark:border-[var(--border)] bg-[#e5ddb0] dark:bg-[var(--background)]">
+        <div className="flex items-center justify-between border-b border-[#d5cea3] dark:border-[var(--border)] p-5">
           <div>
             <h2 className="font-serif text-[20px] font-bold text-foreground">Registrar devolución</h2>
-            <p className="mt-0.5 text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
+            <p className="mt-0.5 text-[12.5px] text-[#43436c] dark:text-[var(--foreground)]">
               {prestamo.nombre_fuente} · <span className="font-mono">{(prestamo.monto_a_devolver || 0).toLocaleString('es-AR')}</span>
             </p>
           </div>
@@ -168,16 +168,16 @@ const PrestamoPayModal = ({
             className="rounded-sm p-2 transition-colors duration-150 hover:bg-black/5 dark:hover:bg-white/5"
             type="button"
           >
-            <X className="w-5 h-5 text-[#625f55] dark:text-[#c8c093]" />
+            <X className="w-5 h-5 text-[#625f55] dark:text-[var(--foreground)]" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <label className="text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
+            <label className="text-[12.5px] text-[#43436c] dark:text-[var(--foreground)]">
               <span className="block mb-1">Fecha de devolución</span>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#625f55] dark:text-[#c8c093]" />
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#625f55] dark:text-[var(--foreground)]" />
                 <input
                   type="date"
                   value={formData.fecha_pago}
@@ -187,7 +187,7 @@ const PrestamoPayModal = ({
               </div>
             </label>
 
-            <label className="text-[12.5px] text-[#43436c] dark:text-[#c8c093]">
+            <label className="text-[12.5px] text-[#43436c] dark:text-[var(--foreground)]">
               <span className="block mb-1">Método de pago</span>
               <select
                 value={formData.metodo_pago_id}
@@ -204,7 +204,7 @@ const PrestamoPayModal = ({
             </label>
           </div>
 
-          <label className="text-[12.5px] text-[#43436c] dark:text-[#c8c093] block">
+          <label className="text-[12.5px] text-[#43436c] dark:text-[var(--foreground)] block">
             <span className="block mb-1">Categoría</span>
             <select
               value={formData.categoria_id}
@@ -220,11 +220,11 @@ const PrestamoPayModal = ({
             </select>
           </label>
 
-          <label className="text-[12.5px] text-[#43436c] dark:text-[#c8c093] block">
+          <label className="text-[12.5px] text-[#43436c] dark:text-[var(--foreground)] block">
             <span className="block mb-1">Comprobante (se sube a MinIO)</span>
             <div className="flex items-center gap-3">
-              <label className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#c8bf91] rounded-sm cursor-pointer transition-colors duration-150 hover:bg-[#e4d794] dark:border-[#363646] dark:bg-[#2a2a37] dark:hover:bg-[#363646]">
-                <Upload className="w-4 h-4 text-[#526a3a]" />
+              <label className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#c8bf91] rounded-sm cursor-pointer transition-colors duration-150 hover:bg-[#e4d794] dark:border-[var(--border)] dark:bg-[var(--card)] dark:hover:bg-[var(--secondary)]">
+                <Upload className="w-4 h-4 text-[#526a3a] dark:text-[var(--primary)]" />
                 <span className="text-[13px] text-foreground">Seleccionar archivo</span>
                 <input
                   type="file"
@@ -234,12 +234,12 @@ const PrestamoPayModal = ({
                 />
               </label>
               {selectedFile && (
-                <span className="text-[12px] text-[#625f55] dark:text-[#c8c093] truncate max-w-xs">{selectedFile.name}</span>
+                <span className="text-[12px] text-[#625f55] dark:text-[var(--foreground)] truncate max-w-xs">{selectedFile.name}</span>
               )}
             </div>
           </label>
 
-          <label className="text-[12.5px] text-[#43436c] dark:text-[#c8c093] block">
+          <label className="text-[12.5px] text-[#43436c] dark:text-[var(--foreground)] block">
             <span className="block mb-1">Notas</span>
             <textarea
               value={formData.notas}
@@ -250,7 +250,7 @@ const PrestamoPayModal = ({
           </label>
 
           {error && (
-            <div className="text-[12.5px] text-[#b83245] bg-[#f9d791] border border-[#de9800] rounded-sm px-3 py-2 dark:border-[#e6c384] dark:bg-[rgba(230,195,132,0.14)] dark:text-[#e46876]">
+            <div className="text-[12.5px] text-[#b83245] bg-[#f9d791] border border-[#de9800] rounded-sm px-3 py-2 dark:border-[var(--warning)] dark:bg-[rgba(230,195,132,0.14)] dark:text-[var(--destructive)]">
               {error}
             </div>
           )}
@@ -259,7 +259,7 @@ const PrestamoPayModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-sm border border-[#c8bf91] bg-white px-[15px] py-[8px] text-[13px] text-foreground transition-colors duration-150 hover:bg-[#e4d794] disabled:opacity-50 dark:border-[#363646] dark:bg-[#2a2a37] dark:hover:bg-[#363646]"
+              className="rounded-sm border border-[#c8bf91] bg-white px-[15px] py-[8px] text-[13px] text-foreground transition-colors duration-150 hover:bg-[#e4d794] disabled:opacity-50 dark:border-[var(--border)] dark:bg-[var(--card)] dark:hover:bg-[var(--secondary)]"
               disabled={saving || uploadingProof}
             >
               Cancelar
@@ -267,7 +267,7 @@ const PrestamoPayModal = ({
             <button
               type="submit"
               disabled={saving || uploadingProof}
-              className="flex items-center gap-2 rounded-sm bg-primary px-[15px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] disabled:opacity-50 dark:hover:bg-[#76946a]"
+              className="flex items-center gap-2 rounded-sm bg-primary px-[15px] py-[8px] text-[13px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] disabled:opacity-50 dark:hover:bg-[var(--primary-hover)]"
             >
               {(saving || uploadingProof) ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileUp className="w-4 h-4" />}
               {uploadingProof ? 'Subiendo comprobante a MinIO...' : saving ? 'Guardando...' : 'Confirmar devolución'}

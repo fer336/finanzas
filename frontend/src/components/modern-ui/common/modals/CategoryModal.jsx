@@ -95,10 +95,10 @@ export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: 'rgba(32,36,44,.4)' }}>
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-[#c8bf91] bg-[#e5ddb0] dark:border-[#363646] dark:bg-[#181820]">
-        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#c8bf91] bg-[#e5ddb0] px-5 py-4 sm:px-6 dark:border-[#363646] dark:bg-[#181820]">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-[#c8bf91] bg-[#e5ddb0] dark:border-[var(--border)] dark:bg-[var(--background)]">
+        <div className="sticky top-0 z-20 flex items-center justify-between border-b border-[#c8bf91] bg-[#e5ddb0] px-5 py-4 sm:px-6 dark:border-[var(--border)] dark:bg-[var(--background)]">
           <div className="flex items-center gap-3">
-            <div className="rounded-sm bg-[#e4d794] p-2 dark:bg-[#2a2a37]">
+            <div className="rounded-sm bg-[#e4d794] p-2 dark:bg-[var(--card)]">
               <FolderOpen className="h-5 w-5 text-primary" />
             </div>
             <h2 className="font-serif text-[19px] font-bold text-foreground sm:text-[21px]">
@@ -108,7 +108,7 @@ export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-sm p-2 text-[#625f55] transition-colors hover:bg-black/5 hover:text-foreground dark:text-[#c8c093] dark:hover:bg-white/5"
+            className="rounded-sm p-2 text-[#625f55] transition-colors hover:bg-black/5 hover:text-foreground dark:text-[var(--foreground)] dark:hover:bg-white/5"
           >
             <X className="h-5 w-5" />
           </button>
@@ -116,20 +116,20 @@ export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
 
         <form onSubmit={handleSubmit} className="space-y-5 p-5 sm:p-6">
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Nombre *</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Nombre *</label>
             <input
               type="text"
               value={formData.nombre}
               onChange={(e) => handleChange('nombre', e.target.value)}
-              className="w-full rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#363646] dark:bg-[#2a2a37] dark:placeholder:text-[#c8c093]"
+              className="w-full rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[var(--border)] dark:bg-[var(--card)] dark:placeholder:text-[var(--foreground)]"
               placeholder="Ej: Combustible"
             />
-            {errors.nombre && <p className="mt-1 text-[11.5px] text-[#b83245] dark:text-[#e46876]">{errors.nombre}</p>}
+            {errors.nombre && <p className="mt-1 text-[11.5px] text-[#b83245] dark:text-[var(--destructive)]">{errors.nombre}</p>}
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Tipo</label>
-            <div className="inline-flex items-center gap-[3px] rounded-full border border-[#c8bf91] bg-card p-[3px] dark:border-[#363646]">
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Tipo</label>
+            <div className="inline-flex items-center gap-[3px] rounded-full border border-[#c8bf91] bg-card p-[3px] dark:border-[var(--border)]">
               {typeOptions.map((option) => (
                 <button
                   key={option.value}
@@ -137,8 +137,8 @@ export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
                   onClick={() => handleChange('tipo', option.value)}
                   className={`rounded-full px-4 py-1.5 font-mono text-[12px] transition-colors duration-150 ${
                     formData.tipo === option.value
-                      ? 'bg-[#4d699b] font-semibold text-[#e5ddb0]'
-                      : 'text-[#43436c] hover:text-foreground dark:text-[#c8c093]'
+                      ? 'bg-[#4d699b] dark:bg-[var(--primary)] font-semibold text-[#e5ddb0]'
+                      : 'text-[#43436c] hover:text-foreground dark:text-[var(--primary-foreground)]'
                   }`}
                 >
                   {option.label}
@@ -148,7 +148,7 @@ export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Ícono</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Ícono</label>
             <div className="grid grid-cols-6 gap-2 sm:grid-cols-8">
               {CATEGORY_ICON_OPTIONS.map(({ name, label, Icon }) => {
                 const isSelected = formData.icono === name;
@@ -165,16 +165,16 @@ export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
                         : { borderColor: 'var(--border)', backgroundColor: 'var(--secondary)' }
                     }
                   >
-                    <Icon size={18} color={isSelected ? formData.color : '#43436c'} />
+                    <Icon size={18} color={isSelected ? formData.color : 'var(--icon-muted)'} />
                   </button>
                 );
               })}
             </div>
-            {errors.icono && <p className="mt-1 text-[11.5px] text-[#b83245] dark:text-[#e46876]">{errors.icono}</p>}
+            {errors.icono && <p className="mt-1 text-[11.5px] text-[#b83245] dark:text-[var(--destructive)]">{errors.icono}</p>}
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Color</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Color</label>
             <div className="grid grid-cols-8 gap-2 sm:grid-cols-10">
               {colorOptions.map((color) => (
                 <button
@@ -182,22 +182,22 @@ export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
                   type="button"
                   onClick={() => handleChange('color', color)}
                   className={`h-8 rounded-sm border-2 transition-all ${
-                    formData.color === color ? 'scale-105 border-[#545464] dark:border-[#dcd7ba]' : 'border-transparent'
+                    formData.color === color ? 'scale-105 border-[#545464] dark:border-[var(--border)]' : 'border-transparent'
                   }`}
                   style={{ backgroundColor: color }}
                 />
               ))}
             </div>
-            {errors.color && <p className="mt-1 text-[11.5px] text-[#b83245] dark:text-[#e46876]">{errors.color}</p>}
+            {errors.color && <p className="mt-1 text-[11.5px] text-[#b83245] dark:text-[var(--destructive)]">{errors.color}</p>}
           </div>
 
           <div>
-            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[#c8c093]">Descripción</label>
+            <label className="mb-1.5 block text-[12.5px] font-medium text-[#43436c] dark:text-[var(--foreground)]">Descripción</label>
             <textarea
               value={formData.descripcion}
               onChange={(e) => handleChange('descripcion', e.target.value)}
               rows={3}
-              className="w-full resize-none rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[#363646] dark:bg-[#2a2a37] dark:placeholder:text-[#c8c093]"
+              className="w-full resize-none rounded-sm border border-[#c8bf91] bg-white px-3.5 py-2.5 text-[13.5px] text-foreground placeholder:text-[#625f55] focus:outline-none focus:ring-2 focus:ring-ring dark:border-[var(--border)] dark:bg-[var(--card)] dark:placeholder:text-[var(--foreground)]"
               placeholder="Descripción opcional"
             />
           </div>
@@ -208,9 +208,9 @@ export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
               type="checkbox"
               checked={formData.activa}
               onChange={(e) => handleChange('activa', e.target.checked)}
-              className="h-4 w-4 rounded-sm border-[#c8bf91] text-primary focus:ring-ring dark:border-[#363646]"
+              className="h-4 w-4 rounded-sm border-[#c8bf91] text-primary focus:ring-ring dark:border-[var(--border)]"
             />
-            <label htmlFor="categoria-activa" className="text-[13px] text-[#43436c] dark:text-[#c8c093]">
+            <label htmlFor="categoria-activa" className="text-[13px] text-[#43436c] dark:text-[var(--foreground)]">
               Categoría activa
             </label>
           </div>
@@ -219,13 +219,13 @@ export const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-sm border border-[#c8bf91] bg-white px-4 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#e4d794] dark:border-[#363646] dark:bg-[#2a2a37] dark:hover:bg-[#363646]"
+              className="flex-1 rounded-sm border border-[#c8bf91] bg-white px-4 py-2.5 text-[13.5px] font-medium text-foreground transition-colors duration-150 hover:bg-[#e4d794] dark:border-[var(--border)] dark:bg-[var(--card)] dark:hover:bg-[var(--secondary)]"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex flex-1 items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2.5 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[#76946a]"
+              className="flex flex-1 items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2.5 text-[13.5px] font-semibold text-primary-foreground transition-colors duration-150 hover:bg-[#5f7841] dark:hover:bg-[var(--primary-hover)]"
             >
               <Save className="h-4 w-4" />
               Guardar

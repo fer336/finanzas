@@ -11,7 +11,7 @@ const buttonVariants = cva(
       variant: {
         // Botón primario (DESIGN.md "Components"): fondo #526a3a, texto
         // #e5ddb0, hover #5f7841.
-        default: "bg-primary text-primary-foreground hover:bg-[#5f7841]",
+        default: "bg-primary text-primary-foreground hover:bg-[#5f7841] dark:hover:bg-[var(--primary-hover)]",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         // Botón secundario: borde #c8bf91, fondo blanco.

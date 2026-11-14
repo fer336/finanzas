@@ -32,7 +32,7 @@ const loadTab = () => {
 // (ver ModernTransactionsView). Activa en fondo oscuro #545464, ya que estos
 // tabs cambian de contenido completo (nivel "modo"), no filtran un rango.
 const PillToggle = ({ options, value, onChange }) => (
-  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#c8bf91] dark:border-[#363646] bg-card p-[3px]">
+  <div className="inline-flex items-center gap-[3px] rounded-full border border-[#c8bf91] dark:border-[var(--border)] bg-card p-[3px]">
     {options.map((opt) => (
       <button
         key={opt.value}
@@ -40,8 +40,8 @@ const PillToggle = ({ options, value, onChange }) => (
         onClick={() => onChange(opt.value)}
         className={`rounded-full px-4 py-1.5 font-mono text-[12px] transition-colors duration-150 ${
           value === opt.value
-            ? 'bg-[#545464] dark:bg-[#dcd7ba] font-semibold text-[#f2ecbc] dark:text-[#1f1f28]'
-            : 'text-[#43436c] dark:text-[#c8c093] hover:text-foreground'
+            ? 'bg-[#545464] dark:bg-[var(--card)] font-semibold text-[#f2ecbc] dark:text-[var(--foreground)]'
+            : 'text-[#43436c] dark:text-[var(--foreground)] hover:text-foreground'
         }`}
       >
         {opt.label}
@@ -87,7 +87,7 @@ const ModernInversionesView = ({
       <div className={`mx-auto max-w-[1100px] ${isMobile ? 'px-4 py-4' : 'px-[34px] py-[28px]'}`}>
         {/* Cabecera (mismo patrón que Movimientos / Vencimientos) */}
         <div
-          className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#b8ad78] dark:border-[#363646] ${
+          className={`flex items-end justify-between gap-5 border-b-[3px] border-double border-[#b8ad78] dark:border-[var(--border)] ${
             isMobile ? 'mb-3 pb-3' : 'mb-[22px] pb-[18px]'
           }`}
         >

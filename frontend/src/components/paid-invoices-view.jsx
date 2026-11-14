@@ -170,82 +170,82 @@ const PaidInvoicesView = () => {
   }
 
   return (
-    <div className="h-full p-0 pb-32 md:pb-0" style={{background: '#000000'}}>
+    <div className="h-full p-0 pb-32 md:pb-0" style={{background: 'var(--page-ink)'}}>
       <div className="h-full w-full p-4 md:p-6">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-black uppercase text-white tracking-tight">Facturas Pagas</h1>
-          <p className="text-zinc-400 text-sm font-bold mt-1">HISTORIAL DE PAGOS COMPLETADOS</p>
+          <h1 className="text-3xl font-black uppercase text-white dark:text-[var(--foreground)] tracking-tight">Facturas Pagas</h1>
+          <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold mt-1">HISTORIAL DE PAGOS COMPLETADOS</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           {/* Total Pagas */}
-          <div className="bg-zinc-900 p-4 rounded-lg border-2 border-zinc-800">
+          <div className="bg-zinc-900 dark:bg-[var(--card)] p-4 rounded-lg border-2 border-zinc-800 dark:border-[var(--border)]">
             <div className="flex items-center justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <p className="text-zinc-400 text-sm font-bold uppercase">Total Pagas</p>
-                <p className="text-2xl md:text-3xl font-bold text-white mt-1 truncate">{stats.total}</p>
-                <p className="text-xs text-zinc-500 mt-1">facturas</p>
+                <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold uppercase">Total Pagas</p>
+                <p className="text-2xl md:text-3xl font-bold text-white dark:text-[var(--foreground)] mt-1 truncate">{stats.total}</p>
+                <p className="text-xs text-zinc-500 dark:text-[var(--muted-foreground)] mt-1">facturas</p>
               </div>
-              <div className="w-10 h-10 bg-green-500/20 border-2 border-green-500/30 flex items-center justify-center rounded-lg flex-shrink-0">
-                <CheckCircle size={20} className="text-green-400" strokeWidth={2} />
+              <div className="w-10 h-10 bg-green-500/20 dark:bg-[var(--accent)] border-2 border-green-500/30 dark:border-[var(--accent)] flex items-center justify-center rounded-lg flex-shrink-0">
+                <CheckCircle size={20} className="text-green-400 dark:text-[var(--primary)]" strokeWidth={2} />
               </div>
             </div>
           </div>
 
           {/* Total Pagado */}
-          <div className="bg-zinc-900 p-4 rounded-lg border-2 border-zinc-800">
+          <div className="bg-zinc-900 dark:bg-[var(--card)] p-4 rounded-lg border-2 border-zinc-800 dark:border-[var(--border)]">
             <div className="flex items-center justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <p className="text-zinc-400 text-sm font-bold uppercase">Total Pagado</p>
-                <p className="text-lg md:text-xl lg:text-2xl font-bold text-white mt-1 break-words">{formatearMoneda(stats.totalPagado, 'ARS')}</p>
-                <p className="text-xs text-zinc-500 mt-1">acumulado</p>
+                <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold uppercase">Total Pagado</p>
+                <p className="text-lg md:text-xl lg:text-2xl font-bold text-white dark:text-[var(--foreground)] mt-1 break-words">{formatearMoneda(stats.totalPagado, 'ARS')}</p>
+                <p className="text-xs text-zinc-500 dark:text-[var(--muted-foreground)] mt-1">acumulado</p>
               </div>
-              <div className="w-10 h-10 bg-blue-500/20 border-2 border-blue-500/30 flex items-center justify-center rounded-lg flex-shrink-0">
-                <DollarSign size={20} className="text-blue-400" strokeWidth={2} />
+              <div className="w-10 h-10 bg-blue-500/20 dark:bg-[var(--accent)] border-2 border-blue-500/30 dark:border-[var(--accent)] flex items-center justify-center rounded-lg flex-shrink-0">
+                <DollarSign size={20} className="text-blue-400 dark:text-[var(--primary)]" strokeWidth={2} />
               </div>
             </div>
           </div>
 
           {/* Este Mes */}
-          <div className="bg-zinc-900 p-4 rounded-lg border-2 border-zinc-800">
+          <div className="bg-zinc-900 dark:bg-[var(--card)] p-4 rounded-lg border-2 border-zinc-800 dark:border-[var(--border)]">
             <div className="flex items-center justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <p className="text-zinc-400 text-sm font-bold uppercase">Este Mes</p>
-                <p className="text-2xl md:text-3xl font-bold text-white mt-1 truncate">{stats.esteMes}</p>
-                <p className="text-xs text-zinc-500 mt-1">pagos</p>
+                <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold uppercase">Este Mes</p>
+                <p className="text-2xl md:text-3xl font-bold text-white dark:text-[var(--foreground)] mt-1 truncate">{stats.esteMes}</p>
+                <p className="text-xs text-zinc-500 dark:text-[var(--muted-foreground)] mt-1">pagos</p>
               </div>
-              <div className="w-10 h-10 bg-purple-500/20 border-2 border-purple-500/30 flex items-center justify-center rounded-lg flex-shrink-0">
-                <Calendar size={20} className="text-purple-400" strokeWidth={2} />
+              <div className="w-10 h-10 bg-purple-500/20 dark:bg-[var(--accent)] border-2 border-purple-500/30 dark:border-[var(--accent)] flex items-center justify-center rounded-lg flex-shrink-0">
+                <Calendar size={20} className="text-purple-400 dark:text-[var(--primary)]" strokeWidth={2} />
               </div>
             </div>
           </div>
 
           {/* Promedio Mensual */}
-          <div className="bg-zinc-900 p-4 rounded-lg border-2 border-zinc-800">
+          <div className="bg-zinc-900 dark:bg-[var(--card)] p-4 rounded-lg border-2 border-zinc-800 dark:border-[var(--border)]">
             <div className="flex items-center justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <p className="text-zinc-400 text-sm font-bold uppercase">Promedio</p>
-                <p className="text-lg md:text-xl lg:text-2xl font-bold text-white mt-1 break-words">{formatearMoneda(stats.promedioMensual, 'ARS')}</p>
-                <p className="text-xs text-zinc-500 mt-1">por mes</p>
+                <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold uppercase">Promedio</p>
+                <p className="text-lg md:text-xl lg:text-2xl font-bold text-white dark:text-[var(--foreground)] mt-1 break-words">{formatearMoneda(stats.promedioMensual, 'ARS')}</p>
+                <p className="text-xs text-zinc-500 dark:text-[var(--muted-foreground)] mt-1">por mes</p>
               </div>
-              <div className="w-10 h-10 bg-orange-500/20 border-2 border-orange-500/30 flex items-center justify-center rounded-lg flex-shrink-0">
-                <CreditCard size={20} className="text-orange-400" strokeWidth={2} />
+              <div className="w-10 h-10 bg-orange-500/20 dark:bg-[var(--arrears-pill)] border-2 border-orange-500/30 dark:border-[var(--arrears-pill)] flex items-center justify-center rounded-lg flex-shrink-0">
+                <CreditCard size={20} className="text-orange-400 dark:text-[var(--warning)]" strokeWidth={2} />
               </div>
             </div>
           </div>
 
           {/* Próximos Vencimientos */}
-          <div className="bg-zinc-900 p-4 rounded-lg border-2 border-zinc-800">
+          <div className="bg-zinc-900 dark:bg-[var(--card)] p-4 rounded-lg border-2 border-zinc-800 dark:border-[var(--border)]">
             <div className="flex items-center justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <p className="text-zinc-400 text-sm font-bold uppercase">Próx. Venc.</p>
-                <p className="text-2xl md:text-3xl font-bold text-white mt-1 truncate">{paidPayments.filter(p => calcularProximoVencimiento(p.fechavencimiento)).length}</p>
-                <p className="text-xs text-zinc-500 mt-1">facturas</p>
+                <p className="text-zinc-400 dark:text-[var(--muted-foreground)] text-sm font-bold uppercase">Próx. Venc.</p>
+                <p className="text-2xl md:text-3xl font-bold text-white dark:text-[var(--foreground)] mt-1 truncate">{paidPayments.filter(p => calcularProximoVencimiento(p.fechavencimiento)).length}</p>
+                <p className="text-xs text-zinc-500 dark:text-[var(--muted-foreground)] mt-1">facturas</p>
               </div>
-              <div className="w-10 h-10 bg-orange-500/20 border-2 border-orange-500/30 flex items-center justify-center rounded-lg flex-shrink-0">
-                <Clock size={20} className="text-orange-400" strokeWidth={2} />
+              <div className="w-10 h-10 bg-orange-500/20 dark:bg-[var(--arrears-pill)] border-2 border-orange-500/30 dark:border-[var(--arrears-pill)] flex items-center justify-center rounded-lg flex-shrink-0">
+                <Clock size={20} className="text-orange-400 dark:text-[var(--warning)]" strokeWidth={2} />
               </div>
             </div>
           </div>
@@ -254,19 +254,19 @@ const PaidInvoicesView = () => {
         {/* Filters Bar */}
         <div className="mb-4 flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} strokeWidth={2} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 dark:text-[var(--muted-foreground)]" size={16} strokeWidth={2} />
             <input 
               type="text" 
               placeholder="BUSCAR FACTURAS..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-zinc-900 border-2 border-zinc-700 rounded-lg font-bold text-sm text-white placeholder-zinc-500 focus:border-blue-500 focus:outline-none"
+              className="w-full pl-10 pr-4 py-2.5 bg-zinc-900 dark:bg-[var(--card)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-lg font-bold text-sm text-white dark:text-[var(--foreground)] placeholder-zinc-500 dark:placeholder-[var(--muted-foreground)] focus:border-blue-500 dark:focus:border-[var(--primary)] focus:outline-none"
             />
           </div>
           <select 
             value={filterPeriod} 
             onChange={(e) => setFilterPeriod(e.target.value)}
-            className="w-full sm:w-auto px-4 py-2.5 bg-zinc-900 border-2 border-zinc-700 rounded-lg text-white font-bold uppercase text-xs hover:bg-zinc-800 focus:outline-none"
+            className="w-full sm:w-auto px-4 py-2.5 bg-zinc-900 dark:bg-[var(--card)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-lg text-white dark:text-[var(--foreground)] font-bold uppercase text-xs hover:bg-zinc-800 dark:hover:bg-[var(--secondary)] focus:outline-none"
           >
             <option value="all">TODOS LOS PERÍODOS</option>
             {availableMonths.map(month => (
@@ -278,11 +278,11 @@ const PaidInvoicesView = () => {
         </div>
 
         {/* Table */}
-        <div className="bg-zinc-900 border-2 border-zinc-700 rounded-lg overflow-hidden">
+        <div className="bg-zinc-900 dark:bg-[var(--card)] border-2 border-zinc-700 dark:border-[var(--border)] rounded-lg overflow-hidden">
               <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-black/30 text-zinc-400 border-b-2 border-zinc-700">
+                <tr className="bg-black/30 text-zinc-400 dark:text-[var(--muted-foreground)] border-b-2 border-zinc-700 dark:border-[var(--border)]">
                   <th className="px-4 py-3 text-left font-bold text-xs uppercase">Descripción</th>
                   <th className="px-4 py-3 text-right font-bold text-xs uppercase">Monto</th>
                   <th className="px-4 py-3 text-center hidden sm:table-cell font-bold text-xs uppercase">Vencimiento</th>
@@ -292,7 +292,7 @@ const PaidInvoicesView = () => {
                   <th className="px-4 py-3 text-center font-bold text-xs uppercase">Factura</th>
                 </tr>
               </thead>
-              <tbody className="divide-y-2 divide-zinc-800">
+              <tbody className="divide-y-2 divide-zinc-800 dark:divide-[var(--border)]">
                 {paginatedPayments.map((payment) => {
                   const proximoVencimiento = calcularProximoVencimiento(
                     payment.fechavencimiento, 
@@ -302,44 +302,44 @@ const PaidInvoicesView = () => {
                   return (
                     <tr key={payment.id} className="hover:bg-zinc-800/50 transition-colors">
                       <td className="px-4 py-3">
-                        <p className="font-bold text-white text-sm">{payment.nombre || 'Sin descripción'}</p>
-                        <p className="text-xs text-zinc-400 mt-1">{payment.descripcion || 'N/A'}</p>
+                        <p className="font-bold text-white dark:text-[var(--foreground)] text-sm">{payment.nombre || 'Sin descripción'}</p>
+                        <p className="text-xs text-zinc-400 dark:text-[var(--muted-foreground)] mt-1">{payment.descripcion || 'N/A'}</p>
                       </td>
-                      <td className="px-4 py-3 text-right font-medium text-white">
+                      <td className="px-4 py-3 text-right font-medium text-white dark:text-[var(--foreground)]">
                             {formatearMoneda(Math.abs(parseFloat(payment.monto || 0)), payment.moneda || 'ARS')}
                       </td>
                       <td className="px-4 py-3 hidden sm:table-cell text-center">
                         <div className="flex flex-col items-center gap-1">
-                          <span className="text-zinc-300 text-sm font-medium">
+                          <span className="text-zinc-300 dark:text-[var(--foreground)] text-sm font-medium">
                           {formatearFecha(payment.fechavencimiento)}
                           </span>
-                          <Calendar size={12} className="text-zinc-500" />
+                          <Calendar size={12} className="text-zinc-500 dark:text-[var(--muted-foreground)]" />
                         </div>
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell text-center">
                         <div className="flex flex-col items-center gap-1">
                           {proximoVencimiento ? (
                             <>
-                              <span className="text-orange-400 text-sm font-medium">
+                              <span className="text-orange-400 dark:text-[var(--warning)] text-sm font-medium">
                                 {formatearFecha(proximoVencimiento)}
                               </span>
-                              <Clock size={12} className="text-orange-500" />
+                              <Clock size={12} className="text-orange-500 dark:text-[var(--warning)]" />
                             </>
                           ) : (
-                            <span className="text-zinc-500 text-xs">N/A</span>
+                            <span className="text-zinc-500 dark:text-[var(--muted-foreground)] text-xs">N/A</span>
                           )}
                         </div>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <div className="flex flex-col items-center gap-1">
-                          <span className="text-green-400 font-bold text-sm">
+                          <span className="text-green-400 dark:text-[var(--primary)] font-bold text-sm">
                               {formatearFecha(payment.fechapago)}
                           </span>
-                          <CheckCircle size={12} className="text-green-500" />
+                          <CheckCircle size={12} className="text-green-500 dark:text-[var(--primary)]" />
                         </div>
                       </td>
                       <td className="px-4 py-3 hidden lg:table-cell text-center">
-                        <span className="px-2 py-1 text-xs font-medium rounded-md bg-zinc-700 text-zinc-300 border border-zinc-600">
+                        <span className="px-2 py-1 text-xs font-medium rounded-md bg-zinc-700 dark:bg-[var(--secondary)] text-zinc-300 dark:text-[var(--foreground)] border border-zinc-600 dark:border-[var(--border)]">
                           N/A
                         </span>
                       </td>
@@ -347,7 +347,7 @@ const PaidInvoicesView = () => {
                           {normalizeDocumentPreviewUrl(payment.url_pdf || '').isValid && (
                           <button
                               onClick={() => handleViewInvoice(payment)}
-                            className="px-3 py-2 bg-blue-600/50 border border-blue-500/50 text-white text-xs font-bold rounded-md hover:bg-blue-600/80 flex items-center justify-center gap-1.5"
+                            className="px-3 py-2 bg-blue-600/50 dark:bg-[var(--accent)] border border-blue-500/50 dark:border-[var(--accent)] text-white dark:text-[var(--foreground)] text-xs font-bold rounded-md hover:bg-blue-600/80 dark:hover:bg-[var(--accent)] flex items-center justify-center gap-1.5"
                           >
                             <FileText size={14} />
                             <ExternalLink size={14} />
@@ -363,22 +363,22 @@ const PaidInvoicesView = () => {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="px-4 py-3 bg-black/30 border-t-2 border-zinc-700 flex items-center justify-between">
-              <span className="text-xs font-bold uppercase text-zinc-400">
+            <div className="px-4 py-3 bg-black/30 border-t-2 border-zinc-700 dark:border-[var(--border)] flex items-center justify-between">
+              <span className="text-xs font-bold uppercase text-zinc-400 dark:text-[var(--muted-foreground)]">
                 Página {currentPage} de {totalPages}
               </span>
               <div className="flex gap-2">
                 <button 
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
-                  className="px-3 py-1.5 bg-zinc-700 border-2 border-zinc-600 text-white font-bold text-xs uppercase rounded-md hover:bg-zinc-600 disabled:opacity-50"
+                  className="px-3 py-1.5 bg-zinc-700 dark:bg-[var(--secondary)] border-2 border-zinc-600 dark:border-[var(--border)] text-white dark:text-[var(--foreground)] font-bold text-xs uppercase rounded-md hover:bg-zinc-600 dark:hover:bg-[var(--border)] disabled:opacity-50"
                 >
                   ←
                 </button>
                 <button 
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 bg-zinc-700 border-2 border-zinc-600 text-white font-bold text-xs uppercase rounded-md hover:bg-zinc-600 disabled:opacity-50"
+                  className="px-3 py-1.5 bg-zinc-700 dark:bg-[var(--secondary)] border-2 border-zinc-600 dark:border-[var(--border)] text-white dark:text-[var(--foreground)] font-bold text-xs uppercase rounded-md hover:bg-zinc-600 dark:hover:bg-[var(--border)] disabled:opacity-50"
                   >
                   →
                 </button>

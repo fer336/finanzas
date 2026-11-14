@@ -90,7 +90,7 @@ export function HistorialIngresosCuota({ selectedMonth, selectedYear }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <DollarSign className="h-5 w-5 text-green-400" />
+          <DollarSign className="h-5 w-5 text-green-400 dark:text-[var(--primary)]" />
           Ingresos para Cuota - {meses[selectedMonth]} {selectedYear}
         </CardTitle>
         <CardDescription>
@@ -99,18 +99,18 @@ export function HistorialIngresosCuota({ selectedMonth, selectedYear }) {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Resumen */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-green-950/20 rounded-lg border border-green-500/20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-green-950/20 dark:bg-[var(--accent)] rounded-lg border border-green-500/20 dark:border-[var(--accent)]">
           <div className="text-center">
-            <p className="text-sm text-green-300">Total Ingresos</p>
-            <p className="text-base sm:text-lg font-bold text-green-200 break-words">${totalIngresos.toLocaleString()}</p>
+            <p className="text-sm text-green-300 dark:text-[var(--primary)]">Total Ingresos</p>
+            <p className="text-base sm:text-lg font-bold text-green-200 dark:text-[var(--primary)] break-words">${totalIngresos.toLocaleString()}</p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-blue-300">Cuota Calculada (30%)</p>
-            <p className="text-base sm:text-lg font-bold text-blue-200 break-words">${cuotaCalculada.toLocaleString()}</p>
+            <p className="text-sm text-blue-300 dark:text-[var(--primary)]">Cuota Calculada (30%)</p>
+            <p className="text-base sm:text-lg font-bold text-blue-200 dark:text-[var(--primary)] break-words">${cuotaCalculada.toLocaleString()}</p>
           </div>
           <div className="text-center">
-            <p className="text-sm text-gray-300">Cantidad</p>
-            <p className="text-base sm:text-lg font-bold text-gray-200">{ingresosCuota.length}</p>
+            <p className="text-sm text-gray-300 dark:text-[var(--foreground)]">Cantidad</p>
+            <p className="text-base sm:text-lg font-bold text-gray-200 dark:text-[var(--foreground)]">{ingresosCuota.length}</p>
           </div>
         </div>
 
@@ -134,7 +134,7 @@ export function HistorialIngresosCuota({ selectedMonth, selectedYear }) {
               return (
                 <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50">
                   <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <CheckCircle className="h-5 w-5 text-green-500 dark:text-[var(--primary)]" />
                     <div>
                       <p className="font-medium">{ingreso.Descripcion}</p>
                       <div className="flex items-center gap-2 mt-1">
@@ -156,7 +156,7 @@ export function HistorialIngresosCuota({ selectedMonth, selectedYear }) {
                     <p className="font-medium text-lg">
                       ${montoOriginal.toLocaleString()}
                     </p>
-                    <p className="text-sm text-blue-600">
+                    <p className="text-sm text-blue-600 dark:text-[var(--primary)]">
                       Cuota: ${cuotaIndividual.toLocaleString()}
                     </p>
                     <p className="text-xs text-muted-foreground">{ingreso.Moneda}</p>
@@ -169,9 +169,9 @@ export function HistorialIngresosCuota({ selectedMonth, selectedYear }) {
 
         {/* Información adicional */}
         {ingresosCuota.length > 0 && (
-          <div className="p-4 bg-blue-950/20 rounded-lg border border-blue-500/20">
-            <h4 className="font-semibold mb-2 text-blue-200">Información de Cálculo</h4>
-            <div className="space-y-1 text-sm text-blue-300">
+          <div className="p-4 bg-blue-950/20 dark:bg-[var(--accent)] rounded-lg border border-blue-500/20 dark:border-[var(--accent)]">
+            <h4 className="font-semibold mb-2 text-blue-200 dark:text-[var(--primary)]">Información de Cálculo</h4>
+            <div className="space-y-1 text-sm text-blue-300 dark:text-[var(--primary)]">
               <p>• Se aplica el 30% sobre cada ingreso marcado para cuota alimentaria</p>
               <p>• Los ingresos se identifican con la etiqueta [CUOTA_ALIMENTARIA] en las notas</p>
               <p>• El cálculo se actualiza automáticamente al agregar nuevos ingresos</p>

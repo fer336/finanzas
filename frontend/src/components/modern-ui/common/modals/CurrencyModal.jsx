@@ -21,14 +21,14 @@ const ICON_OPTIONS = [
 ];
 
 const COLOR_OPTIONS = [
-  { value: 'from-blue-500 dark:from-[var(--primary)] to-cyan-500 dark:to-[var(--primary)]', label: 'Azul → Cyan' },
-  { value: 'from-green-500 dark:from-[var(--primary)] to-emerald-500 dark:to-[var(--primary)]', label: 'Verde → Esmeralda' },
-  { value: 'from-purple-500 dark:from-[var(--primary)] to-pink-500 dark:to-[var(--primary)]', label: 'Púrpura → Rosa' },
-  { value: 'from-yellow-500 dark:from-[var(--warning)] to-orange-500 dark:to-[var(--warning)]', label: 'Amarillo → Naranja' },
-  { value: 'from-indigo-500 dark:from-[var(--primary)] to-violet-500 dark:to-[var(--primary)]', label: 'Índigo → Violeta' },
-  { value: 'from-red-500 dark:from-[var(--destructive)] to-rose-500 dark:to-[var(--destructive)]', label: 'Rojo → Rosado' },
-  { value: 'from-teal-500 dark:from-[var(--primary)] to-cyan-500 dark:to-[var(--primary)]', label: 'Teal → Cyan' },
-  { value: 'from-amber-500 dark:from-[var(--warning)] to-yellow-500 dark:to-[var(--warning)]', label: 'Ámbar → Amarillo' },
+  { value: 'from-blue-500 to-cyan-500', label: 'Azul → Cyan' }, // dark-palette-ignore: persisted data
+  { value: 'from-green-500 to-emerald-500', label: 'Verde → Esmeralda' }, // dark-palette-ignore: persisted data
+  { value: 'from-purple-500 to-pink-500', label: 'Púrpura → Rosa' }, // dark-palette-ignore: persisted data
+  { value: 'from-yellow-500 to-orange-500', label: 'Amarillo → Naranja' }, // dark-palette-ignore: persisted data
+  { value: 'from-indigo-500 to-violet-500', label: 'Índigo → Violeta' }, // dark-palette-ignore: persisted data
+  { value: 'from-red-500 to-rose-500', label: 'Rojo → Rosado' }, // dark-palette-ignore: persisted data
+  { value: 'from-teal-500 to-cyan-500', label: 'Teal → Cyan' }, // dark-palette-ignore: persisted data
+  { value: 'from-amber-500 to-yellow-500', label: 'Ámbar → Amarillo' }, // dark-palette-ignore: persisted data
 ];
 
 export const CurrencyModal = ({ isOpen, onClose, onSave, currency = null }) => {
@@ -37,7 +37,7 @@ export const CurrencyModal = ({ isOpen, onClose, onSave, currency = null }) => {
     nombre: '',
     simbolo: '',
     icono: 'DollarSign',
-    color: 'from-blue-500 dark:from-[var(--primary)] to-cyan-500 dark:to-[var(--primary)]',
+    color: 'from-blue-500 to-cyan-500', // dark-palette-ignore: persisted data
     activa: true,
   });
   const [errors, setErrors] = useState({});
@@ -52,7 +52,7 @@ export const CurrencyModal = ({ isOpen, onClose, onSave, currency = null }) => {
         nombre: currency.nombre || '',
         simbolo: currency.simbolo || '',
         icono: currency.icono || 'DollarSign',
-        color: currency.color || 'from-blue-500 dark:from-[var(--primary)] to-cyan-500 dark:to-[var(--primary)]',
+        color: currency.color || 'from-blue-500 to-cyan-500', // dark-palette-ignore: persisted data
         activa: currency.activa !== undefined ? currency.activa : true,
       });
     } else {
@@ -61,7 +61,7 @@ export const CurrencyModal = ({ isOpen, onClose, onSave, currency = null }) => {
         nombre: '',
         simbolo: '',
         icono: 'DollarSign',
-        color: 'from-blue-500 dark:from-[var(--primary)] to-cyan-500 dark:to-[var(--primary)]',
+        color: 'from-blue-500 to-cyan-500', // dark-palette-ignore: persisted data
         activa: true,
       });
     }

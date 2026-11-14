@@ -299,7 +299,7 @@ const BudgetModal = ({ isOpen, onClose, onSuccess, editingBudget = null }) => {
           <button
             onClick={handleSubmit}
             disabled={loading || !formData.nombre.trim() || !formData.monto_limite}
-            className="px-6 py-2 bg-gradient-to-r from-purple-600 dark:from-[var(--primary)] to-pink-600 dark:to-[var(--primary)] hover:from-purple-500 dark:hover:from-[var(--primary)] hover:to-pink-500 dark:hover:to-[var(--primary)] text-white dark:text-[var(--foreground)] text-sm font-bold rounded-lg shadow-lg disabled:opacity-50 flex items-center gap-2"
+            className="px-6 py-2 bg-gradient-to-r from-purple-600 dark:from-[var(--primary)] to-pink-600 dark:to-[var(--primary)] hover:from-purple-500 dark:hover:from-[var(--primary)] hover:to-pink-500 dark:hover:to-[var(--primary)] text-white dark:text-[var(--primary-foreground)] text-sm font-bold rounded-lg shadow-lg disabled:opacity-50 flex items-center gap-2"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save size={16} />}
             {editingBudget ? 'Guardar' : 'Crear Presupuesto'}

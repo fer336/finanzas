@@ -40,7 +40,7 @@ const ModernReportesView = ({ onGenerateReport, onExportPDF }) => {
           <select value={selectedTipo} onChange={(e) => setSelectedTipo(e.target.value)} className="px-4 py-2.5 rounded-xl bg-[#0a0a0a] dark:bg-[var(--background)] text-white dark:text-[var(--foreground)] border border-white/5 focus:outline-none focus:border-[#10b981]/30 dark:focus:border-[var(--accent)] transition-colors">
             {reportTypes.map(rt => <option key={rt.id} value={rt.id}>{rt.nombre}</option>)}
           </select>
-          <button onClick={() => onGenerateReport && onGenerateReport(selectedTipo, selectedPeriodo)} className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#10b981] dark:from-[var(--primary)] to-[#34d399] dark:to-[var(--primary)] text-white dark:text-[var(--foreground)] font-medium hover:shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2">
+          <button onClick={() => onGenerateReport && onGenerateReport(selectedTipo, selectedPeriodo)} className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#10b981] dark:from-[var(--primary)] to-[#34d399] dark:to-[var(--primary)] text-white dark:text-[var(--primary-foreground)] font-medium hover:shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2">
             <BarChart3 className="w-4 h-4" />
             Generar Reporte
           </button>

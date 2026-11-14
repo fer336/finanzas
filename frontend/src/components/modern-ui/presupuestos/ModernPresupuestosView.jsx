@@ -86,7 +86,7 @@ const ModernPresupuestosView = ({
           </p>
           <button 
             onClick={onNewPresupuesto}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#10b981] dark:from-[var(--primary)] to-[#34d399] dark:to-[var(--primary)] text-white dark:text-[var(--foreground)] font-medium hover:shadow-lg transition-all"
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#10b981] dark:from-[var(--primary)] to-[#34d399] dark:to-[var(--primary)] text-white dark:text-[var(--primary-foreground)] font-medium hover:shadow-lg transition-all"
           >
             Crear Primer Presupuesto
           </button>

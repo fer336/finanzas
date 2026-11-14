@@ -124,6 +124,8 @@
     --chart-tooltip-text: #dcd5ac;
     --chart-positive: #10b981;
     --icon-muted: #43436c;
+    --icon-tile-warning: #f9d791;
+    --icon-tile-info: #e4d794;
 
     --radius: 0.5rem;
     /* 8px — radio de card, ver tailwind.config.js para escala completa */
@@ -245,6 +247,8 @@
     --chart-tooltip-text: var(--text-primary);
     --chart-positive: var(--primary);
     --icon-muted: var(--text-muted);
+    --icon-tile-warning: var(--arrears-pill);
+    --icon-tile-info: var(--accent);
   }
 }
 

@@ -19,9 +19,9 @@ const ConfirmModal = ({
   if (!isOpen) return null;
 
   const colors = {
-    danger: { icon: 'var(--destructive)', bg: 'var(--accent)', button: 'bg-destructive hover:bg-[#8f4230] dark:hover:bg-[var(--destructive)]' },
-    warning: { icon: 'var(--warning)', bg: '#f9d791', button: 'bg-[#6b572f] dark:bg-[var(--warning)] hover:bg-[#795b1a] dark:hover:bg-[var(--warning)]' },
-    info: { icon: 'var(--info)', bg: '#e4d794', button: 'bg-[#4d699b] dark:bg-[var(--primary)] hover:bg-[#354e6d] dark:hover:bg-[var(--primary-hover)]' },
+    danger: { icon: 'var(--destructive)', bg: 'var(--accent)', button: 'bg-destructive hover:bg-[#8f4230] dark:hover:bg-[var(--destructive)] text-[#e5ddb0] dark:text-[var(--destructive-foreground)]' },
+    warning: { icon: 'var(--warning)', bg: 'var(--icon-tile-warning)', button: 'bg-[#6b572f] dark:bg-[var(--warning)] hover:bg-[#795b1a] dark:hover:bg-[var(--warning)] text-[#e5ddb0] dark:text-[var(--primary-foreground)]' },
+    info: { icon: 'var(--info)', bg: 'var(--icon-tile-info)', button: 'bg-[#4d699b] dark:bg-[var(--primary)] hover:bg-[#354e6d] dark:hover:bg-[var(--primary-hover)] text-[#e5ddb0] dark:text-[var(--primary-foreground)]' },
   };
 
   const color = colors[type];
@@ -72,7 +72,7 @@ const ConfirmModal = ({
               onConfirm();
               onClose();
             }}
-            className={`flex-1 rounded-sm px-4 py-[9px] text-[13px] font-semibold text-[#e5ddb0] dark:text-[var(--foreground)] transition-colors duration-150 ${color.button}`}
+            className={`flex-1 rounded-sm px-4 py-[9px] text-[13px] font-semibold transition-colors duration-150 ${color.button}`}
           >
             {confirmText}
           </button>

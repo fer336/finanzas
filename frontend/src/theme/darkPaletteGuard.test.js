@@ -42,11 +42,25 @@ const liveFiles = () => {
 // A neutral translucent overlay, or an existing white/black overlay.
 const isOverlay = (color, opacity) => Boolean(opacity) && NEUTRAL.test(color);
 
+// Solid dark-mode fills (lime, coral, amber) need the dark on-fill foreground.
+const SOLID_FILL = /(?<![\w\[\]:/-])dark:(?:bg|from|via|to)-\[var\(--(?:primary|primary-hover|destructive|warning)\)\]/;
+const LIGHT_DARK_TEXT = /(?<![\w\[\]:/-])dark:text-\[var\(--(?:foreground|muted-foreground|card-foreground)\)\]/g;
+const LIGHT_TOKEN_TEXT = /(?<![\w\[\]:/-])text-(?:foreground|muted-foreground|card-foreground)(?![\w-])/g;
+const HAS_DARK_TEXT = /(?<![\w\[\]:/-])dark:text-(?!\[?\d)/;
+
+// Lines marked `dark-palette-ignore` hold data (e.g. values sent to the backend).
+const IGNORE_LINE = /^.*dark-palette-ignore.*$/gm;
+
 export const findDarkPaletteViolations = (files) => {
   const violations = [];
   for (const file of files) {
-    const text = readFileSync(file, 'utf8');
+    const text = readFileSync(file, 'utf8').replace(IGNORE_LINE, '');
     for (const [literal] of text.matchAll(STRING)) {
+      if (SOLID_FILL.test(literal)) {
+        const lightText = [...literal.matchAll(LIGHT_DARK_TEXT)].map(([m]) => m);
+        if (!HAS_DARK_TEXT.test(literal)) lightText.push(...[...literal.matchAll(LIGHT_TOKEN_TEXT)].map(([m]) => m));
+        lightText.forEach((cls) => violations.push(`${file.replace(`${SRC}/`, '')}: ${cls} (light text on a solid dark fill)`));
+      }
       const darkKeys = new Set(
         [...literal.matchAll(darkAnyRe())].map((m) => `${m[1].replace('dark:', '')}|${m[2]}`)
       );
@@ -78,6 +92,8 @@ describe('dark palette guard', () => {
     expect(findDarkPaletteViolations([sample]).map((v) => v.split(': ')[1])).toEqual([
       'bg-zinc-900 (no dark token)',
       'dark:text-[#c8c093] (raw color in dark variant)',
+      'dark:text-[var(--foreground)] (light text on a solid dark fill)',
+      'text-foreground (light text on a solid dark fill)',
     ]);
   });
 });

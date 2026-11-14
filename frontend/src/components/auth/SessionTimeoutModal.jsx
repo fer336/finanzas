@@ -66,7 +66,7 @@ export const SessionTimeoutModal = ({ isOpen, remainingSeconds, onExtend, onLogo
           </button>
           <button
             onClick={onExtend}
-            className="flex-1 px-4 py-3 bg-gradient-to-r from-yellow-500 dark:from-[var(--warning)] to-orange-500 dark:to-[var(--warning)] hover:from-yellow-400 dark:hover:from-[var(--warning)] hover:to-orange-400 dark:hover:to-[var(--warning)] text-black dark:text-[var(--foreground)] rounded-xl font-bold transition-all shadow-lg shadow-yellow-500/30 hover:scale-105"
+            className="flex-1 px-4 py-3 bg-gradient-to-r from-yellow-500 dark:from-[var(--warning)] to-orange-500 dark:to-[var(--warning)] hover:from-yellow-400 dark:hover:from-[var(--warning)] hover:to-orange-400 dark:hover:to-[var(--warning)] text-black dark:text-[var(--primary-foreground)] rounded-xl font-bold transition-all shadow-lg shadow-yellow-500/30 hover:scale-105"
           >
             Seguir conectado
           </button>

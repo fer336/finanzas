@@ -40,3 +40,13 @@ Method: a scripted codemod rewrites only `dark:` color utilities in live files, 
 - L4: codemod v1 was reverted. It duplicated existing token `dark:` siblings and read the light parchment neutrals (#c8bf91, #e4d794) as amber. v2 adds overrides for old Kanagawa and parchment values, skips translucent neutral overlays, and detects any existing `dark:` sibling.
 - L5: guard test `src/theme/darkPaletteGuard.test.js`. It is RED on the base copy (violations found) and GREEN after. Suite 194/194, build OK, lint shows the same 22 warnings as the base.
 - L6: light differential (base vs change with `dark:` classes stripped). The only differences are inline colors moved to variables whose light values equal the old ones.
+- L7: the independent verifier reported 3 blockers.
+  - B1: light text on lime, amber or coral fills in 5 sites, because gradient fills were missed and ConfirmModal splits text and fill across literals.
+  - B2: the codemod rewrote CurrencyModal gradient values that are persisted to the backend (high-risk item 3).
+  - B3: the guard did not check contrast.
+  Advisories: blue and pink collapse to lime, `#625f55` maps inconsistently, the focus ring is weak, and SVG `var()` needs a visual check.
+- L8: one correction batch.
+  - B1: on-fill foreground set at the 5 sites. ConfirmModal text moved into each button variant, and its icon tiles moved to variables.
+  - B2: the persisted strings were restored exactly and marked `dark-palette-ignore`.
+  - B3: the guard now flags light text on a solid dark fill. The fixture was RED before the rule and GREEN after, and the guard caught 4 of the 5 live sites.
+  Suite 194/194 and build OK.

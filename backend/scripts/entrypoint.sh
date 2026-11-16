@@ -27,7 +27,8 @@ fi
 # aplica todas las cabezas pendientes sin ambigüedad.
 # Instalación local (install.sh): crea el esquema en una base vacía y la
 # cuenta demo. Producción no define LOCAL_AUTH_ENABLED y no lo ejecuta.
-case "${LOCAL_AUTH_ENABLED:-false}" in
+# Mismo criterio que settings.LOCAL_AUTH_ENABLED: true/1/yes sin importar mayúsculas.
+case "$(printf '%s' "${LOCAL_AUTH_ENABLED:-false}" | tr '[:upper:]' '[:lower:]')" in
   true|1|yes)
     echo "🧪 Preparando base de datos local..."
     python scripts/bootstrap_local.py

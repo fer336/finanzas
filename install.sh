@@ -41,6 +41,9 @@ main() {
     fail "Falta Docker Compose. Instalalo: https://docs.docker.com/compose/install/"
   fi
 
+  if [ -e "$dir/.git" ]; then
+    fail "${dir} es un repositorio git; elegí otra carpeta con FINANZAS_DIR para no pisar sus archivos."
+  fi
   mkdir -p "$dir"
   cd "$dir"
 

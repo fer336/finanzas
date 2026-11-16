@@ -6,7 +6,6 @@ on an empty database this creates every table from the models and stamps the
 current heads. It then makes sure the demo account exists. Every step is
 idempotent, so it is safe on each boot; production never runs it.
 """
-import logging
 import os
 import sys
 from pathlib import Path
@@ -22,7 +21,9 @@ from app.core.config import settings  # noqa: E402
 from app.database import Base, SessionLocal, engine  # noqa: E402
 from app.models.db_models import Usuario  # noqa: E402
 
-logger = logging.getLogger("bootstrap_local")
+def log(message: str) -> None:
+    # print, not the logging module: Alembic's fileConfig disables it.
+    print(f"[bootstrap_local] {message}", flush=True)
 
 
 def create_schema_if_empty() -> bool:
@@ -50,17 +51,16 @@ def ensure_demo_user() -> bool:
 
 
 def main() -> int:
-    logging.basicConfig(level=logging.INFO, format="%(message)s")
     if not settings.LOCAL_AUTH_ENABLED:
-        logger.info("LOCAL_AUTH_ENABLED is off; nothing to bootstrap.")
+        log("LOCAL_AUTH_ENABLED is off; nothing to bootstrap.")
         return 0
     if not settings.LOCAL_AUTH_PASSWORD:
-        logger.error("LOCAL_AUTH_PASSWORD is empty; set it in the install .env.")
+        log("LOCAL_AUTH_PASSWORD is empty; set it in the install .env.")
         return 1
     if create_schema_if_empty():
-        logger.info("Created the database schema and stamped Alembic heads.")
+        log("Created the database schema and stamped Alembic heads.")
     if ensure_demo_user():
-        logger.info("Created the demo account %s.", settings.LOCAL_AUTH_EMAIL)
+        log(f"Created the demo account {settings.LOCAL_AUTH_EMAIL}.")
     return 0
 
 

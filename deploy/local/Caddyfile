@@ -1,0 +1,27 @@
+# Single origin for a local install: the API, receipts (MinIO) and the app
+# share http://localhost:<port>, so the published images work unchanged.
+:80 {
+	encode gzip
+
+	request_body {
+		max_size 20MB
+	}
+
+	@backend path /api/* /auth/* /config /config/* /health /docs /docs/* /redoc /openapi.json
+	handle @backend {
+		reverse_proxy backend:8000
+	}
+
+	# Receipts: MINIO_PUBLIC_URL points here, so upload URLs open same-origin.
+	handle /facturas/* {
+		reverse_proxy minio:9000
+	}
+
+	handle {
+		reverse_proxy frontend:80 {
+			# The production image forces HTTPS; a local install is plain HTTP.
+			header_down -Content-Security-Policy
+			header_down -Strict-Transport-Security
+		}
+	}
+}

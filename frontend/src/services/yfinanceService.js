@@ -24,9 +24,8 @@ const getBackendUrl = () => {
     return `${protocol}//finanzas.qeva.xyz`;
   }
   
-  // Fallback
-  return import.meta.env.VITE_BACKEND_URL || 
-         `${protocol}//${hostname}:8000`;
+  // Otherwise the API sits behind the same origin (e.g. the local install proxy).
+  return import.meta.env.VITE_BACKEND_URL || window.location.origin;
 };
 
 const BACKEND_BASE_URL = getBackendUrl();

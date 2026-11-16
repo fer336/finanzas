@@ -1,0 +1,78 @@
+# Local install of Finanzas (see install.sh). Everything is served on
+# http://localhost:${FINANZAS_PORT}; secrets come from the generated .env.
+name: finanzas
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: finanzas
+      POSTGRES_USER: finanzas
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run install.sh to generate .env}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finanzas -d finanzas"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # MinIO publishes no Docker Hub images any more; Chainguard builds it from
+  # source. Distroless (no shell), so the backend bootstrap creates the bucket.
+  minio:
+    image: cgr.dev/chainguard/minio:latest
+    restart: unless-stopped
+    user: "0:0"
+    command: ["server", "/data"]
+    environment:
+      MINIO_ROOT_USER: finanzas
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?run install.sh to generate .env}
+    volumes:
+      - minio-data:/data
+
+  backend:
+    image: ${FINANZAS_BACKEND_IMAGE:-ghcr.io/fer336/finanzas-backend}:${FINANZAS_VERSION:-latest}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    environment:
+      ENVIRONMENT: local
+      DATABASE_URL: postgresql+psycopg2://finanzas:${POSTGRES_PASSWORD}@postgres:5432/finanzas
+      SECRET_KEY: ${SECRET_KEY:?run install.sh to generate .env}
+      LOCAL_AUTH_ENABLED: "true"
+      LOCAL_AUTH_EMAIL: ${LOCAL_AUTH_EMAIL:-demo@example.com}
+      LOCAL_AUTH_PASSWORD: ${LOCAL_AUTH_PASSWORD:?run install.sh to generate .env}
+      LOCAL_AUTH_NAME: ${LOCAL_AUTH_NAME:-Usuario Demo}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_SECURE: "false"
+      MINIO_ACCESS_KEY: finanzas
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET_NAME: facturas
+      MINIO_PUBLIC_URL: http://localhost:${FINANZAS_PORT:-8080}
+      CORS_ORIGINS: http://localhost:${FINANZAS_PORT:-8080}
+
+  frontend:
+    image: ${FINANZAS_FRONTEND_IMAGE:-ghcr.io/fer336/finanzas-frontend}:${FINANZAS_VERSION:-latest}
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  proxy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - frontend
+      - minio
+    ports:
+      - "127.0.0.1:${FINANZAS_PORT:-8080}:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+
+volumes:
+  postgres-data:
+  minio-data:

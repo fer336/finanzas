@@ -100,6 +100,39 @@ describe('normalizeDocumentPreviewUrl', () => {
       reason: 'http-only-local-dev',
     });
   });
+
+  it('allows same-origin http receipts on a local install served over http://localhost', () => {
+    const localInstallPolicy = buildDocumentUrlPolicy({
+      env: { MODE: 'production', DEV: false },
+      locationObject: { origin: 'http://localhost:8080', hostname: 'localhost' },
+    });
+
+    expect(normalizeDocumentPreviewUrl('http://localhost:8080/facturas/comprobantes/a.pdf', localInstallPolicy)).toMatchObject({
+      isValid: true,
+      origin: 'http://localhost:8080',
+      fileType: 'pdf',
+    });
+    // Another local port or host is still not the page's own origin.
+    expect(normalizeDocumentPreviewUrl('http://localhost:9000/facturas/a.pdf', localInstallPolicy)).toMatchObject({
+      isValid: false,
+      reason: 'http-only-local-dev',
+    });
+    expect(normalizeDocumentPreviewUrl('http://evil.example/facturas/a.pdf', localInstallPolicy)).toMatchObject({
+      isValid: false,
+      reason: 'http-only-local-dev',
+    });
+  });
+
+  it('never allows http on a non-local page, even same-origin', () => {
+    const httpRemotePolicy = buildDocumentUrlPolicy({
+      env: { MODE: 'production', DEV: false },
+      locationObject: { origin: 'http://finanzas.example.com', hostname: 'finanzas.example.com' },
+    });
+    expect(normalizeDocumentPreviewUrl('http://finanzas.example.com/facturas/a.pdf', httpRemotePolicy)).toMatchObject({
+      isValid: false,
+      reason: 'http-only-local-dev',
+    });
+  });
 });
 
 describe('getDocumentFileType', () => {

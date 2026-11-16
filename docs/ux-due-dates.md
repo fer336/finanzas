@@ -9,7 +9,7 @@ T4 · S2, S3, S4 · Referencia visual: `design/finance-workflows-proposal/02-due
 - “Próximos 7 días” incluye hoy y los seis días locales siguientes. El rango real aparece en pantalla; no significa semana calendario.
 - Los encabezados identifican Vencidos, En mora, Próximos 7 días, Más adelante o Fecha a confirmar. Se añaden sobre tramos consecutivos de la página existente: no se reordena, repagina ni oculta ningún registro adicional. Pueden repetirse encabezados para preservar el orden cronológico.
 - En mora no se convierte en vencido: la segunda fecha y el estado pagado siguen las reglas de `pendingPaymentStatus.js`. Una fecha desconocida no se presenta como futura.
-- La lista muestra solo vencimientos sin pagar (pendientes, en mora y vencidos); los pagados no se listan. No hay filtro de estado ni selector de mes: la única opción es «Todos los vencimientos» (por defecto, cualquier mes) o «Vencimientos del mes» (mes calendario actual, según la primera fecha). Se mantienen búsqueda, orden, veinte registros por página, pestaña de préstamos y callbacks CRUD existentes.
+- La lista muestra por defecto solo vencimientos sin pagar (pendientes, en mora y vencidos). No hay filtro de estado ni selector de mes: la única opción es «Todos los vencimientos» (por defecto, cualquier mes), «Vencimientos del mes» (mes calendario actual, según la primera fecha) o «Pagados» (historial completo de vencimientos pagados, del más reciente al más antiguo y agrupado por mes, para revisar sus comprobantes). Las tarjetas de resumen siempre resumen los vencimientos sin pagar; los chips de categoría salen de la lista visible. Se mantienen búsqueda, orden, veinte registros por página, pestaña de préstamos y callbacks CRUD existentes.
 
 ## Consulta y pago
 

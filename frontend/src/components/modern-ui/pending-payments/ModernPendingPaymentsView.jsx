@@ -35,11 +35,20 @@ const loadSection = () => {
   }
 };
 
-// The only period choice: every unpaid due date, or just this calendar month.
+// The only list choice: every unpaid due date, just this calendar month, or
+// the full history of paid ones (to review their receipts).
 const VIEW_MODES = [
   { value: 'all', label: 'Todos los vencimientos' },
   { value: 'month', label: 'Vencimientos del mes' },
+  { value: 'paid', label: 'Pagados' },
 ];
+
+const paidMonthGroup = (dateValue) => {
+  const fecha = parseLocalDateOnly(dateValue);
+  if (!fecha) return 'Sin fecha';
+  const label = fecha.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+  return label.charAt(0).toUpperCase() + label.slice(1);
+};
 
 const isInCurrentMonth = (dateValue) => {
   const fecha = parseLocalDateOnly(dateValue);
@@ -56,7 +65,7 @@ EmptyState.propTypes = { children: PropTypes.node };
 
 // Toggle de pills Mensual/Acumulado (mismo patrón visual que Movimientos).
 const PillToggle = ({ options, value, onChange, activeClassName, idPrefix, ariaLabel }) => (
-  <div className="inline-flex items-center gap-[3px] rounded-full border border-border bg-card p-[3px]" aria-label={ariaLabel}>
+  <div className="inline-flex max-w-full items-center gap-[3px] overflow-x-auto rounded-full border border-border bg-card p-[3px]" aria-label={ariaLabel}>
     {options.map((opt) => (
       <button
         id={idPrefix ? `${idPrefix}-${opt.value}` : undefined}
@@ -64,7 +73,7 @@ const PillToggle = ({ options, value, onChange, activeClassName, idPrefix, ariaL
         type="button"
         aria-pressed={value === opt.value}
         onClick={() => onChange(opt.value)}
-        className={`rounded-full px-3 py-1 font-mono text-[12px] transition-colors duration-150 ${
+        className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1 font-mono text-[12px] transition-colors duration-150 ${
           value === opt.value ? `${activeClassName} font-semibold` : 'text-muted-foreground hover:bg-card-hover hover:text-foreground'
         }`}
       >
@@ -156,23 +165,23 @@ const ModernPendingPaymentsView = ({
   useEffect(() => { setCurrentPage(1); }, [searchQuery, selectedCategory, viewMode]);
 
   // ── Filtros ──────────────────────────────────────────────────────────────
-  // Only unpaid due dates are listed: pending, en mora and vencidos.
-  let baseFilteredData = pagos.filter((p) => !isPagoPaid(p));
-
-  if (viewMode === 'month') {
-    baseFilteredData = baseFilteredData.filter((p) => isInCurrentMonth(p.fechaVencimiento));
-  }
-
-  if (searchQuery) {
+  // Unpaid due dates (pending, en mora and vencidos) feed the KPI cards; the
+  // list shows them, or the paid history in the «Pagados» mode.
+  const isPaidView = viewMode === 'paid';
+  const matchesSearch = (p) => {
+    if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
-    baseFilteredData = baseFilteredData.filter((p) =>
-      p.nombre.toLowerCase().includes(query)
+    return p.nombre.toLowerCase().includes(query)
       || p.descripcion.toLowerCase().includes(query)
-      || p.categoria.toLowerCase().includes(query)
-    );
-  }
+      || p.categoria.toLowerCase().includes(query);
+  };
+  const pendientes = pagos.filter((p) => !isPagoPaid(p)
+    && (viewMode !== 'month' || isInCurrentMonth(p.fechaVencimiento))
+    && matchesSearch(p));
+  const baseFilteredData = isPaidView
+    ? pagos.filter((p) => isPagoPaid(p) && matchesSearch(p))
+    : pendientes;
 
-  const pendientes = baseFilteredData;
   const vencidos = pendientes.filter((p) => p.temporalStatus === PENDING_PAYMENT_STATUS.OVERDUE);
   const enMora = pendientes.filter((p) => p.temporalStatus === PENDING_PAYMENT_STATUS.IN_ARREARS);
   const formatPaymentAmount = (payment) => payment.moneda === 'ARS'
@@ -187,6 +196,7 @@ const ModernPendingPaymentsView = ({
   };
   // Hoy y los seis días siguientes; la segunda fecha no cambia de significado.
   const urgencyGroup = (p) => {
+    if (isPagoPaid(p)) return paidMonthGroup(p.fechaVencimiento);
     if (p.temporalStatus === PENDING_PAYMENT_STATUS.OVERDUE) return 'Vencidos';
     if (p.temporalStatus === PENDING_PAYMENT_STATUS.IN_ARREARS) return 'En mora';
     if (!parseLocalDateOnly(p.fechaVencimiento)) return 'Fecha a confirmar';
@@ -209,13 +219,19 @@ const ModernPendingPaymentsView = ({
     : baseFilteredData.filter((p) => p.categoria === activeCategory);
   const emptyMessage = searchQuery
     ? `Sin resultados para "${searchQuery}".`
-    : viewMode === 'month'
-      ? 'No hay vencimientos pendientes este mes.'
-      : 'No hay vencimientos pendientes.';
+    : isPaidView
+      ? 'Todavía no hay vencimientos pagados.'
+      : viewMode === 'month'
+        ? 'No hay vencimientos pendientes este mes.'
+        : 'No hay vencimientos pendientes.';
 
-  const sortedData = [...filteredData].sort(
-    (a, b) => compareLocalDateOnly(a.fechaVencimiento, b.fechaVencimiento)
-  );
+  // Paid history reads newest first; unpaid due dates, soonest first.
+  // Undated rows stay last either way.
+  const sortedData = [...filteredData].sort((a, b) => {
+    const order = compareLocalDateOnly(a.fechaVencimiento, b.fechaVencimiento);
+    const bothDated = parseLocalDateOnly(a.fechaVencimiento) && parseLocalDateOnly(b.fechaVencimiento);
+    return isPaidView && bothDated ? -order : order;
+  });
 
   const totalPages = Math.ceil(sortedData.length / itemsPerPage);
   const paginatedData = sortedData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);

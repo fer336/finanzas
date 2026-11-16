@@ -1,6 +1,7 @@
 import { Suspense, lazy, useState, useEffect } from 'react';
 import { useAuth } from './components/auth/auth-provider';
 import { LoginButton } from './components/auth/login-button';
+import { LocalLoginGate } from './components/auth/local-login-form';
 import { ConnectionStatus } from './components/connection-status';
 
 // Lazy loading del componente moderno principal
@@ -80,7 +81,7 @@ function App() {
             className="rounded-xl border border-border bg-card p-6 animate-in fade-in slide-in-from-bottom-4 duration-500"
             style={{ animationDelay: '100ms' }}
           >
-            <LoginButton />
+            <LocalLoginGate fallback={<LoginButton />} />
           </div>
 
           {/* Footer */}

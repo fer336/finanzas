@@ -385,3 +385,65 @@ describe('ModernPendingPaymentsView category chips', () => {
     expect(screen.queryByText('Actividad')).not.toBeInTheDocument();
   });
 });
+
+describe('ModernPendingPaymentsView paid history', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(FROZEN_NOW);
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    cleanup();
+  });
+
+  const history = () => [
+    { ...createPaymentBase(), id: 'open', nombre: 'Luz impaga', fechavencimiento: '2026-07-20' },
+    { ...createPaymentBase(), id: 'undated', nombre: 'Pagado sin fecha', fechavencimiento: null, estado: 'pagado' },
+    { ...createPaymentBase(), id: 'old', nombre: 'Gas de enero', fechavencimiento: '2025-01-10', estado: 'pagado', Categorias: { nombre: 'Servicios' } },
+    { ...createPaymentBase(), id: 'recent', nombre: 'Colegio de julio', fechavencimiento: '2026-07-05', estado: 'pagado', Categorias: { nombre: 'Colegio' }, comprobante: 'https://s3.qeva.xyz/facturas/comprobantes/colegio.pdf' },
+  ];
+
+  it.each([false, true])('lists every paid due date, newest first, and only paid ones (mobile=%s)', (mobile) => {
+    renderView(history(), mobile);
+    fireEvent.click(screen.getByRole('button', { name: 'Pagados' }));
+
+    expect(screen.getByRole('button', { name: 'Pagados' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByText('Luz impaga')).not.toBeInTheDocument();
+    const recent = screen.getByText('Colegio de julio');
+    const old = screen.getByText('Gas de enero');
+    expect(recent.compareDocumentPosition(old) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(old.compareDocumentPosition(screen.getByText('Pagado sin fecha')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /registrar pago de/i })).not.toBeInTheDocument();
+  });
+
+  it('opens the comprobante of a paid due date', () => {
+    renderView(history());
+    fireEvent.click(screen.getByRole('button', { name: 'Pagados' }));
+    fireEvent.click(screen.getByRole('button', { name: /ver documento de colegio de julio/i }));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('builds chips from paid categories and searches the history', () => {
+    renderView(history());
+    fireEvent.click(screen.getByRole('button', { name: 'Pagados' }));
+    const chips = screen.getByRole('group', { name: 'Filtrar por categoría' });
+    expect(within(chips).getByRole('button', { name: /Colegio/ })).toBeInTheDocument();
+    expect(within(chips).getByRole('button', { name: /Servicios/ })).toBeInTheDocument();
+
+    fireEvent.change(screen.getAllByPlaceholderText('Buscar…')[0], { target: { value: 'gas' } });
+    expect(screen.getByText('Gas de enero')).toBeInTheDocument();
+    expect(screen.queryByText('Colegio de julio')).not.toBeInTheDocument();
+  });
+
+  it('keeps the KPI cards about unpaid due dates', () => {
+    renderView(history());
+    fireEvent.click(screen.getByRole('button', { name: 'Pagados' }));
+    expect(screen.getByText(/1 sin pagar · 0 en mora/i)).toBeInTheDocument();
+  });
+
+  it('says so when nothing was paid yet', () => {
+    renderView(createPaymentBase());
+    fireEvent.click(screen.getByRole('button', { name: 'Pagados' }));
+    expect(screen.getByText('Todavía no hay vencimientos pagados.')).toBeInTheDocument();
+  });
+});

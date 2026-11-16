@@ -68,6 +68,7 @@ startup_logger.info(f"{'=' * 100}\n")
 from app.core.config import settings as get_settings
 from app.dependencies import get_auth_service
 from app.routers.auth import router as auth_router
+from app.routers.local_auth import router as local_auth_router
 from app.routers.yfinance_router import router as yfinance_router
 from app.routers.files import router as files_router
 from app.routers.pagos_pendientes import router as pagos_pendientes_router
@@ -238,6 +239,7 @@ app.add_middleware(
 
 # Incluir router de autenticación
 app.include_router(auth_router, prefix="")
+app.include_router(local_auth_router)
 
 # Incluir router de Yahoo Finance (CEDEARs)
 app.include_router(yfinance_router, prefix="/api")

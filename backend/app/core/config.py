@@ -87,6 +87,13 @@ class Settings:
     cors_origins: List[str] = ["http://localhost:3000", "https://finanzas.qeva.xyz"]
 
     def __init__(self):
+        # Password login exists only on local installs: the local installer
+        # sets LOCAL_AUTH_ENABLED, production never does (Google-only there).
+        self.LOCAL_AUTH_ENABLED: bool = os.getenv("LOCAL_AUTH_ENABLED", "false").lower() in ("true", "1", "yes")
+        self.LOCAL_AUTH_EMAIL: str = os.getenv("LOCAL_AUTH_EMAIL", "demo@example.com").strip().lower()
+        self.LOCAL_AUTH_PASSWORD: str = os.getenv("LOCAL_AUTH_PASSWORD", "")
+        self.LOCAL_AUTH_NAME: str = os.getenv("LOCAL_AUTH_NAME", "Usuario Demo")
+
         # Override cors_origins from environment if provided
         cors_env = os.getenv("CORS_ORIGINS")
         if cors_env:

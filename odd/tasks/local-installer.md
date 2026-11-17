@@ -43,3 +43,8 @@ Runners: backend pytest in a scratch venv; frontend `npx vitest run`, lint `esli
     - Creating a pago, uploading a PDF, fetching it anonymously (200 application/pdf) and patching the receipt all work.
     - Re-running the installer keeps `.env` and the port, and the bootstrap is a no-op.
   - Headless UI: the form replaces the Google button, the wrong-password alert shows, login reaches the dashboard, Vencimientos lists the pago, and the eye opens the receipt dialog. shellcheck is clean.
+- L8 independent verifier: PASS on S1-S4 and the assumption, no blockers.
+  - Fixed advisories: entrypoint now matches the flag case-insensitively, and the installer refuses a directory containing `.git` (d118bf1, shellcheck clean).
+  - Advisories deferred: unquoted special characters in `DEMO_PASSWORD` within `.env`; no login rate limit (bound to 127.0.0.1); `chainguard/minio:latest` is unpinned and runs as root; a partial schema without `usuarios` would be masked by create_all and stamp; the yfinance fallback is same-origin on other hosts.
+- L9 native review: assessed high (item 2 escalated); the user declined this candidate ("Omitir esta vez"), declined_this_candidate.
+- L10 the installer pulls `:latest` images, so it only works after a release publishes images that contain this branch.

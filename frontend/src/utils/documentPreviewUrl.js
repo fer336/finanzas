@@ -323,7 +323,11 @@ export const normalizeDocumentPreviewUrl = (rawUrl, policy = buildDocumentUrlPol
     return { isValid: false, reason: 'credentials-not-allowed', rawUrl: input };
   }
 
-  if (parsed.protocol === 'http:' && !(policy.isLocalDev && isLocalHostname(parsed.hostname))) {
+  // http is fine in local development, and for receipts served by the page's
+  // own origin when that page is itself plain http on localhost (a local
+  // install); an https page never qualifies.
+  const isLocalHttpPage = isLocalHostname(parsed.hostname) && parsed.origin === policy.currentOrigin;
+  if (parsed.protocol === 'http:' && !(isLocalHostname(parsed.hostname) && (policy.isLocalDev || isLocalHttpPage))) {
     return { isValid: false, reason: 'http-only-local-dev', rawUrl: input };
   }
 

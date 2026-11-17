@@ -49,7 +49,28 @@ Internet (HTTPS)
 
 ---
 
-## Instalación
+## Instalación local en un comando (demo)
+
+Solo necesitás [Docker](https://docs.docker.com/get-docker/) con Docker Compose:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/fer336/finanzas/main/install.sh | bash
+```
+
+El instalador deja todo en `~/finanzas` (Postgres, almacenamiento de comprobantes, API, app web y un proxy) y lo sirve en **http://localhost:8080**. Al terminar muestra el usuario de demo:
+
+| Usuario | Contraseña |
+|---|---|
+| `demo@example.com` | `demo1234` |
+
+- Las contraseñas internas se generan al azar en `~/finanzas/.env`.
+- Volver a correr el comando actualiza la instalación y conserva los datos.
+- Variables opcionales: `FINANZAS_PORT=9090`, `FINANZAS_DIR=/otra/ruta`, `FINANZAS_VERSION=v1.0.40`, y `DEMO_EMAIL` / `DEMO_PASSWORD` (solo en la primera instalación). Por ejemplo: `curl -fsSL …/install.sh | FINANZAS_PORT=9090 bash`.
+- Desde `~/finanzas`: `docker compose stop` la detiene, `docker compose up -d` la vuelve a iniciar y `docker compose down -v` borra todo, incluidos los datos.
+
+El login con usuario y contraseña existe **solo** en instalaciones locales: lo activa `LOCAL_AUTH_ENABLED`, que pone el instalador. Producción no lo define y sigue entrando solo con Google.
+
+## Instalación para desarrollo
 
 ### Requisitos
 

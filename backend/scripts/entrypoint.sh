@@ -25,6 +25,16 @@ fi
 # Se usa "upgrade heads" y no "upgrade head" porque el historial tiene
 # multiples ramas (varias migraciones con down_revision = None); heads
 # aplica todas las cabezas pendientes sin ambigüedad.
+# Instalación local (install.sh): crea el esquema en una base vacía y la
+# cuenta demo. Producción no define LOCAL_AUTH_ENABLED y no lo ejecuta.
+# Mismo criterio que settings.LOCAL_AUTH_ENABLED: true/1/yes sin importar mayúsculas.
+case "$(printf '%s' "${LOCAL_AUTH_ENABLED:-false}" | tr '[:upper:]' '[:lower:]')" in
+  true|1|yes)
+    echo "🧪 Preparando base de datos local..."
+    python scripts/bootstrap_local.py
+    ;;
+esac
+
 echo "⏳ Aplicando migraciones de base de datos..."
 alembic upgrade heads
 echo "✅ Migraciones aplicadas"
